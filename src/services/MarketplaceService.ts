@@ -58,9 +58,12 @@ export class MarketplaceService {
     }
 
     async getTransactions(): Promise<TransactionData[]> {
+        const exportUrl = `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`;
+        console.log(`Calling Marketplace API: ${exportUrl}`);
+
         // Start the async export
         const exportResponse = await axios.post<InitiateAsyncTransactionCollection>(
-            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`,
+            exportUrl,
             {},
             {
                 headers: {
@@ -77,6 +80,9 @@ export class MarketplaceService {
         );
 
         // Download the results
+        const downloadUrl = resultUrl.split('?')[0]; // Remove query parameters
+        console.log(`Calling Marketplace API: ${downloadUrl}`);
+
         const resultResponse = await axios.get<TransactionData[]>(resultUrl, {
             headers: {
                 'Authorization': this.getAuthHeader()
@@ -87,9 +93,12 @@ export class MarketplaceService {
     }
 
     async getLicenses(): Promise<LicenseData[]> {
+        const exportUrl = `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`;
+        console.log(`Calling Marketplace API: ${exportUrl}`);
+
         // Start the async export
         const exportResponse = await axios.post<InitiateAsyncLicenseCollection>(
-            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
+            exportUrl,
             {},
             {
                 headers: {
@@ -106,6 +115,9 @@ export class MarketplaceService {
         );
 
         // Download the results
+        const downloadUrl = resultUrl.split('?')[0]; // Remove query parameters
+        console.log(`Calling Marketplace API: ${downloadUrl}`);
+
         const resultResponse = await axios.get<LicenseData[]>(resultUrl, {
             headers: {
                 'Authorization': this.getAuthHeader()
