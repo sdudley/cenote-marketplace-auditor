@@ -11,8 +11,9 @@ export class LicenseService {
         let totalCount = licenses.length;
 
         for (const licenseData of licenses) {
+            const licenseId = licenseData.appEntitlementNumber || licenseData.licenseId;
             const existingLicense = await this.dataSource.getRepository(License)
-                .findOne({ where: { marketplaceLicenseId: licenseData.id } });
+                .findOne({ where: { marketplaceLicenseId: licenseId } });
 
             if (existingLicense) {
                 // Compare with current data using deepEqual
@@ -31,7 +32,7 @@ export class LicenseService {
             } else {
                 // Create new license
                 const license = new License();
-                license.marketplaceLicenseId = licenseData.id;
+                license.marketplaceLicenseId = licenseData.appEntitlementNumber || licenseData.licenseId;
                 license.currentData = licenseData;
                 await this.dataSource.getRepository(License).save(license);
 
@@ -49,4 +50,4 @@ export class LicenseService {
         }
         console.log(`Completed processing ${totalCount} licenses`);
     }
-} 
+}
