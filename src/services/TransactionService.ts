@@ -7,15 +7,19 @@ export class TransactionService {
     constructor(private dataSource: DataSource) {}
 
     async processTransactions(transactions: any[]): Promise<void> {
+        let processedCount = 0;
+        let totalCount = transactions.length;
+
         for (const transactionData of transactions) {
-            console.log('Transaction data:', JSON.stringify(transactionData, null, 2));
-            
+            //console.log('Transaction data:', JSON.stringify(transactionData, null, 2));
+
             const existingTransaction = await this.dataSource.getRepository(Transaction)
                 .findOne({ where: { marketplaceTransactionId: transactionData.transactionLineItemId } });
 
             if (existingTransaction) {
                 // Compare with current data using deepEqual
                 if (!deepEqual(existingTransaction.currentData, transactionData)) {
+                    console.log(`Transaction changed: ${transactionData.transactionLineItemId}`);
                     // Create new version
                     const version = new TransactionVersion();
                     version.data = transactionData;
@@ -39,6 +43,12 @@ export class TransactionService {
                 version.transaction = transaction;
                 await this.dataSource.getRepository(TransactionVersion).save(version);
             }
+
+            processedCount++;
+            if (processedCount % 100 === 0) {
+                console.log(`Processed ${processedCount} of ${totalCount} transactions`);
+            }
         }
+        console.log(`Completed processing ${totalCount} transactions`);
     }
 } 
