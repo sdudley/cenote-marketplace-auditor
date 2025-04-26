@@ -4,17 +4,17 @@ import { LicenseVersion } from './LicenseVersion';
 @Entity()
 export class License {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id!: string;
 
     @Column()
-    marketplaceLicenseId: string;
+    marketplaceLicenseId!: string;
 
     @Column('jsonb')
     currentData: any;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @OneToMany(() => LicenseVersion, version => version.license)
-    versions: LicenseVersion[];
+    versions!: LicenseVersion[];
 } 

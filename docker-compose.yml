@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   app:
+    container_name: auditor-node
     build: .
     environment:
       - DB_HOST=db
@@ -17,11 +18,12 @@ services:
       - /app/node_modules
 
   db:
-    image: postgres:15-alpine
+    container_name: auditor-postgres
+    image: postgres:16.2-bullseye
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=marketplace
+      - POSTGRES_DB=marketplace_auditor
     ports:
       - "5432:5432"
     volumes:

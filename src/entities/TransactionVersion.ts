@@ -4,14 +4,14 @@ import { Transaction } from './Transaction';
 @Entity()
 export class TransactionVersion {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id!: string;
 
     @Column('jsonb')
     data: any;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @ManyToOne(() => Transaction, transaction => transaction.versions)
-    transaction: Transaction;
+    transaction!: Transaction;
 } 

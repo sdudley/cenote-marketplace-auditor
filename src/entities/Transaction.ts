@@ -4,17 +4,17 @@ import { TransactionVersion } from './TransactionVersion';
 @Entity()
 export class Transaction {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id!: string;
 
     @Column()
-    marketplaceTransactionId: string;
+    marketplaceTransactionId!: string;
 
     @Column('jsonb')
     currentData: any;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt!: Date;
 
     @OneToMany(() => TransactionVersion, version => version.transaction)
-    versions: TransactionVersion[];
+    versions!: TransactionVersion[];
 } 
