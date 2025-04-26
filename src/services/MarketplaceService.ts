@@ -11,7 +11,7 @@ import {
 export class MarketplaceService {
     private readonly username: string;
     private readonly password: string;
-    private readonly baseUrl = 'https://marketplace.atlassian.com/api';
+    private readonly baseUrl = 'https://marketplace.atlassian.com';
     private readonly vendorId: string;
 
     constructor(username: string, password: string, vendorId: string) {
