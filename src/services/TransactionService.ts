@@ -8,8 +8,10 @@ export class TransactionService {
 
     async processTransactions(transactions: any[]): Promise<void> {
         for (const transactionData of transactions) {
+            console.log('Transaction data:', JSON.stringify(transactionData, null, 2));
+            
             const existingTransaction = await this.dataSource.getRepository(Transaction)
-                .findOne({ where: { marketplaceTransactionId: transactionData.id } });
+                .findOne({ where: { marketplaceTransactionId: transactionData.transactionLineItemId } });
 
             if (existingTransaction) {
                 // Compare with current data using deepEqual
@@ -27,7 +29,7 @@ export class TransactionService {
             } else {
                 // Create new transaction
                 const transaction = new Transaction();
-                transaction.marketplaceTransactionId = transactionData.id;
+                transaction.marketplaceTransactionId = transactionData.transactionLineItemId;
                 transaction.currentData = transactionData;
                 await this.dataSource.getRepository(Transaction).save(transaction);
 
