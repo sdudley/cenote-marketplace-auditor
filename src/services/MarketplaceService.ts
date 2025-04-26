@@ -102,7 +102,7 @@ export class MarketplaceService {
         const resultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
             exportResponse.data._links.status.href,
             exportResponse.data._links.download.href,
-            (data) => data.status
+            (data) => data.export.status
         );
 
         // Download the results
