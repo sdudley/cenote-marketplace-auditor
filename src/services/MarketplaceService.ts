@@ -36,7 +36,7 @@ export class MarketplaceService {
         while (status === 'IN_PROGRESS' || status === 'QUEUED') {
             await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds between polls
             
-            const statusResponse = await axios.get<T>(statusLink, {
+            const statusResponse = await axios.get<T>(this.baseUrl + statusLink, {
                 headers: {
                     'Authorization': this.getAuthHeader()
                 }
@@ -44,7 +44,7 @@ export class MarketplaceService {
 
             status = checkStatus(statusResponse.data);
             if (status === 'COMPLETED') {
-                resultUrl = downloadLink;
+                resultUrl = this.baseUrl + downloadLink;
             } else if (status === 'FAILED') {
                 throw new Error(`Export failed: ${statusResponse.data}`);
             }
