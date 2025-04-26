@@ -10,7 +10,8 @@ async function main() {
         console.log('Database connection established');
 
         const marketplaceService = new MarketplaceService(
-            process.env.ATLASSIAN_API_KEY || '',
+            process.env.ATLASSIAN_ACCOUNT_USER || '',
+            process.env.ATLASSIAN_ACCOUNT_API_TOKEN || '',
             process.env.ATLASSIAN_VENDOR_ID || ''
         );
         const transactionService = new TransactionService(AppDataSource);

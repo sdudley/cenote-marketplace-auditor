@@ -9,13 +9,20 @@ import {
 } from '../types/marketplace';
 
 export class MarketplaceService {
-    private readonly apiKey: string;
+    private readonly username: string;
+    private readonly password: string;
     private readonly baseUrl = 'https://marketplace.atlassian.com/api';
     private readonly vendorId: string;
 
-    constructor(apiKey: string, vendorId: string) {
-        this.apiKey = apiKey;
+    constructor(username: string, password: string, vendorId: string) {
+        this.username = username;
+        this.password = password;
         this.vendorId = vendorId;
+    }
+
+    private getAuthHeader(): string {
+        const credentials = Buffer.from(`${this.username}:${this.password}`).toString('base64');
+        return `Basic ${credentials}`;
     }
 
     private async pollForCompletion<T>(
@@ -31,7 +38,7 @@ export class MarketplaceService {
             
             const statusResponse = await axios.get<T>(statusLink, {
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`
+                    'Authorization': this.getAuthHeader()
                 }
             });
 
@@ -57,7 +64,7 @@ export class MarketplaceService {
             {},
             {
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Authorization': this.getAuthHeader(),
                     'Content-Type': 'application/json'
                 }
             }
@@ -72,7 +79,7 @@ export class MarketplaceService {
         // Download the results
         const resultResponse = await axios.get<TransactionData[]>(resultUrl, {
             headers: {
-                'Authorization': `Bearer ${this.apiKey}`
+                'Authorization': this.getAuthHeader()
             }
         });
 
@@ -86,7 +93,7 @@ export class MarketplaceService {
             {},
             {
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Authorization': this.getAuthHeader(),
                     'Content-Type': 'application/json'
                 }
             }
@@ -101,7 +108,7 @@ export class MarketplaceService {
         // Download the results
         const resultResponse = await axios.get<LicenseData[]>(resultUrl, {
             headers: {
-                'Authorization': `Bearer ${this.apiKey}`
+                'Authorization': this.getAuthHeader()
             }
         });
 
