@@ -68,34 +68,26 @@ export interface StatusAsyncTransactionCollection {
     export: StatusAsyncTransaction;
 }
 
-export interface LicenseData {
-    id: string;
-    // Add other license fields as needed based on the actual response structure
-    [key: string]: any;
-}
+export type TransactionData = components["schemas"]["Transaction"];
+export type LicenseData = components["schemas"]["License"];
 
-export interface TransactionData {
-    id: string;
-    // Add other transaction fields as needed based on the actual response structure
-    [key: string]: any;
-}
 
 export interface components {
     schemas: {
         License: {
-            /** @description The unique identifier for this license, for example "12345" or "E-123-456-789" */
+            /** @description The unique identifier for server and DC licenses and for few historical cloud licenses, for example "12345" */
             addonLicenseId: string;
             /** @description The new identifier for this license, for example "709a7212-3330-4ba6-9785-9804a9983373". Applies to cloud licenses only */
             appEntitlementId?: string;
             /** @description The new customer facing identifier for this license, for example "E-123-456-789". Applies to cloud licenses only */
             appEntitlementNumber?: string;
-            /** @description The unique identifier for this host instance, for example "12345" or "E-123-456-789". Applies to cloud licenses only */
+            /** @description The unique identifier for few historical cloud host instances, for example "12345" */
             hostLicenseId?: string;
             /** @description The new identifier for the parent product license, for example  "123a1234-1234-1ab2-1234-1234a1234567". Applies to cloud licenses only */
             hostEntitlementId?: string;
             /** @description The new customer facing identifier for the parent product license, for example "E-123-456-789". Applies to cloud licenses only */
             hostEntitlementNumber?: string;
-            /** @description The customer-facing identifier for this license, for example "SEN-12345" or "E-123-456-789". */
+            /** @description The customer-facing identifier for server and DC licenses and for few historical cloud licenses, for example "SEN-12345" */
             licenseId: string;
             /** @description The unique identifier representing the cloud site that the app is installed in. This will be present for all active cloud licenses. */
             cloudId?: string;
@@ -219,7 +211,7 @@ export interface components {
 
         /** @description Describes a single transaction of a vendor's app. */
         Transaction: {
-            /** @description The unique identifier for this transaction, for example "AT-12345" */
+            /** @description The unique identifier for server and DC licenses and for few historical cloud licenses, for example "12345" */
             transactionId: string;
             /** @description The unique identifier for this license, for example "12345" or "E-123-456-789" */
             addonLicenseId: string;
@@ -227,7 +219,7 @@ export interface components {
             appEntitlementId?: string;
             /** @description The new customer facing identifier for this license, for example "E-123-456-789". Applies to cloud licenses only */
             appEntitlementNumber?: string;
-            /** @description The unique identifier for this host instance, for example "12345" or "E-123-456-789". Applies to cloud licenses only */
+            /** @description The unique identifier for few historical cloud host instances, for example "12345" */
             hostLicenseId?: string;
             /** @description The new identifier for the parent product license, for example "123a1234-1234-1ab2-1234-1234a1234567". Applies to cloud licenses only */
             hostEntitlementId?: string;
@@ -255,6 +247,8 @@ export interface components {
             customerDetails: components["schemas"]["TransactionCustomerDetails"];
             purchaseDetails: components["schemas"]["TransactionPurchaseDetails"];
             partnerDetails?: components["schemas"]["TransactionPartnerDetails"];
+            /** @description The unique identifier for the transaction line, for example "0123456789" or "a0bcdefgh-a01b-0a1b-0ab1-a0bcde12f345" */
+            transactionLineItemId: string;
         };
 
         /** @description The customer details for the transaction. */

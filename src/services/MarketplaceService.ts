@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { 
-    InitiateAsyncLicenseCollection, 
+import {
+    InitiateAsyncLicenseCollection,
     InitiateAsyncLicense,
     InitiateAsyncTransactionCollection,
     StatusAsyncTransactionCollection,
@@ -35,7 +35,7 @@ export class MarketplaceService {
 
         while (status === 'IN_PROGRESS' || status === 'QUEUED') {
             await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds between polls
-            
+
             const statusResponse = await axios.get<T>(this.baseUrl + statusLink, {
                 headers: {
                     'Authorization': this.getAuthHeader()
@@ -126,4 +126,4 @@ export class MarketplaceService {
 
         return resultResponse.data;
     }
-} 
+}

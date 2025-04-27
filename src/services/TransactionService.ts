@@ -2,11 +2,13 @@ import { DataSource } from 'typeorm';
 import { Transaction } from '../entities/Transaction';
 import { TransactionVersion } from '../entities/TransactionVersion';
 import { deepEqual } from '../utils/objectUtils';
+import { printJsonDiff } from '../utils/diffUtils';
+import { TransactionData } from '../types/marketplace';
 
 export class TransactionService {
     constructor(private dataSource: DataSource) {}
 
-    async processTransactions(transactions: any[]): Promise<void> {
+    async processTransactions(transactions: TransactionData[]): Promise<void> {
         let processedCount = 0;
         let totalCount = transactions.length;
 
@@ -20,6 +22,8 @@ export class TransactionService {
                 // Compare with current data using deepEqual
                 if (!deepEqual(existingTransaction.currentData, transactionData)) {
                     console.log(`Transaction changed: ${transactionData.transactionLineItemId}`);
+                    printJsonDiff(existingTransaction.currentData, transactionData);
+
                     // Create new version
                     const version = new TransactionVersion();
                     version.data = transactionData;
@@ -51,4 +55,4 @@ export class TransactionService {
         }
         console.log(`Completed processing ${totalCount} transactions`);
     }
-} 
+}

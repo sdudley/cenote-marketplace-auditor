@@ -2,11 +2,13 @@ import { DataSource } from 'typeorm';
 import { License } from '../entities/License';
 import { LicenseVersion } from '../entities/LicenseVersion';
 import { deepEqual } from '../utils/objectUtils';
+import { printJsonDiff } from '../utils/diffUtils';
+import { LicenseData } from '../types/marketplace';
 
 export class LicenseService {
     constructor(private dataSource: DataSource) {}
 
-    async processLicenses(licenses: any[]): Promise<void> {
+    async processLicenses(licenses: LicenseData[]): Promise<void> {
         let processedCount = 0;
         let totalCount = licenses.length;
 
@@ -18,7 +20,9 @@ export class LicenseService {
             if (existingLicense) {
                 // Compare with current data using deepEqual
                 if (!deepEqual(existingLicense.currentData, licenseData)) {
-                    console.log(`License changed: ${licenseData.id}`);
+                    console.log(`License changed: ${licenseId}`);
+                    printJsonDiff(existingLicense.currentData, licenseData);
+
                     // Create new version
                     const version = new LicenseVersion();
                     version.data = licenseData;
