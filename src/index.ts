@@ -52,7 +52,7 @@ async function main() {
 
         if (fetchPricingData) {
             console.log('Fetching pricing data...');
-            await pricingService.fetchAndDisplayPricing();
+            await pricingService.fetchPricing();
         }
 
         if (validateTransactions) {

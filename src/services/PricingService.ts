@@ -4,7 +4,7 @@ import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
 
-interface UserTierPricing {
+export interface UserTierPricing {
     userTier: number;
     cost: number;
 }
@@ -42,13 +42,16 @@ export class PricingService {
             where: { pricing }
         });
 
-        return pricingInfo.map(item => ({
-            userTier: item.data.unitCount,
-            cost: item.data.amount
-        })).sort((a, b) => a.userTier - b.userTier);
+        return pricingInfo
+            .filter(item => item.data.monthsValid === 12)
+            .map(item => ({
+                userTier: item.data.unitCount,
+                cost: item.data.amount
+            }))
+            .sort((a, b) => a.userTier - b.userTier);
     }
 
-    async fetchAndDisplayPricing(): Promise<void> {
+    async fetchPricing(): Promise<void> {
         const addons = await this.addonRepository.find();
         console.log(`Found ${addons.length} addons to check pricing for`);
 
@@ -59,7 +62,7 @@ export class PricingService {
             const deploymentTypes : DeploymentType[] = ['server', 'datacenter', 'cloud'] as const;
             for (const deploymentType of deploymentTypes) {
                 try {
-                    console.log(`\n${deploymentType.toUpperCase()} pricing:`);
+                    console.log(`\nFetching ${deploymentType.toUpperCase()} pricing:`);
                     const pricingData = await this.marketplaceService.getPricing(
                         addon.addonKey,
                         deploymentType,
