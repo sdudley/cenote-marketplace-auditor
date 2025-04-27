@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, Index } from 'typeorm';
 import { LicenseVersion } from './LicenseVersion';
 
 @Entity()
@@ -7,6 +7,7 @@ export class License {
     id!: string;
 
     @Column()
+    @Index()
     marketplaceLicenseId!: string;
 
     @Column('jsonb')
@@ -17,4 +18,4 @@ export class License {
 
     @OneToMany(() => LicenseVersion, version => version.license)
     versions!: LicenseVersion[];
-} 
+}

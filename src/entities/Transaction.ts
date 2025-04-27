@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, Index } from 'typeorm';
 import { TransactionVersion } from './TransactionVersion';
 
 @Entity()
@@ -7,6 +7,7 @@ export class Transaction {
     id!: string;
 
     @Column()
+    @Index()
     marketplaceTransactionId!: string;
 
     @Column('jsonb')
@@ -17,4 +18,4 @@ export class Transaction {
 
     @OneToMany(() => TransactionVersion, version => version.transaction)
     versions!: TransactionVersion[];
-} 
+}
