@@ -4,6 +4,13 @@ import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
 
+interface UserTierPricing {
+    userTier: number;
+    cost: number;
+}
+
+export type DeploymentType = 'server' | 'datacenter' | 'cloud';
+
 export class PricingService {
     private addonRepository: Repository<Addon>;
     private pricingRepository: Repository<Pricing>;
@@ -18,6 +25,29 @@ export class PricingService {
         this.pricingInfoRepository = this.dataSource.getRepository(PricingInfo);
     }
 
+    async getPricing(addonKey: string, deploymentType: DeploymentType): Promise<UserTierPricing[]> {
+        const pricing = await this.pricingRepository.findOne({
+            where: {
+                addonKey,
+                deploymentType
+            },
+            relations: ['items']
+        });
+
+        if (!pricing) {
+            throw new Error(`No ${deploymentType} pricing found for addon ${addonKey}`);
+        }
+
+        const pricingInfo = await this.pricingInfoRepository.find({
+            where: { pricing }
+        });
+
+        return pricingInfo.map(item => ({
+            userTier: item.data.unitCount,
+            cost: item.data.amount
+        })).sort((a, b) => a.userTier - b.userTier);
+    }
+
     async fetchAndDisplayPricing(): Promise<void> {
         const addons = await this.addonRepository.find();
         console.log(`Found ${addons.length} addons to check pricing for`);
@@ -26,7 +56,7 @@ export class PricingService {
             console.log(`\n=== Pricing for ${addon.addonKey} ===`);
 
             // Try to fetch pricing for each deployment type
-            const deploymentTypes = ['server', 'datacenter', 'cloud'] as const;
+            const deploymentTypes : DeploymentType[] = ['server', 'datacenter', 'cloud'] as const;
             for (const deploymentType of deploymentTypes) {
                 try {
                     console.log(`\n${deploymentType.toUpperCase()} pricing:`);
@@ -40,7 +70,6 @@ export class PricingService {
                     const endDate = undefined;
 
                     // Check for existing pricing
-
                     const existingPricing = await this.pricingRepository.findOne({
                         where: {
                             addonKey: addon.addonKey,
