@@ -14,6 +14,7 @@ export class Transaction {
     marketplaceTransactionId!: string;
 
     @Column('jsonb')
+    @Index('IDX_transaction_currentData_gin', { synchronize: false })
     currentData: any;
 
     @OneToMany(() => TransactionVersion, version => version.transaction)

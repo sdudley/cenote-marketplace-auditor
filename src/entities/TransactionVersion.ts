@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index } from 'typeorm';
 import { Transaction } from './Transaction';
 
 @Entity()
@@ -10,6 +10,7 @@ export class TransactionVersion {
     createdAt!: Date;
 
     @Column('jsonb')
+    @Index('IDX_transaction_version_data_gin', { synchronize: false })
     data: any;
 
     @ManyToOne(() => Transaction, transaction => transaction.versions)

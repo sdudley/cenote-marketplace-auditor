@@ -1,12 +1,12 @@
 import 'dotenv/config';
-import { AppDataSource } from './config/database';
+import { AppDataSource, initializeDatabase } from './config/database';
 import { MarketplaceService } from './services/MarketplaceService';
 import { TransactionService } from './services/TransactionService';
 import { LicenseService } from './services/LicenseService';
 
 async function main() {
     try {
-        await AppDataSource.initialize();
+        await initializeDatabase();
         console.log('Database connection established');
 
         const marketplaceService = new MarketplaceService(

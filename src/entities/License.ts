@@ -14,6 +14,7 @@ export class License {
     marketplaceLicenseId!: string;
 
     @Column('jsonb')
+    @Index('IDX_license_currentData_gin', { synchronize: false })
     currentData: any;
 
     @OneToMany(() => LicenseVersion, version => version.license)
