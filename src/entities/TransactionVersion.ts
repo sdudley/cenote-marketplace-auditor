@@ -6,12 +6,12 @@ export class TransactionVersion {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column('jsonb')
-    data: any;
-
     @CreateDateColumn()
     createdAt!: Date;
 
+    @Column('jsonb')
+    data: any;
+
     @ManyToOne(() => Transaction, transaction => transaction.versions)
     transaction!: Transaction;
-} 
+}

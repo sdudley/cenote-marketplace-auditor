@@ -6,15 +6,15 @@ export class Transaction {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
+    @CreateDateColumn()
+    createdAt!: Date;
+
     @Column()
     @Index()
     marketplaceTransactionId!: string;
 
     @Column('jsonb')
     currentData: any;
-
-    @CreateDateColumn()
-    createdAt!: Date;
 
     @OneToMany(() => TransactionVersion, version => version.transaction)
     versions!: TransactionVersion[];

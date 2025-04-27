@@ -6,15 +6,15 @@ export class License {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
+    @CreateDateColumn()
+    createdAt!: Date;
+
     @Column()
     @Index()
     marketplaceLicenseId!: string;
 
     @Column('jsonb')
     currentData: any;
-
-    @CreateDateColumn()
-    createdAt!: Date;
 
     @OneToMany(() => LicenseVersion, version => version.license)
     versions!: LicenseVersion[];

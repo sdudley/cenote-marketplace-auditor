@@ -13,15 +13,14 @@ export class TransactionService {
         let totalCount = transactions.length;
 
         for (const transactionData of transactions) {
-            //console.log('Transaction data:', JSON.stringify(transactionData, null, 2));
-
+            const transactionKey = `${transactionData.transactionLineItemId}:${transactionData.transactionId}`;
             const existingTransaction = await this.dataSource.getRepository(Transaction)
-                .findOne({ where: { marketplaceTransactionId: transactionData.transactionLineItemId } });
+                .findOne({ where: { marketplaceTransactionId: transactionKey } });
 
             if (existingTransaction) {
                 // Compare with current data using deepEqual
                 if (!deepEqual(existingTransaction.currentData, transactionData)) {
-                    console.log(`Transaction changed: ${transactionData.transactionLineItemId}`);
+                    console.log(`Transaction changed: ${transactionKey}`);
                     printJsonDiff(existingTransaction.currentData, transactionData);
 
                     // Create new version
@@ -37,7 +36,7 @@ export class TransactionService {
             } else {
                 // Create new transaction
                 const transaction = new Transaction();
-                transaction.marketplaceTransactionId = transactionData.transactionLineItemId;
+                transaction.marketplaceTransactionId = transactionKey;
                 transaction.currentData = transactionData;
                 await this.dataSource.getRepository(Transaction).save(transaction);
 

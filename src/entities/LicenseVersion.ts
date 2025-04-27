@@ -6,12 +6,12 @@ export class LicenseVersion {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column('jsonb')
-    data: any;
-
     @CreateDateColumn()
     createdAt!: Date;
 
+    @Column('jsonb')
+    data: any;
+
     @ManyToOne(() => License, license => license.versions)
     license!: License;
-} 
+}
