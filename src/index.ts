@@ -4,10 +4,7 @@ import { MarketplaceService } from './services/MarketplaceService';
 import { AddonService } from './services/AddonService';
 import { TransactionService } from './services/TransactionService';
 import { LicenseService } from './services/LicenseService';
-
-async function fetchPricing(marketplaceService: MarketplaceService, addonService: AddonService) {
-    console.log('Pricing fetch not implemented yet');
-}
+import { PricingService } from './services/PricingService';
 
 async function main() {
     // Parse command line arguments
@@ -35,6 +32,7 @@ async function main() {
         const addonService = new AddonService(dataSource);
         const transactionService = new TransactionService(dataSource);
         const licenseService = new LicenseService(dataSource);
+        const pricingService = new PricingService(dataSource, marketplaceService);
 
         if (fetchTransactions) {
             console.log('Fetching transactions...');
@@ -50,7 +48,7 @@ async function main() {
 
         if (fetchPricingData) {
             console.log('Fetching pricing data...');
-            await fetchPricing(marketplaceService, addonService);
+            await pricingService.fetchAndDisplayPricing();
         }
 
         console.log('All operations completed successfully');
