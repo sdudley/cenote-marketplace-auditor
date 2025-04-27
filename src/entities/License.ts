@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, Index } from 'typeorm';
 import { LicenseVersion } from './LicenseVersion';
+import { LicenseData } from '../types/marketplace';
 
 @Entity()
 export class License {
@@ -15,7 +16,7 @@ export class License {
 
     @Column('jsonb')
     @Index('IDX_license_currentData_gin', { synchronize: false })
-    currentData: any;
+    currentData!: LicenseData;
 
     @OneToMany(() => LicenseVersion, version => version.license)
     versions!: LicenseVersion[];
