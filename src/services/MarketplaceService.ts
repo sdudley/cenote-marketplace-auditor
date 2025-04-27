@@ -25,6 +25,8 @@ interface LicenseQueryParams {
     includeAtlassianLicenses?: boolean;
 }
 
+const licenseKey = (license : LicenseData) : string => license.appEntitlementNumber || license.licenseId;
+
 export class MarketplaceService {
     private readonly username: string;
     private readonly password: string;
@@ -182,8 +184,17 @@ export class MarketplaceService {
             includeAtlassianLicenses: true
         });
 
-        // Combine and return all licenses
-        return [...firstBatch, ...secondBatch];
+        // The second "with insights" may duplicate data from the first batch, but we should
+        // always override that with the second batch data because it includes more fields.
+
+        // Create a map of secondBatch keys for quick lookup
+        const secondBatchKeys = new Set(secondBatch.map(licenseKey));
+
+        // Filter out any licenses from firstBatch that appear in secondBatch
+        const filteredFirstBatch = firstBatch.filter(license => !secondBatchKeys.has(licenseKey(license)));
+
+        // Combine the filtered first batch with the second batch
+        return [...filteredFirstBatch, ...secondBatch];
     }
 
     async getPricing(
