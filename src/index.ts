@@ -5,6 +5,7 @@ import { AddonService } from './services/AddonService';
 import { TransactionService } from './services/TransactionService';
 import { LicenseService } from './services/LicenseService';
 import { PricingService } from './services/PricingService';
+import { ValidationService } from './services/ValidationService';
 
 async function main() {
     // Parse command line arguments
@@ -12,12 +13,14 @@ async function main() {
     const fetchTransactions = args.length === 0 || args.includes('--with-transactions');
     const fetchLicenses = args.length === 0 || args.includes('--with-licenses');
     const fetchPricingData = args.length === 0 || args.includes('--with-pricing');
+    const validateTransactions = args.length === 0 || args.includes('--validate-transactions');
 
     console.log('Starting Marketplace Auditor...');
     console.log('Fetch options:');
     console.log(`- Transactions: ${fetchTransactions ? 'enabled' : 'disabled'}`);
     console.log(`- Licenses: ${fetchLicenses ? 'enabled' : 'disabled'}`);
     console.log(`- Pricing: ${fetchPricingData ? 'enabled' : 'disabled'}`);
+    console.log(`- Validation: ${validateTransactions ? 'enabled' : 'disabled'}`);
 
     let dataSource;
     try {
@@ -33,6 +36,7 @@ async function main() {
         const transactionService = new TransactionService(dataSource);
         const licenseService = new LicenseService(dataSource);
         const pricingService = new PricingService(dataSource, marketplaceService);
+        const validationService = new ValidationService(dataSource, pricingService);
 
         if (fetchTransactions) {
             console.log('Fetching transactions...');
@@ -49,6 +53,10 @@ async function main() {
         if (fetchPricingData) {
             console.log('Fetching pricing data...');
             await pricingService.fetchAndDisplayPricing();
+        }
+
+        if (validateTransactions) {
+            await validationService.validateTransactions();
         }
 
         console.log('All operations completed successfully');
