@@ -5,8 +5,13 @@ import {
     InitiateAsyncTransactionCollection,
     StatusAsyncTransactionCollection,
     LicenseData,
-    TransactionData
+    TransactionData,
+    PricingData
 } from '../types/marketplace';
+import { components } from '../types/marketplace-api';
+
+export type CloudOrServer = 'cloud' | 'datacenter' | 'server';
+export type LiveOrPending = 'live' | 'pending';
 
 interface TransactionQueryParams {
     excludeZeroTransactions?: boolean;
@@ -179,5 +184,22 @@ export class MarketplaceService {
 
         // Combine and return all licenses
         return [...firstBatch, ...secondBatch];
+    }
+
+    async getPricing(
+        addonKey: string,
+        cloudOrServer: CloudOrServer,
+        liveOrPending: LiveOrPending
+    ): Promise<PricingData> {
+        const url = `${this.baseUrl}/rest/2/addons/${addonKey}/pricing/${cloudOrServer}/${liveOrPending}`;
+        console.log(`Calling Marketplace API: ${url}`);
+
+        const response = await axios.get<PricingData>(url, {
+            headers: {
+                'Authorization': this.getAuthHeader()
+            }
+        });
+
+        return response.data;
     }
 }

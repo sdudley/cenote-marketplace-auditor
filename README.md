@@ -8,6 +8,7 @@ A TypeScript application that downloads and tracks changes to transactions and l
 - Stores data in a PostgreSQL database using TypeORM
 - Tracks version history of all transactions and licenses
 - Runs in a Docker container for easy deployment
+- Manages a list of addons for tracking
 
 ## Prerequisites
 
@@ -55,6 +56,19 @@ npm run build
 npm test
 ```
 
+## Managing Addons
+
+To add a new addon to track:
+
+```bash
+npm run add-addon -- <addon-key>
+```
+
+For example:
+```bash
+npm run add-addon -- com.atlassian.confluence.plugins.confluence-questions
+```
+
 ## Database Schema
 
 The application uses the following database schema:
@@ -63,7 +77,8 @@ The application uses the following database schema:
 - `TransactionVersion`: Stores historical versions of transactions
 - `License`: Stores current license data
 - `LicenseVersion`: Stores historical versions of licenses
+- `Addon`: Stores a list of addon keys to track
 
 ## License
 
-MIT 
+MIT

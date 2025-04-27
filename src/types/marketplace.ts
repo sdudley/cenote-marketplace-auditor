@@ -72,3 +72,4 @@ export interface StatusAsyncTransactionCollection {
 
 export type TransactionData = components["schemas"]["Transaction"];
 export type LicenseData = components["schemas"]["License"];
+export type PricingData = components["schemas"]["Pricing"];
