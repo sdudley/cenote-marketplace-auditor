@@ -8,6 +8,18 @@ import {
     TransactionData
 } from '../types/marketplace';
 
+interface TransactionQueryParams {
+    excludeZeroTransactions?: boolean;
+    includeManualInvoice?: boolean;
+}
+
+interface LicenseQueryParams {
+    startDate?: string;
+    endDate?: string;
+    withDataInsights?: boolean;
+    includeAtlassianLicenses?: boolean;
+}
+
 export class MarketplaceService {
     private readonly username: string;
     private readonly password: string;
@@ -23,6 +35,16 @@ export class MarketplaceService {
     private getAuthHeader(): string {
         const credentials = Buffer.from(`${this.username}:${this.password}`).toString('base64');
         return `Basic ${credentials}`;
+    }
+
+    private buildUrlWithParams(baseUrl: string, params: Record<string, any>): string {
+        const queryString = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined) {
+                queryString.append(key, value.toString());
+            }
+        });
+        return `${baseUrl}?${queryString.toString()}`;
     }
 
     private async pollForCompletion<T>(
@@ -57,8 +79,11 @@ export class MarketplaceService {
         return resultUrl;
     }
 
-    async getTransactions(): Promise<TransactionData[]> {
-        const exportUrl = `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`;
+    private async fetchTransactionsWithParams(params: TransactionQueryParams): Promise<TransactionData[]> {
+        const exportUrl = this.buildUrlWithParams(
+            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`,
+            params
+        );
         console.log(`Calling Marketplace API: ${exportUrl}`);
 
         // Start the async export
@@ -92,8 +117,11 @@ export class MarketplaceService {
         return resultResponse.data;
     }
 
-    async getLicenses(): Promise<LicenseData[]> {
-        const exportUrl = `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`;
+    private async fetchLicensesWithParams(params: LicenseQueryParams): Promise<LicenseData[]> {
+        const exportUrl = this.buildUrlWithParams(
+            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
+            params
+        );
         console.log(`Calling Marketplace API: ${exportUrl}`);
 
         // Start the async export
@@ -125,5 +153,31 @@ export class MarketplaceService {
         });
 
         return resultResponse.data;
+    }
+
+    async getTransactions(): Promise<TransactionData[]> {
+        return await this.fetchTransactionsWithParams({
+            excludeZeroTransactions: false,
+            includeManualInvoice: true
+        });
+    }
+
+    async getLicenses(): Promise<LicenseData[]> {
+        // First call: 2010-01-01 to 2018-06-30
+        const firstBatch = await this.fetchLicensesWithParams({
+            startDate: '2010-01-01',
+            endDate: '2018-06-30',
+            includeAtlassianLicenses: true
+        });
+
+        // Second call: 2018-07-01 onwards
+        const secondBatch = await this.fetchLicensesWithParams({
+            startDate: '2018-07-01',
+            withDataInsights: true,
+            includeAtlassianLicenses: true
+        });
+
+        // Combine and return all licenses
+        return [...firstBatch, ...secondBatch];
     }
 }
