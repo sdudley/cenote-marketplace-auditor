@@ -1,12 +1,30 @@
 import 'dotenv/config';
-import { AppDataSource, initializeDatabase } from './config/database';
+import { initializeDatabase } from './config/database';
 import { MarketplaceService } from './services/MarketplaceService';
+import { AddonService } from './services/AddonService';
 import { TransactionService } from './services/TransactionService';
 import { LicenseService } from './services/LicenseService';
 
+async function fetchPricing(marketplaceService: MarketplaceService, addonService: AddonService) {
+    console.log('Pricing fetch not implemented yet');
+}
+
 async function main() {
+    // Parse command line arguments
+    const args = process.argv.slice(2);
+    const fetchTransactions = args.length === 0 || args.includes('--with-transactions');
+    const fetchLicenses = args.length === 0 || args.includes('--with-licenses');
+    const fetchPricingData = args.length === 0 || args.includes('--with-pricing');
+
+    console.log('Starting Marketplace Auditor...');
+    console.log('Fetch options:');
+    console.log(`- Transactions: ${fetchTransactions ? 'enabled' : 'disabled'}`);
+    console.log(`- Licenses: ${fetchLicenses ? 'enabled' : 'disabled'}`);
+    console.log(`- Pricing: ${fetchPricingData ? 'enabled' : 'disabled'}`);
+
+    let dataSource;
     try {
-        await initializeDatabase();
+        dataSource = await initializeDatabase();
         console.log('Database connection established');
 
         const marketplaceService = new MarketplaceService(
@@ -14,22 +32,36 @@ async function main() {
             process.env.ATLASSIAN_ACCOUNT_API_TOKEN || '',
             process.env.ATLASSIAN_VENDOR_ID || ''
         );
-        const transactionService = new TransactionService(AppDataSource);
-        const licenseService = new LicenseService(AppDataSource);
+        const addonService = new AddonService(dataSource);
+        const transactionService = new TransactionService(dataSource);
+        const licenseService = new LicenseService(dataSource);
 
-        // Fetch and process transactions
-        const transactions = await marketplaceService.getTransactions();
-        await transactionService.processTransactions(transactions);
+        if (fetchTransactions) {
+            console.log('Fetching transactions...');
+            const transactions = await marketplaceService.getTransactions();
+            await transactionService.processTransactions(transactions);
+        }
 
-        // Fetch and process licenses
-        const licenses = await marketplaceService.getLicenses();
-        await licenseService.processLicenses(licenses);
+        if (fetchLicenses) {
+            console.log('Fetching licenses...');
+            const licenses = await marketplaceService.getLicenses();
+            await licenseService.processLicenses(licenses);
+        }
 
-        console.log('Data synchronization completed');
+        if (fetchPricingData) {
+            console.log('Fetching pricing data...');
+            await fetchPricing(marketplaceService, addonService);
+        }
+
+        console.log('All operations completed successfully');
     } catch (error) {
         console.error('Error:', error);
+        process.exit(1);
     } finally {
-        await AppDataSource.destroy();
+        if (dataSource) {
+            await dataSource.destroy();
+        }
+        process.exit(0);
     }
 }
 

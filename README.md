@@ -69,6 +69,26 @@ For example:
 npm run add-addon -- com.atlassian.confluence.plugins.confluence-questions
 ```
 
+## Command Line Parameters
+
+The application supports the following command line parameters to control what data to fetch:
+
+```bash
+# Fetch everything (default)
+npm start
+
+# Only fetch transactions
+npm start -- --with-transactions
+
+# Fetch both licenses and pricing
+npm start -- --with-licenses --with-pricing
+
+# Fetch all three explicitly
+npm start -- --with-transactions --with-licenses --with-pricing
+```
+
+If no parameters are specified, all data types will be fetched. If any parameters are specified, only the explicitly requested data types will be fetched.
+
 ## Database Schema
 
 The application uses the following database schema:
