@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node --enable-source-maps dist/index.js",
+    "start": "ts-node src/index.ts",
+    "startJs": "node --enable-source-maps dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "jest",
     "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.404 --output src/types/marketplace-api.ts",
