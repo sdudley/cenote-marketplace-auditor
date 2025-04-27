@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { License } from '../entities/License';
 import { LicenseVersion } from '../entities/LicenseVersion';
 import { deepEqual } from '../utils/objectUtils';
@@ -6,16 +6,22 @@ import { printJsonDiff } from '../utils/diffUtils';
 import { LicenseData } from '../types/marketplace';
 
 export class LicenseService {
-    constructor(private dataSource: DataSource) {}
+    private licenseRepository: Repository<License>;
+    private licenseVersionRepository: Repository<LicenseVersion>;
+
+    constructor(private dataSource: DataSource) {
+        this.licenseRepository = this.dataSource.getRepository(License);
+        this.licenseVersionRepository = this.dataSource.getRepository(LicenseVersion);
+    }
 
     async processLicenses(licenses: LicenseData[]): Promise<void> {
         let processedCount = 0;
         let totalCount = licenses.length;
+        let modifiedCount = 0;
 
         for (const licenseData of licenses) {
             const licenseId = licenseData.appEntitlementNumber || licenseData.licenseId;
-            const existingLicense = await this.dataSource.getRepository(License)
-                .findOne({ where: { marketplaceLicenseId: licenseId } });
+            const existingLicense = await this.licenseRepository.findOne({ where: { marketplaceLicenseId: licenseId } });
 
             if (existingLicense) {
                 // Compare with current data using deepEqual
@@ -27,31 +33,32 @@ export class LicenseService {
                     const version = new LicenseVersion();
                     version.data = licenseData;
                     version.license = existingLicense;
-                    await this.dataSource.getRepository(LicenseVersion).save(version);
+                    await this.licenseVersionRepository.save(version);
 
-                    // Update current data
+                    // Update the current data
                     existingLicense.currentData = licenseData;
-                    await this.dataSource.getRepository(License).save(existingLicense);
+                    await this.licenseRepository.save(existingLicense);
+                    modifiedCount++;
                 }
             } else {
                 // Create new license
                 const license = new License();
                 license.marketplaceLicenseId = licenseData.appEntitlementNumber || licenseData.licenseId;
                 license.currentData = licenseData;
-                await this.dataSource.getRepository(License).save(license);
+                await this.licenseRepository.save(license);
 
                 // Create initial version
                 const version = new LicenseVersion();
                 version.data = licenseData;
                 version.license = license;
-                await this.dataSource.getRepository(LicenseVersion).save(version);
+                await this.licenseVersionRepository.save(version);
             }
 
             processedCount++;
-            if (processedCount % 100 === 0) {
+            if (processedCount % 1000 === 0) {
                 console.log(`Processed ${processedCount} of ${totalCount} licenses`);
             }
         }
-        console.log(`Completed processing ${totalCount} licenses`);
+        console.log(`Completed processing ${totalCount} licenses; ${modifiedCount} were updated`);
     }
 }
