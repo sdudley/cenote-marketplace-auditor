@@ -4,6 +4,8 @@ import { TransactionVersion } from '../entities/TransactionVersion';
 import { License } from '../entities/License';
 import { LicenseVersion } from '../entities/LicenseVersion';
 import { Addon } from '../entities/Addon';
+import { Pricing } from '../entities/Pricing';
+import { PricingInfo } from '../entities/PricingInfo';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -14,7 +16,15 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_DATABASE || 'marketplace_auditor',
     synchronize: true,
     logging: false,
-    entities: [Transaction, TransactionVersion, License, LicenseVersion, Addon],
+    entities: [
+        Transaction,
+        TransactionVersion,
+        License,
+        LicenseVersion,
+        Addon,
+        Pricing,
+        PricingInfo
+    ],
     subscribers: [],
     migrations: [],
 });
