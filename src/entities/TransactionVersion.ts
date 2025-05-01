@@ -9,6 +9,10 @@ export class TransactionVersion {
     @CreateDateColumn()
     createdAt!: Date;
 
+    @Column()
+    @Index()
+    entitlementId!: string;
+
     @Column('jsonb')
     @Index('IDX_transaction_version_data_gin', { synchronize: false })
     data: any;

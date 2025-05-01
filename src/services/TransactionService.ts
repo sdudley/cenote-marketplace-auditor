@@ -48,6 +48,7 @@ export class TransactionService {
                     const version = new TransactionVersion();
                     version.data = normalizedData;
                     version.transaction = existingTransaction;
+                    version.entitlementId = entitlementId;
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
 
                     // Set up the version chain
@@ -76,6 +77,7 @@ export class TransactionService {
                 const version = new TransactionVersion();
                 version.data = normalizedData;
                 version.transaction = transaction;
+                version.entitlementId = entitlementId;
                 await this.transactionVersionRepository.save(version);
             }
 

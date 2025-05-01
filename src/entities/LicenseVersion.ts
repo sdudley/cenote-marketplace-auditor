@@ -9,6 +9,10 @@ export class LicenseVersion {
     @CreateDateColumn()
     createdAt!: Date;
 
+    @Column()
+    @Index()
+    entitlementId!: string;
+
     @Column('jsonb')
     @Index('IDX_license_version_data_gin', { synchronize: false })
     data: any;

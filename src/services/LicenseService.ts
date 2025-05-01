@@ -20,8 +20,8 @@ export class LicenseService {
         let modifiedCount = 0;
 
         for (const licenseData of licenses) {
-            const licenseId = licenseData.appEntitlementNumber || licenseData.licenseId;
-            const existingLicense = await this.licenseRepository.findOne({ where: { entitlementId: licenseId } });
+            const entitlementId = licenseData.appEntitlementNumber || licenseData.licenseId;
+            const existingLicense = await this.licenseRepository.findOne({ where: { entitlementId } });
 
             // Normalize the incoming data
             const normalizedData = normalizeObject(licenseData);
@@ -29,7 +29,7 @@ export class LicenseService {
             if (existingLicense) {
                 // Compare with current data using deepEqual
                 if (!deepEqual(existingLicense.currentData, normalizedData)) {
-                    console.log(`License changed: ${licenseId}`);
+                    console.log(`License changed: ${entitlementId}`);
                     printJsonDiff(existingLicense.currentData, normalizedData);
 
                     // Compute and print JSONPaths of differences
@@ -46,6 +46,7 @@ export class LicenseService {
                     const version = new LicenseVersion();
                     version.data = normalizedData;
                     version.license = existingLicense;
+                    version.entitlementId = entitlementId;
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
 
                     // Set up the version chain
@@ -65,7 +66,7 @@ export class LicenseService {
             } else {
                 // Create new license
                 const license = new License();
-                license.entitlementId = licenseData.appEntitlementNumber || licenseData.licenseId;
+                license.entitlementId = entitlementId;
                 license.currentData = normalizedData;
                 await this.licenseRepository.save(license);
 
@@ -73,6 +74,7 @@ export class LicenseService {
                 const version = new LicenseVersion();
                 version.data = normalizedData;
                 version.license = license;
+                version.entitlementId = entitlementId;
                 await this.licenseVersionRepository.save(version);
             }
 
