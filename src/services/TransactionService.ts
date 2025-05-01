@@ -1,7 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { Transaction } from '../entities/Transaction';
 import { TransactionVersion } from '../entities/TransactionVersion';
-import { deepEqual } from '../utils/objectUtils';
+import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
 import { printJsonDiff } from '../utils/diffUtils';
 import { TransactionData } from '../types/marketplace';
 
@@ -23,11 +23,18 @@ export class TransactionService {
             const transactionKey = `${transactionData.transactionLineItemId}:${transactionData.transactionId}`;
             const existingTransaction = await this.transactionRepository.findOne({ where: { marketplaceTransactionId: transactionKey } });
 
+            // Normalize the incoming data
+            const normalizedData = normalizeObject(transactionData);
+
             if (existingTransaction) {
                 // Compare with current data using deepEqual
-                if (!deepEqual(existingTransaction.currentData, transactionData)) {
+                if (!deepEqual(existingTransaction.currentData, normalizedData)) {
                     console.log(`Transaction changed: ${transactionKey}`);
-                    printJsonDiff(existingTransaction.currentData, transactionData);
+                    printJsonDiff(existingTransaction.currentData, normalizedData);
+
+                    // Compute and print JSONPaths of differences
+                    const changedPaths = computeJsonPaths(existingTransaction.currentData, normalizedData);
+                    console.log('Changed paths:', changedPaths.join(' | '));
 
                     // Get the current, soon-to-be old version
                     const oldVersion = await this.transactionVersionRepository.findOne({
@@ -37,7 +44,7 @@ export class TransactionService {
 
                     // Create new version
                     const version = new TransactionVersion();
-                    version.data = transactionData;
+                    version.data = normalizedData;
                     version.transaction = existingTransaction;
 
                     // Set up the version chain
@@ -50,7 +57,7 @@ export class TransactionService {
                     await this.transactionVersionRepository.save(version);
 
                     // Update current data
-                    existingTransaction.currentData = transactionData;
+                    existingTransaction.currentData = normalizedData;
                     await this.transactionRepository.save(existingTransaction);
                     modifiedCount++;
                 }
@@ -58,12 +65,12 @@ export class TransactionService {
                 // Create new transaction
                 const transaction = new Transaction();
                 transaction.marketplaceTransactionId = transactionKey;
-                transaction.currentData = transactionData;
+                transaction.currentData = normalizedData;
                 await this.transactionRepository.save(transaction);
 
                 // Create initial version
                 const version = new TransactionVersion();
-                version.data = transactionData;
+                version.data = normalizedData;
                 version.transaction = transaction;
                 await this.transactionVersionRepository.save(version);
             }
