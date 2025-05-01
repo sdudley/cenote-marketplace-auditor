@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { TransactionVersion } from './TransactionVersion';
 import { TransactionData } from '../types/marketplace';
+import { License } from './License';
 
 @Entity()
 export class Transaction {
@@ -20,6 +21,10 @@ export class Transaction {
     @Column()
     @Index()
     entitlementId!: string;
+
+    @ManyToOne(() => License, license => license.transactions)
+    @JoinColumn({ name: 'entitlementId', referencedColumnName: 'entitlementId' })
+    license!: License;
 
     @Column('jsonb')
     @Index('IDX_transaction_data_gin', { synchronize: false })

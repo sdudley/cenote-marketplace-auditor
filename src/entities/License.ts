@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
 import { LicenseVersion } from './LicenseVersion';
 import { LicenseData } from '../types/marketplace';
+import { Transaction } from './Transaction';
 
 @Entity()
 export class License {
@@ -14,7 +15,7 @@ export class License {
     updatedAt!: Date;
 
     @Column()
-    @Index()
+    @Index({ unique: true })
     entitlementId!: string;
 
     @Column('jsonb')
@@ -23,4 +24,7 @@ export class License {
 
     @OneToMany(() => LicenseVersion, version => version.license)
     versions!: LicenseVersion[];
+
+    @OneToMany(() => Transaction, transaction => transaction.license)
+    transactions!: Transaction[];
 }
