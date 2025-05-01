@@ -23,6 +23,8 @@ export class TransactionService {
             const transactionKey = `${transactionData.transactionLineItemId}:${transactionData.transactionId}`;
             const existingTransaction = await this.transactionRepository.findOne({ where: { marketplaceTransactionId: transactionKey } });
 
+            const entitlementId = transactionData.appEntitlementNumber || transactionData.licenseId;
+
             // Normalize the incoming data
             const normalizedData = normalizeObject(transactionData);
 
@@ -67,6 +69,7 @@ export class TransactionService {
                 const transaction = new Transaction();
                 transaction.marketplaceTransactionId = transactionKey;
                 transaction.currentData = normalizedData;
+                transaction.entitlementId = entitlementId;
                 await this.transactionRepository.save(transaction);
 
                 // Create initial version

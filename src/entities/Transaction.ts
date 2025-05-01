@@ -17,6 +17,9 @@ export class Transaction {
     @Index()
     marketplaceTransactionId!: string;
 
+    @Column()
+    @Index()
+    entitlementId!: string;
     @Column('jsonb')
     @Index('IDX_transaction_currentData_gin', { synchronize: false })
     currentData!: TransactionData;

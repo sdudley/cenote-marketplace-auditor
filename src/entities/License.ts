@@ -15,7 +15,7 @@ export class License {
 
     @Column()
     @Index()
-    marketplaceLicenseId!: string;
+    entitlementId!: string;
 
     @Column('jsonb')
     @Index('IDX_license_currentData_gin', { synchronize: false })
