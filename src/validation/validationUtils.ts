@@ -1,4 +1,7 @@
 import { DeploymentType } from "../services/PricingService";
+import { Transaction } from "../entities/Transaction";
+import { Repository } from "typeorm";
+import { License } from "../entities/License";
 
 const formatCurrency = (value: number | undefined): string => {
     if (value === undefined) return '$0.00';
@@ -29,4 +32,11 @@ const deploymentTypeFromHosting = (hosting: string): DeploymentType => {
     }
 }
 
-export { formatCurrency, userCountFromTier, deploymentTypeFromHosting };
+const loadLicenseForTransaction = async (licenseRepository: Repository<License>, transaction: Transaction): Promise<License | null> => {
+    return await licenseRepository
+        .findOne({
+            where: { entitlementId: transaction.entitlementId }
+        });
+}
+
+export { formatCurrency, userCountFromTier, deploymentTypeFromHosting, loadLicenseForTransaction };

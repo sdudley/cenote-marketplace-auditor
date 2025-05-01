@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, JoinColumn } from 'typeorm';
 import { LicenseVersion } from './LicenseVersion';
 import { LicenseData } from '../types/marketplace';
 import { Transaction } from './Transaction';
@@ -26,5 +26,6 @@ export class License {
     versions!: LicenseVersion[];
 
     @OneToMany(() => Transaction, transaction => transaction.license)
+    @JoinColumn({ name: 'entitlementId', referencedColumnName: 'entitlementId' })
     transactions!: Transaction[];
 }

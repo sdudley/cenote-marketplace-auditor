@@ -3,10 +3,17 @@ import { calculateLicenseDurationInMonths, calculateLicenseDuration } from "./li
 import { UserTierPricing } from "../services/PricingService";
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
 import { ACADEMIC_PRICE_RATIO } from "./constants";
+import { Transaction } from "../entities/Transaction";
+
+interface PriceCalcOpts {
+    purchaseDetails: PurchaseDetails;
+    pricing: UserTierPricing[];
+    isSandbox: boolean;
+}
 
 export class PriceCalculatorService {
-    public calculateExpectedPrice(opts: { purchaseDetails: PurchaseDetails, pricing: UserTierPricing[] }): number|undefined {
-        const { purchaseDetails, pricing } = opts;
+    public calculateExpectedPrice(opts: PriceCalcOpts): number|undefined {
+        const { purchaseDetails, pricing, isSandbox } = opts;
         const {
             hosting,
             licenseType,
@@ -19,6 +26,11 @@ export class PriceCalculatorService {
             billingPeriod,
             oldBillingPeriod
         } = purchaseDetails;
+
+
+        if (isSandbox) {
+            return 0;
+        }
 
         const deploymentType = deploymentTypeFromHosting(hosting);
         const userCount = userCountFromTier(tier);

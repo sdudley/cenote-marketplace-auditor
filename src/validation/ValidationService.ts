@@ -4,8 +4,9 @@ import { PricingService, UserTierPricing } from '../services/PricingService';
 import { DeploymentType } from '../services/PricingService';
 import { components } from '../types/marketplace-api';
 import { CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO, ACADEMIC_PRICE_RATIO } from './constants';
-import { formatCurrency, deploymentTypeFromHosting } from './validationUtils';
+import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
 import { PriceCalculatorService } from './PriceCalculatorService';
+import { License } from '../entities/License';
 
 const NUM_TRANSACTIONS = 50;
 
@@ -26,8 +27,11 @@ export class ValidationService {
 
     async validateTransactions(): Promise<void> {
         const transactionRepository = this.dataSource.getRepository(Transaction);
+        const licenseRepository = this.dataSource.getRepository(License);
+
         const transactions = await transactionRepository
             .createQueryBuilder('transaction')
+           // .leftJoinAndSelect("transaction.license", "license")
             .where('transaction.data->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
             .orderBy('transaction.data->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
             .addOrderBy('transaction.created_at', 'DESC')
@@ -58,7 +62,18 @@ export class ValidationService {
                 const deploymentType = deploymentTypeFromHosting(hosting);
                 const pricing = await this.pricingService.getPricing(addonKey, deploymentType);
 
-                const expectedPurchasePrice = this.priceCalculatorService.calculateExpectedPrice({ purchaseDetails, pricing });
+                let isSandbox = false;
+
+                if (vendorAmount===0) {
+                    const license = await loadLicenseForTransaction(licenseRepository, transaction);
+
+                    if (license) {
+                        transaction.license = license;
+                        isSandbox = license.data.installedOnSandbox ? true : false;
+                    }
+                }
+
+                const expectedPurchasePrice = this.priceCalculatorService.calculateExpectedPrice({ purchaseDetails, pricing, isSandbox });
                 const expectedVendorAmount = expectedPurchasePrice ? expectedPurchasePrice * getDiscountAmount(saleDate, deploymentType) : undefined;
 
                 const actualFormatted = formatCurrency(vendorAmount);
