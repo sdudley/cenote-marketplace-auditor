@@ -6,6 +6,8 @@ import { LicenseVersion } from '../entities/LicenseVersion';
 import { Addon } from '../entities/Addon';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
+import { AddGinIndexes1711234567890 } from '../migrations/1711234567890-AddGinIndexes';
+import { UpdateExistingRecords1711234567891 } from '../migrations/1711234567891-UpdateExistingRecords';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -26,7 +28,7 @@ export const AppDataSource = new DataSource({
         PricingInfo
     ],
     subscribers: [],
-    migrations: [],
+    migrations: [AddGinIndexes1711234567890, UpdateExistingRecords1711234567891],
 });
 
 export async function initializeDatabase() {
