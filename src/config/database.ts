@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { Transaction } from '../entities/Transaction';
 import { TransactionVersion } from '../entities/TransactionVersion';
 import { License } from '../entities/License';
@@ -18,6 +19,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_DATABASE || 'marketplace_auditor',
     synchronize: true,
     logging: false,
+    namingStrategy: new SnakeNamingStrategy(),
     entities: [
         Transaction,
         TransactionVersion,
@@ -36,9 +38,9 @@ export async function initializeDatabase() {
 
     // Create GIN indexes after initialization
     await dataSource.query(`
-        CREATE INDEX IF NOT EXISTS "IDX_transaction_currentData_gin" ON "transaction" USING GIN ("currentData");
+        CREATE INDEX IF NOT EXISTS "IDX_transaction_current_data_gin" ON "transaction" USING GIN ("current_data");
         CREATE INDEX IF NOT EXISTS "IDX_transaction_version_data_gin" ON "transaction_version" USING GIN ("data");
-        CREATE INDEX IF NOT EXISTS "IDX_license_currentData_gin" ON "license" USING GIN ("currentData");
+        CREATE INDEX IF NOT EXISTS "IDX_license_current_data_gin" ON "license" USING GIN ("current_data");
         CREATE INDEX IF NOT EXISTS "IDX_license_version_data_gin" ON "license_version" USING GIN ("data");
     `);
 

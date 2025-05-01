@@ -113,9 +113,9 @@ export class ValidationService {
         const transactionRepository = this.dataSource.getRepository(Transaction);
         const transactions = await transactionRepository
             .createQueryBuilder('transaction')
-            .where('transaction."currentData"->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
-            .orderBy('transaction."currentData"->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
-            .addOrderBy('transaction."createdAt"', 'DESC')
+            .where('transaction."current_data"->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
+            .orderBy('transaction."current_data"->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
+            .addOrderBy('transaction."created_at"', 'DESC')
             .take(NUM_TRANSACTIONS)
             .getMany();
 
@@ -123,7 +123,6 @@ export class ValidationService {
 
         console.log('Using Cloud pricing table: ');
         console.dir(cloudPricing, { depth: null });
-
 
         console.log(`Validating last ${NUM_TRANSACTIONS} transactions:`);
         for (const transaction of transactions) {
