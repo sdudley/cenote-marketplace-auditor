@@ -5,7 +5,8 @@ import { AddonService } from './services/AddonService';
 import { TransactionService } from './services/TransactionService';
 import { LicenseService } from './services/LicenseService';
 import { PricingService } from './services/PricingService';
-import { ValidationService } from './services/ValidationService';
+import { ValidationService } from './validation/ValidationService';
+import { PriceCalculatorService } from './validation/PriceCalculatorService';
 
 async function main() {
     // Parse command line arguments
@@ -36,7 +37,8 @@ async function main() {
         const transactionService = new TransactionService(dataSource);
         const licenseService = new LicenseService(dataSource);
         const pricingService = new PricingService(dataSource, marketplaceService);
-        const validationService = new ValidationService(dataSource, pricingService);
+        const priceCalculatorService = new PriceCalculatorService();
+        const validationService = new ValidationService(dataSource, pricingService, priceCalculatorService);
 
         if (fetchTransactions) {
             console.log('Fetching transactions...');
