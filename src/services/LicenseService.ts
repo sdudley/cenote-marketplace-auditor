@@ -1,7 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { License } from '../entities/License';
 import { LicenseVersion } from '../entities/LicenseVersion';
-import { deepEqual } from '../utils/objectUtils';
+import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
 import { printJsonDiff } from '../utils/diffUtils';
 import { LicenseData } from '../types/marketplace';
 
@@ -23,11 +23,18 @@ export class LicenseService {
             const licenseId = licenseData.appEntitlementNumber || licenseData.licenseId;
             const existingLicense = await this.licenseRepository.findOne({ where: { marketplaceLicenseId: licenseId } });
 
+            // Normalize the incoming data
+            const normalizedData = normalizeObject(licenseData);
+
             if (existingLicense) {
                 // Compare with current data using deepEqual
-                if (!deepEqual(existingLicense.currentData, licenseData)) {
+                if (!deepEqual(existingLicense.currentData, normalizedData)) {
                     console.log(`License changed: ${licenseId}`);
-                    printJsonDiff(existingLicense.currentData, licenseData);
+                    printJsonDiff(existingLicense.currentData, normalizedData);
+
+                    // Compute and print JSONPaths of differences
+                    const changedPaths = computeJsonPaths(existingLicense.currentData, normalizedData);
+                    console.log('Changed paths:', changedPaths.join(' | '));
 
                     // Get the current, soon-to-be old version
                     const oldVersion = await this.licenseVersionRepository.findOne({
@@ -37,7 +44,7 @@ export class LicenseService {
 
                     // Create new version
                     const version = new LicenseVersion();
-                    version.data = licenseData;
+                    version.data = normalizedData;
                     version.license = existingLicense;
 
                     // Set up the version chain
@@ -50,7 +57,7 @@ export class LicenseService {
                     await this.licenseVersionRepository.save(version);
 
                     // Update the current data
-                    existingLicense.currentData = licenseData;
+                    existingLicense.currentData = normalizedData;
                     await this.licenseRepository.save(existingLicense);
                     modifiedCount++;
                 }
@@ -58,12 +65,12 @@ export class LicenseService {
                 // Create new license
                 const license = new License();
                 license.marketplaceLicenseId = licenseData.appEntitlementNumber || licenseData.licenseId;
-                license.currentData = licenseData;
+                license.currentData = normalizedData;
                 await this.licenseRepository.save(license);
 
                 // Create initial version
                 const version = new LicenseVersion();
-                version.data = licenseData;
+                version.data = normalizedData;
                 version.license = license;
                 await this.licenseVersionRepository.save(version);
             }
