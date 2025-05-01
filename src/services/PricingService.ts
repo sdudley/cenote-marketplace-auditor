@@ -16,6 +16,8 @@ export class PricingService {
     private pricingRepository: Repository<Pricing>;
     private pricingInfoRepository: Repository<PricingInfo>;
 
+    private pricingCache: Map<string, UserTierPricing[]> = new Map();
+
     constructor(
         private dataSource: DataSource,
         private marketplaceService: MarketplaceService
@@ -26,6 +28,12 @@ export class PricingService {
     }
 
     async getPricing(addonKey: string, deploymentType: DeploymentType): Promise<UserTierPricing[]> {
+        const cacheKey = `${addonKey}-${deploymentType}`;
+
+        if (this.pricingCache.has(cacheKey)) {
+            return this.pricingCache.get(cacheKey) as UserTierPricing[];
+        }
+
         const pricing = await this.pricingRepository.findOne({
             where: {
                 addonKey,
@@ -42,13 +50,17 @@ export class PricingService {
             where: { pricing }
         });
 
-        return pricingInfo
+        const result = pricingInfo
             .filter(item => item.data.monthsValid === 12)
             .map(item => ({
                 userTier: item.data.unitCount,
                 cost: item.data.amount
             }))
             .sort((a, b) => a.userTier - b.userTier);
+
+        this.pricingCache.set(cacheKey, result);
+
+        return result;
     }
 
     async fetchPricing(): Promise<void> {
