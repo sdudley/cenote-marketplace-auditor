@@ -29,10 +29,24 @@ export class TransactionService {
                     console.log(`Transaction changed: ${transactionKey}`);
                     printJsonDiff(existingTransaction.currentData, transactionData);
 
+                    // Get the current, soon-to-be old version
+                    const oldVersion = await this.transactionVersionRepository.findOne({
+                        where: { transaction: existingTransaction },
+                        order: { createdAt: 'DESC' }
+                    });
+
                     // Create new version
                     const version = new TransactionVersion();
                     version.data = transactionData;
                     version.transaction = existingTransaction;
+
+                    // Set up the version chain
+                    if (oldVersion) {
+                        version.priorTransaction = oldVersion;
+                        oldVersion.nextTransaction = version;
+                        await this.transactionVersionRepository.save(oldVersion);
+                    }
+
                     await this.transactionVersionRepository.save(version);
 
                     // Update current data

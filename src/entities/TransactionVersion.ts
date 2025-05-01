@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToOne, JoinColumn, Index } from 'typeorm';
 import { Transaction } from './Transaction';
 
 @Entity()
@@ -15,4 +15,12 @@ export class TransactionVersion {
 
     @ManyToOne(() => Transaction, transaction => transaction.versions)
     transaction!: Transaction;
+
+    @OneToOne(() => TransactionVersion, { nullable: true })
+    @JoinColumn()
+    nextTransaction?: TransactionVersion;
+
+    @OneToOne(() => TransactionVersion, { nullable: true })
+    @JoinColumn()
+    priorTransaction?: TransactionVersion;
 }
