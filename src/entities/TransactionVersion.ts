@@ -21,9 +21,9 @@ export class TransactionVersion {
 
     @OneToOne(() => TransactionVersion, { nullable: true })
     @JoinColumn()
-    nextTransaction?: TransactionVersion;
+    nextTransactionVersion?: TransactionVersion;
 
     @OneToOne(() => TransactionVersion, { nullable: true })
     @JoinColumn()
-    priorTransaction?: TransactionVersion;
+    priorTransactionVersion?: TransactionVersion;
 }

@@ -21,9 +21,9 @@ export class LicenseVersion {
 
     @OneToOne(() => LicenseVersion, { nullable: true })
     @JoinColumn()
-    nextLicense?: LicenseVersion;
+    nextLicenseVersion?: LicenseVersion;
 
     @OneToOne(() => LicenseVersion, { nullable: true })
     @JoinColumn()
-    priorLicense?: LicenseVersion;
+    priorLicenseVersion?: LicenseVersion;
 }

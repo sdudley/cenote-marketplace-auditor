@@ -50,8 +50,8 @@ export class LicenseService {
 
                     // Set up the version chain
                     if (oldVersion) {
-                        version.priorLicense = oldVersion;
-                        oldVersion.nextLicense = version;
+                        version.priorLicenseVersion = oldVersion;
+                        oldVersion.nextLicenseVersion = version;
                         await this.licenseVersionRepository.save(oldVersion);
                     }
 

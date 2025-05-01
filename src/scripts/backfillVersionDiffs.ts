@@ -14,7 +14,7 @@ async function backfillVersionDiffs() {
 
     // Process license versions
     const licenseVersions = await licenseVersionRepo.find({
-        relations: ['priorLicense'],
+        relations: ['priorLicenseVersion'],
         order: { createdAt: 'ASC' }
     });
 
@@ -22,9 +22,9 @@ async function backfillVersionDiffs() {
     let licenseUpdatedCount = 0;
 
     for (const version of licenseVersions) {
-        if (version.priorLicense) {
+        if (version.priorLicenseVersion) {
             const currentDataNorm = normalizeObject(version.data);
-            const priorDataNorm = normalizeObject(version.priorLicense.data);
+            const priorDataNorm = normalizeObject(version.priorLicenseVersion.data);
 
             const changedPaths = computeJsonPaths(priorDataNorm, currentDataNorm);
             if (changedPaths.length > 0) {
@@ -37,7 +37,7 @@ async function backfillVersionDiffs() {
 
     // Process transaction versions
     const transactionVersions = await transactionVersionRepo.find({
-        relations: ['priorTransaction'],
+        relations: ['priorTransactionVersion'],
         order: { createdAt: 'ASC' }
     });
 
@@ -45,9 +45,9 @@ async function backfillVersionDiffs() {
     let transactionUpdatedCount = 0;
 
     for (const version of transactionVersions) {
-        if (version.priorTransaction) {
+        if (version.priorTransactionVersion) {
             const currentDataNorm = normalizeObject(version.data);
-            const priorDataNorm = normalizeObject(version.priorTransaction.data);
+            const priorDataNorm = normalizeObject(version.priorTransactionVersion.data);
 
             const changedPaths = computeJsonPaths(priorDataNorm, currentDataNorm);
             if (changedPaths.length > 0) {

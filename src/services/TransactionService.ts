@@ -50,8 +50,8 @@ export class TransactionService {
 
                     // Set up the version chain
                     if (oldVersion) {
-                        version.priorTransaction = oldVersion;
-                        oldVersion.nextTransaction = version;
+                        version.priorTransactionVersion = oldVersion;
+                        oldVersion.nextTransactionVersion = version;
                         await this.transactionVersionRepository.save(oldVersion);
                     }
 
