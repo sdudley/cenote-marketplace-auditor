@@ -20,9 +20,10 @@ export class Transaction {
     @Column()
     @Index()
     entitlementId!: string;
+
     @Column('jsonb')
-    @Index('IDX_transaction_currentData_gin', { synchronize: false })
-    currentData!: TransactionData;
+    @Index('IDX_transaction_data_gin', { synchronize: false })
+    data!: TransactionData;
 
     @OneToMany(() => TransactionVersion, version => version.transaction)
     versions!: TransactionVersion[];

@@ -28,12 +28,12 @@ export class LicenseService {
 
             if (existingLicense) {
                 // Compare with current data using deepEqual
-                if (!deepEqual(existingLicense.currentData, normalizedData)) {
+                if (!deepEqual(existingLicense.data, normalizedData)) {
                     console.log(`License changed: ${entitlementId}`);
-                    printJsonDiff(existingLicense.currentData, normalizedData);
+                    printJsonDiff(existingLicense.data, normalizedData);
 
                     // Compute and print JSONPaths of differences
-                    const changedPaths = computeJsonPaths(existingLicense.currentData, normalizedData);
+                    const changedPaths = computeJsonPaths(existingLicense.data, normalizedData);
                     console.log('Changed paths:', changedPaths.join(' | '));
 
                     // Get the current, soon-to-be old version
@@ -59,7 +59,7 @@ export class LicenseService {
                     await this.licenseVersionRepository.save(version);
 
                     // Update the current data
-                    existingLicense.currentData = normalizedData;
+                    existingLicense.data = normalizedData;
                     await this.licenseRepository.save(existingLicense);
                     modifiedCount++;
                 }
@@ -67,7 +67,7 @@ export class LicenseService {
                 // Create new license
                 const license = new License();
                 license.entitlementId = entitlementId;
-                license.currentData = normalizedData;
+                license.data = normalizedData;
                 await this.licenseRepository.save(license);
 
                 // Create initial version

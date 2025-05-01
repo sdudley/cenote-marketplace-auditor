@@ -18,8 +18,8 @@ export class License {
     entitlementId!: string;
 
     @Column('jsonb')
-    @Index('IDX_license_currentData_gin', { synchronize: false })
-    currentData!: LicenseData;
+    @Index('IDX_license_data_gin', { synchronize: false })
+    data!: LicenseData;
 
     @OneToMany(() => LicenseVersion, version => version.license)
     versions!: LicenseVersion[];

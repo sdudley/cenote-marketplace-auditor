@@ -113,9 +113,9 @@ export class ValidationService {
         const transactionRepository = this.dataSource.getRepository(Transaction);
         const transactions = await transactionRepository
             .createQueryBuilder('transaction')
-            .where('transaction."current_data"->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
-            .orderBy('transaction."current_data"->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
-            .addOrderBy('transaction."created_at"', 'DESC')
+            .where('transaction.data->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
+            .orderBy('transaction.data->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
+            .addOrderBy('transaction.created_at', 'DESC')
             .take(NUM_TRANSACTIONS)
             .getMany();
 
@@ -126,7 +126,7 @@ export class ValidationService {
 
         console.log(`Validating last ${NUM_TRANSACTIONS} transactions:`);
         for (const transaction of transactions) {
-            const data = transaction.currentData;
+            const data = transaction.data;
             const { addonKey, purchaseDetails, licenseId, appEntitlementNumber } = data;
             const {
                 hosting,

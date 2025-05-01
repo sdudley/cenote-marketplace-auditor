@@ -30,12 +30,12 @@ export class TransactionService {
 
             if (existingTransaction) {
                 // Compare with current data using deepEqual
-                if (!deepEqual(existingTransaction.currentData, normalizedData)) {
+                if (!deepEqual(existingTransaction.data, normalizedData)) {
                     console.log(`Transaction changed: ${transactionKey}`);
-                    printJsonDiff(existingTransaction.currentData, normalizedData);
+                    printJsonDiff(existingTransaction.data, normalizedData);
 
                     // Compute and print JSONPaths of differences
-                    const changedPaths = computeJsonPaths(existingTransaction.currentData, normalizedData);
+                    const changedPaths = computeJsonPaths(existingTransaction.data, normalizedData);
                     console.log('Changed paths:', changedPaths.join(' | '));
 
                     // Get the current, soon-to-be old version
@@ -61,7 +61,7 @@ export class TransactionService {
                     await this.transactionVersionRepository.save(version);
 
                     // Update current data
-                    existingTransaction.currentData = normalizedData;
+                    existingTransaction.data = normalizedData;
                     await this.transactionRepository.save(existingTransaction);
                     modifiedCount++;
                 }
@@ -69,7 +69,7 @@ export class TransactionService {
                 // Create new transaction
                 const transaction = new Transaction();
                 transaction.marketplaceTransactionId = transactionKey;
-                transaction.currentData = normalizedData;
+                transaction.data = normalizedData;
                 transaction.entitlementId = entitlementId;
                 await this.transactionRepository.save(transaction);
 
