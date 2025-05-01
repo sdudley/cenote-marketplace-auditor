@@ -13,6 +13,9 @@ export class TransactionVersion {
     @Index('IDX_transaction_version_data_gin', { synchronize: false })
     data: any;
 
+    @Column({ nullable: true })
+    diff?: string;
+
     @ManyToOne(() => Transaction, transaction => transaction.versions)
     transaction!: Transaction;
 

@@ -46,6 +46,7 @@ export class TransactionService {
                     const version = new TransactionVersion();
                     version.data = normalizedData;
                     version.transaction = existingTransaction;
+                    version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
 
                     // Set up the version chain
                     if (oldVersion) {

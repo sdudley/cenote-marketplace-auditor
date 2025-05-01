@@ -46,6 +46,7 @@ export class LicenseService {
                     const version = new LicenseVersion();
                     version.data = normalizedData;
                     version.license = existingLicense;
+                    version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
 
                     // Set up the version chain
                     if (oldVersion) {

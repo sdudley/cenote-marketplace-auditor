@@ -13,6 +13,9 @@ export class LicenseVersion {
     @Index('IDX_license_version_data_gin', { synchronize: false })
     data: any;
 
+    @Column({ nullable: true })
+    diff?: string;
+
     @ManyToOne(() => License, license => license.versions)
     license!: License;
 
