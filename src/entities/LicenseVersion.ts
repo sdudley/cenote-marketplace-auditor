@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToOne, JoinColumn, Index } from 'typeorm';
 import { License } from './License';
 
 @Entity()
@@ -15,4 +15,12 @@ export class LicenseVersion {
 
     @ManyToOne(() => License, license => license.versions)
     license!: License;
+
+    @OneToOne(() => LicenseVersion, { nullable: true })
+    @JoinColumn()
+    nextLicense?: LicenseVersion;
+
+    @OneToOne(() => LicenseVersion, { nullable: true })
+    @JoinColumn()
+    priorLicense?: LicenseVersion;
 }

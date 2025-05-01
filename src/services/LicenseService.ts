@@ -29,10 +29,24 @@ export class LicenseService {
                     console.log(`License changed: ${licenseId}`);
                     printJsonDiff(existingLicense.currentData, licenseData);
 
+                    // Get the current, soon-to-be old version
+                    const oldVersion = await this.licenseVersionRepository.findOne({
+                        where: { license: existingLicense },
+                        order: { createdAt: 'DESC' }
+                    });
+
                     // Create new version
                     const version = new LicenseVersion();
                     version.data = licenseData;
                     version.license = existingLicense;
+
+                    // Set up the version chain
+                    if (oldVersion) {
+                        version.priorLicense = oldVersion;
+                        oldVersion.nextLicense = version;
+                        await this.licenseVersionRepository.save(oldVersion);
+                    }
+
                     await this.licenseVersionRepository.save(version);
 
                     // Update the current data
