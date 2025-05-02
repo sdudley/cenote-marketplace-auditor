@@ -1,63 +1,71 @@
-const calculateLicenseDuration = (startDate: string, endDate: string): number => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    // Set both dates to midnight to ensure we're comparing full days
-    start.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
-
-    // Calculate the difference in days
-    const diffTime = end.getTime() - start.getTime();
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-    console.log(`${startDate} to ${endDate} = ${diffDays} days`);
-    return diffDays;
-}
-
-const calculateLicenseDurationInMonths = (startDate: string, endDate: string): number => {
-    // Create UTC dates from the ISO strings
-    const start = new Date(Date.UTC(
-        parseInt(startDate.substring(0, 4)), // year
-        parseInt(startDate.substring(5, 7)) - 1, // month (0-based)
-        parseInt(startDate.substring(8, 10)) // day
-    ));
-    const end = new Date(Date.UTC(
-        parseInt(endDate.substring(0, 4)), // year
-        parseInt(endDate.substring(5, 7)) - 1, // month (0-based)
-        parseInt(endDate.substring(8, 10)) // day
-    ));
-
-    // Calculate the difference in months
-    const years = end.getUTCFullYear() - start.getUTCFullYear();
-    const months = end.getUTCMonth() - start.getUTCMonth();
-    const totalMonths = years * 12 + months;
-
-    if (end.getUTCDate() === start.getUTCDate()) {
-        return totalMonths;
+/**
+ * Calculate the number of days in the old subscription that overlap with the new
+ * subscription.
+ */
+const getSubscriptionOverlapDays = (
+    currentStartDate: string,
+    priorEndDate: string|null
+): number => {
+    if (priorEndDate === null) {
+        return 0;
     }
 
-    // Check if either date is the last day of its month
-    const isStartLastDay = start.getUTCDate() === new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
-    const isEndLastDay = end.getUTCDate() === new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0)).getUTCDate();
-
-    // If either date is the last day of its month, return the total integer number of months
-    if ((isStartLastDay || isEndLastDay) && start.getUTCDate() >= 28 && end.getUTCDate() >= 28) {
-        return totalMonths;
+    if (currentStartDate >= priorEndDate) {
+        return 0;
     }
 
-    // Calculate the days in the start and end months
-    const daysInStartMonth = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
-    const daysInEndMonth = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0)).getUTCDate();
+    return getLicenseDurationInDays(currentStartDate, priorEndDate) ?? 0;
+};
 
-    // Calculate the fractions of the start and end months
-    const startFraction = (daysInStartMonth - start.getUTCDate() + 1) / daysInStartMonth;
-    const endFraction = end.getUTCDate() / daysInEndMonth;
+/**
+ * Calculate the support duration in days between two dates.
+ * If the dates are exactly one or more years apart, returns the number of years * 365.
+ * Otherwise, returns the exact number of days between the dates.
+ */
+const getLicenseDurationInDays = (startDate: string, endDate: string): number => {
+    // Create dates at midnight UTC from ISO strings
+    const d1 = new Date(Date.UTC(
+        parseInt(startDate.substring(0, 4)),
+        parseInt(startDate.substring(5, 7)) - 1,
+        parseInt(startDate.substring(8, 10))
+    ));
+    const d2 = new Date(Date.UTC(
+        parseInt(endDate.substring(0, 4)),
+        parseInt(endDate.substring(5, 7)) - 1,
+        parseInt(endDate.substring(8, 10))
+    ));
+    const d2minusOneDay = new Date(d2);
+    d2minusOneDay.setUTCDate(d2minusOneDay.getUTCDate() - 1);
 
-    // Calculate the total fractional months
-    const adjustedMonths = totalMonths - 1 + startFraction + endFraction;
+    let exactYearDiff = getExactYearDiff(d1, d2minusOneDay);
 
-    console.log(`${startDate} to ${endDate} = ${adjustedMonths.toFixed(2)} months`);
-    return adjustedMonths;
-}
+    if (exactYearDiff === null) {
+        exactYearDiff = getExactYearDiff(d1, d2);
+    }
 
-export { calculateLicenseDuration, calculateLicenseDurationInMonths };
+    if (exactYearDiff !== null) {
+        return exactYearDiff * 365; // FULL_YEAR
+    }
+
+    // Calculate exact days between dates
+    const diffTime = d2.getTime() - d1.getTime();
+    return Math.round(diffTime / (1000 * 60 * 60 * 24));
+};
+
+/**
+ * Check if two dates are exactly one or more years apart (same month and day).
+ * Returns the number of years if they are, null otherwise.
+ */
+const getExactYearDiff = (d1: Date, d2: Date): number | null => {
+    if (d1.getUTCMonth() !== d2.getUTCMonth() || d1.getUTCDate() !== d2.getUTCDate()) {
+        return null;
+    }
+
+    return d2.getUTCFullYear() - d1.getUTCFullYear();
+};
+
+export {
+    getSubscriptionOverlapDays,
+    getLicenseDurationInDays,
+    getExactYearDiff
+};

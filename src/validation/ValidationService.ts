@@ -8,14 +8,10 @@ import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } 
 import { PriceCalcOpts, PriceCalculatorService } from './PriceCalculatorService';
 import { License } from '../entities/License';
 
-const NUM_TRANSACTIONS = 50;
+const NUM_TRANSACTIONS = 100;
 
 export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];
 
-// Vendor discount amounts (after Atlassian share)
-const getDiscountAmount = (saleDate: string, deploymentType: DeploymentType): number => {
-    return deploymentType==='cloud' ? CLOUD_DISCOUNT_RATIO : DC_DISCOUNT_RATIO;
-};
 
 
 export class ValidationService {
@@ -81,6 +77,7 @@ export class ValidationService {
                 const pricingOpts: PriceCalcOpts = {
                     pricing,
                     saleType,
+                    saleDate,
                     isSandbox,
                     hosting,
                     licenseType,
@@ -90,8 +87,9 @@ export class ValidationService {
                     billingPeriod
                 };
 
-                const expectedPurchasePrice = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
-                const expectedVendorAmount = expectedPurchasePrice ? expectedPurchasePrice * getDiscountAmount(saleDate, deploymentType) : undefined;
+                const price = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
+                const expectedPurchasePrice = price.purchasePrice;
+                const expectedVendorAmount = price.vendorPrice;
 
                 const actualFormatted = formatCurrency(vendorAmount);
                 const expectedFormatted = formatCurrency(expectedVendorAmount);

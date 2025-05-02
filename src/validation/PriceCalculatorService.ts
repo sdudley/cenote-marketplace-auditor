@@ -1,12 +1,13 @@
 import { PurchaseDetails } from "./ValidationService";
-import { calculateLicenseDurationInMonths, calculateLicenseDuration } from "./licenseDurationCalculator";
-import { UserTierPricing } from "../services/PricingService";
+import { getLicenseDurationInDays } from "./licenseDurationCalculator";
+import { DeploymentType, UserTierPricing } from "../services/PricingService";
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
-import { ACADEMIC_PRICE_RATIO } from "./constants";
+import { ACADEMIC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
 import { Transaction } from "../entities/Transaction";
 
 export interface PriceCalcOpts {
     pricing: UserTierPricing[];
+    saleDate: string;
     saleType: "New" | "Refund" | "Renewal" | "Upgrade";
     isSandbox: boolean;
     hosting: "Server" | "Data Center" | "Cloud";
@@ -17,10 +18,20 @@ export interface PriceCalcOpts {
     billingPeriod: "Monthly" | "Annual";
 }
 
+export interface PriceResult {
+    vendorPrice: number;
+    purchasePrice: number;
+}
+
 export class PriceCalculatorService {
-    public calculateExpectedPrice(opts: PriceCalcOpts): number|undefined {
+    private getDiscountAmount(saleDate: string, deploymentType: DeploymentType): number {
+        return deploymentType==='cloud' ? CLOUD_DISCOUNT_RATIO : DC_DISCOUNT_RATIO;
+    }
+
+    public calculateExpectedPrice(opts: PriceCalcOpts): PriceResult {
         const {
             pricing,
+            saleDate,
             saleType,
             isSandbox,
             hosting,
@@ -32,7 +43,7 @@ export class PriceCalculatorService {
         } = opts;
 
         if (isSandbox) {
-            return 0;
+            return { vendorPrice: 0, purchasePrice: 0 };
         }
 
         const deploymentType = deploymentTypeFromHosting(hosting);
@@ -42,19 +53,13 @@ export class PriceCalculatorService {
         const tierIndex = pricing.findIndex(t => userCount <= t.userTier);
 
         if (tierIndex === -1) {
-            return undefined;
+            return { vendorPrice: 0, purchasePrice: 0 };
         }
 
         const pricingTier : UserTierPricing = pricing[tierIndex];
         const { cost } = pricingTier;
 
-        // Calculate the license duration in days
-        let licenseDurationMonths = calculateLicenseDurationInMonths(maintenanceStartDate, maintenanceEndDate);
-
-        if (Math.trunc(licenseDurationMonths) !== licenseDurationMonths) {
-            const licenseDurationDays = calculateLicenseDuration(maintenanceStartDate, maintenanceEndDate);
-            licenseDurationMonths = licenseDurationDays / 365 * 12;
-        }
+        const licenseDurationDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
 
         let basePrice;
 
@@ -78,25 +83,42 @@ export class PriceCalculatorService {
                 const pricePerUserInNewTier = (pricingTier.cost - priorPricingTier.cost) / userDifferencePerTier;
                 basePrice = priorPricingTier.cost + (pricePerUserInNewTier * usersInNewTier);
             }
-
-            // Stored price is the annual price, which is based on 10 month-equivalents, so adjust it if using
-            // monthly billing
-            if (billingPeriod==='Monthly') {
-                basePrice = basePrice * 12 / 10;
-            }
         }
 
-        basePrice = basePrice * licenseDurationMonths / 12;
-
-        // Apply academic discount if applicable
-        if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
-            basePrice = basePrice * ACADEMIC_PRICE_RATIO;
+        if (billingPeriod === 'Monthly') {
+            basePrice /= 10; // 2-month discount for annual
+        } else {
+            basePrice = basePrice * licenseDurationDays / 365;
         }
 
         if (saleType==='Refund') {
             basePrice = -basePrice;
         }
 
-        return basePrice;
+        // Apply academic discount if applicable
+        if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
+            basePrice = basePrice * ACADEMIC_PRICE_RATIO;
+        }
+
+        const purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
+
+        if (billingPeriod === 'Annual') {
+            basePrice = Math.ceil(basePrice);
+        }
+
+        basePrice *= this.getDiscountAmount(saleDate, deploymentType);
+
+        // If partner discount:
+
+        if (false /* marketplacePromotion */) {
+            basePrice *= 0.95;
+            basePrice = Math.floor(basePrice * 0.95);
+        }
+
+        if (billingPeriod==='Annual' && hosting !== 'Cloud') {
+            basePrice = Math.ceil(basePrice);
+        }
+
+        return { purchasePrice: Math.round(purchasePrice * 100)/100, vendorPrice: Math.round(basePrice * 100)/100 };
     }
 }
