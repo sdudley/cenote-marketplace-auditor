@@ -11,9 +11,21 @@ interface PriceCalcOpts {
     isSandbox: boolean;
 }
 
+interface PriceCalcOptsInternal {
+    pricing: UserTierPricing[];
+    isSandbox: boolean;
+    hosting: "Server" | "Data Center" | "Cloud";
+    licenseType: "ACADEMIC" | "COMMERCIAL" | "COMMUNITY" | "EVALUATION" | "OPEN_SOURCE";
+    tier: string;
+    maintenanceStartDate: string;
+    maintenanceEndDate: string;
+    billingPeriod: "Monthly" | "Annual";
+}
+
 export class PriceCalculatorService {
     public calculateExpectedPrice(opts: PriceCalcOpts): number|undefined {
         const { purchaseDetails, pricing, isSandbox } = opts;
+
         const {
             hosting,
             licenseType,
@@ -27,6 +39,40 @@ export class PriceCalculatorService {
             oldBillingPeriod
         } = purchaseDetails;
 
+        const optsInternal: PriceCalcOptsInternal = {
+            pricing,
+            isSandbox,
+            hosting,
+            licenseType,
+            tier,
+            maintenanceStartDate,
+            maintenanceEndDate,
+            billingPeriod
+        };
+
+        const result = this.calculateExpectedPriceInternal(optsInternal);
+
+        console.log(`\nExpected price: ${result}`);
+
+        {
+            const { pricing, ...rest } = optsInternal;
+            console.dir(rest, { depth: null });
+        }
+
+        return result;
+    }
+
+    public calculateExpectedPriceInternal(opts: PriceCalcOptsInternal): number|undefined {
+        const {
+            pricing,
+            isSandbox,
+            hosting,
+            licenseType,
+            tier,
+            maintenanceStartDate,
+            maintenanceEndDate,
+            billingPeriod,
+        } = opts;
 
         if (isSandbox) {
             return 0;

@@ -38,11 +38,6 @@ export class ValidationService {
             .take(NUM_TRANSACTIONS)
             .getMany();
 
-        const cloudPricing = await this.pricingService.getPricing('com.arsenale.plugins.lockpoint', 'cloud');
-
-        console.log('Using Cloud pricing table: ');
-        console.dir(cloudPricing, { depth: null });
-
         console.log(`Validating last ${NUM_TRANSACTIONS} transactions:`);
         for (const transaction of transactions) {
             const data = transaction.data;
@@ -82,7 +77,8 @@ export class ValidationService {
                 const valid = actualFormatted === expectedFormatted ? 'Y' : 'n'
 
                 const license = appEntitlementNumber ? appEntitlementNumber : licenseId;
-                console.log(`${valid} ${saleDate} ${saleType} L=${license} ID=${transaction.id}; U=${tier}; Start=${maintenanceStartDate}; End=${maintenanceEndDate}; Expected: ${expectedFormatted}; Actual: ${actualFormatted}`);
+                console.log(`${valid} ${saleDate} ${saleType} L=${license} ID=${transaction.id}; U=${tier}; Start=${maintenanceStartDate}; End=${maintenanceEndDate}; Expected: ${expectedFormatted}; Actual: ${actualFormatted}; ActualPurch: ${purchasePrice}`);
+                console.log(`\n`);
             } catch (error: any) {
                 console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
                 console.log(`- Error: ${error.message}`);
