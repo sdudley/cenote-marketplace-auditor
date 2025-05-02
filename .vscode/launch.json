@@ -4,7 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "type": "node",
             "request": "launch",
@@ -16,6 +15,11 @@
             "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
+            ],
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
             ]
         },
         {
@@ -33,8 +37,14 @@
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ],
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
             "env": {
-                "NODE_ENV": "development"
+                "NODE_ENV": "development",
+                "NODE_OPTIONS": "--enable-source-maps"
             }
         }
     ]
