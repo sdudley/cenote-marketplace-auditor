@@ -27,8 +27,15 @@ const calculateLicenseDurationInMonths = (startDate: string, endDate: string): n
     const months = end.getMonth() - start.getMonth();
     const totalMonths = years * 12 + months;
 
-    // If the end day of month is the same as the start day of month, return the total integer number of months
     if (end.getDate()===start.getDate()) {
+        return totalMonths;
+    }
+    // Check if either date is the last day of its month
+    const isStartLastDay = start.getDate() === new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+    const isEndLastDay = end.getDate() === new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate();
+
+    // If either date is the last day of its month, return the total integer number of months
+    if ((isStartLastDay || isEndLastDay) && start.getDate() >= 28 && end.getDate() >= 28) {
         return totalMonths;
     }
 
