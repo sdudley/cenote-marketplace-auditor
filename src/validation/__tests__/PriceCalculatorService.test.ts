@@ -11,6 +11,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for 173 users with monthly billing', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Cloud',
             licenseType: 'COMMERCIAL',
@@ -26,6 +27,7 @@ describe('PriceCalculatorService', () => {
     it('should return $0 for sandbox licenses regardless of user count', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: true,
             hosting: 'Cloud',
             licenseType: 'COMMERCIAL',
@@ -41,6 +43,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for 100 users with annual billing', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Cloud',
             licenseType: 'COMMERCIAL',
@@ -56,6 +59,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for 70 users with monthly billing', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Cloud',
             licenseType: 'COMMERCIAL',
@@ -71,6 +75,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for 4750 users with 3-year annual billing', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Cloud',
             licenseType: 'COMMERCIAL',
@@ -86,6 +91,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for 300 users with annual billing', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Cloud',
             licenseType: 'COMMERCIAL',
@@ -98,9 +104,26 @@ describe('PriceCalculatorService', () => {
         expect(result).toBe(3005);
     });
 
+    it('should calculate correct price for new 300 user annual cloud license', () => {
+        const result = service.calculateExpectedPrice({
+            pricing: cloudPricing,
+            saleType: 'New',
+            isSandbox: false,
+            hosting: 'Cloud',
+            licenseType: 'COMMERCIAL',
+            tier: '300 Users',
+            maintenanceStartDate: '2025-04-15',
+            maintenanceEndDate: '2026-03-15',
+            billingPeriod: 'Annual'
+        });
+
+        expect(result).toBe(2750);
+    });
+
     it('should return $0 for open-source licenses', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: true,
             hosting: 'Cloud',
             licenseType: 'OPEN_SOURCE',
@@ -116,6 +139,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for 46 users with monthly billing', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Cloud',
             licenseType: 'COMMERCIAL',
@@ -131,6 +155,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for academic license with 135 users', () => {
         const result = service.calculateExpectedPrice({
             pricing: cloudPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Cloud',
             licenseType: 'ACADEMIC',
@@ -146,6 +171,7 @@ describe('PriceCalculatorService', () => {
     it('should calculate correct price for Data Center license with 500 users', () => {
         const result = service.calculateExpectedPrice({
             pricing: dataCenterPricing,
+            saleType: 'Renewal',
             isSandbox: false,
             hosting: 'Data Center',
             licenseType: 'COMMERCIAL',

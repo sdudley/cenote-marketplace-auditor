@@ -7,6 +7,7 @@ import { Transaction } from "../entities/Transaction";
 
 export interface PriceCalcOpts {
     pricing: UserTierPricing[];
+    saleType: "New" | "Refund" | "Renewal" | "Upgrade";
     isSandbox: boolean;
     hosting: "Server" | "Data Center" | "Cloud";
     licenseType: "ACADEMIC" | "COMMERCIAL" | "COMMUNITY" | "EVALUATION" | "OPEN_SOURCE";
@@ -20,6 +21,7 @@ export class PriceCalculatorService {
     public calculateExpectedPrice(opts: PriceCalcOpts): number|undefined {
         const {
             pricing,
+            saleType,
             isSandbox,
             hosting,
             licenseType,
@@ -46,30 +48,6 @@ export class PriceCalculatorService {
         const pricingTier : UserTierPricing = pricing[tierIndex];
         const { cost } = pricingTier;
 
-        // Non-cloud pricing is always annual
-        if (deploymentType !== 'cloud') {
-            if (billingPeriod !== 'Annual') {
-                throw new Error('Non-cloud pricing must always be annual');
-            }
-
-            return cost;
-        }
-
-        let basePrice;
-
-        if (!tier.startsWith('Per Unit Pricing') || tierIndex === 0) {
-            // Fixed pricing for first tier (up to 10 users), or any user tier with annual billing
-            basePrice = cost;
-        } else {
-            // For the first tier, we calculate the base price all the way from 0 users, not from the 10-user tier
-            const priorPricingTier = tierIndex===1 ? { userTier: 0, cost: 0 } : pricing[tierIndex - 1];
-
-            const usersInNewTier = userCount - priorPricingTier.userTier;
-            const userDifferencePerTier = pricingTier.userTier - priorPricingTier.userTier;
-            const pricePerUserInNewTier = (pricingTier.cost - priorPricingTier.cost) / userDifferencePerTier;
-            basePrice = priorPricingTier.cost + (pricePerUserInNewTier * usersInNewTier);
-        }
-
         // Calculate the license duration in days
         let licenseDurationMonths = calculateLicenseDurationInMonths(maintenanceStartDate, maintenanceEndDate);
 
@@ -78,10 +56,34 @@ export class PriceCalculatorService {
             licenseDurationMonths = licenseDurationDays / 365 * 12;
         }
 
-        // Stored price is the annual price, which is based on 10 month-equivalents, so adjust it if using
-        // monthly billing
-        if (billingPeriod==='Monthly') {
-            basePrice = basePrice * 12 / 10;
+        let basePrice;
+
+        // Non-cloud pricing is always annual
+        if (deploymentType !== 'cloud') {
+            if (billingPeriod !== 'Annual') {
+                throw new Error('Non-cloud pricing must always be annual');
+            }
+
+            basePrice = cost;
+        } else {
+            if (!tier.startsWith('Per Unit Pricing') || tierIndex === 0) {
+                // Fixed pricing for first tier (up to 10 users), or any user tier with annual billing
+                basePrice = cost;
+            } else {
+                // For the first tier, we calculate the base price all the way from 0 users, not from the 10-user tier
+                const priorPricingTier = tierIndex===1 ? { userTier: 0, cost: 0 } : pricing[tierIndex - 1];
+
+                const usersInNewTier = userCount - priorPricingTier.userTier;
+                const userDifferencePerTier = pricingTier.userTier - priorPricingTier.userTier;
+                const pricePerUserInNewTier = (pricingTier.cost - priorPricingTier.cost) / userDifferencePerTier;
+                basePrice = priorPricingTier.cost + (pricePerUserInNewTier * usersInNewTier);
+            }
+
+            // Stored price is the annual price, which is based on 10 month-equivalents, so adjust it if using
+            // monthly billing
+            if (billingPeriod==='Monthly') {
+                basePrice = basePrice * 12 / 10;
+            }
         }
 
         basePrice = basePrice * licenseDurationMonths / 12;
@@ -89,6 +91,10 @@ export class PriceCalculatorService {
         // Apply academic discount if applicable
         if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
             basePrice = basePrice * ACADEMIC_PRICE_RATIO;
+        }
+
+        if (saleType==='Refund') {
+            basePrice = -basePrice;
         }
 
         return basePrice;

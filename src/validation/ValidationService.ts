@@ -80,6 +80,7 @@ export class ValidationService {
 
                 const pricingOpts: PriceCalcOpts = {
                     pricing,
+                    saleType,
                     isSandbox,
                     hosting,
                     licenseType,
@@ -98,11 +99,11 @@ export class ValidationService {
                 const valid = actualFormatted === expectedFormatted ? true : false;
 
                 if (valid) {
-                    console.log(`L=${licenseId} OK: Expected: ${expectedPurchasePrice}; actual: ${purchasePrice}`);
+                    console.log(`OK L=${licenseId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
                     continue;
                 }
 
-                console.log(`\nL=${licenseId} ID=${transaction.id} Expected price: ${expectedPurchasePrice}; actual purchase price: ${purchasePrice}`);
+                console.log(`\n\n*ERROR* L=${licenseId} ${saleType} ID=${transaction.id} Expected price: ${expectedFormatted}; actual purchase price: ${actualFormatted}`);
 
                 {
                     const { pricing, ...rest } = pricingOpts;
