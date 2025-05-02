@@ -5,13 +5,7 @@ import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils"
 import { ACADEMIC_PRICE_RATIO } from "./constants";
 import { Transaction } from "../entities/Transaction";
 
-interface PriceCalcOpts {
-    purchaseDetails: PurchaseDetails;
-    pricing: UserTierPricing[];
-    isSandbox: boolean;
-}
-
-interface PriceCalcOptsInternal {
+export interface PriceCalcOpts {
     pricing: UserTierPricing[];
     isSandbox: boolean;
     hosting: "Server" | "Data Center" | "Cloud";
@@ -24,45 +18,6 @@ interface PriceCalcOptsInternal {
 
 export class PriceCalculatorService {
     public calculateExpectedPrice(opts: PriceCalcOpts): number|undefined {
-        const { purchaseDetails, pricing, isSandbox } = opts;
-
-        const {
-            hosting,
-            licenseType,
-            tier,
-            changeInTier,
-            oldTier,
-            maintenanceStartDate,
-            maintenanceEndDate,
-            changeInBillingPeriod,
-            billingPeriod,
-            oldBillingPeriod
-        } = purchaseDetails;
-
-        const optsInternal: PriceCalcOptsInternal = {
-            pricing,
-            isSandbox,
-            hosting,
-            licenseType,
-            tier,
-            maintenanceStartDate,
-            maintenanceEndDate,
-            billingPeriod
-        };
-
-        const result = this.calculateExpectedPriceInternal(optsInternal);
-
-        console.log(`\nExpected price: ${result}`);
-
-        {
-            const { pricing, ...rest } = optsInternal;
-            console.dir(rest, { depth: null });
-        }
-
-        return result;
-    }
-
-    public calculateExpectedPriceInternal(opts: PriceCalcOptsInternal): number|undefined {
         const {
             pricing,
             isSandbox,

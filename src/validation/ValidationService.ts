@@ -5,7 +5,7 @@ import { DeploymentType } from '../services/PricingService';
 import { components } from '../types/marketplace-api';
 import { CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO, ACADEMIC_PRICE_RATIO } from './constants';
 import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
-import { PriceCalculatorService } from './PriceCalculatorService';
+import { PriceCalcOpts, PriceCalculatorService } from './PriceCalculatorService';
 import { License } from '../entities/License';
 
 const NUM_TRANSACTIONS = 50;
@@ -32,7 +32,7 @@ export class ValidationService {
         const transactions = await transactionRepository
             .createQueryBuilder('transaction')
            // .leftJoinAndSelect("transaction.license", "license")
-            .where('transaction.data->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
+            // .where('transaction.data->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
             .orderBy('transaction.data->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
             .addOrderBy('transaction.created_at', 'DESC')
             .take(NUM_TRANSACTIONS)
@@ -45,15 +45,23 @@ export class ValidationService {
             const {
                 hosting,
                 vendorAmount,
+                licenseType,
                 saleDate,
                 purchasePrice,
                 saleType,
                 tier,
+                changeInTier,
+                oldTier,
+                billingPeriod,
+                oldBillingPeriod,
+                changeInBillingPeriod,
                 maintenanceStartDate,
                 maintenanceEndDate
             } = purchaseDetails;
 
             try {
+                const licenseId = transaction.entitlementId;
+
                 const deploymentType = deploymentTypeFromHosting(hosting);
                 const pricing = await this.pricingService.getPricing(addonKey, deploymentType);
 
@@ -68,17 +76,42 @@ export class ValidationService {
                     }
                 }
 
-                const expectedPurchasePrice = this.priceCalculatorService.calculateExpectedPrice({ purchaseDetails, pricing, isSandbox });
+                const entitlementId = transaction.entitlementId;
+
+                const pricingOpts: PriceCalcOpts = {
+                    pricing,
+                    isSandbox,
+                    hosting,
+                    licenseType,
+                    tier,
+                    maintenanceStartDate,
+                    maintenanceEndDate,
+                    billingPeriod
+                };
+
+                const expectedPurchasePrice = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
                 const expectedVendorAmount = expectedPurchasePrice ? expectedPurchasePrice * getDiscountAmount(saleDate, deploymentType) : undefined;
 
                 const actualFormatted = formatCurrency(vendorAmount);
                 const expectedFormatted = formatCurrency(expectedVendorAmount);
 
-                const valid = actualFormatted === expectedFormatted ? 'Y' : 'n'
+                const valid = actualFormatted === expectedFormatted ? true : false;
 
-                const license = appEntitlementNumber ? appEntitlementNumber : licenseId;
-                console.log(`${valid} ${saleDate} ${saleType} L=${license} ID=${transaction.id}; U=${tier}; Start=${maintenanceStartDate}; End=${maintenanceEndDate}; Expected: ${expectedFormatted}; Actual: ${actualFormatted}; ActualPurch: ${purchasePrice}`);
-                console.log(`\n`);
+                if (valid) {
+                    console.log(`L=${licenseId} OK: Expected: ${expectedPurchasePrice}; actual: ${purchasePrice}`);
+                    continue;
+                }
+
+                console.log(`\nL=${licenseId} ID=${transaction.id} Expected price: ${expectedPurchasePrice}; actual purchase price: ${purchasePrice}`);
+
+                {
+                    const { pricing, ...rest } = pricingOpts;
+                    console.dir(rest, { depth: null });
+                }
+
+
+                // console.log(`${valid} ${saleDate} ${saleType} L=${licenseId} ID=${transaction.id}; U=${tier}; Start=${maintenanceStartDate}; End=${maintenanceEndDate}; Expected: ${expectedFormatted}; Actual: ${actualFormatted}; ActualPurch: ${purchasePrice}`);
+                // console.log(`\n`);
             } catch (error: any) {
                 console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
                 console.log(`- Error: ${error.message}`);
