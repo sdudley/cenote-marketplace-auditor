@@ -3,7 +3,6 @@ import { Transaction } from '../entities/Transaction';
 import { PricingService, UserTierPricing } from '../services/PricingService';
 import { DeploymentType } from '../services/PricingService';
 import { components } from '../types/marketplace-api';
-import { CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO, ACADEMIC_PRICE_RATIO } from './constants';
 import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
 import { PriceCalcOpts, PriceCalculatorService } from './PriceCalculatorService';
 import { License } from '../entities/License';
@@ -12,7 +11,7 @@ const NUM_TRANSACTIONS = 100;
 
 export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];
 
-
+const MAX_JPY_DRIFT = 0.15; // Atlassian allows generally a 15% buffer for Japanese transactions
 
 export class ValidationService {
     constructor(
@@ -94,7 +93,7 @@ export class ValidationService {
                 const actualFormatted = formatCurrency(vendorAmount);
                 const expectedFormatted = formatCurrency(expectedVendorAmount);
 
-                const valid = actualFormatted === expectedFormatted ? true : false;
+                const valid = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
 
                 if (valid) {
                     console.log(`OK L=${licenseId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
@@ -117,4 +116,19 @@ export class ValidationService {
             }
         }
     }
+
+    isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : boolean{
+        const { expectedVendorAmount, vendorAmount, country } = opts;
+
+        if (country==='Japan') {
+            return vendorAmount >= expectedVendorAmount*(1-MAX_JPY_DRIFT) &&
+                vendorAmount <= expectedVendorAmount*(1+MAX_JPY_DRIFT) &&
+                !(vendorAmount===0 && expectedVendorAmount > 0);
+        }
+
+        return (vendorAmount >= expectedVendorAmount-10 &&
+                vendorAmount <= expectedVendorAmount+10 &&
+                !(vendorAmount===0 && expectedVendorAmount > 0));
+    }
+
 }

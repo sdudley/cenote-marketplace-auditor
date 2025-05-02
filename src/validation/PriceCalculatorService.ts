@@ -2,7 +2,7 @@ import { PurchaseDetails } from "./ValidationService";
 import { getLicenseDurationInDays } from "./licenseDurationCalculator";
 import { DeploymentType, UserTierPricing } from "../services/PricingService";
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
-import { ACADEMIC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
+import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
 import { Transaction } from "../entities/Transaction";
 
 export interface PriceCalcOpts {
@@ -97,7 +97,7 @@ export class PriceCalculatorService {
 
         // Apply academic discount if applicable
         if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
-            basePrice = basePrice * ACADEMIC_PRICE_RATIO;
+            basePrice = basePrice * (hosting==='Cloud' ? ACADEMIC_CLOUD_PRICE_RATIO : ACADEMIC_DC_PRICE_RATIO);
         }
 
         const purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
