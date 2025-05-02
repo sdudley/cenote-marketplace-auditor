@@ -46,6 +46,35 @@
                 "NODE_ENV": "development",
                 "NODE_OPTIONS": "--enable-source-maps"
             }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Jest Tests",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": [
+                "--runInBand",
+                "--config",
+                "${workspaceFolder}/jest.config.js"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "disableOptimisticBPs": true,
+            "windows": {
+                "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+            },
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "env": {
+                "NODE_ENV": "test",
+                "NODE_OPTIONS": "--enable-source-maps"
+            }
         }
     ]
 }
