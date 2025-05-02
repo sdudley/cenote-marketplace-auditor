@@ -4,7 +4,7 @@ import { PricingService, UserTierPricing } from '../services/PricingService';
 import { DeploymentType } from '../services/PricingService';
 import { components } from '../types/marketplace-api';
 import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
-import { PriceCalcOpts, PriceCalculatorService } from './PriceCalculatorService';
+import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
 import { License } from '../entities/License';
 
 const NUM_TRANSACTIONS = 100;
@@ -73,21 +73,17 @@ export class ValidationService {
 
                 const entitlementId = transaction.entitlementId;
 
-                const pricingOpts: PriceCalcOpts = {
-                    pricing,
-                    saleType,
-                    saleDate,
-                    isSandbox,
-                    hosting,
-                    licenseType,
-                    tier,
-                    maintenanceStartDate,
-                    maintenanceEndDate,
-                    billingPeriod
-                };
 
-                const price = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
-                const expectedPurchasePrice = price.purchasePrice;
+                let previousPurchase : Transaction | undefined;
+
+                if (saleType==='Upgrade') {
+                    const relatedTransactions = await this.loadRelatedTransactions(entitlementId);
+                    previousPurchase = this.getPreviousPurchase({ relatedTransactions, thisTransaction: transaction });
+                }
+
+                const previousPricing = previousPurchase ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricing }) : undefined;
+
+                const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricing, previousPurchase, previousPricing: previousPricing?.price });
                 const expectedVendorAmount = price.vendorPrice;
 
                 const actualFormatted = formatCurrency(vendorAmount);
@@ -117,6 +113,35 @@ export class ValidationService {
         }
     }
 
+    calculatePriceForTransaction(opts: {
+        transaction: Transaction;
+        isSandbox: boolean;
+        pricing: UserTierPricing[];
+        previousPurchase?: Transaction|undefined;
+        previousPricing?: PriceResult|undefined;
+    }) : { price: PriceResult; pricingOpts: PriceCalcOpts } {
+        const { transaction, isSandbox, pricing } = opts;
+
+        const data = transaction.data;
+        const { purchaseDetails } = data;
+
+        const pricingOpts: PriceCalcOpts = {
+            pricing,
+            saleType: purchaseDetails.saleType,
+            saleDate: purchaseDetails.saleDate,
+            isSandbox,
+            hosting: purchaseDetails.hosting,
+            licenseType: purchaseDetails.licenseType,
+            tier: purchaseDetails.tier,
+            maintenanceStartDate: purchaseDetails.maintenanceStartDate,
+            maintenanceEndDate: purchaseDetails.maintenanceEndDate,
+            billingPeriod: purchaseDetails.billingPeriod
+        };
+
+        const price = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
+        return { price, pricingOpts };
+    }
+
     isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : boolean{
         const { expectedVendorAmount, vendorAmount, country } = opts;
 
@@ -131,4 +156,29 @@ export class ValidationService {
                 !(vendorAmount===0 && expectedVendorAmount > 0));
     }
 
+    async loadRelatedTransactions(entitlementId: string) : Promise<Transaction[]> {
+        const transactionRepository = this.dataSource.getRepository(Transaction);
+
+        const transactions = await transactionRepository
+            .createQueryBuilder('transaction')
+            .where('transaction.entitlementId = :entitlementId', { entitlementId })
+            .orderBy('transaction.data->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
+            .addOrderBy('transaction.created_at', 'DESC')
+            .getMany();
+
+        return transactions;
+    }
+
+    getPreviousPurchase(opts: { relatedTransactions: Transaction[]; thisTransaction: Transaction; }) : Transaction | undefined {
+        const { relatedTransactions, thisTransaction } = opts;
+
+        const thisTransactionIndex = relatedTransactions.findIndex(t => t.id === thisTransaction.id);
+
+        if (thisTransactionIndex === -1 || thisTransactionIndex === relatedTransactions.length-1) {
+            return undefined;
+        }
+
+        const subsequentTransactions = relatedTransactions.slice(thisTransactionIndex+1);
+        return subsequentTransactions.find(t => t.data.purchaseDetails.saleType !== 'Refund');
+    }
 }
