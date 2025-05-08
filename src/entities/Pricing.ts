@@ -14,10 +14,10 @@ export class Pricing {
     @Index()
     deploymentType!: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'date', nullable: true })
     startDate?: Date;
 
-    @Column({ nullable: true })
+    @Column({ type: 'date', nullable: true })
     endDate?: Date;
 
     @OneToMany(() => PricingInfo, (info: PricingInfo) => info.pricing)

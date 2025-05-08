@@ -1,3 +1,5 @@
+import { createLocalDateFromString, createUTCDateFromString } from '../utils/dateUtils';
+
 /**
  * Calculate the number of days in the old subscription that overlap with the new
  * subscription.
@@ -24,16 +26,8 @@ const getSubscriptionOverlapDays = (
  */
 const getLicenseDurationInDays = (startDate: string, endDate: string): number => {
     // Create dates at midnight UTC from ISO strings
-    const d1 = new Date(Date.UTC(
-        parseInt(startDate.substring(0, 4)),
-        parseInt(startDate.substring(5, 7)) - 1,
-        parseInt(startDate.substring(8, 10))
-    ));
-    const d2 = new Date(Date.UTC(
-        parseInt(endDate.substring(0, 4)),
-        parseInt(endDate.substring(5, 7)) - 1,
-        parseInt(endDate.substring(8, 10))
-    ));
+    const d1 = createUTCDateFromString(startDate);
+    const d2 = createUTCDateFromString(endDate);
     const d2minusOneDay = new Date(d2);
     d2minusOneDay.setUTCDate(d2minusOneDay.getUTCDate() - 1);
 
