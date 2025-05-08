@@ -53,11 +53,10 @@ export class PricingService {
         });
 
         const result = pricingInfo
-            .filter(item => item.data.monthsValid === 12)
-            .map(item => ({
-                userTier: item.data.unitCount,
-                cost: item.data.amount
-            }))
+            .map(({ userTier, cost }) => ({
+                userTier,
+                cost
+            } as UserTierPricing))
             .sort((a, b) => a.userTier - b.userTier);
 
         this.pricingCache.set(cacheKey, result);
@@ -67,7 +66,7 @@ export class PricingService {
 
     async fetchPricing(): Promise<void> {
         const addons = await this.addonRepository.find();
-        console.log(`Found ${addons.length} addons to check pricing for`);
+        console.log(`Found ${addons.length} addons to check pricing`);
 
         for (const addon of addons) {
             console.log(`\n=== Pricing for ${addon.addonKey} ===`);
@@ -97,10 +96,11 @@ export class PricingService {
                     });
 
                     if (existingPricing) {
-                        // Delete existing pricing info
-                        await this.pricingInfoRepository.delete({ pricing: existingPricing });
-                        // Delete existing pricing
-                        await this.pricingRepository.delete(existingPricing.id);
+                        continue;
+
+                        // Or else delete existing pricing info
+                        // await this.pricingInfoRepository.delete({ pricing: existingPricing });
+                        // await this.pricingRepository.delete(existingPricing.id);
                     }
 
                     // Store the pricing data
@@ -113,13 +113,18 @@ export class PricingService {
 
                     // Store each pricing item
                     for (const item of pricingData.items) {
+                        if (item.monthsValid !== 12) {
+                            continue;
+                        }
+
                         const pricingInfo = new PricingInfo();
-                        pricingInfo.data = item;
+                        pricingInfo.userTier = item.unitCount;
+                        pricingInfo.cost = item.amount;
                         pricingInfo.pricing = pricing;
                         await this.pricingInfoRepository.save(pricingInfo);
                     }
-                } catch (error) {
-                    console.log(`No ${deploymentType} pricing available`);
+                } catch (e) {
+                    console.log(`No ${deploymentType} pricing available`, e);
                 }
             }
         }

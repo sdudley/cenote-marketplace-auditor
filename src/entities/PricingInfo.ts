@@ -1,13 +1,24 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Pricing } from './Pricing';
-import { PricingItem } from '../types/marketplace';
+
 @Entity()
 export class PricingInfo {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column('jsonb')
-    data!: PricingItem;
+    @Column()
+    userTier!: number;
+
+    @Column({
+        type: 'decimal',
+        precision: 14,
+        scale: 4,
+        transformer: {
+            to: (value: number) => value,
+            from: (value: string) => parseFloat(value)
+        }
+    })
+    cost!: number;
 
     @ManyToOne(() => Pricing, pricing => pricing.items)
     @JoinColumn()
