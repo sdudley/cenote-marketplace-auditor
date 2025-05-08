@@ -66,6 +66,18 @@ function adjustOverlappingRecord(existingRecord: Pricing, newDateRange: DateRang
     const { startDate: newStartDate, endDate: newEndDate } = newDateRange;
     const adjustedRecord = { ...existingRecord };
 
+    // Special case: if existing record has both dates null, treat it as the most current record
+    if (existingRecord.startDate === null && existingRecord.endDate === null) {
+        if (newEndDate) {
+            // Set the start date of the existing record to the day after our new record ends
+            const dayAfter = new Date(newEndDate);
+            dayAfter.setDate(dayAfter.getDate() + 1);
+            adjustedRecord.startDate = stripTimeFromDate(dayAfter);
+            // Keep endDate as null to indicate it's still the most current record
+        }
+        return adjustedRecord;
+    }
+
     if (newStartDate && (!existingRecord.startDate || existingRecord.startDate < newStartDate)) {
         // If the existing record starts before our new record
         if (newEndDate) {
