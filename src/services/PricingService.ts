@@ -27,7 +27,9 @@ export class PricingService {
         this.pricingInfoRepository = this.dataSource.getRepository(PricingInfo);
     }
 
-    async getPricing(addonKey: string, deploymentType: DeploymentType): Promise<UserTierPricing[]> {
+    async getPricing(opts: { addonKey: string, deploymentType: DeploymentType, saleDate: string }): Promise<UserTierPricing[]> {
+        const { addonKey, deploymentType, saleDate } = opts;
+
         const cacheKey = `${addonKey}-${deploymentType}`;
 
         if (this.pricingCache.has(cacheKey)) {

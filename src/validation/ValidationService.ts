@@ -35,30 +35,25 @@ export class ValidationService {
 
         console.log(`Validating last ${NUM_TRANSACTIONS} transactions:`);
         for (const transaction of transactions) {
+
+            // if (transaction.entitlementId !== 'SEN-xxxxxxx') {
+            //     continue;
+            // }
+
             const data = transaction.data;
-            const { addonKey, purchaseDetails, licenseId, appEntitlementNumber } = data;
+            const { addonKey, purchaseDetails } = data;
             const {
                 hosting,
                 vendorAmount,
-                licenseType,
-                saleDate,
-                purchasePrice,
                 saleType,
-                tier,
-                changeInTier,
-                oldTier,
-                billingPeriod,
-                oldBillingPeriod,
-                changeInBillingPeriod,
-                maintenanceStartDate,
-                maintenanceEndDate
+                saleDate
             } = purchaseDetails;
 
             try {
                 const licenseId = transaction.entitlementId;
 
                 const deploymentType = deploymentTypeFromHosting(hosting);
-                const pricing = await this.pricingService.getPricing(addonKey, deploymentType);
+                const pricing = await this.pricingService.getPricing({ addonKey, deploymentType, saleDate });
 
                 let isSandbox = false;
 
@@ -120,7 +115,7 @@ export class ValidationService {
         previousPurchase?: Transaction|undefined;
         previousPricing?: PriceResult|undefined;
     }) : { price: PriceResult; pricingOpts: PriceCalcOpts } {
-        const { transaction, isSandbox, pricing } = opts;
+        const { transaction, isSandbox, pricing, previousPurchase, previousPricing } = opts;
 
         const data = transaction.data;
         const { purchaseDetails } = data;
@@ -135,8 +130,12 @@ export class ValidationService {
             tier: purchaseDetails.tier,
             maintenanceStartDate: purchaseDetails.maintenanceStartDate,
             maintenanceEndDate: purchaseDetails.maintenanceEndDate,
-            billingPeriod: purchaseDetails.billingPeriod
+            billingPeriod: purchaseDetails.billingPeriod,
+            previousPurchase,
+            previousPricing
         };
+
+        // Also add new feed for renewal events: https://marketplace.atlassian.com/rest/2/vendors/1215549/reporting/sales/metrics/renewal/details
 
         const price = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
         return { price, pricingOpts };
@@ -168,6 +167,13 @@ export class ValidationService {
 
         return transactions;
     }
+
+    // This function gets the most recent transaction that is not a refund. This may not be entirely correct,
+    // but if the purchase history is more complicated, then it probably needs manual review anyway.
+    //
+    // The relatedTransactions array must be sorted by descending sale date.
+    //
+    // TODO FIXME: what if multiple transactions created on the same day?
 
     getPreviousPurchase(opts: { relatedTransactions: Transaction[]; thisTransaction: Transaction; }) : Transaction | undefined {
         const { relatedTransactions, thisTransaction } = opts;

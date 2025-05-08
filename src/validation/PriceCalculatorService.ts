@@ -1,5 +1,5 @@
 import { PurchaseDetails } from "./ValidationService";
-import { getLicenseDurationInDays } from "./licenseDurationCalculator";
+import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "./licenseDurationCalculator";
 import { DeploymentType, UserTierPricing } from "../services/PricingService";
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
 import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
@@ -16,11 +16,14 @@ export interface PriceCalcOpts {
     maintenanceStartDate: string;
     maintenanceEndDate: string;
     billingPeriod: "Monthly" | "Annual";
+    previousPurchase?: Transaction|undefined;
+    previousPricing?: PriceResult|undefined;
 }
 
 export interface PriceResult {
     vendorPrice: number;
     purchasePrice: number;
+    dailyNominalPrice: number;
 }
 
 export class PriceCalculatorService {
@@ -40,10 +43,12 @@ export class PriceCalculatorService {
             maintenanceStartDate,
             maintenanceEndDate,
             billingPeriod,
+            previousPurchase,
+            previousPricing
         } = opts;
 
         if (isSandbox) {
-            return { vendorPrice: 0, purchasePrice: 0 };
+            return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0 };
         }
 
         const deploymentType = deploymentTypeFromHosting(hosting);
@@ -53,7 +58,7 @@ export class PriceCalculatorService {
         const tierIndex = pricing.findIndex(t => userCount <= t.userTier);
 
         if (tierIndex === -1) {
-            return { vendorPrice: 0, purchasePrice: 0 };
+            return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0 };
         }
 
         const pricingTier : UserTierPricing = pricing[tierIndex];
@@ -100,7 +105,36 @@ export class PriceCalculatorService {
             basePrice = basePrice * (hosting==='Cloud' ? ACADEMIC_CLOUD_PRICE_RATIO : ACADEMIC_DC_PRICE_RATIO);
         }
 
-        const purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
+        // Now we start to calculate the final value paid to Atlassian
+        let purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
+        const dailyNominalPrice = purchasePrice / licenseDurationDays;
+
+        // If this is an upgrade, then we need to calculate the price differential for the
+        // overlap in subscription length.
+
+        if (saleType==='Upgrade' && previousPurchase) {
+            const { previousPricing } = opts;
+
+            const overlapDays = getSubscriptionOverlapDays(maintenanceStartDate, previousPurchase.data.purchaseDetails.maintenanceEndDate);
+
+            if (overlapDays > licenseDurationDays) {
+                throw new Error('Overlap days are greater than the license duration');
+            }
+
+            if (overlapDays > 0 && previousPricing && previousPricing.purchasePrice > 0) {
+                const newDays = licenseDurationDays - overlapDays;
+
+                // Calculate the payment for the days that aren't included in the old license
+                const newPeriodPrice = dailyNominalPrice * newDays;
+
+                // For the days already partially paid, subtract the old daily price
+                const oldPeriodPrice = (dailyNominalPrice - previousPricing.dailyNominalPrice) * overlapDays;
+
+                // Now update the base price and purchase price
+                basePrice = oldPeriodPrice + newPeriodPrice;
+                purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
+            }
+        }
 
         if (billingPeriod === 'Annual') {
             basePrice = Math.ceil(basePrice);
@@ -119,6 +153,10 @@ export class PriceCalculatorService {
             basePrice = Math.ceil(basePrice);
         }
 
-        return { purchasePrice: Math.round(purchasePrice * 100)/100, vendorPrice: Math.round(basePrice * 100)/100 };
+        return {
+            purchasePrice: Math.round(purchasePrice * 100)/100,
+            vendorPrice: Math.round(basePrice * 100)/100,
+            dailyNominalPrice
+        };
     }
 }
