@@ -1,8 +1,9 @@
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Addon } from '../entities/Addon';
 import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
+import { createUTCDateFromString } from '../utils/dateUtils';
 
 export interface UserTierPricing {
     userTier: number;
@@ -30,22 +31,50 @@ export class PricingService {
     async getPricing(opts: { addonKey: string, deploymentType: DeploymentType, saleDate: string }): Promise<UserTierPricing[]> {
         const { addonKey, deploymentType, saleDate } = opts;
 
-        const cacheKey = `${addonKey}-${deploymentType}`;
+        const cacheKey = `${addonKey}-${deploymentType}-${saleDate}`;
 
         if (this.pricingCache.has(cacheKey)) {
             return this.pricingCache.get(cacheKey) as UserTierPricing[];
         }
 
+        const saleDateObj = createUTCDateFromString(saleDate);
+
         const pricing = await this.pricingRepository.findOne({
-            where: {
-                addonKey,
-                deploymentType
-            },
+            where: [
+                // Case 1: startDate is null (beginning of time) and endDate is null (end of time)
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: IsNull(),
+                    endDate: IsNull()
+                },
+                // Case 2: startDate is null (beginning of time) and saleDate is before or equal to endDate
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: IsNull(),
+                    endDate: MoreThanOrEqual(saleDateObj)
+                },
+                // Case 3: endDate is null (end of time) and saleDate is after or equal to startDate
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: LessThanOrEqual(saleDateObj),
+                    endDate: IsNull()
+                },
+                // Case 4: saleDate falls between startDate and endDate
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: LessThanOrEqual(saleDateObj),
+                    endDate: MoreThanOrEqual(saleDateObj)
+                }
+            ],
             relations: ['items']
         });
 
         if (!pricing) {
-            throw new Error(`No ${deploymentType} pricing found for addon ${addonKey}`);
+            throw new Error(`No ${deploymentType} pricing found for addon ${addonKey} on date ${saleDate}`);
         }
 
         const pricingInfo = await this.pricingInfoRepository.find({
