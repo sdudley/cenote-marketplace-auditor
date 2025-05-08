@@ -77,11 +77,7 @@ export class PricingService {
             throw new Error(`No ${deploymentType} pricing found for addon ${addonKey} on date ${saleDate}`);
         }
 
-        const pricingInfo = await this.pricingInfoRepository.find({
-            where: { pricing }
-        });
-
-        const result = pricingInfo
+        const result = pricing.items
             .map(({ userTier, cost }) => ({
                 userTier,
                 cost
