@@ -4,20 +4,40 @@ import { TransactionVersion } from '../entities/TransactionVersion';
 import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
 import { printJsonDiff } from '../utils/diffUtils';
 import { TransactionData } from '../types/marketplace';
+import { IgnoredFieldService } from './IgnoredFieldService';
 
 export class TransactionService {
     private transactionRepository: Repository<Transaction>;
     private transactionVersionRepository: Repository<TransactionVersion>;
+    private ignoredFieldService: IgnoredFieldService;
+    private ignoredFields: string[] | null = null;
 
     constructor(private dataSource: DataSource) {
         this.transactionRepository = this.dataSource.getRepository(Transaction);
         this.transactionVersionRepository = this.dataSource.getRepository(TransactionVersion);
+        this.ignoredFieldService = new IgnoredFieldService(dataSource);
+    }
+
+    private async getIgnoredFields(): Promise<string[]> {
+        if (this.ignoredFields === null) {
+            this.ignoredFields = await this.ignoredFieldService.getIgnoredFields('transaction');
+        }
+        return this.ignoredFields;
+    }
+
+    private isProperSubsetOfIgnoredFields(changedPaths: string[]): boolean {
+        if (changedPaths.length === 0) return false;
+        return changedPaths.every(path => this.ignoredFields?.includes(path));
     }
 
     async processTransactions(transactions: TransactionData[]): Promise<void> {
         let processedCount = 0;
         let totalCount = transactions.length;
         let modifiedCount = 0;
+        let skippedCount = 0;
+
+        // Initialize ignored fields list
+        await this.getIgnoredFields();
 
         for (const transactionData of transactions) {
             const transactionKey = `${transactionData.transactionLineItemId}:${transactionData.transactionId}`;
@@ -31,12 +51,20 @@ export class TransactionService {
             if (existingTransaction) {
                 // Compare with current data using deepEqual
                 if (!deepEqual(existingTransaction.data, normalizedData)) {
-                    console.log(`Transaction changed: ${transactionKey}`);
-                    printJsonDiff(existingTransaction.data, normalizedData);
-
                     // Compute and print JSONPaths of differences
                     const changedPaths = computeJsonPaths(existingTransaction.data, normalizedData);
-                    console.log('Changed paths:', changedPaths.join(' | '));
+                    const changedPathsString = changedPaths.join(' | ');
+
+                    // Check if changes are only in ignored fields
+                    if (this.isProperSubsetOfIgnoredFields(changedPaths)) {
+                        console.log(`Skipping version creation for ${transactionKey} - changes only in ignored fields: ${changedPathsString}`);
+                        skippedCount++;
+                        continue;
+                    }
+
+                    console.log(`Transaction changed: ${transactionKey}`);
+                    console.log('Changed paths:', changedPathsString);
+                    printJsonDiff(existingTransaction.data, normalizedData);
 
                     // Get the current, soon-to-be old version
                     const oldVersion = await this.transactionVersionRepository.findOne({
@@ -86,6 +114,6 @@ export class TransactionService {
                 console.log(`Processed ${processedCount} of ${totalCount} transactions`);
             }
         }
-        console.log(`Completed processing ${totalCount} transactions; ${modifiedCount} were updated`);
+        console.log(`Completed processing ${totalCount} transactions; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
     }
 }

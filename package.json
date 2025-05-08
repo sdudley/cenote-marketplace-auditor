@@ -11,6 +11,7 @@
     "test": "jest",
     "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.404 --output src/types/marketplace-api.ts",
     "add-addon": "ts-node src/scripts/addAddon.ts",
+    "add-ignored-field": "ts-node src/scripts/addIgnoredField.ts",
     "backfill-version-diffs": "ts-node src/scripts/backfillVersionDiffs.ts"
   },
   "dependencies": {

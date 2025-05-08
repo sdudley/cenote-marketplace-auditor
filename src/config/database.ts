@@ -9,6 +9,7 @@ import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
 import { AddGinIndexes1711234567890 } from '../migrations/1711234567890-AddGinIndexes';
 import { UpdateExistingRecords1711234567891 } from '../migrations/1711234567891-UpdateExistingRecords';
+import { IgnoredField } from '../entities/IgnoredField';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -27,7 +28,8 @@ export const AppDataSource = new DataSource({
         LicenseVersion,
         Addon,
         Pricing,
-        PricingInfo
+        PricingInfo,
+        IgnoredField
     ],
     subscribers: [],
     migrations: [AddGinIndexes1711234567890, UpdateExistingRecords1711234567891],
