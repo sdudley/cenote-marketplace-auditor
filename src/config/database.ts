@@ -9,6 +9,7 @@ import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
 import { AddGinIndexes1711234567890 } from '../migrations/1711234567890-AddGinIndexes';
 import { UpdateExistingRecords1711234567891 } from '../migrations/1711234567891-UpdateExistingRecords';
+import { InitializeIgnoredFields1711234567892 } from '../migrations/1711234567892-InitializeIgnoredFields';
 import { IgnoredField } from '../entities/IgnoredField';
 
 export const AppDataSource = new DataSource({
@@ -32,19 +33,18 @@ export const AppDataSource = new DataSource({
         IgnoredField
     ],
     subscribers: [],
-    migrations: [AddGinIndexes1711234567890, UpdateExistingRecords1711234567891],
+    migrations: [
+        AddGinIndexes1711234567890,
+        UpdateExistingRecords1711234567891,
+        InitializeIgnoredFields1711234567892
+    ],
 });
 
 export async function initializeDatabase() {
     const dataSource = await AppDataSource.initialize();
 
-    // Create GIN indexes after initialization
-    await dataSource.query(`
-        CREATE INDEX IF NOT EXISTS "IDX_transaction_data_gin" ON "transaction" USING GIN ("data");
-        CREATE INDEX IF NOT EXISTS "IDX_transaction_version_data_gin" ON "transaction_version" USING GIN ("data");
-        CREATE INDEX IF NOT EXISTS "IDX_license_data_gin" ON "license" USING GIN ("data");
-        CREATE INDEX IF NOT EXISTS "IDX_license_version_data_gin" ON "license_version" USING GIN ("data");
-    `);
+    // Run migrations
+    await dataSource.runMigrations();
 
     return dataSource;
 }

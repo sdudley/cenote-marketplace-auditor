@@ -71,6 +71,41 @@ For example:
 npm run add-addon -- com.atlassian.confluence.plugins.confluence-questions
 ```
 
+### Managing Ignored Fields
+
+The application tracks changes to transactions and licenses, but some fields may change on a frequent
+basis due to Atlassian processing errors, despite no substantive transaction or license data actually changing.
+
+These fields can be marked as "ignored" to prevent the creation of large numbers of version history entries
+unnecessarily. Fields are described via their JSONPath within a license or transaction record.
+
+The default list of ignored fields are:
+
+Licenses:
+- `lastUpdated`
+
+Transactions:
+- `lastUpdated`
+- `purchaseDetails.parentProductEdition`
+- `purchaseDetails.changeInParentProductEdition`
+- `purchaseDetails.oldParentProductEdition`
+
+To add a field to the ignored list:
+
+```bash
+npm run add-ignored-field -- <record-type> <field-name>
+```
+
+Where:
+- `record-type` is either "transaction" or "license"
+- `field-name` is the JSON path to the field (e.g., "lastUpdated" or "purchaseDetails.parentProductEdition")
+
+For example:
+```bash
+npm run add-ignored-field -- license lastUpdated
+npm run add-ignored-field -- transaction purchaseDetails.parentProductEdition
+```
+
 ## Managing Pricing Data
 
 If you have previously updated the pricing for your app, you must provide the prior pricing
@@ -176,6 +211,7 @@ prior transactions, with the fields changed in this version indicated by the Jso
 - `Addon`: Stores a list of addon keys to track
 - `Pricing`: Stores pricing records with date ranges
 - `PricingInfo`: Stores pricing tiers for each pricing record
+- `IgnoredField`: Stores a list of fields that should be ignored when tracking changes to transactions and licenses
 
 Data downloaded from transactions and licenses is stored as JSON blobs in the `data` column of the
 `Transaction`/`TransactionVersion` and `License`/`LicenseVersion` tables. This data can be viewed in
