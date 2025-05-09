@@ -3,13 +3,19 @@ import { Addon } from '../entities/Addon';
 import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
-import { createUTCDateFromString } from '../utils/dateUtils';
+import { createLocalDateFromString, createUTCDateFromString, stripTimeFromDate } from '../utils/dateUtils';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 
 export interface UserTierPricing {
     userTier: number;
     cost: number;
+}
+
+export interface PricingTierResult {
+    tiers: UserTierPricing[];
+    priorTiers: UserTierPricing[]|undefined;
+    priorPricingEndDate: string|undefined;
 }
 
 export type DeploymentType = 'server' | 'datacenter' | 'cloud';
@@ -20,7 +26,7 @@ export class PricingService {
     private pricingRepository: Repository<Pricing>;
     private pricingInfoRepository: Repository<PricingInfo>;
 
-    private pricingCache: Map<string, UserTierPricing[]> = new Map();
+    private pricingTierCache: Map<string, PricingTierResult> = new Map();
 
     constructor(
         @inject(TYPES.DataSource) private dataSource: DataSource,
@@ -31,13 +37,13 @@ export class PricingService {
         this.pricingInfoRepository = this.dataSource.getRepository(PricingInfo);
     }
 
-    async getPricing(opts: { addonKey: string, deploymentType: DeploymentType, saleDate: string }): Promise<UserTierPricing[]> {
+    async getPricingTiers(opts: { addonKey: string, deploymentType: DeploymentType, saleDate: string }): Promise<PricingTierResult> {
         const { addonKey, deploymentType, saleDate } = opts;
 
         const cacheKey = `${addonKey}-${deploymentType}-${saleDate}`;
 
-        if (this.pricingCache.has(cacheKey)) {
-            return this.pricingCache.get(cacheKey) as UserTierPricing[];
+        if (this.pricingTierCache.has(cacheKey)) {
+            return this.pricingTierCache.get(cacheKey) as PricingTierResult;
         }
 
         const saleDateObj = createUTCDateFromString(saleDate);
@@ -80,16 +86,50 @@ export class PricingService {
             throw new Error(`No ${deploymentType} pricing found for addon ${addonKey} on date ${saleDate}`);
         }
 
-        const result = pricing.items
+        const tiers = this.pricingToUserTiers(pricing);
+        let priorTiers: UserTierPricing[]|undefined = undefined;
+
+        // Now check to see if there is a prior period pricing that we need to include.
+
+        let priorPricingEndDate: string|undefined = undefined;
+        if (pricing.startDate) {
+            const dayBefore = createLocalDateFromString(pricing.startDate as unknown as string);
+            dayBefore.setDate(dayBefore.getDate() - 1);
+            const priorPeriodEndDate = stripTimeFromDate(dayBefore);
+
+            const priorPricing = await this.pricingRepository.findOne({
+                where: {
+                    addonKey,
+                    deploymentType,
+                    endDate: priorPeriodEndDate
+                },
+                relations: ['items']
+            });
+
+            if (priorPricing) {
+                priorTiers = this.pricingToUserTiers(priorPricing);
+                priorPricingEndDate = priorPricing.endDate as unknown as string;
+            }
+        }
+
+        const result = {
+            tiers,
+            priorTiers,
+            priorPricingEndDate
+        };
+
+        this.pricingTierCache.set(cacheKey, result);
+
+        return result;
+    }
+
+    private pricingToUserTiers(pricing: Pricing): UserTierPricing[] {
+        return pricing.items
             .map(({ userTier, cost }) => ({
                 userTier,
                 cost
             } as UserTierPricing))
             .sort((a, b) => a.userTier - b.userTier);
-
-        this.pricingCache.set(cacheKey, result);
-
-        return result;
     }
 
     async fetchPricing(): Promise<void> {

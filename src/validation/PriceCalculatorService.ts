@@ -1,13 +1,13 @@
 import { PurchaseDetails } from "./ValidationService";
 import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "./licenseDurationCalculator";
-import { DeploymentType, UserTierPricing } from "../services/PricingService";
+import { DeploymentType, PricingTierResult, UserTierPricing } from "../services/PricingService";
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
 import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
 import { Transaction } from "../entities/Transaction";
 import { injectable } from "inversify";
 
 export interface PriceCalcOpts {
-    pricingTiers: UserTierPricing[];
+    pricingResult: PricingTierResult;
     saleDate: string;
     saleType: "New" | "Refund" | "Renewal" | "Upgrade";
     isSandbox: boolean;
@@ -35,7 +35,7 @@ export class PriceCalculatorService {
 
     public calculateExpectedPrice(opts: PriceCalcOpts): PriceResult {
         const {
-            pricingTiers,
+            pricingResult,
             saleDate,
             saleType,
             isSandbox,
@@ -45,8 +45,7 @@ export class PriceCalculatorService {
             maintenanceStartDate,
             maintenanceEndDate,
             billingPeriod,
-            previousPurchase,
-            previousPricing
+            previousPurchase
         } = opts;
 
         if (isSandbox) {
@@ -57,6 +56,7 @@ export class PriceCalculatorService {
         const userCount = userCountFromTier(tier);
 
         // Find the appropriate tier for the user count
+        const { tiers: pricingTiers } = pricingResult;
         const tierIndex = pricingTiers.findIndex(t => userCount <= t.userTier);
 
         if (tierIndex === -1) {

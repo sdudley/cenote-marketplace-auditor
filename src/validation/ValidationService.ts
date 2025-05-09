@@ -1,15 +1,16 @@
 import { DataSource } from 'typeorm';
 import { Transaction } from '../entities/Transaction';
-import { PricingService, UserTierPricing } from '../services/PricingService';
-import { DeploymentType } from '../services/PricingService';
+import { PricingTierResult, PricingService, UserTierPricing } from '../services/PricingService';
 import { components } from '../types/marketplace-api';
 import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
 import { License } from '../entities/License';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
+import { TransactionReconcile } from '../entities/TransactionReconcile';
+import { TransactionVersion } from '../entities/TransactionVersion';
 
-const NUM_TRANSACTIONS = 100;
+const START_DATE = '2024-01-01';
 
 export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];
 
@@ -26,17 +27,17 @@ export class ValidationService {
     public async validateTransactions(): Promise<void> {
         const transactionRepository = this.dataSource.getRepository(Transaction);
         const licenseRepository = this.dataSource.getRepository(License);
+        const transactionReconcileRepo = this.dataSource.getRepository(TransactionReconcile);
+        const transactionVersionRepo = this.dataSource.getRepository(TransactionVersion);
 
         const transactions = await transactionRepository
             .createQueryBuilder('transaction')
-           // .leftJoinAndSelect("transaction.license", "license")
-            // .where('transaction.data->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting: 'Cloud' })
-            .orderBy('transaction.data->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
+            .orderBy("transaction.data->'purchaseDetails'->>'saleDate'", 'DESC')
             .addOrderBy('transaction.created_at', 'DESC')
-            .take(NUM_TRANSACTIONS)
+            .where('transaction.data->\'purchaseDetails\'->>\'saleDate\' >= :startDate', { startDate: START_DATE })
             .getMany();
 
-        console.log(`\nValidating last ${NUM_TRANSACTIONS} transactions:`);
+        console.log(`\nValidating transactions since ${START_DATE}:`);
         for (const transaction of transactions) {
 
             // if (transaction.entitlementId !== 'SEN-xxxxxxx') {
@@ -53,12 +54,15 @@ export class ValidationService {
             } = purchaseDetails;
 
             try {
-                const licenseId = transaction.entitlementId;
+                // Fetch the license information, hosting type, and related pricing info
 
+                const licenseId = transaction.entitlementId;
                 const deploymentType = deploymentTypeFromHosting(hosting);
-                const pricingTiers = await this.pricingService.getPricing({ addonKey, deploymentType, saleDate });
+                const pricingTiersResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
 
                 let isSandbox = false;
+
+                // Load the related license to see if it's a sandbox instance.
 
                 if (vendorAmount===0) {
                     const license = await loadLicenseForTransaction(licenseRepository, transaction);
@@ -71,9 +75,11 @@ export class ValidationService {
 
                 const entitlementId = transaction.entitlementId;
 
+                // If it is an upgrade, we need to also load the previous purchase and potentially-different
+                // pricing tiers for that transaction.
 
                 let previousPurchase : Transaction | undefined;
-                let previousPricingTiers : UserTierPricing[] | undefined;
+                let previousPricingResult : PricingTierResult | undefined;
 
                 if (saleType==='Upgrade') {
                     const relatedTransactions = await this.loadRelatedTransactions(entitlementId);
@@ -81,35 +87,108 @@ export class ValidationService {
 
                     if (previousPurchase) {
                         const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
-                        previousPricingTiers = await this.pricingService.getPricing({ addonKey, deploymentType, saleDate: previousSaleDate });
+                        previousPricingResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
                     }
                 }
 
-                const previousPricing = previousPurchase && previousPricingTiers ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTiers: previousPricingTiers }) : undefined;
+                // Calculate the expected price for the previous purchase, if it exists.
 
-                const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTiers, previousPurchase, previousPricing: previousPricing?.price });
-                const expectedVendorAmount = price.vendorPrice;
+                const previousPricing = previousPurchase && previousPricingResult ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingResult: previousPricingResult }) : undefined;
+
+                // Calculate the expected price for the current transaction.
+
+                const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingResult: pricingTiersResult, previousPurchase, previousPricing: previousPricing?.price });
+
+                let legacyPrice : PriceResult | undefined = undefined;
+
+                // If there was a legacy pricing tier, calculate the expected price for that too in case this transaction
+                // was priced using legacy pricing.
+
+                if (pricingTiersResult.priorTiers) {
+                    const legacyPricingResult : PricingTierResult = {
+                        tiers: pricingTiersResult.priorTiers,
+                        priorTiers: undefined,
+                        priorPricingEndDate: undefined
+                    };
+
+                    const { price: priorPrice } = this.calculatePriceForTransaction({ transaction, isSandbox: false, pricingResult: legacyPricingResult, previousPurchase, previousPricing: previousPricing?.price });
+                    legacyPrice = priorPrice;
+                }
+
+                let expectedVendorAmount = price.vendorPrice;
+
+                // Now compare the prices and see if the actual price is what we expect..
 
                 const actualFormatted = formatCurrency(vendorAmount);
                 const expectedFormatted = formatCurrency(expectedVendorAmount);
 
-                const valid = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
+                let { valid, notes } = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
 
-                if (valid) {
-                    console.log(`OK L=${licenseId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
+                if (!valid && legacyPrice) {
+                    const { valid: legacyValid, notes: legacyNotes } = this.isPriceValid({ vendorAmount, expectedVendorAmount: legacyPrice.vendorPrice, country: transaction.data.customerDetails.country });
+
+                    if (legacyValid) {
+                        valid = false;
+                        notes += `Price is correct but uses legacy pricing that expired ${pricingTiersResult.priorPricingEndDate}. Current price would be ${expectedFormatted}. `;
+                        expectedVendorAmount = legacyPrice.vendorPrice;
+                    }
+                }
+
+                // Now write reconciliation records for each transaction.
+
+                // Check if a reconcile record already exists for this transaction and version
+                const existingReconcile = await transactionReconcileRepo.findOne({
+                    where: {
+                        transaction: { id: transaction.id },
+                        current: true
+                    }
+                });
+
+                // Don't re-reconcile if no new version has been created
+
+                if (existingReconcile && existingReconcile.transactionVersion===transaction.currentVersion) {
                     continue;
                 }
 
-                console.log(`\n\n*ERROR* L=${licenseId} ${saleType} ID=${transaction.id} Expected price: ${expectedFormatted}; actual purchase price: ${actualFormatted}`);
+                // Update the existing reconcile record to be non-current
 
-                {
-                    const { pricingTiers, ...rest } = pricingOpts;
-                    console.dir(rest, { depth: null });
+                if (existingReconcile) {
+                    existingReconcile.current = false;
+                    await transactionReconcileRepo.save(existingReconcile);
                 }
 
+                // Create new reconcile record
 
-                // console.log(`${valid} ${saleDate} ${saleType} L=${licenseId} ID=${transaction.id}; U=${tier}; Start=${maintenanceStartDate}; End=${maintenanceEndDate}; Expected: ${expectedFormatted}; Actual: ${actualFormatted}; ActualPurch: ${purchasePrice}`);
-                // console.log(`\n`);
+                if (valid && existingReconcile && !existingReconcile?.reconciled) {
+                    notes += 'Price matches but prior version of transaction was not reconciled, so expecting manual approval. ';
+                    valid = false;
+                }
+
+                if (saleType==='Refund') {
+                    notes += 'Refund requires manual approval. ';
+                    valid = false;
+                }
+
+                const reconcile = new TransactionReconcile();
+                reconcile.transaction = transaction;
+                reconcile.transactionVersion = transaction.currentVersion;
+                reconcile.reconciled = existingReconcile ? valid && existingReconcile.reconciled : valid;
+                reconcile.automatic = true;
+                reconcile.notes = notes;
+                reconcile.actualVendorAmount = vendorAmount;
+                reconcile.expectedVendorAmount = expectedVendorAmount;
+                reconcile.current = true;
+                await transactionReconcileRepo.save(reconcile);
+
+                if (valid) {
+                    console.log(`OK ${saleDate} L=${licenseId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
+                } else {
+                    console.log(`\n\n*ERROR* ${saleDate} L=${licenseId} ${saleType} ID=${transaction.id} Expected price: ${expectedFormatted}; actual purchase price: ${actualFormatted}. ${notes}`);
+                    {
+                        const { pricingResult, ...rest } = pricingOpts;
+                        console.dir(rest, { depth: null });
+                    }
+                }
             } catch (error: any) {
                 console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
                 console.log(`- Error: ${error.message}`);
@@ -120,17 +199,17 @@ export class ValidationService {
     private calculatePriceForTransaction(opts: {
         transaction: Transaction;
         isSandbox: boolean;
-        pricingTiers: UserTierPricing[];
+        pricingResult: PricingTierResult;
         previousPurchase?: Transaction|undefined;
         previousPricing?: PriceResult|undefined;
     }) : { price: PriceResult; pricingOpts: PriceCalcOpts } {
-        const { transaction, isSandbox, pricingTiers, previousPurchase, previousPricing } = opts;
+        const { transaction, isSandbox, pricingResult, previousPurchase, previousPricing } = opts;
 
         const data = transaction.data;
         const { purchaseDetails } = data;
 
         const pricingOpts: PriceCalcOpts = {
-            pricingTiers,
+            pricingResult,
             saleType: purchaseDetails.saleType,
             saleDate: purchaseDetails.saleDate,
             isSandbox,
@@ -150,18 +229,22 @@ export class ValidationService {
         return { price, pricingOpts };
     }
 
-    private isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : boolean{
+    private isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : { valid: boolean; notes: string } {
         const { expectedVendorAmount, vendorAmount, country } = opts;
 
         if (country==='Japan') {
-            return vendorAmount >= expectedVendorAmount*(1-MAX_JPY_DRIFT) &&
+            const valid = vendorAmount >= expectedVendorAmount*(1-MAX_JPY_DRIFT) &&
                 vendorAmount <= expectedVendorAmount*(1+MAX_JPY_DRIFT) &&
                 !(vendorAmount===0 && expectedVendorAmount > 0);
+
+            return { valid, notes: 'Japan sales priced in JPY are allowed drift' };
         }
 
-        return (vendorAmount >= expectedVendorAmount-10 &&
+        const valid = (vendorAmount >= expectedVendorAmount-10 &&
                 vendorAmount <= expectedVendorAmount+10 &&
                 !(vendorAmount===0 && expectedVendorAmount > 0));
+
+        return { valid, notes: '' };
     }
 
     private async loadRelatedTransactions(entitlementId: string) : Promise<Transaction[]> {

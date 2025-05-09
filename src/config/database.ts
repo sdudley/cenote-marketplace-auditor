@@ -11,6 +11,7 @@ import { AddGinIndexes1711234567890 } from '../migrations/1711234567890-AddGinIn
 import { UpdateExistingRecords1711234567891 } from '../migrations/1711234567891-UpdateExistingRecords';
 import { InitializeIgnoredFields1711234567892 } from '../migrations/1711234567892-InitializeIgnoredFields';
 import { IgnoredField } from '../entities/IgnoredField';
+import { TransactionReconcile } from '../entities/TransactionReconcile';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -30,7 +31,8 @@ export const AppDataSource = new DataSource({
         Addon,
         Pricing,
         PricingInfo,
-        IgnoredField
+        IgnoredField,
+        TransactionReconcile
     ],
     subscribers: [],
     migrations: [

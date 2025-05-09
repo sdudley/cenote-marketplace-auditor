@@ -1,4 +1,4 @@
-import { UserTierPricing } from "../../../services/PricingService";
+import { PricingTierResult, UserTierPricing } from "../../../services/PricingService";
 
 export const cloudPricing : UserTierPricing[] = [
     { userTier: 10, cost: 100 },
@@ -132,3 +132,16 @@ export const serverPricing : UserTierPricing[] = [
     { userTier: 2000, cost: 4900 },
     { userTier: 10000, cost: 7300 }
 ];
+
+export const cloudPricingResult : PricingTierResult = {
+    tiers: cloudPricing,
+    priorTiers: undefined,
+    priorPricingEndDate: undefined
+};
+
+export const dataCenterPricingResult : PricingTierResult = {
+    tiers: dataCenterPricing,
+    priorTiers: undefined,
+    priorPricingEndDate: undefined
+};
+
