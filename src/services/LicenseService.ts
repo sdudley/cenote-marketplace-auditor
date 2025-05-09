@@ -56,7 +56,7 @@ export class LicenseService {
 
                     // Check if changes are only in ignored fields
                     if (this.isProperSubsetOfIgnoredFields(changedPaths)) {
-                        console.log(`Skipping version creation for ${entitlementId} - changes only in ignored fields: ${changedPathsString}`);
+                        console.log(`Skipping license version creation for license ${entitlementId} - changes only in ignored fields: ${changedPathsString}`);
                         skippedCount++;
                         continue;
                     }

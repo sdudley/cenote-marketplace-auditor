@@ -12,7 +12,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for 173 users for cloud with monthly billing', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: false,
@@ -29,7 +29,7 @@ describe('PriceCalculatorService', () => {
 
     it('should return $0 for sandbox licenses regardless of user count', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: true,
@@ -46,7 +46,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for 70 users for cloud with monthly billing', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: false,
@@ -63,7 +63,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for 4750 users with cloud license with 3-year annual billing', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: false,
@@ -80,7 +80,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for 300 user cloud license with annual billing', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: false,
@@ -97,7 +97,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for new 300 user 11-month cloud license', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'New',
             isSandbox: false,
@@ -114,7 +114,7 @@ describe('PriceCalculatorService', () => {
 
     it('should return $0 for open-source cloud licenses', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: true,
@@ -131,7 +131,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for 46 users cloud license with monthly billing', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: false,
@@ -148,7 +148,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for academic cloud license with 135 users', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: false,
@@ -165,7 +165,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for Data Center license with 500 users', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: dataCenterPricing,
+            pricingTiers: dataCenterPricing,
             saleDate: '2025-05-01',
             saleType: 'Renewal',
             isSandbox: false,
@@ -182,7 +182,7 @@ describe('PriceCalculatorService', () => {
 
     it('should calculate correct price for 800 users annual community cloud renewal', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
-            pricing: cloudPricing,
+            pricingTiers: cloudPricing,
             saleType: 'Renewal',
             saleDate: '2025-04-27',
             isSandbox: false,

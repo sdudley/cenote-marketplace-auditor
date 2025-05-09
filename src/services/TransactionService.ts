@@ -57,7 +57,7 @@ export class TransactionService {
 
                     // Check if changes are only in ignored fields
                     if (this.isProperSubsetOfIgnoredFields(changedPaths)) {
-                        console.log(`Skipping version creation for ${transactionKey} - changes only in ignored fields: ${changedPathsString}`);
+                        console.log(`Skipping transaction version creation for transaction #${transactionKey} - changes only in ignored fields: ${changedPathsString}`);
                         skippedCount++;
                         continue;
                     }

@@ -213,4 +213,23 @@ export class MarketplaceService {
 
         return response.data;
     }
+
+    async getVendorSpecificAddonKeys(): Promise<string[]> {
+        const url = this.buildUrlWithParams(
+            `${this.baseUrl}/rest/2/addons`,
+            {
+                cost: 'marketplace',
+                forThisUser: true
+            }
+        );
+        console.log(`Calling Marketplace API: ${url}`);
+
+        const response = await axios.get<components['schemas']['AddonCollection']>(url, {
+            headers: {
+                'Authorization': this.getAuthHeader()
+            }
+        });
+
+        return response.data._embedded.addons.map(addon => addon.key);
+    }
 }

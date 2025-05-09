@@ -33,7 +33,7 @@ export class ValidationService {
             .take(NUM_TRANSACTIONS)
             .getMany();
 
-        console.log(`Validating last ${NUM_TRANSACTIONS} transactions:`);
+        console.log(`\nValidating last ${NUM_TRANSACTIONS} transactions:`);
         for (const transaction of transactions) {
 
             // if (transaction.entitlementId !== 'SEN-xxxxxxx') {
@@ -53,7 +53,7 @@ export class ValidationService {
                 const licenseId = transaction.entitlementId;
 
                 const deploymentType = deploymentTypeFromHosting(hosting);
-                const pricing = await this.pricingService.getPricing({ addonKey, deploymentType, saleDate });
+                const pricingTiers = await this.pricingService.getPricing({ addonKey, deploymentType, saleDate });
 
                 let isSandbox = false;
 
@@ -70,15 +70,21 @@ export class ValidationService {
 
 
                 let previousPurchase : Transaction | undefined;
+                let previousPricingTiers : UserTierPricing[] | undefined;
 
                 if (saleType==='Upgrade') {
                     const relatedTransactions = await this.loadRelatedTransactions(entitlementId);
                     previousPurchase = this.getPreviousPurchase({ relatedTransactions, thisTransaction: transaction });
+
+                    if (previousPurchase) {
+                        const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
+                        previousPricingTiers = await this.pricingService.getPricing({ addonKey, deploymentType, saleDate: previousSaleDate });
+                    }
                 }
 
-                const previousPricing = previousPurchase ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricing }) : undefined;
+                const previousPricing = previousPurchase && previousPricingTiers ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTiers: previousPricingTiers }) : undefined;
 
-                const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricing, previousPurchase, previousPricing: previousPricing?.price });
+                const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTiers, previousPurchase, previousPricing: previousPricing?.price });
                 const expectedVendorAmount = price.vendorPrice;
 
                 const actualFormatted = formatCurrency(vendorAmount);
@@ -94,7 +100,7 @@ export class ValidationService {
                 console.log(`\n\n*ERROR* L=${licenseId} ${saleType} ID=${transaction.id} Expected price: ${expectedFormatted}; actual purchase price: ${actualFormatted}`);
 
                 {
-                    const { pricing, ...rest } = pricingOpts;
+                    const { pricingTiers, ...rest } = pricingOpts;
                     console.dir(rest, { depth: null });
                 }
 
@@ -111,17 +117,17 @@ export class ValidationService {
     calculatePriceForTransaction(opts: {
         transaction: Transaction;
         isSandbox: boolean;
-        pricing: UserTierPricing[];
+        pricingTiers: UserTierPricing[];
         previousPurchase?: Transaction|undefined;
         previousPricing?: PriceResult|undefined;
     }) : { price: PriceResult; pricingOpts: PriceCalcOpts } {
-        const { transaction, isSandbox, pricing, previousPurchase, previousPricing } = opts;
+        const { transaction, isSandbox, pricingTiers, previousPurchase, previousPricing } = opts;
 
         const data = transaction.data;
         const { purchaseDetails } = data;
 
         const pricingOpts: PriceCalcOpts = {
-            pricing,
+            pricingTiers,
             saleType: purchaseDetails.saleType,
             saleDate: purchaseDetails.saleDate,
             isSandbox,

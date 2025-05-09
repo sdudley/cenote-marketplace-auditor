@@ -6,7 +6,7 @@ import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RAT
 import { Transaction } from "../entities/Transaction";
 
 export interface PriceCalcOpts {
-    pricing: UserTierPricing[];
+    pricingTiers: UserTierPricing[];
     saleDate: string;
     saleType: "New" | "Refund" | "Renewal" | "Upgrade";
     isSandbox: boolean;
@@ -33,7 +33,7 @@ export class PriceCalculatorService {
 
     public calculateExpectedPrice(opts: PriceCalcOpts): PriceResult {
         const {
-            pricing,
+            pricingTiers,
             saleDate,
             saleType,
             isSandbox,
@@ -55,13 +55,13 @@ export class PriceCalculatorService {
         const userCount = userCountFromTier(tier);
 
         // Find the appropriate tier for the user count
-        const tierIndex = pricing.findIndex(t => userCount <= t.userTier);
+        const tierIndex = pricingTiers.findIndex(t => userCount <= t.userTier);
 
         if (tierIndex === -1) {
             return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0 };
         }
 
-        const pricingTier : UserTierPricing = pricing[tierIndex];
+        const pricingTier : UserTierPricing = pricingTiers[tierIndex];
         const { cost } = pricingTier;
 
         const licenseDurationDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
@@ -81,7 +81,7 @@ export class PriceCalculatorService {
                 basePrice = cost;
             } else {
                 // For the first tier, we calculate the base price all the way from 0 users, not from the 10-user tier
-                const priorPricingTier = tierIndex===1 ? { userTier: 0, cost: 0 } : pricing[tierIndex - 1];
+                const priorPricingTier = tierIndex===1 ? { userTier: 0, cost: 0 } : pricingTiers[tierIndex - 1];
 
                 const usersInNewTier = userCount - priorPricingTier.userTier;
                 const userDifferencePerTier = pricingTier.userTier - priorPricingTier.userTier;

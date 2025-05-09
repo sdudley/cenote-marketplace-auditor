@@ -153,5 +153,7 @@ export class PricingService {
                 }
             }
         }
+
+        console.log('Pricing fetched');
     }
 }
