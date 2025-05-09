@@ -22,7 +22,7 @@ export class Transaction {
     @Index()
     entitlementId!: string;
 
-    @Column({ nullable: true })
+    @Column()
     currentVersion!: number;
 
     @ManyToOne(() => License, license => license.transactions)

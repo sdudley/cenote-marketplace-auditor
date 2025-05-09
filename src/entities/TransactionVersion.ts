@@ -13,7 +13,7 @@ export class TransactionVersion {
     @Index()
     entitlementId!: string;
 
-    @Column({ nullable: true })
+    @Column()
     version!: number;
 
     @Column('jsonb')

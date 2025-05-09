@@ -18,7 +18,7 @@ export class License {
     @Index({ unique: true })
     entitlementId!: string;
 
-    @Column({ nullable: true })
+    @Column()
     currentVersion!: number;
 
     @Column('jsonb')
