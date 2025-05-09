@@ -4,6 +4,7 @@ import { DeploymentType, UserTierPricing } from "../services/PricingService";
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
 import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
 import { Transaction } from "../entities/Transaction";
+import { injectable } from "inversify";
 
 export interface PriceCalcOpts {
     pricingTiers: UserTierPricing[];
@@ -26,6 +27,7 @@ export interface PriceResult {
     dailyNominalPrice: number;
 }
 
+@injectable()
 export class PriceCalculatorService {
     private getDiscountAmount(saleDate: string, deploymentType: DeploymentType): number {
         return deploymentType==='cloud' ? CLOUD_DISCOUNT_RATIO : DC_DISCOUNT_RATIO;

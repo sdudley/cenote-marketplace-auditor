@@ -1,5 +1,8 @@
+import 'reflect-metadata';
 import 'dotenv/config';
 import { initializeDatabase } from './config/database';
+import { configureContainer } from './config/container';
+import { TYPES } from './config/types';
 import { MarketplaceService } from './services/MarketplaceService';
 import { AddonService } from './services/AddonService';
 import { TransactionService } from './services/TransactionService';
@@ -30,17 +33,16 @@ async function main() {
         dataSource = await initializeDatabase();
         console.log('Database connection established');
 
-        const marketplaceService = new MarketplaceService(
-            process.env.ATLASSIAN_ACCOUNT_USER || '',
-            process.env.ATLASSIAN_ACCOUNT_API_TOKEN || '',
-            process.env.ATLASSIAN_VENDOR_ID || ''
-        );
-        const addonService = new AddonService(dataSource, marketplaceService);
-        const transactionService = new TransactionService(dataSource);
-        const licenseService = new LicenseService(dataSource);
-        const pricingService = new PricingService(dataSource, marketplaceService);
-        const priceCalculatorService = new PriceCalculatorService();
-        const validationService = new ValidationService(dataSource, pricingService, priceCalculatorService);
+        // Configure and create container
+        const container = configureContainer(dataSource);
+
+        // Get service instances from container
+        const marketplaceService = container.get<MarketplaceService>(TYPES.MarketplaceService);
+        const addonService = container.get<AddonService>(TYPES.AddonService);
+        const transactionService = container.get<TransactionService>(TYPES.TransactionService);
+        const licenseService = container.get<LicenseService>(TYPES.LicenseService);
+        const pricingService = container.get<PricingService>(TYPES.PricingService);
+        const validationService = container.get<ValidationService>(TYPES.ValidationService);
 
         if (withFetchApps) {
             console.log('Fetching apps...');

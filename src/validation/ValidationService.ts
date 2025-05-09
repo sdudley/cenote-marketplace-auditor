@@ -6,6 +6,8 @@ import { components } from '../types/marketplace-api';
 import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
 import { License } from '../entities/License';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../config/types';
 
 const NUM_TRANSACTIONS = 100;
 
@@ -13,14 +15,15 @@ export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'
 
 const MAX_JPY_DRIFT = 0.15; // Atlassian allows generally a 15% buffer for Japanese transactions
 
+@injectable()
 export class ValidationService {
     constructor(
-        private dataSource: DataSource,
-        private pricingService: PricingService,
-        private priceCalculatorService: PriceCalculatorService
+        @inject(TYPES.DataSource) private dataSource: DataSource,
+        @inject(TYPES.PricingService) private pricingService: PricingService,
+        @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService
     ) {}
 
-    async validateTransactions(): Promise<void> {
+    public async validateTransactions(): Promise<void> {
         const transactionRepository = this.dataSource.getRepository(Transaction);
         const licenseRepository = this.dataSource.getRepository(License);
 
@@ -114,7 +117,7 @@ export class ValidationService {
         }
     }
 
-    calculatePriceForTransaction(opts: {
+    private calculatePriceForTransaction(opts: {
         transaction: Transaction;
         isSandbox: boolean;
         pricingTiers: UserTierPricing[];
@@ -147,7 +150,7 @@ export class ValidationService {
         return { price, pricingOpts };
     }
 
-    isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : boolean{
+    private isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : boolean{
         const { expectedVendorAmount, vendorAmount, country } = opts;
 
         if (country==='Japan') {
@@ -161,7 +164,7 @@ export class ValidationService {
                 !(vendorAmount===0 && expectedVendorAmount > 0));
     }
 
-    async loadRelatedTransactions(entitlementId: string) : Promise<Transaction[]> {
+    private async loadRelatedTransactions(entitlementId: string) : Promise<Transaction[]> {
         const transactionRepository = this.dataSource.getRepository(Transaction);
 
         const transactions = await transactionRepository
@@ -181,7 +184,7 @@ export class ValidationService {
     //
     // TODO FIXME: what if multiple transactions created on the same day?
 
-    getPreviousPurchase(opts: { relatedTransactions: Transaction[]; thisTransaction: Transaction; }) : Transaction | undefined {
+    private getPreviousPurchase(opts: { relatedTransactions: Transaction[]; thisTransaction: Transaction; }) : Transaction | undefined {
         const { relatedTransactions, thisTransaction } = opts;
 
         const thisTransactionIndex = relatedTransactions.findIndex(t => t.id === thisTransaction.id);

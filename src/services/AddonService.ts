@@ -1,13 +1,16 @@
+import { injectable, inject } from 'inversify';
 import { DataSource } from 'typeorm';
 import { Addon } from '../entities/Addon';
 import { MarketplaceService } from './MarketplaceService';
+import { TYPES } from '../config/types';
 
+@injectable()
 export class AddonService {
     private readonly addonRepository;
 
     constructor(
-        private dataSource: DataSource,
-        private marketplaceService: MarketplaceService
+        @inject(TYPES.DataSource) private dataSource: DataSource,
+        @inject(TYPES.MarketplaceService) private marketplaceService: MarketplaceService
     ) {
         this.addonRepository = this.dataSource.getRepository(Addon);
     }

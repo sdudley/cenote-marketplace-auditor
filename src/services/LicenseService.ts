@@ -5,17 +5,21 @@ import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUti
 import { printJsonDiff } from '../utils/diffUtils';
 import { LicenseData } from '../types/marketplace';
 import { IgnoredFieldService } from './IgnoredFieldService';
+import { TYPES } from '../config/types';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class LicenseService {
     private licenseRepository: Repository<License>;
     private licenseVersionRepository: Repository<LicenseVersion>;
-    private ignoredFieldService: IgnoredFieldService;
     private ignoredFields: string[] | null = null;
 
-    constructor(private dataSource: DataSource) {
+    constructor(
+        @inject(TYPES.DataSource) private dataSource: DataSource,
+        @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService
+    ) {
         this.licenseRepository = this.dataSource.getRepository(License);
         this.licenseVersionRepository = this.dataSource.getRepository(LicenseVersion);
-        this.ignoredFieldService = new IgnoredFieldService(dataSource);
     }
 
     private async getIgnoredFields(): Promise<string[]> {

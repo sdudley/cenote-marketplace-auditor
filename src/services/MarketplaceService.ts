@@ -1,3 +1,4 @@
+import { injectable } from 'inversify';
 import axios from 'axios';
 import {
     InitiateAsyncLicenseCollection,
@@ -27,17 +28,15 @@ interface LicenseQueryParams {
 
 const licenseKey = (license : LicenseData) : string => license.appEntitlementNumber || license.licenseId;
 
+@injectable()
 export class MarketplaceService {
-    private readonly username: string;
-    private readonly password: string;
     private readonly baseUrl = 'https://marketplace.atlassian.com';
-    private readonly vendorId: string;
 
-    constructor(username: string, password: string, vendorId: string) {
-        this.username = username;
-        this.password = password;
-        this.vendorId = vendorId;
-    }
+    constructor(
+        private readonly username: string = process.env.ATLASSIAN_ACCOUNT_USER || '',
+        private readonly password: string = process.env.ATLASSIAN_ACCOUNT_API_TOKEN || '',
+        private readonly vendorId: string = process.env.ATLASSIAN_VENDOR_ID || ''
+    ) {}
 
     private getAuthHeader(): string {
         const credentials = Buffer.from(`${this.username}:${this.password}`).toString('base64');

@@ -1,10 +1,13 @@
 import { DataSource, Repository } from "typeorm";
 import { IgnoredField, RecordType } from "../entities/IgnoredField";
+import { injectable, inject } from "inversify";
+import { TYPES } from "../config/types";
 
+@injectable()
 export class IgnoredFieldService {
     private ignoredFieldRepository: Repository<IgnoredField>;
 
-    constructor(dataSource: DataSource) {
+    constructor(@inject(TYPES.DataSource) dataSource: DataSource) {
         this.ignoredFieldRepository = dataSource.getRepository(IgnoredField);
     }
 

@@ -4,6 +4,8 @@ import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
 import { createUTCDateFromString } from '../utils/dateUtils';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../config/types';
 
 export interface UserTierPricing {
     userTier: number;
@@ -12,6 +14,7 @@ export interface UserTierPricing {
 
 export type DeploymentType = 'server' | 'datacenter' | 'cloud';
 
+@injectable()
 export class PricingService {
     private addonRepository: Repository<Addon>;
     private pricingRepository: Repository<Pricing>;
@@ -20,8 +23,8 @@ export class PricingService {
     private pricingCache: Map<string, UserTierPricing[]> = new Map();
 
     constructor(
-        private dataSource: DataSource,
-        private marketplaceService: MarketplaceService
+        @inject(TYPES.DataSource) private dataSource: DataSource,
+        @inject(TYPES.MarketplaceService) private marketplaceService: MarketplaceService
     ) {
         this.addonRepository = this.dataSource.getRepository(Addon);
         this.pricingRepository = this.dataSource.getRepository(Pricing);
