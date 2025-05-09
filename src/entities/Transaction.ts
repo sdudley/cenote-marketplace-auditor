@@ -22,6 +22,9 @@ export class Transaction {
     @Index()
     entitlementId!: string;
 
+    @Column({ nullable: true })
+    currentVersion!: number;
+
     @ManyToOne(() => License, license => license.transactions)
     @JoinColumn({ name: 'entitlementId', referencedColumnName: 'entitlementId' })
     license!: License;

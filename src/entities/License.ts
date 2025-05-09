@@ -18,6 +18,9 @@ export class License {
     @Index({ unique: true })
     entitlementId!: string;
 
+    @Column({ nullable: true })
+    currentVersion!: number;
+
     @Column('jsonb')
     @Index('IDX_license_data_gin', { synchronize: false })
     data!: LicenseData;

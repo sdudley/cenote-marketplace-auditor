@@ -51,6 +51,7 @@ export class TransactionService {
 
             // Normalize the incoming data
             const normalizedData = normalizeObject(transactionData);
+            let currentVersion = 1;
 
             if (existingTransaction) {
                 // Compare with current data using deepEqual
@@ -76,12 +77,15 @@ export class TransactionService {
                         order: { createdAt: 'DESC' }
                     });
 
+                    currentVersion = oldVersion ? oldVersion.version + 1 : 1;
+
                     // Create new version
                     const version = new TransactionVersion();
                     version.data = normalizedData;
                     version.transaction = existingTransaction;
                     version.entitlementId = entitlementId;
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
+                    version.version = currentVersion;
 
                     // Set up the version chain
                     if (oldVersion) {
@@ -94,6 +98,7 @@ export class TransactionService {
 
                     // Update current data
                     existingTransaction.data = normalizedData;
+                    existingTransaction.currentVersion = currentVersion;
                     await this.transactionRepository.save(existingTransaction);
                     modifiedCount++;
                 }
@@ -110,6 +115,7 @@ export class TransactionService {
                 version.data = normalizedData;
                 version.transaction = transaction;
                 version.entitlementId = entitlementId;
+                version.version = currentVersion;
                 await this.transactionVersionRepository.save(version);
             }
 

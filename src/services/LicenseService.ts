@@ -49,6 +49,7 @@ export class LicenseService {
 
             // Normalize the incoming data
             const normalizedData = normalizeObject(licenseData);
+            let currentVersion = 1;
 
             if (existingLicense) {
                 // Compare with current data using deepEqual
@@ -75,12 +76,14 @@ export class LicenseService {
                         order: { createdAt: 'DESC' }
                     });
 
+                    currentVersion = oldVersion ? oldVersion.version + 1 : 1;
                     // Create new version
                     const version = new LicenseVersion();
                     version.data = normalizedData;
                     version.license = existingLicense;
                     version.entitlementId = entitlementId;
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
+                    version.version = currentVersion;
 
                     // Set up the version chain
                     if (oldVersion) {
@@ -93,6 +96,7 @@ export class LicenseService {
 
                     // Update the current data
                     existingLicense.data = normalizedData;
+                    existingLicense.currentVersion = currentVersion;
                     await this.licenseRepository.save(existingLicense);
                     modifiedCount++;
                 }
@@ -108,6 +112,7 @@ export class LicenseService {
                 version.data = normalizedData;
                 version.license = license;
                 version.entitlementId = entitlementId;
+                version.version = currentVersion;
                 await this.licenseVersionRepository.save(version);
             }
 
