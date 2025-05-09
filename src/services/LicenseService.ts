@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, IsNull } from 'typeorm';
 import { License } from '../entities/License';
 import { LicenseVersion } from '../entities/LicenseVersion';
 import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
@@ -73,7 +73,8 @@ export class LicenseService {
                     // Get the current, soon-to-be old version
                     const oldVersion = await this.licenseVersionRepository.findOne({
                         where: { license: existingLicense },
-                        order: { createdAt: 'DESC' }
+                        order: { createdAt: 'DESC' },
+                        relations: ['nextLicenseVersion', 'priorLicenseVersion']
                     });
 
                     currentVersion = oldVersion ? oldVersion.version + 1 : 1;
@@ -89,10 +90,11 @@ export class LicenseService {
                     if (oldVersion) {
                         version.priorLicenseVersion = oldVersion;
                         oldVersion.nextLicenseVersion = version;
-                        await this.licenseVersionRepository.save(oldVersion);
+                        // Save both sides of the relationship
+                        await this.licenseVersionRepository.save([oldVersion, version]);
+                    } else {
+                        await this.licenseVersionRepository.save(version);
                     }
-
-                    await this.licenseVersionRepository.save(version);
 
                     // Update the current data
                     existingLicense.data = normalizedData;

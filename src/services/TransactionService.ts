@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { Transaction } from '../entities/Transaction';
 import { TransactionVersion } from '../entities/TransactionVersion';
 import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
@@ -73,8 +73,9 @@ export class TransactionService {
 
                     // Get the current, soon-to-be old version
                     const oldVersion = await this.transactionVersionRepository.findOne({
-                        where: { transaction: existingTransaction },
-                        order: { createdAt: 'DESC' }
+                        where: { transaction: existingTransaction, nextTransactionVersion: IsNull() },
+                        order: { createdAt: 'DESC' },
+                        relations: ['nextTransactionVersion', 'priorTransactionVersion']
                     });
 
                     currentVersion = oldVersion ? oldVersion.version + 1 : 1;
@@ -91,10 +92,11 @@ export class TransactionService {
                     if (oldVersion) {
                         version.priorTransactionVersion = oldVersion;
                         oldVersion.nextTransactionVersion = version;
-                        await this.transactionVersionRepository.save(oldVersion);
+                        // Save both sides of the relationship
+                        await this.transactionVersionRepository.save([oldVersion, version]);
+                    } else {
+                        await this.transactionVersionRepository.save(version);
                     }
-
-                    await this.transactionVersionRepository.save(version);
 
                     // Update current data
                     existingTransaction.data = normalizedData;
