@@ -133,13 +133,13 @@ export const serverPricing : UserTierPricing[] = [
     { userTier: 10000, cost: 7300 }
 ];
 
-export const cloudPricingResult : PricingTierResult = {
+export const cloudPricingTierResult : PricingTierResult = {
     tiers: cloudPricing,
     priorTiers: undefined,
     priorPricingEndDate: undefined
 };
 
-export const dataCenterPricingResult : PricingTierResult = {
+export const dataCenterPricingTierResult : PricingTierResult = {
     tiers: dataCenterPricing,
     priorTiers: undefined,
     priorPricingEndDate: undefined

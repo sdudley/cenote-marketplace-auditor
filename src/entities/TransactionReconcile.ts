@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm';
 import { Transaction } from './Transaction';
-import { TransactionVersion } from './TransactionVersion';
 
 @Entity()
 export class TransactionReconcile {

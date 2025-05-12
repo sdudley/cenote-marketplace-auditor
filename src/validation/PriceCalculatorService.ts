@@ -7,7 +7,7 @@ import { Transaction } from "../entities/Transaction";
 import { injectable } from "inversify";
 
 export interface PriceCalcOpts {
-    pricingResult: PricingTierResult;
+    pricingTierResult: PricingTierResult;
     saleDate: string;
     saleType: "New" | "Refund" | "Renewal" | "Upgrade";
     isSandbox: boolean;
@@ -35,7 +35,7 @@ export class PriceCalculatorService {
 
     public calculateExpectedPrice(opts: PriceCalcOpts): PriceResult {
         const {
-            pricingResult,
+            pricingTierResult,
             saleDate,
             saleType,
             isSandbox,
@@ -56,7 +56,7 @@ export class PriceCalculatorService {
         const userCount = userCountFromTier(tier);
 
         // Find the appropriate tier for the user count
-        const { tiers: pricingTiers } = pricingResult;
+        const { tiers: pricingTiers } = pricingTierResult;
         const tierIndex = pricingTiers.findIndex(t => userCount <= t.userTier);
 
         if (tierIndex === -1) {
