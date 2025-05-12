@@ -12,6 +12,7 @@ import { UpdateExistingRecords1711234567891 } from '../migrations/1711234567891-
 import { InitializeIgnoredFields1711234567892 } from '../migrations/1711234567892-InitializeIgnoredFields';
 import { IgnoredField } from '../entities/IgnoredField';
 import { TransactionReconcile } from '../entities/TransactionReconcile';
+import { Reseller } from '../entities/Reseller';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -31,6 +32,7 @@ export const AppDataSource = new DataSource({
         Addon,
         Pricing,
         PricingInfo,
+        Reseller,
         IgnoredField,
         TransactionReconcile
     ],

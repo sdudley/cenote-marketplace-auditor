@@ -175,9 +175,41 @@ the tier at the indicated level and not the per-user cost, and it represents the
 value. (This number can be easily calculated for current pricing by visiting the Marketplace page
 for your app, selecting the "Annual" billing period, and then filling in the user tier value.)
 
+
+## Reseller Discount Management
+
+The system supports managing resellers with different expected discount amounts. When a
+reseller is added, the system will be able to automatically accept the transaction
+if the sale price matches the expected discount amount.
+
+Each reseller has:
+- A name
+- A match mode (exact or substring)
+- A discount amount
+
+### Adding a Reseller
+
+To add a new reseller, use the `add-reseller` script:
+
+```bash
+npm run add-reseller <name> <matchMode> <discountAmount>
+```
+
+Example:
+```bash
+npm run add-reseller "Xyz Reseller" substring 0.10
+```
+
+Parameters:
+- `name`: The reseller name (use quotes if it contains spaces)
+- `matchMode`: Either "exact" or "substring". "exact" must match the full
+reseller name, while "substring" will match any portion of the reseller name
+- `discountAmount`: The discount amount as a fraction (for example, 0.10 is
+a 10% discount)
+
 ## General Usage: Command Line Parameters
 
-The application supports the following command line parameters to control what actions to perform.
+When run to pull new data, the application supports the following command line parameters.
 By default, everything is performed:
 
 ```bash

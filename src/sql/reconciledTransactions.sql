@@ -6,6 +6,7 @@ tr.actual_vendor_amount as Actual,
 tr.transaction_version as TxVersion,
 t.data->'purchaseDetails'->>'maintenanceStartDate' as start_date,
 t.data->'purchaseDetails'->>'maintenanceEndDate' as end_date,
+t.data->'partnerDetails'->>'partnerName' as reseller,
 tr.notes
 FROM transaction t
 LEFT JOIN transaction_reconcile tr on t.id=tr.transaction_id AND tr.current=true
