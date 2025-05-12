@@ -3,14 +3,13 @@ import { AppDataSource, initializeDatabase } from '../config/database';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
 import * as fs from 'fs';
-import * as path from 'path';
 import { parse } from 'csv-parse/sync';
-import { LessThan, MoreThan, IsNull, Between, Or } from 'typeorm';
-import { createLocalDateFromString, stripTimeFromDate } from '../utils/dateUtils';
+import { LessThan, MoreThan, IsNull, Or } from 'typeorm';
+import { isoDateMath } from '../utils/dateUtils';
 
 interface DateRange {
-    startDate?: Date;
-    endDate?: Date;
+    startDate?: string;
+    endDate?: string;
 }
 
 function getOverlapQueryConditions(addonKey: string, deploymentType: string, dateRange: DateRange) {
@@ -69,10 +68,7 @@ function adjustOverlappingRecord(existingRecord: Pricing, newDateRange: DateRang
     // Special case: if existing record has both dates null, treat it as the most current record
     if (existingRecord.startDate === null && existingRecord.endDate === null) {
         if (newEndDate) {
-            // Set the start date of the existing record to the day after our new record ends
-            const dayAfter = new Date(newEndDate);
-            dayAfter.setDate(dayAfter.getDate() + 1);
-            adjustedRecord.startDate = stripTimeFromDate(dayAfter);
+            adjustedRecord.startDate = isoDateMath(newEndDate, 1);
             // Keep endDate as null to indicate it's still the most current record
         }
         return adjustedRecord;
@@ -82,17 +78,13 @@ function adjustOverlappingRecord(existingRecord: Pricing, newDateRange: DateRang
         // If the existing record starts before our new record
         if (newEndDate) {
             // Set the end date of the existing record to the day before our new record starts
-            const dayBefore = new Date(newStartDate);
-            dayBefore.setDate(dayBefore.getDate() - 1);
-            adjustedRecord.endDate = stripTimeFromDate(dayBefore);
+            adjustedRecord.endDate = isoDateMath(newStartDate, -1);
         }
     } else if (newEndDate && (!existingRecord.endDate || existingRecord.endDate > newEndDate)) {
         // If the existing record ends after our new record
         if (newStartDate) {
             // Set the start date of the existing record to the day after our new record ends
-            const dayAfter = new Date(newEndDate);
-            dayAfter.setDate(dayAfter.getDate() + 1);
-            adjustedRecord.startDate = stripTimeFromDate(dayAfter);
+            adjustedRecord.startDate = isoDateMath(newEndDate, 1);
         }
     }
 
@@ -123,8 +115,9 @@ async function main() {
     const endDate = process.argv[5];
     const csvFile = process.argv[6];
 
-    if (!addonKey || !deploymentType || !startDate || !csvFile) {
-        console.error('Please provide addonKey, deploymentType, startDate, and csvFile as command line arguments. endDate is optional.');
+    if (!addonKey || !deploymentType || !startDate || !endDate || !csvFile) {
+        console.error('Usage: importPricing <addonKey> <deploymentType> <startDate> <endDate> <csvFile>');
+        console.error('If startDate or endDate represent the end of time, use "NONE" instead.');
         process.exit(1);
     }
 
@@ -140,8 +133,9 @@ async function main() {
         }) as Array<{ userTier: string; cost: string }>;
 
         // Parse dates and strip time components
-        const newStartDate = startDate === 'NONE' ? undefined : createLocalDateFromString(startDate);
-        const newEndDate = endDate === 'NONE' ? undefined : createLocalDateFromString(endDate);
+        const newStartDate = startDate === 'NONE' ? undefined : startDate;
+        const newEndDate = endDate === 'NONE' ? undefined : endDate;
+
         const dateRange = { startDate: newStartDate, endDate: newEndDate };
 
         // Handle overlapping records

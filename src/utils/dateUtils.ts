@@ -26,3 +26,9 @@ export function stripTimeFromDate(date: Date): Date {
     newDate.setHours(0, 0, 0, 0);
     return newDate;
 }
+
+export function isoDateMath(date: string, days: number): string {
+    const dateObj = new Date(date);
+    dateObj.setDate(dateObj.getDate() + days);
+    return dateObj.toISOString().split('T')[0];
+}

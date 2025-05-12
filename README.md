@@ -153,19 +153,26 @@ will either need to edit the data in the database manually, or else delete all o
 The format for importing pricing is:
 
 ```bash
-npm run import-pricing -- <addon-key> <deployment-type> <start-date> [end-date] <csv-file>
+npm run import-pricing -- <addon-key> <deployment-type> <start-date> <end-date> <csv-file>
 ```
+
+Typically, the app will download all current pricing, and this script is used to import data for the prior pricing
+period. If you are only importing one historical pricing period, you would typically specify the date range in which
+the prior pricing was valid. For example, if prices were changed on 2024-09-01, the old pricing would be active
+until the day prior, so you would supply date arguments of "NONE 2024-08-31" (indicating that the old pricing
+was valid from the end of time through 2024-08-31). If you are importing multiple old pricing periods, you may want
+to use a defined start date instead of NONE.
 
 For example:
 ```bash
-npm run import-pricing -- com.atlassian.confluence.plugins.confluence-questions server 2024-03-01 2024-12-31 pricing_for_20240331_to_20241231.csv
+npm run import-pricing -- com.atlassian.confluence.plugins.confluence-questions server NONE 2024-12-31 pricing_for_20240331_to_20241231.csv
 ```
 
 Parameters:
 - `addon-key`: The key of the addon
 - `deployment-type`: One of 'server', 'datacenter', or 'cloud'
-- `start-date`: The start date for the pricing (YYYY-MM-DD)
-- `end-date`: Optional end date for the pricing (YYYY-MM-DD). Use 'NONE' for no end date
+- `start-date`: The start date for the pricing (YYYY-MM-DD). Use 'NONE' for indefinite past start date.
+- `end-date`: Optional end date for the pricing (YYYY-MM-DD). Use 'NONE' for indefinite future end date.
 - `csv-file`: Path to the CSV file containing the pricing data
 
 The CSV file should have two columns:

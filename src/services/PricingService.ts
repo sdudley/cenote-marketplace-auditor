@@ -3,7 +3,7 @@ import { Addon } from '../entities/Addon';
 import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
-import { createLocalDateFromString, createUTCDateFromString, stripTimeFromDate } from '../utils/dateUtils';
+import { createUTCDateFromString, isoDateMath } from '../utils/dateUtils';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 
@@ -46,8 +46,6 @@ export class PricingService {
             return this.pricingTierCache.get(cacheKey) as PricingTierResult;
         }
 
-        const saleDateObj = createUTCDateFromString(saleDate);
-
         const pricing = await this.pricingRepository.findOne({
             where: [
                 // Case 1: startDate is null (beginning of time) and endDate is null (end of time)
@@ -62,21 +60,21 @@ export class PricingService {
                     addonKey,
                     deploymentType,
                     startDate: IsNull(),
-                    endDate: MoreThanOrEqual(saleDateObj)
+                    endDate: MoreThanOrEqual(saleDate)
                 },
                 // Case 3: endDate is null (end of time) and saleDate is after or equal to startDate
                 {
                     addonKey,
                     deploymentType,
-                    startDate: LessThanOrEqual(saleDateObj),
+                    startDate: LessThanOrEqual(saleDate),
                     endDate: IsNull()
                 },
                 // Case 4: saleDate falls between startDate and endDate
                 {
                     addonKey,
                     deploymentType,
-                    startDate: LessThanOrEqual(saleDateObj),
-                    endDate: MoreThanOrEqual(saleDateObj)
+                    startDate: LessThanOrEqual(saleDate),
+                    endDate: MoreThanOrEqual(saleDate)
                 }
             ],
             relations: ['items']
@@ -93,9 +91,7 @@ export class PricingService {
 
         let priorPricingEndDate: string|undefined = undefined;
         if (pricing.startDate) {
-            const dayBefore = createLocalDateFromString(pricing.startDate as unknown as string);
-            dayBefore.setDate(dayBefore.getDate() - 1);
-            const priorPeriodEndDate = stripTimeFromDate(dayBefore);
+            const priorPeriodEndDate = isoDateMath(pricing.startDate, -1);
 
             const priorPricing = await this.pricingRepository.findOne({
                 where: {
