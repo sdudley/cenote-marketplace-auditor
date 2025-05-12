@@ -110,6 +110,7 @@ export class TransactionService {
                 transaction.marketplaceTransactionId = transactionKey;
                 transaction.data = normalizedData;
                 transaction.entitlementId = entitlementId;
+                transaction.currentVersion = currentVersion;
                 await this.transactionRepository.save(transaction);
 
                 // Create initial version

@@ -107,6 +107,7 @@ export class LicenseService {
                 const license = new License();
                 license.entitlementId = entitlementId;
                 license.data = normalizedData;
+                license.currentVersion = currentVersion;
                 await this.licenseRepository.save(license);
 
                 // Create initial version
