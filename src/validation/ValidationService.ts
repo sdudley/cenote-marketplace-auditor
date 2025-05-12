@@ -8,10 +8,9 @@ import { License } from '../entities/License';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 import { TransactionReconcile } from '../entities/TransactionReconcile';
-import { TransactionVersion } from '../entities/TransactionVersion';
 
 const START_DATE = '2024-01-01';
-const MAX_JPY_DRIFT = 0.15; // Atlassian allows generally a 15% buffer for Japanese transactions
+const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
 
 export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];
 
@@ -108,33 +107,78 @@ export class ValidationService {
         const actualFormatted = formatCurrency(vendorAmount);
         const expectedFormatted = formatCurrency(expectedVendorAmount);
 
+        // First, check to see if the priec is valid according to current pricing.
+
         let { valid, notes } = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
+
+        // If it's not valid, also check to see if it could be valid according to legacy pricing.
 
         if (!valid && legacyPrice) {
             const { valid: legacyValid, notes: legacyNotes } = this.isPriceValid({ vendorAmount, expectedVendorAmount: legacyPrice.vendorPrice, country: transaction.data.customerDetails.country });
 
             if (legacyValid) {
                 valid = false;
-                notes += `Price is correct but uses legacy pricing that expired ${pricingTiersResult.priorPricingEndDate}. Current price would be ${expectedFormatted}. `;
+                notes.push(`Price is correct but uses legacy pricing that expired ${pricingTiersResult.priorPricingEndDate}. Current price would be ${expectedFormatted}.`);
                 expectedVendorAmount = legacyPrice.vendorPrice;
             }
         }
 
-        // Now write reconciliation records for each transaction.
+        // Refunds always require approval
+
+        if (saleType==='Refund') {
+            notes.push('Refund requires manual approval.');
+            valid = false;
+        }
 
         // Check if a reconcile record already exists for this transaction and version
-        const existingReconcile = await this.transactionReconcileRepo.findOne({
-            where: {
-                transaction: { id: transaction.id },
-                current: true
-            }
-        });
+
+        const existingReconcile = await this.getTransactionReconcileRecord(transaction);
 
         // Don't re-reconcile if no new version has been created
 
         if (existingReconcile && existingReconcile.transactionVersion===transaction.currentVersion) {
             return;
         }
+
+        // Record the reconcile record
+
+        await this.recordReconcile({ transaction, existingReconcile, valid, notes, vendorAmount, expectedVendorAmount });
+
+        if (valid) {
+            console.log(`OK ${saleDate} L=${entitlementId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
+        } else {
+            console.log(`\n\n*ERROR* ${saleDate} L=${entitlementId} ${saleType} ID=${transaction.id} Expected price: ${expectedFormatted}; actual purchase price: ${actualFormatted}. ${notes}`);
+            {
+                const { pricingTierResult: pricingResult, ...rest } = pricingOpts;
+                console.dir(rest, { depth: null });
+            }
+        }
+    }
+
+
+    // Fetch all transactions from the database that have a sale date greater than or equal to the start date.
+
+    private async getTransactions(startDate: string): Promise<Transaction[]> {
+        return await this.transactionRepository
+            .createQueryBuilder('transaction')
+            .orderBy("transaction.data->'purchaseDetails'->>'saleDate'", 'DESC')
+            .addOrderBy('transaction.created_at', 'DESC')
+            .where('transaction.data->\'purchaseDetails\'->>\'saleDate\' >= :startDate', { startDate })
+            .getMany();
+    }
+
+    private async getTransactionReconcileRecord(transaction: Transaction): Promise<TransactionReconcile | null> {
+        return await this.transactionReconcileRepo.findOne({
+            where: {
+                transaction: { id: transaction.id },
+                current: true
+            }
+        });
+    }
+
+    private async recordReconcile(opts: { transaction: Transaction, existingReconcile: TransactionReconcile|null, valid: boolean, notes: string[], vendorAmount: number, expectedVendorAmount: number }): Promise<void> {
+        const { transaction, existingReconcile, notes, vendorAmount, expectedVendorAmount } = opts;
+        let { valid } = opts;
 
         // Update the existing reconcile record to be non-current
 
@@ -146,12 +190,7 @@ export class ValidationService {
         // Create new reconcile record
 
         if (valid && existingReconcile && !existingReconcile?.reconciled) {
-            notes += 'Price matches but prior version of transaction was not reconciled, so expecting manual approval. ';
-            valid = false;
-        }
-
-        if (saleType==='Refund') {
-            notes += 'Refund requires manual approval. ';
+            notes.push('Price matches but prior version of transaction was not reconciled, so expecting manual approval.');
             valid = false;
         }
 
@@ -160,33 +199,11 @@ export class ValidationService {
         reconcile.transactionVersion = transaction.currentVersion;
         reconcile.reconciled = existingReconcile ? valid && existingReconcile.reconciled : valid;
         reconcile.automatic = true;
-        reconcile.notes = notes;
+        reconcile.notes = notes?.join('; ');
         reconcile.actualVendorAmount = vendorAmount;
         reconcile.expectedVendorAmount = expectedVendorAmount;
         reconcile.current = true;
         await this.transactionReconcileRepo.save(reconcile);
-
-        if (valid) {
-            console.log(`OK ${saleDate} L=${entitlementId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
-        } else {
-            console.log(`\n\n*ERROR* ${saleDate} L=${entitlementId} ${saleType} ID=${transaction.id} Expected price: ${expectedFormatted}; actual purchase price: ${actualFormatted}. ${notes}`);
-            {
-                const { pricingTierResult: pricingResult, ...rest } = pricingOpts;
-                console.dir(rest, { depth: null });
-            }
-        }
-
-    }
-
-
-    // Fetch all transactions from the database that have a sale date greater than or equal to the start date.
-    private async getTransactions(startDate: string): Promise<Transaction[]> {
-        return await this.transactionRepository
-            .createQueryBuilder('transaction')
-            .orderBy("transaction.data->'purchaseDetails'->>'saleDate'", 'DESC')
-            .addOrderBy('transaction.created_at', 'DESC')
-            .where('transaction.data->\'purchaseDetails\'->>\'saleDate\' >= :startDate', { startDate })
-            .getMany();
     }
 
     // Returns true if the transaction represents a sandbox instance
@@ -263,8 +280,6 @@ export class ValidationService {
             previousPricing
         };
 
-        // Also add new feed for renewal events: https://marketplace.atlassian.com/rest/2/vendors/1215549/reporting/sales/metrics/renewal/details
-
         const price = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
         return { price, pricingOpts };
     }
@@ -272,7 +287,7 @@ export class ValidationService {
     // Tests to see if the expected price is within a reasonable range of the actual price, given
     // Atlassian's pricing logic.
 
-    private isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : { valid: boolean; notes: string } {
+    private isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : { valid: boolean; notes: string[] } {
         const { expectedVendorAmount, vendorAmount, country } = opts;
 
         if (country==='Japan') {
@@ -280,14 +295,14 @@ export class ValidationService {
                 vendorAmount <= expectedVendorAmount*(1+MAX_JPY_DRIFT) &&
                 !(vendorAmount===0 && expectedVendorAmount > 0);
 
-            return { valid, notes: 'Japan sales priced in JPY are allowed drift' };
+            return { valid, notes: ['Japan sales priced in JPY are allowed drift.'] };
         }
 
         const valid = (vendorAmount >= expectedVendorAmount-10 &&
                 vendorAmount <= expectedVendorAmount+10 &&
                 !(vendorAmount===0 && expectedVendorAmount > 0));
 
-        return { valid, notes: '' };
+        return { valid, notes: [] };
     }
 
     // Loads all transactions that are related to the given entitlement ID.
