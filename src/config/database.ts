@@ -13,6 +13,7 @@ import { InitializeIgnoredFields1711234567892 } from '../migrations/171123456789
 import { IgnoredField } from '../entities/IgnoredField';
 import { TransactionReconcile } from '../entities/TransactionReconcile';
 import { Reseller } from '../entities/Reseller';
+import { TransactionAdjustment } from '../entities/TransactionAdjustment';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -26,6 +27,7 @@ export const AppDataSource = new DataSource({
     namingStrategy: new SnakeNamingStrategy(),
     entities: [
         Transaction,
+        TransactionAdjustment,
         TransactionVersion,
         License,
         LicenseVersion,
