@@ -10,5 +10,6 @@ export const TYPES = {
     IgnoredFieldService: Symbol.for('IgnoredFieldService'),
     TransactionDaoService: Symbol.for('TransactionDaoService'),
     TransactionReconcileDaoService: Symbol.for('TransactionReconcileDaoService'),
-    LicenseDaoService: Symbol.for('LicenseDaoService')
+    LicenseDaoService: Symbol.for('LicenseDaoService'),
+    TransactionAdjustmentDaoService: Symbol.for('TransactionAdjustmentDaoService')
 };

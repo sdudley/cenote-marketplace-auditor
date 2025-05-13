@@ -120,6 +120,7 @@ export class LicenseService {
                 console.log(`Processed ${processedCount} of ${totalCount} licenses`);
             }
         }
+
         console.log(`Completed processing ${totalCount} licenses; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
     }
 }

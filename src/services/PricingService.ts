@@ -3,19 +3,19 @@ import { Addon } from '../entities/Addon';
 import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
-import { createUTCDateFromString, isoDateMath } from '../utils/dateUtils';
+import { isoDateMath } from '../utils/dateUtils';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 
 export interface UserTierPricing {
-    userTier: number;
-    cost: number;
+    userTier: number;                           // Number of users in the tier for which this pricing applies
+    cost: number;                               // Price for this tier
 }
 
 export interface PricingTierResult {
-    tiers: UserTierPricing[];
-    priorTiers: UserTierPricing[]|undefined;
-    priorPricingEndDate: string|undefined;
+    tiers: UserTierPricing[];                   // Pricing tiers corresponding to the saleDate of the transaction
+    priorTiers: UserTierPricing[]|undefined;    // Pricing tiers corresponding to the period prior to the saleDate of the transaction
+    priorPricingEndDate: string|undefined;      // Date on which the priorTiers pricing was supposed to end
 }
 
 export type DeploymentType = 'server' | 'datacenter' | 'cloud';

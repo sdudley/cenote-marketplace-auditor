@@ -19,6 +19,30 @@ interface PriceWithPricingOpts {
     pricingOpts: PriceCalcOpts;
 }
 
+interface TransactionValidationResult {
+    isExpectedPrice: boolean;
+    valid: boolean;
+    vendorAmount: number;
+    expectedVendorAmount: number;
+    notes: string[];
+}
+
+interface LegacyPricePermutation {
+    useLegacyPricingTierForCurrent: boolean;
+    useLegacyPricingTierForPrevious: boolean;
+}
+
+// List of various permutations of legacy pricing (or not) for both the main transaction and the
+// license we are upgrading from (if any).
+
+const LEGACY_PRICING_PERMUTATIONS : LegacyPricePermutation[] = [
+    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // start with no legacy pricing
+    { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: false },   // try different permutations of legacy pricing
+    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: true },
+    { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: true },
+    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // Must end with no legacy pricing (again) if we find no match
+];
+
 @injectable()
 export class ValidationService {
     constructor(
@@ -45,7 +69,37 @@ export class ValidationService {
             }
 
             try {
-                await this.validateOneTransaction(transaction);
+                let validationResult : TransactionValidationResult|undefined = undefined;
+
+                // For this transaction, try various permutations of legacy pricing (or not) for both
+                // the main transaction, as well as the license we are upgrading from (if any)
+
+                for (const legacyPricePermutation of LEGACY_PRICING_PERMUTATIONS) {
+                    const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;
+
+                    // Try to see if the price matches with this permutation of legacy pricing (or not)
+
+                    validationResult = await this.validateOneTransaction({ transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious });
+
+                    const { isExpectedPrice, notes } = validationResult;
+
+                    if (isExpectedPrice) {
+                        if (useLegacyPricingTierForCurrent) {
+                            notes.push(`Price is correct but uses legacy pricing for current transaction.`);
+                        }
+
+                        if (useLegacyPricingTierForPrevious) {
+                            notes.push(`Price is correct but uses legacy pricing for previous transaction.`);
+                        }
+
+                        break;
+                    }
+                }
+
+                if (validationResult) {
+                    await this.recordTransactionReconcile({ validationResult, transaction });
+                    await this.logTransactionValidation({ validationResult, transaction });
+                }
             } catch (error: any) {
                 console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
                 console.log(`- Error: ${error.message}`);
@@ -53,7 +107,8 @@ export class ValidationService {
         }
     }
 
-    private async validateOneTransaction(transaction: Transaction): Promise<void> {
+    private async validateOneTransaction(opts: { transaction: Transaction; useLegacyPricingTierForCurrent: boolean; useLegacyPricingTierForPrevious: boolean; }): Promise<TransactionValidationResult> {
+        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = opts;
         const { data, entitlementId } = transaction;
         const { addonKey, purchaseDetails } = data;
         const {
@@ -63,14 +118,14 @@ export class ValidationService {
         } = purchaseDetails;
 
         const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
-        const pricingTiersResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
+        const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
         const isSandbox = await this.isSandbox({ vendorAmount, transaction });
 
         // If it is an upgrade, we need to also load the previous purchase and potentially-different
         // pricing tiers for that transaction.
 
         let previousPurchase : Transaction | undefined;
-        let previousPricingTiersResult : PricingTierResult | undefined;
+        let previousPurchasePricingTierResult : PricingTierResult | undefined;
 
         if (saleType==='Upgrade') {
             const relatedTransactions = await this.transactionDaoService.loadRelatedTransactions(entitlementId);
@@ -78,20 +133,17 @@ export class ValidationService {
 
             if (previousPurchase) {
                 const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
-                previousPricingTiersResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
+                previousPurchasePricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
             }
         }
 
         // Calculate the expected price for the previous purchase, if it exists.
 
-        const previousPricing = previousPurchase && previousPricingTiersResult ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPricingTiersResult }) : undefined;
+        const previousPricing = previousPurchase && previousPurchasePricingTierResult ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious }) : undefined;
 
         // Calculate the expected price for the current transaction.
 
-        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTiersResult, previousPurchase, previousPricing: previousPricing?.price });
-
-        // Also calculate the expected price if this were a legacy transaction.
-        const legacyPrice = this.calculateLegacyPrice({ transaction, pricingTiersResult, previousPurchase, previousPricing: previousPricing?.price });
+        const { price } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent });
 
         let expectedVendorAmount = price.vendorPrice;
 
@@ -99,31 +151,32 @@ export class ValidationService {
 
         // Now compare the prices and see if the actual price is what we expect..
 
-        const actualFormatted = formatCurrency(vendorAmount);
         const expectedFormatted = formatCurrency(expectedVendorAmount);
 
         // First, check to see if the priec is valid according to current pricing.
 
         let { valid, notes } = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
+        const isExpectedPrice = valid;
 
-        // If it's not valid, also check to see if it could be valid according to legacy pricing.
-
-        if (!valid && legacyPrice) {
-            const { valid: legacyValid, notes: legacyNotes } = this.isPriceValid({ vendorAmount, expectedVendorAmount: legacyPrice.vendorPrice, country: transaction.data.customerDetails.country });
-
-            if (legacyValid) {
-                valid = false;
-                notes.push(`Price is correct but uses legacy pricing that expired ${pricingTiersResult.priorPricingEndDate}. Current price would be ${expectedFormatted}.`);
-                expectedVendorAmount = legacyPrice.vendorPrice;
-            }
-        }
-
-        // Refunds always require approval
+        // Even if price is as expected, refunds always require approval
 
         if (saleType==='Refund') {
             notes.push('Refund requires manual approval.');
             valid = false;
         }
+
+        return {
+            isExpectedPrice,
+            valid,
+            vendorAmount,
+            expectedVendorAmount,
+            notes
+        };
+    }
+
+    private async recordTransactionReconcile(opts: { validationResult: TransactionValidationResult, transaction: Transaction; }) : Promise<void> {
+        const { validationResult, transaction } = opts;
+        const { valid, notes, vendorAmount, expectedVendorAmount } = validationResult;
 
         // Check if a reconcile record already exists for this transaction and version
 
@@ -138,15 +191,28 @@ export class ValidationService {
         // Record the reconcile record
 
         await this.transactionReconcileDaoService.recordReconcile({ transaction, existingReconcile, valid, notes, vendorAmount, expectedVendorAmount });
+    }
+
+    private async logTransactionValidation(opts: { validationResult: TransactionValidationResult; transaction: Transaction; }) {
+        const { validationResult, transaction } = opts;
+
+        const { valid, notes, vendorAmount, expectedVendorAmount } = validationResult;
+
+        const { data, entitlementId } = transaction;
+        const { purchaseDetails } = data;
+        const {
+            saleType,
+            saleDate
+        } = purchaseDetails;
+
+
+        const actualFormatted = formatCurrency(vendorAmount);
+        const expectedFormatted = formatCurrency(expectedVendorAmount);
 
         if (valid) {
-            console.log(`OK ${saleDate} L=${entitlementId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
+            console.log(`OK      ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected: ${expectedFormatted.padEnd(10)}; actual: ${actualFormatted.padEnd(10)} ${notes}`);
         } else {
-            console.log(`\n\n*ERROR* ${saleDate} L=${entitlementId} ${saleType} ID=${transaction.id} Expected price: ${expectedFormatted}; actual purchase price: ${actualFormatted}. ${notes}`);
-            {
-                const { pricingTierResult: pricingResult, ...rest } = pricingOpts;
-                console.dir(rest, { depth: null });
-            }
+            console.log(`*ERROR* ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected: ${expectedFormatted.padEnd(10)}; actual: ${actualFormatted.padEnd(10)}; ID=${transaction.id}. ${notes}`);
         }
     }
 
@@ -168,33 +234,6 @@ export class ValidationService {
         return license.data.installedOnSandbox ? true : false;
     }
 
-    /**
-     * Calculate the expected price of this transaction if we were to use the legacy pricing tiers rather than the current ones,
-     * because Atlassian often sells with legacy pricing past the pricing transition date.
-     */
-    private calculateLegacyPrice(opts: { transaction: Transaction; pricingTiersResult: PricingTierResult; previousPurchase?: Transaction|undefined; previousPricing?: PriceResult|undefined; }) : PriceResult | undefined {
-        const { transaction, pricingTiersResult, previousPurchase, previousPricing } = opts;
-
-        // If there are no legacy pricing tiers, there is nothing to calculate.
-
-        if (!pricingTiersResult.priorTiers) {
-            return undefined;
-        }
-
-        // If there was a legacy pricing tier, calculate the expected price for that too in case this transaction
-        // was priced using legacy pricing.
-
-        const legacyPricingResult : PricingTierResult = {
-            tiers: pricingTiersResult.priorTiers,
-            priorTiers: undefined,
-            priorPricingEndDate: undefined
-        };
-
-        const { price: priorPrice } = this.calculatePriceForTransaction({ transaction, isSandbox: false, pricingTierResult: legacyPricingResult, previousPurchase, previousPricing });
-        return priorPrice;
-    }
-
-
     // Invokes the PriceCalculatorService to calculate the expected price for a transaction.
 
     private calculatePriceForTransaction(opts: {
@@ -203,8 +242,9 @@ export class ValidationService {
         pricingTierResult: PricingTierResult;
         previousPurchase?: Transaction|undefined;
         previousPricing?: PriceResult|undefined;
+        useLegacyPricingTier: boolean;
     }) : PriceWithPricingOpts {
-        const { transaction, isSandbox, pricingTierResult, previousPurchase, previousPricing } = opts;
+        const { transaction, isSandbox, pricingTierResult, previousPurchase, previousPricing, useLegacyPricingTier } = opts;
         const { purchaseDetails } = transaction.data;
 
         const pricingOpts: PriceCalcOpts = {
@@ -220,6 +260,16 @@ export class ValidationService {
             billingPeriod: purchaseDetails.billingPeriod,
             previousPurchase,
             previousPricing
+        };
+
+        // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator
+
+        if (useLegacyPricingTier && pricingTierResult.priorTiers) {
+            pricingOpts.pricingTierResult = {
+                tiers: pricingTierResult.priorTiers,
+                priorTiers: undefined,
+                priorPricingEndDate: undefined
+            };
         };
 
         const price = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
