@@ -38,6 +38,7 @@
                 "${workspaceFolder}/dist/**/*.js"
             ],
             "sourceMaps": true,
+            "smartStep": true,
             "resolveSourceMapLocations": [
                 "${workspaceFolder}/**",
                 "!**/node_modules/**"
@@ -63,6 +64,7 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "disableOptimisticBPs": true,
+            "smartStep": true,
             "windows": {
                 "program": "${workspaceFolder}/node_modules/jest/bin/jest"
             },

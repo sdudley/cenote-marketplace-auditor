@@ -1,10 +1,13 @@
 import { PurchaseDetails } from "./ValidationService";
 import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "./licenseDurationCalculator";
-import { DeploymentType, PricingTierResult, UserTierPricing } from "../services/PricingService";
+import { DeploymentType, PricingTierResult } from "../services/PricingService";
+import { UserTierPricing } from '../types/userTiers';
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
 import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
 import { Transaction } from "../entities/Transaction";
 import { injectable } from "inversify";
+
+const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
 
 export interface PriceCalcOpts {
     pricingTierResult: PricingTierResult;
@@ -54,20 +57,8 @@ export class PriceCalculatorService {
 
         const deploymentType = deploymentTypeFromHosting(hosting);
         const userCount = userCountFromTier(tier);
-
-        // Find the appropriate tier for the user count
         const { tiers: pricingTiers } = pricingTierResult;
-        const tierIndex = pricingTiers.findIndex(t => userCount <= t.userTier);
-
-        if (tierIndex === -1) {
-            return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0 };
-        }
-
-        const pricingTier : UserTierPricing = pricingTiers[tierIndex];
-        const { cost } = pricingTier;
-
         const licenseDurationDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
-
         let basePrice;
 
         // Non-cloud pricing is always annual
@@ -76,26 +67,23 @@ export class PriceCalculatorService {
                 throw new Error('Non-cloud pricing must always be annual');
             }
 
-            basePrice = cost;
-        } else {
-            if (!tier.startsWith('Per Unit Pricing') || tierIndex === 0) {
-                // Fixed pricing for first tier (up to 10 users), or any user tier with annual billing
-                basePrice = cost;
-            } else {
-                // For the first tier, we calculate the base price all the way from 0 users, not from the 10-user tier
-                const priorPricingTier = tierIndex===1 ? { userTier: 0, cost: 0 } : pricingTiers[tierIndex - 1];
+            const tierIndex = pricingTiers.findIndex(t => userCount <= t.userTier);
+            const pricingTier : UserTierPricing = pricingTiers[tierIndex];
 
-                const usersInNewTier = userCount - priorPricingTier.userTier;
-                const userDifferencePerTier = pricingTier.userTier - priorPricingTier.userTier;
-                const pricePerUserInNewTier = (pricingTier.cost - priorPricingTier.cost) / userDifferencePerTier;
-                basePrice = priorPricingTier.cost + (pricePerUserInNewTier * usersInNewTier);
-            }
-        }
-
-        if (billingPeriod === 'Monthly') {
-            basePrice /= 10; // 2-month discount for annual
-        } else {
+            basePrice = pricingTier.cost;
             basePrice = basePrice * licenseDurationDays / 365;
+        } else {
+            if (userCount <= pricingTiers[0].userTier) {
+                // Fixed pricing for first tier (up to 10 users)
+                basePrice = pricingTiers[0].cost;
+            } else {
+                // Variable, per-user pricing for all other tiers
+                basePrice = this.computeTierPrice({ userCount, perUserTiers: pricingTiers });
+            }
+
+            if (billingPeriod === 'Annual') {
+                basePrice = basePrice * ANNUAL_DISCOUNT_MULTIPLIER * licenseDurationDays / 365;
+            }
         }
 
         if (saleType==='Refund') {
@@ -160,5 +148,54 @@ export class PriceCalculatorService {
             vendorPrice: Math.round(basePrice * 100)/100,
             dailyNominalPrice
         };
+    }
+
+    // Used in tests to validate that we can correctly calculate annual pricing tiers
+
+    generateCloudAnnualTierFromPerUserTier(opts: { perUserTiers: UserTierPricing[], annualTiers: UserTierPricing[] }): UserTierPricing[] {
+        const { perUserTiers, annualTiers } = opts;
+
+        const result : UserTierPricing[] = [];
+
+        for (let i=0; i < annualTiers.length; i++) {
+            const { userTier } = annualTiers[i];
+
+            result.push({ userTier, cost: this.computeTierPrice({ userCount: userTier, perUserTiers }) * 10 });
+        }
+
+        return result;
+    }
+
+    private computeTierPrice(opts: { userCount: number; perUserTiers: UserTierPricing[]; }): number {
+        const { userCount, perUserTiers } = opts;
+
+        let cost = 0;
+
+        // First tier is flat
+
+        if (userCount <= perUserTiers[0].userTier) {
+            return perUserTiers[0].cost;
+        }
+
+        let remainingUsers = userCount;
+        let priorPeriodUsers = 0;
+
+        for (let i=1; i < perUserTiers.length; i++) {
+            const tier = perUserTiers[i];
+
+            let usersInThisTier = tier.userTier===-1 ? remainingUsers : tier.userTier - priorPeriodUsers;
+            const usersToPrice = Math.min(usersInThisTier, remainingUsers);
+
+            cost += usersToPrice * tier.cost;
+            priorPeriodUsers = tier.userTier;
+
+            remainingUsers -= usersToPrice;
+
+            if (remainingUsers <= 0) {
+                break;
+            }
+        }
+
+        return cost;
     }
 }

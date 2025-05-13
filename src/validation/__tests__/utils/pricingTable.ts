@@ -1,6 +1,36 @@
-import { PricingTierResult, UserTierPricing } from "../../../services/PricingService";
+import { PricingTierResult } from "../../../services/PricingService";
+import { UserTierPricing } from '../../../types/userTiers';
 
-export const cloudPricing : UserTierPricing[] = [
+export const cloudPerUserPricingTiers : UserTierPricing[] = [
+    { userTier: 10, cost: 10 },
+    { userTier: 100, cost: 1.65 },
+    { userTier: 250, cost: 0.77 },
+    { userTier: 1000, cost: 0.40 },
+    { userTier: 2500, cost: 0.23 },
+    { userTier: 5000, cost: 0.23 },
+    { userTier: 7500, cost: 0.14 },
+    { userTier: 10000, cost: 0.14 },
+    { userTier: 15000, cost: 0.12 },
+    { userTier: 20000, cost: 0.12 },
+    { userTier: 25000, cost: 0.12 },
+    { userTier: 30000, cost: 0.12 },
+    { userTier: 35000, cost: 0.12 },
+    { userTier: 40000, cost: 0.12 },
+    { userTier: 45000, cost: 0.12 },
+    { userTier: 50000, cost: 0.12 },
+    { userTier: 60000, cost: 0.12 },
+    { userTier: 70000, cost: 0.12 },
+    { userTier: 80000, cost: 0.12 },
+    { userTier: 90000, cost: 0.12 },
+    { userTier: 100000, cost: 0.12 },
+    { userTier: 110000, cost: 0.12 },
+    { userTier: 120000, cost: 0.12 },
+    { userTier: 130000, cost: 0.12 },
+    { userTier: 140000, cost: 0.12 },
+    { userTier: -1, cost: 0.12 }
+];
+
+export const cloudAnnualPricingTiers : UserTierPricing[] = [
     { userTier: 10, cost: 100 },
     { userTier: 15, cost: 247.5 },
     { userTier: 25, cost: 412.5 },
@@ -134,7 +164,7 @@ export const serverPricing : UserTierPricing[] = [
 ];
 
 export const cloudPricingTierResult : PricingTierResult = {
-    tiers: cloudPricing,
+    tiers: cloudPerUserPricingTiers,
     priorTiers: undefined,
     priorPricingEndDate: undefined
 };

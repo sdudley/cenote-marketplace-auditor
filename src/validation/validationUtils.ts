@@ -3,11 +3,6 @@ import { Transaction } from "../entities/Transaction";
 import { Repository } from "typeorm";
 import { License } from "../entities/License";
 
-const formatCurrency = (value: number | undefined): string => {
-    if (value === undefined) return '$0.00';
-    return `$${value.toFixed(2)}`;
-};
-
 const userCountFromTier = (tier: string): number => {
     if (tier === 'Unlimited Users') {
         return -1;
@@ -39,4 +34,4 @@ const loadLicenseForTransaction = async (licenseRepository: Repository<License>,
         });
 }
 
-export { formatCurrency, userCountFromTier, deploymentTypeFromHosting, loadLicenseForTransaction };
+export { userCountFromTier, deploymentTypeFromHosting, loadLicenseForTransaction };

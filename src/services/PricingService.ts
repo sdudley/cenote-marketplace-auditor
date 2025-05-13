@@ -6,12 +6,8 @@ import { PricingInfo } from '../entities/PricingInfo';
 import { isoDateMath } from '../utils/dateUtils';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-
-export interface UserTierPricing {
-    userTier: number;                           // Number of users in the tier for which this pricing applies
-    cost: number;                               // Price for this tier
-}
-
+import { UserTierPricing } from '../types/userTiers';
+import { userTierSorter } from '../utils/userTierSorter';
 export interface PricingTierResult {
     tiers: UserTierPricing[];                   // Pricing tiers corresponding to the saleDate of the transaction
     priorTiers: UserTierPricing[]|undefined;    // Pricing tiers corresponding to the period prior to the saleDate of the transaction
@@ -19,6 +15,8 @@ export interface PricingTierResult {
 }
 
 export type DeploymentType = 'server' | 'datacenter' | 'cloud';
+
+
 
 @injectable()
 export class PricingService {
@@ -125,7 +123,7 @@ export class PricingService {
                 userTier,
                 cost
             } as UserTierPricing))
-            .sort((a, b) => a.userTier - b.userTier);
+            .sort(userTierSorter);
     }
 
     async fetchPricing(): Promise<void> {
@@ -136,7 +134,7 @@ export class PricingService {
             console.log(`\n=== Pricing for ${addon.addonKey} ===`);
 
             // Try to fetch pricing for each deployment type
-            const deploymentTypes : DeploymentType[] = ['server', 'datacenter', 'cloud'] as const;
+            const deploymentTypes : DeploymentType[] = ['cloud', 'server', 'datacenter'] as const;
             for (const deploymentType of deploymentTypes) {
                 try {
                     console.log(`\nFetching ${deploymentType.toUpperCase()} pricing:`);
@@ -175,24 +173,51 @@ export class PricingService {
                     pricing.endDate = undefined;
                     await this.pricingRepository.save(pricing);
 
-                    // Store each pricing item
-                    for (const item of pricingData.items) {
-                        if (item.monthsValid !== 12) {
-                            continue;
+                    // console.log(`\n=== Pricing for ${addon.addonKey} with deployment type ${deploymentType} ===`);
+                    // console.dir(pricingData, { depth: null });
+
+                    // Now pull down the appropriate pricing type based on the deployment
+
+                    let items : { amount: number; unitCount: number; }[] = [];
+
+                    if (deploymentType==='cloud') {
+                        if (!pricingData.perUnitItems) {
+                            throw new Error(`No perUnitItems found for ${addon.addonKey} with deployment type ${deploymentType}`);
                         }
 
-                        const pricingInfo = new PricingInfo();
-                        pricingInfo.userTier = item.unitCount;
-                        pricingInfo.cost = item.amount;
-                        pricingInfo.pricing = pricing;
-                        await this.pricingInfoRepository.save(pricingInfo);
+                        // Get the 10-user price
+                        items = items.concat(pricingData.items.filter(i => i.monthsValid===1).map(i => ({ unitCount: i.unitCount, amount: i.amount })));
+
+                        // Get all of the other per-tier prices
+                        items = items.concat(pricingData.perUnitItems?.filter(i => i.monthsValid===1).map(i => ({ unitCount: i.unitCount, amount: i.amount })));
+                    } else {
+                        // DC and server pricing is only 12-month pricing
+
+                        items = items.concat(pricingData.items.filter(i => i.monthsValid===12).map(i => ({ unitCount: i.unitCount, amount: i.amount })));
+                    }
+
+                    if (!items) {
+                        throw new Error(`No pricing items found for ${addon.addonKey} with deployment type ${deploymentType}`);
+                    }
+
+                    // Store each pricing item
+                    for (const item of items) {
+                        await this.savePricingInfo(item, pricing);
                     }
                 } catch (e) {
-                    console.log(`No ${deploymentType} pricing available`, e);
+                    console.warn(`App ${addon.addonKey} has no pricing available for deploymentType=${deploymentType}`, e);
                 }
             }
         }
 
         console.log('Pricing fetched');
+    }
+
+    private async savePricingInfo(item: { unitCount: number; amount: number; }, pricing: Pricing) : Promise<void> {
+        const pricingInfo = new PricingInfo();
+        pricingInfo.userTier = item.unitCount;
+        pricingInfo.cost = item.amount;
+        pricingInfo.pricing = pricing;
+        await this.pricingInfoRepository.save(pricingInfo);
     }
 }

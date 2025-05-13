@@ -1,5 +1,5 @@
 import { PriceCalculatorService, PriceResult } from '../PriceCalculatorService';
-import { cloudPricingTierResult, dataCenterPricingTierResult } from './utils/pricingTable';
+import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult } from './utils/pricingTable';
 
 const stripDailyPrice = (data: PriceResult) => ({ purchasePrice: data.purchasePrice, vendorPrice: data.vendorPrice });
 
@@ -8,6 +8,18 @@ describe('PriceCalculatorService', () => {
 
     beforeEach(() => {
         service = new PriceCalculatorService();
+    });
+
+    it('correctly maps per-user pricing to annual pricing', () => {
+
+        const annualTiers = cloudAnnualPricingTiers.map(t => ({ userTier: t.userTier, cost: 0, pricingType: 'annual' as const }));
+
+        const result = service.generateCloudAnnualTierFromPerUserTier({
+            perUserTiers: cloudPerUserPricingTiers,
+            annualTiers
+        });
+
+        expect(result).toEqual(cloudAnnualPricingTiers);
     });
 
     it('should calculate correct price for 173 users for cloud with monthly billing', () => {
@@ -95,6 +107,24 @@ describe('PriceCalculatorService', () => {
         expect(result).toEqual({ purchasePrice: 3005, vendorPrice: 2554.25 });
     });
 
+
+    it('should calculate correct price for 250 user cloud license with annual billing', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: cloudPricingTierResult,
+            saleDate: '2025-05-01',
+            saleType: 'Renewal',
+            isSandbox: false,
+            hosting: 'Cloud',
+            licenseType: 'COMMERCIAL',
+            tier: '250 Users',
+            maintenanceStartDate: '2025-03-02',
+            maintenanceEndDate: '2026-03-02',
+            billingPeriod: 'Annual'
+        }));
+
+        expect(result).toEqual({ purchasePrice: 2805, vendorPrice: 2384.25 });
+    });
+
     it('should calculate correct price for new 300 user 11-month cloud license', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
             pricingTierResult: cloudPricingTierResult,
@@ -129,6 +159,23 @@ describe('PriceCalculatorService', () => {
         expect(result).toEqual({ purchasePrice: 0, vendorPrice: 0 });
     });
 
+    it('should calculate correct price for 16 users cloud license with monthly billing', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: cloudPricingTierResult,
+            saleDate: '2025-05-01',
+            saleType: 'Renewal',
+            isSandbox: false,
+            hosting: 'Cloud',
+            licenseType: 'COMMERCIAL',
+            tier: 'Per Unit Pricing (16 Users)',
+            maintenanceStartDate: '2025-05-11',
+            maintenanceEndDate: '2025-06-11',
+            billingPeriod: 'Monthly'
+        }));
+
+        expect(result).toEqual({ purchasePrice: 26.40, vendorPrice: 22.44 });
+    });
+
     it('should calculate correct price for 46 users cloud license with monthly billing', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
             pricingTierResult: cloudPricingTierResult,
@@ -143,7 +190,7 @@ describe('PriceCalculatorService', () => {
             billingPeriod: 'Monthly'
         }));
 
-        expect(result).toEqual({ purchasePrice: 75.90, vendorPrice: 64.52 }); // actual is 64.51 per Atlassian
+        expect(result).toEqual({ purchasePrice: 75.90, vendorPrice: 64.51 });
     });
 
     it('should calculate correct price for academic cloud license with 135 users', () => {

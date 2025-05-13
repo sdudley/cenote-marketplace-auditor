@@ -4,8 +4,9 @@ import { Pricing } from '../entities/Pricing';
 import { PricingInfo } from '../entities/PricingInfo';
 import * as fs from 'fs';
 import { parse } from 'csv-parse/sync';
-import { LessThan, MoreThan, IsNull, Or } from 'typeorm';
+import { LessThan, MoreThan, IsNull, Or, Repository } from 'typeorm';
 import { isoDateMath } from '../utils/dateUtils';
+import { formatCurrency } from '../utils/formatCurrency';
 
 interface DateRange {
     startDate?: string;
@@ -91,8 +92,8 @@ function adjustOverlappingRecord(existingRecord: Pricing, newDateRange: DateRang
     return adjustedRecord;
 }
 
-async function handleOverlappingRecords(addonKey: string, deploymentType: string, dateRange: DateRange): Promise<number> {
-    const overlappingRecords = await AppDataSource.getRepository(Pricing).find({
+async function handleOverlappingRecords(pricingRepo: Repository<Pricing>, addonKey: string, deploymentType: string, dateRange: DateRange): Promise<number> {
+    const overlappingRecords = await pricingRepo.find({
         where: getOverlapQueryConditions(addonKey, deploymentType, dateRange)
     });
 
@@ -100,7 +101,7 @@ async function handleOverlappingRecords(addonKey: string, deploymentType: string
     for (const record of overlappingRecords) {
         const adjustedRecord = adjustOverlappingRecord(record, dateRange);
         if (adjustedRecord.startDate !== record.startDate || adjustedRecord.endDate !== record.endDate) {
-            await AppDataSource.getRepository(Pricing).save(adjustedRecord);
+            await pricingRepo.save(adjustedRecord);
             adjustedCount++;
         }
     }
@@ -123,6 +124,8 @@ async function main() {
 
     try {
         await initializeDatabase();
+        const pricingRepo = await AppDataSource.getRepository(Pricing);
+        const pricingInfoRepo = await AppDataSource.getRepository(PricingInfo);
         console.log('Database connection established');
 
         // Read and parse CSV file
@@ -130,7 +133,7 @@ async function main() {
         const records = parse(csvContent, {
             columns: true,
             skip_empty_lines: true
-        }) as Array<{ userTier: string; cost: string }>;
+        }) as Array<{ userTier: string; cost: string; }>;
 
         // Parse dates and strip time components
         const newStartDate = startDate === 'NONE' ? undefined : startDate;
@@ -139,7 +142,7 @@ async function main() {
         const dateRange = { startDate: newStartDate, endDate: newEndDate };
 
         // Handle overlapping records
-        const adjustedCount = await handleOverlappingRecords(addonKey, deploymentType, dateRange);
+        const adjustedCount = await handleOverlappingRecords(pricingRepo, addonKey, deploymentType, dateRange);
 
         // Create new pricing record
         const pricing = new Pricing();
@@ -149,19 +152,22 @@ async function main() {
         pricing.endDate = newEndDate;
 
         // Save pricing record first to get the ID
-        await AppDataSource.getRepository(Pricing).save(pricing);
+        await pricingRepo.save(pricing);
 
         // Create and save pricing info records
-        const pricingInfoRecords = records.map(record => {
+        const pricingInfoRecords : PricingInfo[] = records.map(r => {
             const pricingInfo = new PricingInfo();
-            pricingInfo.userTier = parseInt(record.userTier);
-            pricingInfo.cost = parseFloat(record.cost);
+            pricingInfo.userTier = parseInt(r.userTier);
+            pricingInfo.cost = parseFloat(r.cost);
             pricingInfo.pricing = pricing;
+            console.log(`Persisting pricing tier: ${pricingInfo.userTier} at ${formatCurrency(pricingInfo.cost)}`);
             return pricingInfo;
         });
 
-        await AppDataSource.getRepository(PricingInfo).save(pricingInfoRecords);
+        await pricingInfoRepo.save(pricingInfoRecords);
+
         console.log(`Successfully imported ${pricingInfoRecords.length} pricing tiers for ${addonKey} ${deploymentType}`);
+
         if (adjustedCount > 0) {
             console.log(`Adjusted ${adjustedCount} overlapping pricing records`);
         }

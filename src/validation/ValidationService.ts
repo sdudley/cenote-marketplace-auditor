@@ -1,14 +1,15 @@
 import { Transaction } from '../entities/Transaction';
-import { PricingTierResult, PricingService, UserTierPricing } from '../services/PricingService';
+import { PricingTierResult, PricingService } from '../services/PricingService';
+import { UserTierPricing } from '../types/userTiers';
 import { components } from '../types/marketplace-api';
-import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
+import { deploymentTypeFromHosting } from './validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 import TransactionDaoService from '../services/TransactionDaoService';
 import TransactionReconcileDaoService from '../services/TransactionReconcileDaoService';
 import { LicenseDaoService } from '../services/LicenseDaoService';
-
+import { formatCurrency } from '../utils/formatCurrency';
 const START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
 
@@ -25,6 +26,7 @@ interface TransactionValidationResult {
     vendorAmount: number;
     expectedVendorAmount: number;
     notes: string[];
+    pricingOpts: PriceCalcOpts;
 }
 
 interface LegacyPricePermutation {
@@ -63,7 +65,7 @@ export class ValidationService {
 
         for (const transaction of transactions) {
 
-            if (false) {//transaction.entitlementId !== 'SEN-xxxxxxx') {
+            if (false) { // transaction.entitlementId !== 'SEN-xxxxxx') {
                 // problem with this transaction:
                 // the prior period license (from which we are upgrading) was also calculated using
                 // the legacy pricing period, so we need to figure out how to determine that this was
@@ -156,17 +158,13 @@ export class ValidationService {
 
         // Calculate the expected price for the current transaction.
 
-        const { price } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent });
+        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent });
 
         let expectedVendorAmount = price.vendorPrice;
 
         // TRY TO SEE IF WE HAVE ANY EXPERT RESALES TO PRICE-MATCH
 
-        // Now compare the prices and see if the actual price is what we expect..
-
-        const expectedFormatted = formatCurrency(expectedVendorAmount);
-
-        // First, check to see if the priec is valid according to current pricing.
+        // Now compare the prices and see if the actual price is what we expect.
 
         let { valid, notes } = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
         const isExpectedPrice = valid;
@@ -183,7 +181,8 @@ export class ValidationService {
             valid,
             vendorAmount,
             expectedVendorAmount,
-            notes
+            notes,
+            pricingOpts
         };
     }
 
@@ -209,7 +208,7 @@ export class ValidationService {
     private async logTransactionValidation(opts: { validationResult: TransactionValidationResult; transaction: Transaction; }) {
         const { validationResult, transaction } = opts;
 
-        const { valid, notes, vendorAmount, expectedVendorAmount } = validationResult;
+        const { valid, notes, vendorAmount, expectedVendorAmount, pricingOpts } = validationResult;
 
         const { data, entitlementId } = transaction;
         const { purchaseDetails } = data;
@@ -226,6 +225,8 @@ export class ValidationService {
             console.log(`OK      ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected: ${expectedFormatted.padEnd(10)}; actual: ${actualFormatted.padEnd(10)} ${notes}`);
         } else {
             console.log(`*ERROR* ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected: ${expectedFormatted.padEnd(10)}; actual: ${actualFormatted.padEnd(10)}; ID=${transaction.id}. ${notes}`);
+            console.log(`Pricing opts: `);
+            console.dir(pricingOpts, { depth: 1 });
         }
     }
 

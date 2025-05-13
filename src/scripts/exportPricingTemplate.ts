@@ -1,10 +1,9 @@
 import 'dotenv/config';
 import { AppDataSource, initializeDatabase } from '../config/database';
 import { Pricing } from '../entities/Pricing';
-import { PricingInfo } from '../entities/PricingInfo';
 import * as fs from 'fs';
-import * as path from 'path';
 import { IsNull } from 'typeorm';
+import { userTierSorter } from '../utils/userTierSorter';
 
 async function main() {
     const addonKey = process.argv[2];
@@ -38,7 +37,7 @@ async function main() {
         }
 
         // Sort the pricing items by userTier
-        const sortedItems = pricing.items.sort((a, b) => a.userTier - b.userTier);
+        const sortedItems = pricing.items.sort(userTierSorter);
 
         // Create CSV content
         const csvContent = [
