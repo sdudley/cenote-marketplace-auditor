@@ -58,6 +58,9 @@ export class ValidationService {
         const transactions = await this.transactionDaoService.getTransactionsBySaleDate(START_DATE);
         console.log(`\nValidating transactions since ${START_DATE}:`);
 
+        let validCount = 0;
+        let expectedPriceCount = 0;
+
         for (const transaction of transactions) {
 
             if (false) {//transaction.entitlementId !== 'SEN-xxxxxxx') {
@@ -99,12 +102,22 @@ export class ValidationService {
                 if (validationResult) {
                     await this.recordTransactionReconcile({ validationResult, transaction });
                     await this.logTransactionValidation({ validationResult, transaction });
+
+                    if (validationResult.isExpectedPrice) {
+                        expectedPriceCount++;
+                    }
+
+                    if (validationResult.valid) {
+                        validCount++;
+                    }
                 }
             } catch (error: any) {
                 console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
                 console.log(`- Error: ${error.message}`);
             }
         }
+
+        console.log(`\nSummary: ${transactions.length} transactions; ${expectedPriceCount} have expected price; ${validCount} are reconciled.`);
     }
 
     private async validateOneTransaction(opts: { transaction: Transaction; useLegacyPricingTierForCurrent: boolean; useLegacyPricingTierForPrevious: boolean; }): Promise<TransactionValidationResult> {
