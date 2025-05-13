@@ -1,4 +1,3 @@
-import { DataSource, Repository, IsNull } from 'typeorm';
 import { License } from '../entities/License';
 import { LicenseVersion } from '../entities/LicenseVersion';
 import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
@@ -7,19 +6,16 @@ import { LicenseData } from '../types/marketplace';
 import { IgnoredFieldService } from './IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
+import { LicenseDaoService } from './LicenseDaoService';
 
 @injectable()
 export class LicenseService {
-    private licenseRepository: Repository<License>;
-    private licenseVersionRepository: Repository<LicenseVersion>;
     private ignoredFields: string[] | null = null;
 
     constructor(
-        @inject(TYPES.DataSource) private dataSource: DataSource,
-        @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService
+        @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
+        @inject(TYPES.LicenseDaoService) private licenseDaoService: LicenseDaoService
     ) {
-        this.licenseRepository = this.dataSource.getRepository(License);
-        this.licenseVersionRepository = this.dataSource.getRepository(LicenseVersion);
     }
 
     private async getIgnoredFields(): Promise<string[]> {
@@ -39,13 +35,14 @@ export class LicenseService {
         let totalCount = licenses.length;
         let modifiedCount = 0;
         let skippedCount = 0;
+        let newCount = 0;
 
         // Initialize ignored fields list
         await this.getIgnoredFields();
 
         for (const licenseData of licenses) {
-            const entitlementId = licenseData.appEntitlementNumber || licenseData.licenseId;
-            const existingLicense = await this.licenseRepository.findOne({ where: { entitlementId } });
+            const entitlementId = this.licenseDaoService.getEntitlementIdForLicense(licenseData);
+            const existingLicense = await this.licenseDaoService.getLicenseForEntitlementId(entitlementId);
 
             // Normalize the incoming data
             const normalizedData = normalizeObject(licenseData);
@@ -71,13 +68,10 @@ export class LicenseService {
                     printJsonDiff(existingLicense.data, normalizedData);
 
                     // Get the current, soon-to-be old version
-                    const oldVersion = await this.licenseVersionRepository.findOne({
-                        where: { license: existingLicense },
-                        order: { createdAt: 'DESC' },
-                        relations: ['nextLicenseVersion', 'priorLicenseVersion']
-                    });
+                    const oldVersion = await this.licenseDaoService.getCurrentLicenseVersionForLicense(existingLicense);
 
                     currentVersion = oldVersion ? oldVersion.version + 1 : 1;
+
                     // Create new version
                     const version = new LicenseVersion();
                     version.data = normalizedData;
@@ -91,15 +85,15 @@ export class LicenseService {
                         version.priorLicenseVersion = oldVersion;
                         oldVersion.nextLicenseVersion = version;
                         // Save both sides of the relationship
-                        await this.licenseVersionRepository.save([oldVersion, version]);
+                        await this.licenseDaoService.saveLicenseVersions(oldVersion, version);
                     } else {
-                        await this.licenseVersionRepository.save(version);
+                        await this.licenseDaoService.saveLicenseVersions(version);
                     }
 
                     // Update the current data
                     existingLicense.data = normalizedData;
                     existingLicense.currentVersion = currentVersion;
-                    await this.licenseRepository.save(existingLicense);
+                    await this.licenseDaoService.saveLicense(existingLicense);
                     modifiedCount++;
                 }
             } else {
@@ -108,7 +102,7 @@ export class LicenseService {
                 license.entitlementId = entitlementId;
                 license.data = normalizedData;
                 license.currentVersion = currentVersion;
-                await this.licenseRepository.save(license);
+                await this.licenseDaoService.saveLicense(license);
 
                 // Create initial version
                 const version = new LicenseVersion();
@@ -116,7 +110,9 @@ export class LicenseService {
                 version.license = license;
                 version.entitlementId = entitlementId;
                 version.version = currentVersion;
-                await this.licenseVersionRepository.save(version);
+                await this.licenseDaoService.saveLicenseVersions(version);
+
+                newCount++;
             }
 
             processedCount++;
@@ -124,6 +120,6 @@ export class LicenseService {
                 console.log(`Processed ${processedCount} of ${totalCount} licenses`);
             }
         }
-        console.log(`Completed processing ${totalCount} licenses; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
+        console.log(`Completed processing ${totalCount} licenses; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
     }
 }

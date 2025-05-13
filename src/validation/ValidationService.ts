@@ -1,13 +1,13 @@
-import { DataSource, Repository } from 'typeorm';
 import { Transaction } from '../entities/Transaction';
 import { PricingTierResult, PricingService, UserTierPricing } from '../services/PricingService';
 import { components } from '../types/marketplace-api';
 import { formatCurrency, deploymentTypeFromHosting, loadLicenseForTransaction } from './validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
-import { License } from '../entities/License';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import { TransactionReconcile } from '../entities/TransactionReconcile';
+import TransactionDaoService from '../services/TransactionDaoService';
+import TransactionReconcileDaoService from '../services/TransactionReconcileDaoService';
+import { LicenseDaoService } from '../services/LicenseDaoService';
 
 const START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
@@ -21,22 +21,17 @@ interface PriceWithPricingOpts {
 
 @injectable()
 export class ValidationService {
-    private transactionRepository: Repository<Transaction>;
-    private licenseRepository: Repository<License>;
-    private transactionReconcileRepo: Repository<TransactionReconcile>;
-
     constructor(
-        @inject(TYPES.DataSource) private dataSource: DataSource,
         @inject(TYPES.PricingService) private pricingService: PricingService,
-        @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService
+        @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
+        @inject(TYPES.TransactionDaoService) private transactionDaoService: TransactionDaoService,
+        @inject(TYPES.TransactionReconcileDaoService) private transactionReconcileDaoService: TransactionReconcileDaoService,
+        @inject(TYPES.LicenseDaoService) private licenseDaoService: LicenseDaoService
     ) {
-        this.transactionRepository = this.dataSource.getRepository(Transaction);
-        this.licenseRepository = this.dataSource.getRepository(License);
-        this.transactionReconcileRepo = this.dataSource.getRepository(TransactionReconcile);
     }
 
     public async validateTransactions(): Promise<void> {
-        const transactions = await this.getTransactions(START_DATE);
+        const transactions = await this.transactionDaoService.getTransactionsBySaleDate(START_DATE);
         console.log(`\nValidating transactions since ${START_DATE}:`);
 
         for (const transaction of transactions) {
@@ -78,7 +73,7 @@ export class ValidationService {
         let previousPricingTiersResult : PricingTierResult | undefined;
 
         if (saleType==='Upgrade') {
-            const relatedTransactions = await this.loadRelatedTransactions(entitlementId);
+            const relatedTransactions = await this.transactionDaoService.loadRelatedTransactions(entitlementId);
             previousPurchase = this.getPreviousPurchase({ relatedTransactions, thisTransaction: transaction });
 
             if (previousPurchase) {
@@ -132,7 +127,7 @@ export class ValidationService {
 
         // Check if a reconcile record already exists for this transaction and version
 
-        const existingReconcile = await this.getTransactionReconcileRecord(transaction);
+        const existingReconcile = await this.transactionReconcileDaoService.getTransactionReconcileForTransaction(transaction);
 
         // Don't re-reconcile if no new version has been created
 
@@ -142,7 +137,7 @@ export class ValidationService {
 
         // Record the reconcile record
 
-        await this.recordReconcile({ transaction, existingReconcile, valid, notes, vendorAmount, expectedVendorAmount });
+        await this.transactionReconcileDaoService.recordReconcile({ transaction, existingReconcile, valid, notes, vendorAmount, expectedVendorAmount });
 
         if (valid) {
             console.log(`OK ${saleDate} L=${entitlementId} ${saleType} OK: Expected: ${expectedFormatted}; actual: ${actualFormatted}`);
@@ -155,57 +150,6 @@ export class ValidationService {
         }
     }
 
-
-    // Fetch all transactions from the database that have a sale date greater than or equal to the start date.
-
-    private async getTransactions(startDate: string): Promise<Transaction[]> {
-        return await this.transactionRepository
-            .createQueryBuilder('transaction')
-            .orderBy("transaction.data->'purchaseDetails'->>'saleDate'", 'DESC')
-            .addOrderBy('transaction.created_at', 'DESC')
-            .where('transaction.data->\'purchaseDetails\'->>\'saleDate\' >= :startDate', { startDate })
-            .getMany();
-    }
-
-    private async getTransactionReconcileRecord(transaction: Transaction): Promise<TransactionReconcile | null> {
-        return await this.transactionReconcileRepo.findOne({
-            where: {
-                transaction: { id: transaction.id },
-                current: true
-            }
-        });
-    }
-
-    private async recordReconcile(opts: { transaction: Transaction, existingReconcile: TransactionReconcile|null, valid: boolean, notes: string[], vendorAmount: number, expectedVendorAmount: number }): Promise<void> {
-        const { transaction, existingReconcile, notes, vendorAmount, expectedVendorAmount } = opts;
-        let { valid } = opts;
-
-        // Update the existing reconcile record to be non-current
-
-        if (existingReconcile) {
-            existingReconcile.current = false;
-            await this.transactionReconcileRepo.save(existingReconcile);
-        }
-
-        // Create new reconcile record
-
-        if (valid && existingReconcile && !existingReconcile?.reconciled) {
-            notes.push('Price matches but prior version of transaction was not reconciled, so expecting manual approval.');
-            valid = false;
-        }
-
-        const reconcile = new TransactionReconcile();
-        reconcile.transaction = transaction;
-        reconcile.transactionVersion = transaction.currentVersion;
-        reconcile.reconciled = existingReconcile ? valid && existingReconcile.reconciled : valid;
-        reconcile.automatic = true;
-        reconcile.notes = notes?.join('; ');
-        reconcile.actualVendorAmount = vendorAmount;
-        reconcile.expectedVendorAmount = expectedVendorAmount;
-        reconcile.current = true;
-        await this.transactionReconcileRepo.save(reconcile);
-    }
-
     // Returns true if the transaction represents a sandbox instance
 
     private async isSandbox(opts: { vendorAmount: number; transaction: Transaction }) : Promise<boolean> {
@@ -215,7 +159,7 @@ export class ValidationService {
             return false;
         }
 
-        const license = await loadLicenseForTransaction(this.licenseRepository, transaction);
+        const license = await this.licenseDaoService.loadLicenseForTransaction(transaction);
 
         if (!license) {
             return false;
@@ -261,9 +205,7 @@ export class ValidationService {
         previousPricing?: PriceResult|undefined;
     }) : PriceWithPricingOpts {
         const { transaction, isSandbox, pricingTierResult, previousPurchase, previousPricing } = opts;
-
-        const data = transaction.data;
-        const { purchaseDetails } = data;
+        const { purchaseDetails } = transaction.data;
 
         const pricingOpts: PriceCalcOpts = {
             pricingTierResult: pricingTierResult,
@@ -303,21 +245,6 @@ export class ValidationService {
                 !(vendorAmount===0 && expectedVendorAmount > 0));
 
         return { valid, notes: [] };
-    }
-
-    // Loads all transactions that are related to the given entitlement ID.
-
-    private async loadRelatedTransactions(entitlementId: string) : Promise<Transaction[]> {
-        const transactionRepository = this.dataSource.getRepository(Transaction);
-
-        const transactions = await transactionRepository
-            .createQueryBuilder('transaction')
-            .where('transaction.entitlementId = :entitlementId', { entitlementId })
-            .orderBy('transaction.data->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
-            .addOrderBy('transaction.created_at', 'DESC')
-            .getMany();
-
-        return transactions;
     }
 
     // This function gets the most recent transaction that is not a refund. This may not be entirely correct,

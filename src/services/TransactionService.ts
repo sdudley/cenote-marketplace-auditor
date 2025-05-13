@@ -1,4 +1,3 @@
-import { DataSource, IsNull, Repository } from 'typeorm';
 import { Transaction } from '../entities/Transaction';
 import { TransactionVersion } from '../entities/TransactionVersion';
 import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
@@ -7,19 +6,16 @@ import { TransactionData } from '../types/marketplace';
 import { IgnoredFieldService } from './IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
+import TransactionDaoService from './TransactionDaoService';
 
 @injectable()
 export class TransactionService {
-    private transactionRepository: Repository<Transaction>;
-    private transactionVersionRepository: Repository<TransactionVersion>;
     private ignoredFields: string[] | null = null;
 
     constructor(
-        @inject(TYPES.DataSource) private dataSource: DataSource,
-        @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService
+        @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
+        @inject(TYPES.TransactionDaoService) private transactionDaoService: TransactionDaoService
     ) {
-        this.transactionRepository = this.dataSource.getRepository(Transaction);
-        this.transactionVersionRepository = this.dataSource.getRepository(TransactionVersion);
     }
 
     private async getIgnoredFields(): Promise<string[]> {
@@ -38,16 +34,16 @@ export class TransactionService {
         let processedCount = 0;
         let totalCount = transactions.length;
         let modifiedCount = 0;
+        let newCount = 0;
         let skippedCount = 0;
 
         // Initialize ignored fields list
         await this.getIgnoredFields();
 
         for (const transactionData of transactions) {
-            const transactionKey = `${transactionData.transactionLineItemId}:${transactionData.transactionId}`;
-            const existingTransaction = await this.transactionRepository.findOne({ where: { marketplaceTransactionId: transactionKey } });
-
-            const entitlementId = transactionData.appEntitlementNumber || transactionData.licenseId;
+            const transactionKey = this.transactionDaoService.getKeyForTransaction(transactionData);
+            const existingTransaction = await this.transactionDaoService.getTransactionForKey(transactionKey);
+            const entitlementId = this.transactionDaoService.getEntitlementIdForTransaction(transactionData);
 
             // Normalize the incoming data
             const normalizedData = normalizeObject(transactionData);
@@ -72,11 +68,7 @@ export class TransactionService {
                     printJsonDiff(existingTransaction.data, normalizedData);
 
                     // Get the current, soon-to-be old version
-                    const oldVersion = await this.transactionVersionRepository.findOne({
-                        where: { transaction: existingTransaction, nextTransactionVersion: IsNull() },
-                        order: { createdAt: 'DESC' },
-                        relations: ['nextTransactionVersion', 'priorTransactionVersion']
-                    });
+                    const oldVersion = await this.transactionDaoService.getCurrentTransactionVersion(existingTransaction);
 
                     currentVersion = oldVersion ? oldVersion.version + 1 : 1;
 
@@ -92,16 +84,20 @@ export class TransactionService {
                     if (oldVersion) {
                         version.priorTransactionVersion = oldVersion;
                         oldVersion.nextTransactionVersion = version;
-                        // Save both sides of the relationship
-                        await this.transactionVersionRepository.save([oldVersion, version]);
+
+                        // Save both sides of the relationship at once to ensure that the relationship
+                        // link is created (because one object needs to exist before the other can be
+                        // saved)
+
+                        await this.transactionDaoService.saveTransactionVersions(oldVersion, version);
                     } else {
-                        await this.transactionVersionRepository.save(version);
+                        await this.transactionDaoService.saveTransactionVersions(version);
                     }
 
                     // Update current data
                     existingTransaction.data = normalizedData;
                     existingTransaction.currentVersion = currentVersion;
-                    await this.transactionRepository.save(existingTransaction);
+                    await this.transactionDaoService.saveTransaction(existingTransaction);
                     modifiedCount++;
                 }
             } else {
@@ -111,7 +107,7 @@ export class TransactionService {
                 transaction.data = normalizedData;
                 transaction.entitlementId = entitlementId;
                 transaction.currentVersion = currentVersion;
-                await this.transactionRepository.save(transaction);
+                await this.transactionDaoService.saveTransaction(transaction);
 
                 // Create initial version
                 const version = new TransactionVersion();
@@ -119,7 +115,9 @@ export class TransactionService {
                 version.transaction = transaction;
                 version.entitlementId = entitlementId;
                 version.version = currentVersion;
-                await this.transactionVersionRepository.save(version);
+                await this.transactionDaoService.saveTransactionVersions(version);
+
+                newCount++;
             }
 
             processedCount++;
@@ -127,6 +125,6 @@ export class TransactionService {
                 console.log(`Processed ${processedCount} of ${totalCount} transactions`);
             }
         }
-        console.log(`Completed processing ${totalCount} transactions; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
+        console.log(`Completed processing ${totalCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
     }
 }
