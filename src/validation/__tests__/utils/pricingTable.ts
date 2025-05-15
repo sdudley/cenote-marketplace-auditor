@@ -151,6 +151,23 @@ export const dataCenterPricing : UserTierPricing[] = [
     { userTier: 150000, cost: 27000 }
 ];
 
+export const dataCenterLegacyPricing : UserTierPricing[] = [
+    { userTier: -1, cost: 19900 },
+    { userTier: 500, cost: 3400 },
+    { userTier: 1000, cost: 5000 },
+    { userTier: 2000, cost: 6700 },
+    { userTier: 3000, cost: 7600 },
+    { userTier: 4000, cost: 8400 },
+    { userTier: 5000, cost: 9200 },
+    { userTier: 10000, cost: 10800 },
+    { userTier: 15000, cost: 11700 },
+    { userTier: 20000, cost: 12600 },
+    { userTier: 25000, cost: 13500 },
+    { userTier: 30000, cost: 14400 },
+    { userTier: 35000, cost: 15300 },
+    { userTier: 40000, cost: 16200 },
+];
+
 export const serverPricing : UserTierPricing[] = [
     { userTier: -1, cost: 10500 },
     { userTier: 10, cost: 10 },
@@ -171,7 +188,7 @@ export const cloudPricingTierResult : PricingTierResult = {
 
 export const dataCenterPricingTierResult : PricingTierResult = {
     tiers: dataCenterPricing,
-    priorTiers: undefined,
-    priorPricingEndDate: undefined
+    priorTiers: dataCenterLegacyPricing,
+    priorPricingEndDate: '2024-09-18'
 };
 

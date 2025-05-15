@@ -68,7 +68,7 @@ export class PriceCalculatorService {
                 throw new Error('Non-cloud pricing must always be annual');
             }
 
-            const tierIndex = pricingTiers.findIndex(t => userCount <= t.userTier);
+            const tierIndex = userCount===-1 ? pricingTiers.findIndex(t => t.userTier===-1) : pricingTiers.findIndex(t => userCount <= t.userTier);
             const pricingTier : UserTierPricing = pricingTiers[tierIndex];
 
             basePrice = pricingTier.cost;
@@ -84,6 +84,12 @@ export class PriceCalculatorService {
 
             if (billingPeriod === 'Annual') {
                 basePrice = basePrice * ANNUAL_DISCOUNT_MULTIPLIER * licenseDurationDays / 365;
+            } else {
+                // Should be monthly, but handle short months based on Atassian's magic formula
+
+                if (licenseDurationDays < 29) {
+                    basePrice = basePrice * (licenseDurationDays+2) / 31;
+                }
             }
         }
 

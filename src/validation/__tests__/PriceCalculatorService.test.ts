@@ -1,6 +1,5 @@
-import { Transaction } from '../../entities/Transaction';
 import { PriceCalculatorService, PriceResult } from '../PriceCalculatorService';
-import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult } from './utils/pricingTable';
+import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult, dataCenterLegacyPricing } from './utils/pricingTable';
 
 const stripDailyPrice = (data: PriceResult) => ({ purchasePrice: data.purchasePrice, vendorPrice: data.vendorPrice });
 
@@ -304,5 +303,49 @@ describe('PriceCalculatorService', () => {
           }));
 
           expect(result).toEqual({ purchasePrice: 1988, vendorPrice: 1491 });
+    });
+
+    it('calculates non-full-month monthly pricing correctly', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: cloudPricingTierResult,
+            saleType: 'New',
+            saleDate: '2025-02-19',
+            isSandbox: false,
+            hosting: 'Cloud',
+            licenseType: 'COMMERCIAL',
+            tier: 'Per Unit Pricing (29 Users)',
+            maintenanceStartDate: '2025-02-19',
+            maintenanceEndDate: '2025-03-07',
+            billingPeriod: 'Monthly',
+            previousPurchaseMaintenanceEndDate: undefined,
+            previousPricing: undefined,
+            expectedDiscount: 0
+          }));
+
+          expect(result).toEqual({ purchasePrice: 27.78, vendorPrice: 23.62 }); // Atlassian actual is 27.76, 23.60
+    });
+
+    it('calculates unlimited DC tier pricing correctly', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: {
+                tiers: dataCenterLegacyPricing,
+                priorTiers: undefined,
+                priorPricingEndDate: undefined
+            },
+            saleType: 'Renewal',
+            saleDate: '2025-01-31',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'COMMERCIAL',
+            tier: 'Unlimited Users',
+            maintenanceStartDate: '2025-01-31',
+            maintenanceEndDate: '2026-01-31',
+            billingPeriod: 'Annual',
+            previousPurchaseMaintenanceEndDate: undefined,
+            previousPricing: undefined,
+            expectedDiscount: 0
+          }));
+
+          expect(result).toEqual({ purchasePrice: 19900, vendorPrice: 14925 });
     });
 });

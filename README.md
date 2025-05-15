@@ -214,6 +214,30 @@ reseller name, while "substring" will match any portion of the reseller name
 - `discountAmount`: The discount amount as a fraction (for example, 0.10 is
 a 10% discount)
 
+## Transaction Adjustment Management
+
+The system allows for manual adjustments to transactions, such as applying a discount or adding notes.
+
+### Adding a Transaction Adjustment
+
+To add or update an adjustment for a specific transaction, use the `add-transaction-adjustment` script:
+
+```bash
+npm run add-transaction-adjustment <transactionId> <discountAmount> [notes]
+```
+
+Example:
+```bash
+npm run add-transaction-adjustment 74f075cb-7afc-445d-ba3b-cc5d874341fc 100.00 "Special discount for customer X"
+```
+
+Parameters:
+- `transactionId`: The database ID (UUID) of the transaction to adjust.
+- `discountAmount`: The dollar amount to apply as a discount. Positive numbers represent a discount off list price (and should still be positive for refund transactions). Negative numbers correspond to an Atlassian overpayment on a sale.
+- `notes` (optional): Any notes to associate with this adjustment.
+
+The script will find the specified transaction and create a new adjustment record.
+
 ## General Usage: Command Line Parameters
 
 When run to pull new data, the application supports the following command line parameters.
