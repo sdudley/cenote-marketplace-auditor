@@ -56,10 +56,6 @@ export class PriceCalculatorService {
             return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0 };
         }
 
-        if (expectedDiscount && expectedDiscount < 0) {
-            throw new Error('Expected discount must be positive');
-        }
-
         const deploymentType = deploymentTypeFromHosting(hosting);
         const userCount = userCountFromTier(tier);
         const { tiers: pricingTiers } = pricingTierResult;

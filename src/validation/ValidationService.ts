@@ -130,7 +130,7 @@ export class ValidationService {
         for (const legacyPricePermutation of LEGACY_PRICING_PERMUTATIONS) {
 
             // Also try permutations of using or not using the expected discount, but only if a discount exists
-            const discountPermutations = discountToUse > 0 ? USE_EXPECTED_DISCOUNT_PERMUTATIONS : [ true ];
+            const discountPermutations = discountToUse !== 0 ? USE_EXPECTED_DISCOUNT_PERMUTATIONS : [ true ];
 
             for (const useExpectedDiscount of discountPermutations) {
                 const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;
@@ -221,8 +221,6 @@ export class ValidationService {
 
         let expectedVendorAmount = price.vendorPrice;
 
-        // TRY TO SEE IF WE HAVE ANY EXPERT RESALES TO PRICE-MATCH
-
         // Now compare the prices and see if the actual price is what we expect.
 
         let { valid, notes } = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
@@ -289,12 +287,14 @@ export class ValidationService {
         const expectedPurchaseFormatted = formatCurrency(expectedPurchase);
 
         if (valid) {
-            console.log(`OK      ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected: ${expectedVendorFormatted.padEnd(10)}; actual: ${actualVendorFormatted.padEnd(10)} ${notes.join('; ')}`);
+            console.log(`OK      ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)} ${notes.join('; ')}`);
         } else {
-            const diff = Math.abs(expectedPurchase - actualPurchase);
+            const diff = expectedPurchase - actualPurchase;
             console.log(`*ERROR* ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)}; expected purchase: ${expectedPurchaseFormatted.padEnd(10)}; actual purchase: ${actualPurchaseFormatted.padEnd(10)}; difference=${formatCurrency(diff)}; txID=${transaction.id} ${notes.join('; ')}`);
             console.log(`Pricing opts: `);
             console.dir(pricingOpts, { depth: 1 });
+
+            console.log(`npm run add-transaction-adjustment -- ${transaction.id} ${diff.toFixed(2)} ""`);
         }
     }
 

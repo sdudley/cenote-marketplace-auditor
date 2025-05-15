@@ -18,8 +18,8 @@ async function addTransactionAdjustment() {
     const [transactionId, discountAmountStr, notes] = args;
 
     const discountAmount = parseFloat(discountAmountStr);
-    if (isNaN(discountAmount) || discountAmount < 0) {
-        console.error('discountAmount must be a positive number (even for refunds)');
+    if (isNaN(discountAmount)) {
+        console.error('discountAmount must be a valid number');
         process.exit(1);
     }
 
