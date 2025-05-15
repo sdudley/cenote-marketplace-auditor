@@ -96,6 +96,7 @@ export class PriceCalculatorService {
                 basePrice = basePrice * ANNUAL_DISCOUNT_MULTIPLIER * licenseDurationDays / 365;
             } else {
                 // Should be monthly, but handle short months based on Atassian's magic formula
+                // (Not entirely sure this is correct and it may need to be updated)
 
                 if (licenseDurationDays < 29) {
                     basePrice = basePrice * (licenseDurationDays+2) / 31;

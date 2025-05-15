@@ -48,11 +48,17 @@ interface DiscountResult {
 // List of various permutations of legacy pricing (or not) for both the main transaction and the
 // license we are upgrading from (if any).
 
-const LEGACY_PRICING_PERMUTATIONS : LegacyPricePermutation[] = [
+const LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE : LegacyPricePermutation[] = [
     { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // start with no legacy pricing
     { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: false },   // try different permutations of legacy pricing
     { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: true },
     { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: true },
+    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // Must end with no legacy pricing (again) if we find no match
+];
+
+const LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE : LegacyPricePermutation[] = [
+    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // start with no legacy pricing
+    { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: false },
     { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // Must end with no legacy pricing (again) if we find no match
 ];
 
@@ -125,11 +131,14 @@ export class ValidationService {
 
         let validationResult : TransactionValidationResult|undefined = undefined;
 
+        const legacyPricePermutations = transaction.data.purchaseDetails.saleType === 'Upgrade'
+                                            ? LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE
+                                            : LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE;
 
         // For this transaction, try various permutations of legacy pricing (or not) for both
         // the main transaction, as well as the license we are upgrading from (if any).
 
-        for (const legacyPricePermutation of LEGACY_PRICING_PERMUTATIONS) {
+        for (const legacyPricePermutation of legacyPricePermutations) {
 
             // Also try permutations of using or not using the expected discount, but only if a discount exists
             const discountPermutations = discountToUse !== 0 ? USE_EXPECTED_DISCOUNT_PERMUTATIONS : [ true ];
@@ -292,7 +301,7 @@ export class ValidationService {
             console.log(`OK      ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)} ${notes.join('; ')}`);
         } else {
             const diff = expectedPurchase - actualPurchase;
-            console.log(`*ERROR* ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)}; expected purchase: ${expectedPurchaseFormatted.padEnd(10)}; actual purchase: ${actualPurchaseFormatted.padEnd(10)}; difference=${formatCurrency(diff)}; txID=${transaction.id}; Customer=${transaction.data.customerDetails.company}; ${notes.join('; ')}`);
+            console.log(`*ERROR* ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)}; expected purchase: ${expectedPurchaseFormatted.padEnd(10)}; actual purchase: ${actualPurchaseFormatted.padEnd(10)}; difference=${formatCurrency(diff)}; txID=${transaction.id}; Customer=${transaction.data.customerDetails.company}; Partner=${transaction.data.partnerDetails?.partnerName}; ${notes.join('; ')}`);
             console.log(`Pricing opts: `);
             console.dir(pricingOpts, { depth: 1 });
 
