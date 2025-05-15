@@ -257,7 +257,6 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-06-01',
             maintenanceEndDate: '2026-06-01',
             billingPeriod: 'Annual',
-            previousPurchase: undefined,
             previousPricing: undefined,
             expectedDiscount: 585
         }));
@@ -277,12 +276,33 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-29',
             maintenanceEndDate: '2026-04-29',
             billingPeriod: 'Annual',
-            previousPurchase: undefined,
             previousPricing: undefined,
             expectedDiscount: 170
           }));
           expect(result).toEqual({ purchasePrice: -3230, vendorPrice: -2422.50 });
     });
 
+    it('calculated DC upgrades correctly with overlapping maintenance periods', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: dataCenterPricingTierResult,
+            saleType: 'Upgrade',
+            saleDate: '2025-04-14',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'COMMERCIAL',
+            tier: '2000 Users',
+            maintenanceStartDate: '2025-04-14',
+            maintenanceEndDate: '2026-01-29',
+            billingPeriod: 'Annual',
+            previousPurchaseMaintenanceEndDate: '2026-01-29',
+            previousPricing: {
+              purchasePrice: 4200,
+              vendorPrice: 3150,
+              dailyNominalPrice: 11.506849315068493
+            },
+            expectedDiscount: 0
+          }));
 
+          expect(result).toEqual({ purchasePrice: 1988, vendorPrice: 1491 });
+    });
 });

@@ -1,10 +1,8 @@
-import { PurchaseDetails } from "./ValidationService";
 import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "./licenseDurationCalculator";
 import { DeploymentType, PricingTierResult } from "../services/PricingService";
 import { UserTierPricing } from '../types/userTiers';
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
 import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
-import { Transaction } from "../entities/Transaction";
 import { injectable } from "inversify";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
@@ -20,7 +18,7 @@ export interface PriceCalcOpts {
     maintenanceStartDate: string;
     maintenanceEndDate: string;
     billingPeriod: "Monthly" | "Annual";
-    previousPurchase?: Transaction|undefined;
+    previousPurchaseMaintenanceEndDate?: string|undefined;
     previousPricing?: PriceResult|undefined;
     expectedDiscount?: number; // always positive, even for refunds
 }
@@ -33,7 +31,8 @@ export interface PriceResult {
 
 @injectable()
 export class PriceCalculatorService {
-    private getDiscountAmount(saleDate: string, deploymentType: DeploymentType): number {
+    private getDiscountAmount(_saleDate: string, deploymentType: DeploymentType): number {
+        // For revenue share changes, we will eventually need to use the sale date.
         return deploymentType==='cloud' ? CLOUD_DISCOUNT_RATIO : DC_DISCOUNT_RATIO;
     }
 
@@ -49,7 +48,7 @@ export class PriceCalculatorService {
             maintenanceStartDate,
             maintenanceEndDate,
             billingPeriod,
-            previousPurchase,
+            previousPurchaseMaintenanceEndDate,
             expectedDiscount
         } = opts;
 
@@ -108,10 +107,10 @@ export class PriceCalculatorService {
         // If this is an upgrade, then we need to calculate the price differential for the
         // overlap in subscription length.
 
-        if (saleType==='Upgrade' && previousPurchase) {
+        if (saleType==='Upgrade' && previousPurchaseMaintenanceEndDate) {
             const { previousPricing } = opts;
 
-            const overlapDays = getSubscriptionOverlapDays(maintenanceStartDate, previousPurchase.data.purchaseDetails.maintenanceEndDate);
+            const overlapDays = getSubscriptionOverlapDays(maintenanceStartDate, previousPurchaseMaintenanceEndDate);
 
             if (overlapDays > licenseDurationDays) {
                 throw new Error('Overlap days are greater than the license duration');
