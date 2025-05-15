@@ -16,7 +16,8 @@
     "backfill-version-numbers": "ts-node src/scripts/backfillVersionNumbers.ts",
     "export-pricing-template": "ts-node src/scripts/exportPricingTemplate.ts",
     "import-pricing": "ts-node src/scripts/importPricing.ts",
-    "add-reseller": "ts-node src/scripts/addReseller.ts"
+    "add-reseller": "ts-node src/scripts/addReseller.ts",
+    "add-transaction-adjustment": "ts-node src/scripts/addTransactionAdjustment.ts"
   },
   "dependencies": {
     "axios": "^1.6.7",

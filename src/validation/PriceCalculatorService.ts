@@ -2,17 +2,27 @@ import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "./licenseD
 import { DeploymentType, PricingTierResult } from "../services/PricingService";
 import { UserTierPricing } from '../types/userTiers';
 import { deploymentTypeFromHosting, userCountFromTier } from "./validationUtils";
-import { ACADEMIC_CLOUD_PRICE_RATIO, ACADEMIC_DC_PRICE_RATIO, CLOUD_DISCOUNT_RATIO, DC_DISCOUNT_RATIO } from "./constants";
+import {
+    ACADEMIC_CLOUD_PRICE_RATIO,
+    ACADEMIC_DC_PRICE_RATIO_LEGACY,
+    ACADEMIC_DC_PRICE_RATIO_CURRENT_10K,
+    ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE,
+    CLOUD_DISCOUNT_RATIO,
+    DC_DISCOUNT_RATIO
+} from "./constants";
 import { injectable } from "inversify";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
+
+export type HostingType = "Server" | "Data Center" | "Cloud";
+export type LicenseType = "ACADEMIC" | "COMMERCIAL" | "COMMUNITY" | "EVALUATION" | "OPEN_SOURCE";
 
 export interface PriceCalcOpts {
     pricingTierResult: PricingTierResult;
     saleDate: string;
     saleType: "New" | "Refund" | "Renewal" | "Upgrade";
     isSandbox: boolean;
-    hosting: "Server" | "Data Center" | "Cloud";
+    hosting: HostingType;
     licenseType: "ACADEMIC" | "COMMERCIAL" | "COMMUNITY" | "EVALUATION" | "OPEN_SOURCE";
     tier: string;
     maintenanceStartDate: string;
@@ -99,7 +109,7 @@ export class PriceCalculatorService {
 
         // Apply academic discount if applicable
         if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
-            basePrice = basePrice * (hosting==='Cloud' ? ACADEMIC_CLOUD_PRICE_RATIO : ACADEMIC_DC_PRICE_RATIO);
+            basePrice = this.applyLicenseTypeDiscounts({ basePrice, saleDate, hosting, userCount });
         }
 
         // Now we start to calculate the final value paid to Atlassian
@@ -210,5 +220,27 @@ export class PriceCalculatorService {
         }
 
         return cost;
+    }
+
+    private applyLicenseTypeDiscounts(opts: { basePrice: number; saleDate: string; hosting: HostingType; userCount: number; }): number {
+        const { basePrice, saleDate, hosting, userCount } = opts;
+
+        if (hosting==='Cloud') {
+            return basePrice * ACADEMIC_CLOUD_PRICE_RATIO;
+        }
+
+        if (saleDate < ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE) {
+            return basePrice * ACADEMIC_DC_PRICE_RATIO_LEGACY;
+        }
+
+        // Somewhere in 2024, Atlassian changed the pricing for academic data center licenses to apply a
+        // 75% discount for user tiers of 10k+ for Confluence licenses.
+
+        if (userCount !== -1 && userCount < 10000) {
+            // If under 10k (and not unlimited), continue with the 50% discount
+            return basePrice * ACADEMIC_DC_PRICE_RATIO_LEGACY;
+        }
+
+        return basePrice * ACADEMIC_DC_PRICE_RATIO_CURRENT_10K;
     }
 }
