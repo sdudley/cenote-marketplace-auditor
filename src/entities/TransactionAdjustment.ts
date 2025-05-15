@@ -16,9 +16,6 @@ export class TransactionAdjustment {
     @JoinColumn()
     transaction!: Transaction;
 
-    @Column({ nullable: true })
-    legacyPricingOverride!: boolean;
-
     @Column('decimal', {
         precision: 14,
         scale: 4,
