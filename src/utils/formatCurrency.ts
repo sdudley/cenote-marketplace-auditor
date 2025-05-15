@@ -1,6 +1,6 @@
 
 const formatCurrency = (value: number | undefined): string => {
-    if (value === undefined) return '$0.00';
+    if (typeof value === 'undefined') return '$0.00';
     return `$${value.toFixed(2)}`;
 };
 

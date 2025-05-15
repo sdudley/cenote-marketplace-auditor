@@ -13,6 +13,8 @@ import { LicenseDaoService } from '../services/LicenseDaoService';
 import TransactionReconcileDaoService from '../services/TransactionReconcileDaoService';
 import { TYPES } from './types';
 import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
+import { ResellerDaoService } from '../services/ResellerDaoService';
+
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
 
@@ -32,6 +34,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionReconcileDaoService>(TYPES.TransactionReconcileDaoService).to(TransactionReconcileDaoService).inSingletonScope();
     container.bind<LicenseDaoService>(TYPES.LicenseDaoService).to(LicenseDaoService).inSingletonScope();
     container.bind<TransactionAdjustmentDaoService>(TYPES.TransactionAdjustmentDaoService).to(TransactionAdjustmentDaoService).inSingletonScope();
+    container.bind<ResellerDaoService>(TYPES.ResellerDaoService).to(ResellerDaoService);
 
     return container;
 }

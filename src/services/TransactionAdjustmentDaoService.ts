@@ -15,12 +15,15 @@ export class TransactionAdjustmentDaoService {
     }
 
     /**
-     * Get the adjustment for a transaction, if one exists
+     * Get the adjustments for a transaction
      */
-    async getAdjustmentForTransaction(transaction: Transaction): Promise<TransactionAdjustment | null> {
-        return this.transactionAdjustmentRepo.findOne({
+    async getAdjustmentsForTransaction(transaction: Transaction): Promise<TransactionAdjustment[]> {
+        return this.transactionAdjustmentRepo.find({
             where: {
                 transaction: { id: transaction.id }
+            },
+            order: {
+                createdAt: 'ASC'
             }
         });
     }

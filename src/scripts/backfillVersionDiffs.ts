@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { DataSource } from 'typeorm';
 import { LicenseVersion } from '../entities/LicenseVersion';
 import { TransactionVersion } from '../entities/TransactionVersion';
 import { computeJsonPaths, normalizeObject } from '../utils/objectUtils';

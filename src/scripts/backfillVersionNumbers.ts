@@ -1,6 +1,4 @@
-import 'reflect-metadata';
 import 'dotenv/config';
-import { DataSource, IsNull } from 'typeorm';
 import { Transaction } from '../entities/Transaction';
 import { TransactionVersion } from '../entities/TransactionVersion';
 import { License } from '../entities/License';

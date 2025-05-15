@@ -4,8 +4,8 @@ export type ResellerMatchMode = 'exact' | 'substring';
 
 @Entity()
 export class Reseller {
-    @PrimaryGeneratedColumn()
-    id!: number;
+    @PrimaryGeneratedColumn('uuid')
+    id!: string;
 
     @Column()
     name!: string;
@@ -20,7 +20,11 @@ export class Reseller {
     @Column({
         type: 'decimal',
         precision: 14,
-        scale: 2
+        scale: 4,
+        transformer: {
+            to: (value: number) => value,
+            from: (value: string) => parseFloat(value)
+        }
     })
     discountAmount!: number;
 }

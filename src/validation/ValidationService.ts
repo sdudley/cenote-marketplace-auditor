@@ -1,6 +1,5 @@
 import { Transaction } from '../entities/Transaction';
 import { PricingTierResult, PricingService } from '../services/PricingService';
-import { UserTierPricing } from '../types/userTiers';
 import { components } from '../types/marketplace-api';
 import { deploymentTypeFromHosting } from './validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
@@ -10,6 +9,10 @@ import TransactionDaoService from '../services/TransactionDaoService';
 import TransactionReconcileDaoService from '../services/TransactionReconcileDaoService';
 import { LicenseDaoService } from '../services/LicenseDaoService';
 import { formatCurrency } from '../utils/formatCurrency';
+import { ResellerDaoService } from '../services/ResellerDaoService';
+import { TransactionAdjustment } from '../entities/TransactionAdjustment';
+import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
+
 const START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
 
@@ -45,6 +48,11 @@ const LEGACY_PRICING_PERMUTATIONS : LegacyPricePermutation[] = [
     { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // Must end with no legacy pricing (again) if we find no match
 ];
 
+const USE_EXPECTED_DISCOUNT_PERMUTATIONS : boolean[] = [
+    true,
+    false
+];
+
 @injectable()
 export class ValidationService {
     constructor(
@@ -52,7 +60,9 @@ export class ValidationService {
         @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
         @inject(TYPES.TransactionDaoService) private transactionDaoService: TransactionDaoService,
         @inject(TYPES.TransactionReconcileDaoService) private transactionReconcileDaoService: TransactionReconcileDaoService,
-        @inject(TYPES.LicenseDaoService) private licenseDaoService: LicenseDaoService
+        @inject(TYPES.LicenseDaoService) private licenseDaoService: LicenseDaoService,
+        @inject(TYPES.ResellerDaoService) private resellerDaoService: ResellerDaoService,
+        @inject(TYPES.TransactionAdjustmentDaoService) private transactionAdjustmentDaoService: TransactionAdjustmentDaoService
     ) {
     }
 
@@ -76,28 +86,55 @@ export class ValidationService {
             try {
                 let validationResult : TransactionValidationResult|undefined = undefined;
 
+                // Check to see if we expect any reseller adjustments for this transaction
+
+                const expectedAdjustments = await this.generateExpectedAdjustments(transaction);
+                const actualAdjustments = await this.getActualAdjustments(transaction);
+
+                // If any adjustments were actually persisted to the database, use those. If not,
+                // generate the adjustments we expect (such as reseller discounts).
+
+                const shouldApplyActualAdjustments = actualAdjustments.length > 0;
+                const adjustmentsToApply = shouldApplyActualAdjustments ? actualAdjustments : expectedAdjustments;
+                const expectedDiscount = adjustmentsToApply.reduce((acc, adjustment) => acc + (adjustment.purchasePriceDiscount || 0), 0);
+
                 // For this transaction, try various permutations of legacy pricing (or not) for both
-                // the main transaction, as well as the license we are upgrading from (if any)
+                // the main transaction, as well as the license we are upgrading from (if any).
+                //
+                // Also try permutations of using or not using the expected discount
 
                 for (const legacyPricePermutation of LEGACY_PRICING_PERMUTATIONS) {
-                    const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;
+                    const discountPermutations = expectedDiscount > 0 ? USE_EXPECTED_DISCOUNT_PERMUTATIONS : [ true ];
 
-                    // Try to see if the price matches with this permutation of legacy pricing (or not)
+                    for (const useExpectedDiscount of discountPermutations) {
+                        const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;
 
-                    validationResult = await this.validateOneTransaction({ transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious });
+                        // Try to see if the price matches with this permutation of legacy pricing (or not)
 
-                    const { isExpectedPrice, notes } = validationResult;
+                        validationResult = await this.validateOneTransaction({
+                            transaction,
+                            useLegacyPricingTierForCurrent,
+                            useLegacyPricingTierForPrevious,
+                            expectedDiscount: useExpectedDiscount ? expectedDiscount : 0
+                        });
 
-                    if (isExpectedPrice) {
-                        if (useLegacyPricingTierForCurrent) {
-                            notes.push(`Price is correct but uses legacy pricing for current transaction.`);
+                        const { isExpectedPrice, notes } = validationResult;
+
+                        if (isExpectedPrice) {
+                            if (useLegacyPricingTierForCurrent) {
+                                notes.push(`Price is correct but uses legacy pricing for current transaction.`);
+                            }
+
+                            if (useLegacyPricingTierForPrevious) {
+                                notes.push(`Price is correct but uses legacy pricing for previous transaction.`);
+                            }
+
+                            if (!useExpectedDiscount) {
+                                notes.push(`Price is correct but expected discount of ${formatCurrency(expectedDiscount)} was not applied.`);
+                            }
+
+                            break;
                         }
-
-                        if (useLegacyPricingTierForPrevious) {
-                            notes.push(`Price is correct but uses legacy pricing for previous transaction.`);
-                        }
-
-                        break;
                     }
                 }
 
@@ -122,8 +159,13 @@ export class ValidationService {
         console.log(`\nSummary: ${transactions.length} transactions; ${expectedPriceCount} have expected price; ${validCount} are reconciled.`);
     }
 
-    private async validateOneTransaction(opts: { transaction: Transaction; useLegacyPricingTierForCurrent: boolean; useLegacyPricingTierForPrevious: boolean; }): Promise<TransactionValidationResult> {
-        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = opts;
+    private async validateOneTransaction(opts: {
+        transaction: Transaction;
+        useLegacyPricingTierForCurrent: boolean;
+        useLegacyPricingTierForPrevious: boolean;
+        expectedDiscount: number;
+    }): Promise<TransactionValidationResult> {
+        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount } = opts;
         const { data, entitlementId } = transaction;
         const { addonKey, purchaseDetails } = data;
         const {
@@ -141,6 +183,7 @@ export class ValidationService {
 
         let previousPurchase : Transaction | undefined;
         let previousPurchasePricingTierResult : PricingTierResult | undefined;
+        let expectedDiscountForPreviousPurchase : number | undefined;
 
         if (saleType==='Upgrade') {
             const relatedTransactions = await this.transactionDaoService.loadRelatedTransactions(entitlementId);
@@ -149,16 +192,17 @@ export class ValidationService {
             if (previousPurchase) {
                 const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
                 previousPurchasePricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
+                expectedDiscountForPreviousPurchase = await this.calculateExpectedDiscountForTransaction({ transaction: previousPurchase });
             }
         }
 
         // Calculate the expected price for the previous purchase, if it exists.
 
-        const previousPricing = previousPurchase && previousPurchasePricingTierResult ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious }) : undefined;
+        const previousPricing = previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined' ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase }) : undefined;
 
         // Calculate the expected price for the current transaction.
 
-        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent });
+        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount });
 
         let expectedVendorAmount = price.vendorPrice;
 
@@ -257,8 +301,9 @@ export class ValidationService {
         previousPurchase?: Transaction|undefined;
         previousPricing?: PriceResult|undefined;
         useLegacyPricingTier: boolean;
+        expectedDiscount: number;
     }) : PriceWithPricingOpts {
-        const { transaction, isSandbox, pricingTierResult, previousPurchase, previousPricing, useLegacyPricingTier } = opts;
+        const { transaction, isSandbox, pricingTierResult, previousPurchase, previousPricing, useLegacyPricingTier, expectedDiscount } = opts;
         const { purchaseDetails } = transaction.data;
 
         const pricingOpts: PriceCalcOpts = {
@@ -273,7 +318,8 @@ export class ValidationService {
             maintenanceEndDate: purchaseDetails.maintenanceEndDate,
             billingPeriod: purchaseDetails.billingPeriod,
             previousPurchase,
-            previousPricing
+            previousPricing,
+            expectedDiscount
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator
@@ -329,5 +375,69 @@ export class ValidationService {
 
         const subsequentTransactions = relatedTransactions.slice(thisTransactionIndex+1);
         return subsequentTransactions.find(t => t.data.purchaseDetails.saleType !== 'Refund');
+    }
+
+    private async getActualAdjustments(transaction: Transaction) : Promise<TransactionAdjustment[]> {
+        const adjustments = await this.transactionAdjustmentDaoService.getAdjustmentsForTransaction(transaction);
+        return adjustments;
+    }
+
+    private async generateExpectedAdjustments(transaction: Transaction) : Promise<TransactionAdjustment[]> {
+        const resellerName = transaction.data.partnerDetails?.partnerName;
+        const reseller = await this.resellerDaoService.findMatchingReseller(resellerName);
+
+        if (!reseller) {
+            return [];
+        }
+
+        const { discountAmount } = reseller;
+
+        if (discountAmount > 1) {
+            throw new Error(`Reseller discount amount cannot be greater than 100%: ${discountAmount} for ${resellerName}`);
+        }
+
+        if (discountAmount <= 0) {
+            return [];
+        }
+
+        const { purchasePrice } = transaction.data.purchaseDetails
+
+        // Reseller discount is a percentage expressed as 0.05 = 5%
+        //
+        // The discount has already been applied to the purchase price, so we need to reverse it
+        // to get the original purchase price.
+
+        let purchasePriceDiscount = (purchasePrice / (1-discountAmount)) - purchasePrice;
+
+        // Discount is always positive, even for refunds
+
+        if (purchasePriceDiscount < 0) {
+            purchasePriceDiscount = -purchasePriceDiscount;
+        }
+
+        const adjustment = new TransactionAdjustment();
+        adjustment.transaction = transaction;
+        adjustment.purchasePriceDiscount = purchasePriceDiscount;
+        adjustment.notes = `Automatic reseller discount of ${formatCurrency(discountAmount)} for ${resellerName}`;
+
+        return [adjustment];
+    }
+
+    private async calculateExpectedDiscountForTransaction(opts: { transaction: Transaction; }) : Promise<number> {
+        const { transaction } = opts;
+
+        // Check to see if we expect any reseller adjustments for this transaction
+
+        const expectedAdjustments = await this.generateExpectedAdjustments(transaction);
+        const actualAdjustments = await this.getActualAdjustments(transaction);
+
+        // If any adjustments were actually persisted to the database, use those. If not,
+        // generate the adjustments we expect (such as reseller discounts).
+
+        const shouldApplyActualAdjustments = actualAdjustments.length > 0;
+        const adjustmentsToApply = shouldApplyActualAdjustments ? actualAdjustments : expectedAdjustments;
+        const expectedDiscount = adjustmentsToApply.reduce((acc, adjustment) => acc + (adjustment.purchasePriceDiscount || 0), 0);
+
+        return expectedDiscount;
     }
 }

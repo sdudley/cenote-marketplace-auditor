@@ -12,14 +12,21 @@ export class TransactionAdjustment {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @OneToOne(() => Transaction)
+    @ManyToOne(() => Transaction)
     @JoinColumn()
     transaction!: Transaction;
 
     @Column({ nullable: true })
     legacyPricingOverride!: boolean;
 
-    @Column('decimal', { precision: 14, scale: 2, nullable: true })
+    @Column('decimal', {
+        precision: 14,
+        scale: 4,
+        nullable: true,
+        transformer: {
+            to: (value: number) => value,
+            from: (value: string) => parseFloat(value)
+        } })
     purchasePriceDiscount?: number;
 
     @Column({ type: 'text', nullable: true })

@@ -1,3 +1,4 @@
+import { Transaction } from '../../entities/Transaction';
 import { PriceCalculatorService, PriceResult } from '../PriceCalculatorService';
 import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult } from './utils/pricingTable';
 
@@ -241,6 +242,47 @@ describe('PriceCalculatorService', () => {
             billingPeriod: 'Annual'
         }));
 
-        expect(result).toEqual({ purchasePrice: 1252, vendorPrice: 1064.20 }); // actual is 1063.56 per Atlassian
+        expect(result).toEqual({ purchasePrice: 1252, vendorPrice: 1064.20 }); // Actual is 1063.56 per Atlassian
     });
+
+    it('should calculate correct price for 15k DC renewal with reseller discount', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: dataCenterPricingTierResult,
+            saleType: 'Renewal',
+            saleDate: '2025-04-07',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'COMMERCIAL',
+            tier: '15000 Users',
+            maintenanceStartDate: '2025-06-01',
+            maintenanceEndDate: '2026-06-01',
+            billingPeriod: 'Annual',
+            previousPurchase: undefined,
+            previousPricing: undefined,
+            expectedDiscount: 585
+        }));
+
+        expect(result).toEqual({ purchasePrice: 11115, vendorPrice: 8336.25 });
+    });
+
+    it('calculates correct refund price with reseller discount', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: dataCenterPricingTierResult,
+            saleType: 'Refund',
+            saleDate: '2025-04-28',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'COMMERCIAL',
+            tier: '500 Users',
+            maintenanceStartDate: '2025-04-29',
+            maintenanceEndDate: '2026-04-29',
+            billingPeriod: 'Annual',
+            previousPurchase: undefined,
+            previousPricing: undefined,
+            expectedDiscount: 170
+          }));
+          expect(result).toEqual({ purchasePrice: -3230, vendorPrice: -2422.50 });
+    });
+
+
 });

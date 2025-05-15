@@ -28,10 +28,24 @@ export class TransactionReconcile {
     @Column({ type: 'text', nullable: true })
     notes?: string;
 
-    @Column('decimal', { precision: 14, scale: 2, nullable: true })
+    @Column('decimal', {
+        precision: 14,
+        scale: 4,
+        nullable: true,
+        transformer: {
+            to: (value: number) => value,
+            from: (value: string) => parseFloat(value)
+        } })
     actualVendorAmount?: number;
 
-    @Column('decimal', { precision: 14, scale: 2, nullable: true })
+    @Column('decimal', {
+        precision: 14,
+        scale: 4,
+        nullable: true,
+        transformer: {
+            to: (value: number) => value,
+            from: (value: string) => parseFloat(value)
+        } })
     expectedVendorAmount?: number;
 
     @Column()

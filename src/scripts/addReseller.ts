@@ -1,6 +1,9 @@
-import { DataSource } from 'typeorm';
+import 'dotenv/config';
 import { Reseller, ResellerMatchMode } from '../entities/Reseller';
 import { initializeDatabase } from '../config/database';
+import { ResellerDaoService } from '../services/ResellerDaoService';
+import { configureContainer } from '../config/container';
+import { TYPES } from '../config/types';
 
 async function addReseller() {
     const args = process.argv.slice(2);
@@ -24,24 +27,15 @@ async function addReseller() {
     }
 
     const dataSource = await initializeDatabase();
-    const resellerRepository = dataSource.getRepository(Reseller);
-
-    const existingReseller = await resellerRepository.findOne({
-        where: { name }
-    });
-
-    if (existingReseller) {
-        console.log(`Reseller already exists: ${name}`);
-        await dataSource.destroy();
-        return;
-    }
+    const container = configureContainer(dataSource);
+    const resellerService = container.get<ResellerDaoService>(TYPES.ResellerDaoService);
 
     const newReseller = new Reseller();
     newReseller.name = name;
     newReseller.matchMode = matchMode as ResellerMatchMode;
     newReseller.discountAmount = discountAmount;
 
-    await resellerRepository.save(newReseller);
+    await resellerService.saveReseller(newReseller);
     console.log(`Added reseller: ${name}`);
 
     await dataSource.destroy();

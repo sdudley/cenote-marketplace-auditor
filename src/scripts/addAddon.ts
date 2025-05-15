@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import 'dotenv/config';
 import { initializeDatabase } from '../config/database';
 import { configureContainer } from '../config/container';

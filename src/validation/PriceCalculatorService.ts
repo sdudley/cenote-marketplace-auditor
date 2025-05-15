@@ -22,6 +22,7 @@ export interface PriceCalcOpts {
     billingPeriod: "Monthly" | "Annual";
     previousPurchase?: Transaction|undefined;
     previousPricing?: PriceResult|undefined;
+    expectedDiscount?: number; // always positive, even for refunds
 }
 
 export interface PriceResult {
@@ -48,11 +49,16 @@ export class PriceCalculatorService {
             maintenanceStartDate,
             maintenanceEndDate,
             billingPeriod,
-            previousPurchase
+            previousPurchase,
+            expectedDiscount
         } = opts;
 
         if (isSandbox) {
             return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0 };
+        }
+
+        if (expectedDiscount && expectedDiscount < 0) {
+            throw new Error('Expected discount must be positive');
         }
 
         const deploymentType = deploymentTypeFromHosting(hosting);
@@ -126,22 +132,28 @@ export class PriceCalculatorService {
             }
         }
 
+        // If partner or other manual discount
+
+        if (expectedDiscount) {
+            basePrice -= expectedDiscount * (saleType==='Refund' ? -1 : 1);
+        }
+
         if (billingPeriod === 'Annual') {
             basePrice = Math.ceil(basePrice);
         }
 
-        basePrice *= this.getDiscountAmount(saleDate, deploymentType);
+        // Adjust the purchase price after any discounts
 
-        // If partner discount:
+        purchasePrice = basePrice;
 
-        if (false /* marketplacePromotion */) {
-            basePrice *= 0.95;
-            basePrice = Math.floor(basePrice * 0.95);
-        }
+        // TODO FIXME need to adjust purchasePrice here too?
+        // dailyNominalPrice = purchasePrice / licenseDurationDays;
 
         if (billingPeriod==='Annual' && hosting !== 'Cloud') {
             basePrice = Math.ceil(basePrice);
         }
+
+        basePrice *= this.getDiscountAmount(saleDate, deploymentType);
 
         return {
             purchasePrice: Math.round(purchasePrice * 100)/100,
