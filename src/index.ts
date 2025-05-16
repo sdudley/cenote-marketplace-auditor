@@ -9,72 +9,51 @@ import { TransactionService } from './services/TransactionService';
 import { LicenseService } from './services/LicenseService';
 import { PricingService } from './services/PricingService';
 import { ValidationService } from './validation/ValidationService';
-import { PriceCalculatorService } from './validation/PriceCalculatorService';
+
 
 async function main() {
-    // Parse command line arguments
     const args = process.argv.slice(2);
-    const withFetchApps = args.length === 0 || args.includes('--with-fetch-apps');
-    const fetchPricingData = args.length === 0 || args.includes('--with-pricing');
-    const fetchTransactions = args.length === 0 || args.includes('--with-transactions');
-    const fetchLicenses = args.length === 0 || args.includes('--with-licenses');
-    const validateTransactions = args.length === 0 || args.includes('--validate-transactions');
+    const flags = new Set(args);
 
-    console.log('Starting Marketplace Auditor...');
-    console.log('Fetch options:');
-    console.log(`- Fetch Apps: ${withFetchApps ? 'enabled' : 'disabled'}`);
-    console.log(`- Fetch Pricing: ${fetchPricingData ? 'enabled' : 'disabled'}`);
-    console.log(`- Fetch New Transactions: ${fetchTransactions ? 'enabled' : 'disabled'}`);
-    console.log(`- Fetch New Licenses: ${fetchLicenses ? 'enabled' : 'disabled'}`);
-    console.log(`- Validate Transactions: ${validateTransactions ? 'enabled' : 'disabled'}`);
+    const dataSource = await initializeDatabase();
+    const container = configureContainer(dataSource);
 
-    let dataSource;
+    // Parse start date if provided
+    let startDate: string|undefined;
+    const startDateArg = args.find(arg => arg.startsWith('--start-date='));
+    if (startDateArg) {
+        startDate = startDateArg.split('=')[1];
+    }
+
     try {
-        dataSource = await initializeDatabase();
-        console.log('Database connection established');
-
-        // Configure and create container
-        const container = configureContainer(dataSource);
-
-        // Get service instances from container
         const marketplaceService = container.get<MarketplaceService>(TYPES.MarketplaceService);
-        const addonService = container.get<AddonService>(TYPES.AddonService);
-        const transactionService = container.get<TransactionService>(TYPES.TransactionService);
-        const licenseService = container.get<LicenseService>(TYPES.LicenseService);
-        const pricingService = container.get<PricingService>(TYPES.PricingService);
-        const validationService = container.get<ValidationService>(TYPES.ValidationService);
 
-        if (withFetchApps) {
-            console.log('Fetching apps...');
+        if (flags.size === 0 || flags.has('--with-fetch-apps')) {
+            const addonService = container.get<AddonService>(TYPES.AddonService);
             await addonService.syncAddonKeys();
         }
 
-        if (fetchPricingData) {
-            console.log('\nFetching pricing data...');
+        if (flags.size === 0 || flags.has('--with-pricing')) {
+            const pricingService = container.get<PricingService>(TYPES.PricingService);
             await pricingService.fetchPricing();
         }
 
-        if (fetchTransactions) {
-            console.log('\nFetching transactions...');
+        if (flags.size === 0 || flags.has('--with-transactions')) {
             const transactions = await marketplaceService.getTransactions();
+            const transactionService = container.get<TransactionService>(TYPES.TransactionService);
             await transactionService.processTransactions(transactions);
         }
 
-        if (fetchLicenses) {
-            console.log('\nFetching licenses...');
+        if (flags.size === 0 || flags.has('--with-licenses')) {
             const licenses = await marketplaceService.getLicenses();
+            const licenseService = container.get<LicenseService>(TYPES.LicenseService);
             await licenseService.processLicenses(licenses);
         }
 
-        if (validateTransactions) {
-            console.log('\nValidating transactions...');
-            await validationService.validateTransactions();
+        if (flags.size === 0 || flags.has('--validate-transactions')) {
+            const validationService = container.get<ValidationService>(TYPES.ValidationService);
+            await validationService.validateTransactions(startDate);
         }
-
-        console.log('Processing completed successfully');
-    } catch (error) {
-        console.error('Error during processing:', error);
-        process.exit(1);
     } finally {
         if (dataSource) {
             await dataSource.destroy();

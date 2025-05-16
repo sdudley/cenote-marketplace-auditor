@@ -14,7 +14,7 @@ import { TransactionAdjustment } from '../entities/TransactionAdjustment';
 import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
 import { getLicenseDurationInDays } from './licenseDurationCalculator';
 
-const START_DATE = '2024-01-01';
+const DEFAULT_START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
 
 export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];
@@ -71,7 +71,7 @@ const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS : boolean[] = [
 
 const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS : boolean[] = [
     true,
-    false,
+    false // Ends with no discounts applied on failure, so that our summary does not show the impact of potentially-incorrect estimated discounts
 ];
 
 @injectable()
@@ -87,23 +87,19 @@ export class ValidationService {
     ) {
     }
 
-    public async validateTransactions(): Promise<void> {
-        const transactions = await this.transactionDaoService.getTransactionsBySaleDate(START_DATE);
-        console.log(`\nValidating transactions since ${START_DATE}:`);
+    /**
+     * Validate all transactions in the database
+     * @param startDate Optional start date to filter transactions
+     */
+    async validateTransactions(startDate?: string|null): Promise<void> {
+        const actualStartDate = startDate ?? DEFAULT_START_DATE;
+        const transactions = await this.transactionDaoService.getTransactionsBySaleDate(actualStartDate);
+        console.log(`\nValidating transactions since ${actualStartDate}:`);
 
         let validCount = 0;
         let expectedPriceCount = 0;
 
         for (const transaction of transactions) {
-
-            if (false) { // transaction.entitlementId !== 'SEN-xxxxxx') {
-                // problem with this transaction:
-                // the prior period license (from which we are upgrading) was also calculated using
-                // the legacy pricing period, so we need to figure out how to determine that this was
-                // the case. Recursive evaluation of the prior transaction?
-                continue;
-            }
-
             try {
                 const discountResult = await this.calculateExpectedDiscountForTransaction(transaction);
                 const validationResult = await this.validateOneTransactionWithPricingPermutations({ transaction, discountResult });
