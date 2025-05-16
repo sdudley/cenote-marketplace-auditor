@@ -12,6 +12,7 @@ import { formatCurrency } from '../utils/formatCurrency';
 import { ResellerDaoService } from '../services/ResellerDaoService';
 import { TransactionAdjustment } from '../entities/TransactionAdjustment';
 import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
+import { getLicenseDurationInDays } from './licenseDurationCalculator';
 
 const START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
@@ -209,7 +210,9 @@ export class ValidationService {
         const {
             vendorAmount,
             saleType,
-            saleDate
+            saleDate,
+            maintenanceStartDate,
+            maintenanceEndDate
         } = purchaseDetails;
 
         const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
@@ -223,7 +226,7 @@ export class ValidationService {
         let previousPurchasePricingTierResult : PricingTierResult | undefined;
         let expectedDiscountForPreviousPurchase : DiscountResult | undefined;
 
-        if (saleType==='Upgrade') {
+        if (saleType==='Upgrade' || saleType==='Renewal') {
             const relatedTransactions = await this.transactionDaoService.loadRelatedTransactions(entitlementId);
             previousPurchase = this.getPreviousPurchase({ relatedTransactions, thisTransaction: transaction });
 
@@ -236,7 +239,9 @@ export class ValidationService {
 
         // Calculate the expected price for the previous purchase, if it exists.
 
-        const previousPricing = previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined' ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse }) : undefined;
+        const previousPricing = saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
+                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse })
+                        : undefined;
 
         // Calculate the expected price for the current transaction.
 
@@ -248,6 +253,27 @@ export class ValidationService {
 
         let { valid, notes } = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
         const isExpectedPrice = valid;
+
+        // Also validate the start/end dates of the license
+        const licenseDurationInDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
+        const { licenseType } = purchaseDetails;
+
+        if ((saleType==='Upgrade' || saleType==='Renewal') &&
+            licenseDurationInDays !== 0  &&
+            licenseType !== 'COMMUNITY') {
+
+            if (!previousPurchase) {
+                notes.push('Could not find previous purchase');
+                valid = false;
+            } else {
+                const { maintenanceEndDate: priorMaintenanceEndDate } = previousPurchase?.data.purchaseDetails;
+
+                if (priorMaintenanceEndDate < maintenanceStartDate) {
+                    notes.push(`Gap in licensing: previous maintenance ended on ${priorMaintenanceEndDate} but this license starts on ${maintenanceStartDate}`);
+                    valid = false;
+                }
+            }
+        }
 
         // Even if price is as expected, refunds always require approval
 
