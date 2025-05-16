@@ -62,10 +62,15 @@ const LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE : LegacyPricePermutation[] = [
     { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // Must end with no legacy pricing (again) if we find no match
 ];
 
-const USE_EXPECTED_DISCOUNT_PERMUTATIONS : boolean[] = [
+const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS : boolean[] = [
     true,
     false,
     true // Must end with true (again) if we find no match to produce expected price with discounts
+];
+
+const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS : boolean[] = [
+    true,
+    false,
 ];
 
 @injectable()
@@ -141,7 +146,14 @@ export class ValidationService {
         for (const legacyPricePermutation of legacyPricePermutations) {
 
             // Also try permutations of using or not using the expected discount, but only if a discount exists
-            const discountPermutations = discountToUse !== 0 ? USE_EXPECTED_DISCOUNT_PERMUTATIONS : [ true ];
+
+            let discountPermutations : boolean[] = [ true ];
+
+            if (discountToUse !== 0) {
+                discountPermutations = discountResult.hasActualAdjustments
+                    ? EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS // if no match, still apply user-requested discounts in totals
+                    : EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS; // if no match, remove estimated discounts from totals
+            }
 
             for (const useExpectedDiscount of discountPermutations) {
                 const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;

@@ -117,6 +117,8 @@ export class TransactionService {
                 version.version = currentVersion;
                 await this.transactionDaoService.saveTransactionVersions(version);
 
+                console.log(`Created new transaction ${transactionKey}:`);
+                console.dir(normalizedData, { depth: null });
                 newCount++;
             }
 

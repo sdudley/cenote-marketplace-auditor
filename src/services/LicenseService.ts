@@ -112,6 +112,9 @@ export class LicenseService {
                 version.version = currentVersion;
                 await this.licenseDaoService.saveLicenseVersions(version);
 
+                console.log(`Created new license ${entitlementId}:`);
+                console.dir(normalizedData, { depth: null });
+
                 newCount++;
             }
 
