@@ -74,6 +74,13 @@ const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS : boolean[] = [
     false // Ends with no discounts applied on failure, so that our summary does not show the impact of potentially-incorrect estimated discounts
 ];
 
+interface ValidationOptions {
+    transaction: Transaction;
+    useLegacyPricingTierForCurrent: boolean;
+    useLegacyPricingTierForPrevious: boolean;
+    expectedDiscount: number;
+}
+
 @injectable()
 export class ValidationService {
     constructor(
@@ -194,12 +201,7 @@ export class ValidationService {
         return validationResult;
     }
 
-    private async validateOneTransaction(opts: {
-        transaction: Transaction;
-        useLegacyPricingTierForCurrent: boolean;
-        useLegacyPricingTierForPrevious: boolean;
-        expectedDiscount: number;
-    }): Promise<TransactionValidationResult> {
+    private async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
         const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount } = opts;
         const { data, entitlementId } = transaction;
         const { addonKey, purchaseDetails } = data;

@@ -60,6 +60,7 @@ export default class TransactionDaoService {
     // descending sale date, such that the most recent transaction should be first.
 
     public async loadRelatedTransactions(entitlementId: string) : Promise<Transaction[]> {
+        // Get transactions sorted by date descending from the database
         const transactions = await this.transactionRepo
             .createQueryBuilder('transaction')
             .where('transaction.entitlementId = :entitlementId', { entitlementId })
@@ -67,6 +68,21 @@ export default class TransactionDaoService {
             .addOrderBy('transaction.created_at', 'DESC')
             .getMany();
 
-        return transactions;
+        const sortedTransactions = transactions.sort((a, b) => {
+            const aDate = a.data.purchaseDetails.saleDate;
+            const bDate = b.data.purchaseDetails.saleDate;
+
+            // If same date, put refunds before purchases
+            if (aDate === bDate) {
+                if (a.data.purchaseDetails.saleType !== 'Refund' && b.data.purchaseDetails.saleType === 'Refund') return -1;
+                if (a.data.purchaseDetails.saleType === 'Refund' && b.data.purchaseDetails.saleType !== 'Refund') return 1;
+            }
+
+            if (aDate < bDate) return 1;
+            if (aDate > bDate) return -1;
+            return 0;
+        });
+
+        return sortedTransactions;
     }
 }
