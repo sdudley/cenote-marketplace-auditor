@@ -134,7 +134,7 @@ export class PricingService {
             console.log(`\n=== Pricing for ${addon.addonKey} ===`);
 
             // Try to fetch pricing for each deployment type
-            const deploymentTypes : DeploymentType[] = ['cloud', 'server', 'datacenter'] as const;
+            const deploymentTypes: DeploymentType[] = ['cloud', 'server', 'datacenter'];
             for (const deploymentType of deploymentTypes) {
                 try {
                     console.log(`\nFetching ${deploymentType.toUpperCase()} pricing:`);

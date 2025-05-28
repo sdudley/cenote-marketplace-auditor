@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { TransactionVersion } from './TransactionVersion';
-import { TransactionData } from '../types/marketplace';
+import type { TransactionData } from '../types/marketplace';
 import { License } from './License';
 
 @Entity()

@@ -46,7 +46,7 @@ export class TransactionService {
             const entitlementId = this.transactionDaoService.getEntitlementIdForTransaction(transactionData);
 
             // Normalize the incoming data
-            const normalizedData = normalizeObject(transactionData);
+            const normalizedData : TransactionData = normalizeObject(transactionData);
             let currentVersion = 1;
 
             if (existingTransaction) {
@@ -58,7 +58,7 @@ export class TransactionService {
 
                     // Check if changes are only in ignored fields
                     if (this.isProperSubsetOfIgnoredFields(changedPaths)) {
-                        console.log(`Skipping transaction version creation for transaction #${transactionKey} - changes only in ignored fields: ${changedPathsString}`);
+                        // console.log(`Skipping transaction version creation for transaction #${transactionKey} - changes only in ignored fields: ${changedPathsString}`);
                         skippedCount++;
                         continue;
                     }
@@ -117,8 +117,11 @@ export class TransactionService {
                 version.version = currentVersion;
                 await this.transactionDaoService.saveTransactionVersions(version);
 
-                console.log(`Created new transaction ${transactionKey}:`);
-                console.dir(normalizedData, { depth: null });
+                const { saleDate, vendorAmount, tier } = normalizedData.purchaseDetails;
+                const customerName = normalizedData.customerDetails.company;
+                const { maintenanceStartDate, maintenanceEndDate } = normalizedData.purchaseDetails;
+
+                console.log(`Created new transaction: ${saleDate} $${vendorAmount} for ${entitlementId} (${customerName}) at tier ${tier}, with maintenance from ${maintenanceStartDate} to ${maintenanceEndDate}`);
                 newCount++;
             }
 

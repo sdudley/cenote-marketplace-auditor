@@ -25,8 +25,10 @@ export class InitializeIgnoredFields1711234567892 implements MigrationInterface 
         const transactionFields = [
             'lastUpdated',
             'purchaseDetails.parentProductEdition',
+            'purchaseDetails.parentProductName',
             'purchaseDetails.changeInParentProductEdition',
-            'purchaseDetails.oldParentProductEdition'
+            'purchaseDetails.oldParentProductEdition',
+
         ];
 
         for (const fieldName of transactionFields) {

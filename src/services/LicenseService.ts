@@ -45,7 +45,7 @@ export class LicenseService {
             const existingLicense = await this.licenseDaoService.getLicenseForEntitlementId(entitlementId);
 
             // Normalize the incoming data
-            const normalizedData = normalizeObject(licenseData);
+            const normalizedData : LicenseData = normalizeObject(licenseData);
             let currentVersion = 1;
 
             if (existingLicense) {
@@ -112,9 +112,10 @@ export class LicenseService {
                 version.version = currentVersion;
                 await this.licenseDaoService.saveLicenseVersions(version);
 
-                console.log(`Created new license ${entitlementId}:`);
-                console.dir(normalizedData, { depth: null });
+                const { maintenanceStartDate, maintenanceEndDate, tier } = normalizedData;
+                const customerName = normalizedData.contactDetails.company;
 
+                console.log(`Created new license ${entitlementId}: ${maintenanceStartDate}-${maintenanceEndDate} for ${customerName} at tier ${tier}`);
                 newCount++;
             }
 

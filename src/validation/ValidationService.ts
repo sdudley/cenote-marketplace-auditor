@@ -332,7 +332,7 @@ export class ValidationService {
         const expectedPurchaseFormatted = formatCurrency(expectedPurchase);
 
         if (valid) {
-            console.log(`OK      ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)} ${notes.join('; ')}`);
+            //console.log(`OK      ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)} ${notes.join('; ')}`);
         } else {
             const diff = expectedPurchase - actualPurchase;
             console.log(`*ERROR* ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)}; expected purchase: ${expectedPurchaseFormatted.padEnd(10)}; actual purchase: ${actualPurchaseFormatted.padEnd(10)}; difference=${formatCurrency(diff)}; txID=${transaction.id}; Customer=${transaction.data.customerDetails.company}; Partner=${transaction.data.partnerDetails?.partnerName}; ${notes.join('; ')}`);
@@ -513,7 +513,9 @@ export class ValidationService {
             discountToUse: expectedDiscount,
             hasExpectedAdjustments: expectedAdjustments.length > 0,
             hasActualAdjustments: actualAdjustments.length > 0,
-            adjustmentNotes: adjustmentsToApply.map(a => a.notes).filter(n => typeof n !== 'undefined')
+            adjustmentNotes: adjustmentsToApply
+                .map(a => a.notes)
+                .filter((n): n is string => typeof n === 'string')
         };
     }
 }
