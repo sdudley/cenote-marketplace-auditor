@@ -8,6 +8,14 @@ import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
 import { LicenseDaoService } from './LicenseDaoService';
 
+const ignoreLicenseFieldsForDiffDisplay = [
+    'lastUpdated',
+    'contactDetails.',
+    'paymentStatus',
+    'attribution.',
+    'parentProductBillingCycle'
+];
+
 @injectable()
 export class LicenseService {
     private ignoredFields: string[] | null = null;
@@ -26,8 +34,15 @@ export class LicenseService {
     }
 
     private isProperSubsetOfIgnoredFields(changedPaths: string[]): boolean {
-        if (changedPaths.length === 0) return false;
-        return changedPaths.every(path => this.ignoredFields?.includes(path));
+        return this.isProperSubsetOfFields(changedPaths, this.ignoredFields);
+    }
+
+    private isProperSubsetOfFields(changedPaths: string[], fieldsToIgnore: string[]|null): boolean {
+        if (changedPaths.length === 0) {
+            return false;
+        }
+
+        return changedPaths.every(path => fieldsToIgnore?.includes(path));
     }
 
     async processLicenses(licenses: LicenseData[]): Promise<void> {
@@ -63,9 +78,14 @@ export class LicenseService {
                         continue;
                     }
 
-                    console.log(`License changed: ${entitlementId}`);
+                    console.log(`\n\nLicense changed: ${entitlementId}`);
+
                     console.log('Changed paths:', changedPathsString);
-                    printJsonDiff(existingLicense.data, normalizedData);
+
+
+                    if (!this.isProperSubsetOfFields(changedPaths, ignoreLicenseFieldsForDiffDisplay)) {
+                        printJsonDiff(existingLicense.data, normalizedData);
+                    }
 
                     // Get the current, soon-to-be old version
                     const oldVersion = await this.licenseDaoService.getCurrentLicenseVersionForLicense(existingLicense);
