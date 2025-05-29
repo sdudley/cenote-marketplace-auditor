@@ -7,12 +7,13 @@ import { IgnoredFieldService } from './IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
 import { LicenseDaoService } from './LicenseDaoService';
+import { isProperSubsetOfFields } from '../utils/fieldUtils';
 
 const ignoreLicenseFieldsForDiffDisplay = [
     'lastUpdated',
     'contactDetails.',
     'paymentStatus',
-    'attribution.',
+    'attribution',
     'parentProductBillingCycle'
 ];
 
@@ -34,7 +35,7 @@ export class LicenseService {
     }
 
     private isProperSubsetOfIgnoredFields(changedPaths: string[]): boolean {
-        return this.isProperSubsetOfFields(changedPaths, this.ignoredFields);
+        return isProperSubsetOfFields(changedPaths, this.ignoredFields);
     }
 
     private isProperSubsetOfFields(changedPaths: string[], fieldsToIgnore: string[]|null): boolean {
@@ -42,7 +43,7 @@ export class LicenseService {
             return false;
         }
 
-        return changedPaths.every(path => fieldsToIgnore?.includes(path));
+        return changedPaths.every(path => fieldsToIgnore?.some(field => path.includes(field)));
     }
 
     async processLicenses(licenses: LicenseData[]): Promise<void> {
@@ -140,9 +141,6 @@ export class LicenseService {
             }
 
             processedCount++;
-            if (processedCount % 1000 === 0) {
-                console.log(`Processed ${processedCount} of ${totalCount} licenses`);
-            }
         }
 
         console.log(`Completed processing ${totalCount} licenses; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);

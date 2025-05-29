@@ -7,6 +7,14 @@ import { IgnoredFieldService } from './IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
 import TransactionDaoService from './TransactionDaoService';
+import { isProperSubsetOfFields } from '../utils/fieldUtils';
+
+const ignoreTransactionFieldsForDiffDisplay = [
+    'lastUpdated',
+    'partnerDetails.billingContact.',
+    'hostEntitlementId',
+    'hostEntitlementNumber',
+];
 
 @injectable()
 export class TransactionService {
@@ -26,8 +34,7 @@ export class TransactionService {
     }
 
     private isProperSubsetOfIgnoredFields(changedPaths: string[]): boolean {
-        if (changedPaths.length === 0) return false;
-        return changedPaths.every(path => this.ignoredFields?.includes(path));
+        return isProperSubsetOfFields(changedPaths, this.ignoredFields);
     }
 
     async processTransactions(transactions: TransactionData[]): Promise<void> {
@@ -65,7 +72,10 @@ export class TransactionService {
 
                     console.log(`Transaction changed: ${transactionKey}`);
                     console.log('Changed paths:', changedPathsString);
-                    printJsonDiff(existingTransaction.data, normalizedData);
+
+                    if (!isProperSubsetOfFields(changedPaths, ignoreTransactionFieldsForDiffDisplay)) {
+                        printJsonDiff(existingTransaction.data, normalizedData);
+                    }
 
                     // Get the current, soon-to-be old version
                     const oldVersion = await this.transactionDaoService.getCurrentTransactionVersion(existingTransaction);
@@ -126,9 +136,6 @@ export class TransactionService {
             }
 
             processedCount++;
-            if (processedCount % 1000 === 0) {
-                console.log(`Processed ${processedCount} of ${totalCount} transactions`);
-            }
         }
 
         console.log(`Completed processing ${totalCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);

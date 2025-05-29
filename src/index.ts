@@ -39,12 +39,16 @@ async function main() {
         }
 
         if (flags.size === 0 || flags.has('--with-transactions')) {
+            console.log(`\n=== Fetching transactions ===`);
+
             const transactions = await marketplaceService.getTransactions();
             const transactionService = container.get<TransactionService>(TYPES.TransactionService);
             await transactionService.processTransactions(transactions);
         }
 
         if (flags.size === 0 || flags.has('--with-licenses')) {
+            console.log(`\n=== Fetching licenses ===`);
+
             const licenses = await marketplaceService.getLicenses();
             const licenseService = container.get<LicenseService>(TYPES.LicenseService);
             await licenseService.processLicenses(licenses);

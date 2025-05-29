@@ -101,7 +101,8 @@ export class ValidationService {
     async validateTransactions(startDate?: string|null): Promise<void> {
         const actualStartDate = startDate ?? DEFAULT_START_DATE;
         const transactions = await this.transactionDaoService.getTransactionsBySaleDate(actualStartDate);
-        console.log(`\nValidating transactions since ${actualStartDate}:`);
+
+        console.log(`\n=== Validating transactions since ${actualStartDate} ===`);
 
         let validCount = 0;
         let expectedPriceCount = 0;

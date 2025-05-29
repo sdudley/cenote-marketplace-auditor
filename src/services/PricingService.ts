@@ -127,6 +127,8 @@ export class PricingService {
     }
 
     async fetchPricing(): Promise<void> {
+        console.log(`\n=== Fetching pricing for apps ===`);
+
         const addons = await this.addonRepository.find();
         console.log(`Found ${addons.length} addons to check pricing`);
 
