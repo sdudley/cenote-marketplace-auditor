@@ -30,11 +30,14 @@ export class PreviousTransactionService {
         // Track the effective end date of each transaction
         const effectiveEndDates = new Map<string, string>();
 
-        // First pass: process all refunds to adjust effective end dates
-        for (const tx of otherTransactions) {
-            if (tx.data.purchaseDetails.saleType === 'Refund') {
-                const refundStart = tx.data.purchaseDetails.maintenanceStartDate;
-                const refundEnd = tx.data.purchaseDetails.maintenanceEndDate;
+        // First pass: process all refunds to adjust effective end dates, but only
+        // look at refunds that were created prior to this transaction (or on the same day)
+
+        for (const otherTx of otherTransactions) {
+            if (otherTx.data.purchaseDetails.saleType === 'Refund' &&
+                otherTx.data.purchaseDetails.saleDate <= transaction.data.purchaseDetails.saleDate) {
+                const refundStart = otherTx.data.purchaseDetails.maintenanceStartDate;
+                const refundEnd = otherTx.data.purchaseDetails.maintenanceEndDate;
 
                 // Find any transaction being possibly refunded, with an overlapping maintenance period,
                 // and which was purchased before the refund (including on the same day, since we don't
@@ -44,7 +47,7 @@ export class PreviousTransactionService {
                     t.data.purchaseDetails.saleType !== 'Refund' &&
                     t.data.purchaseDetails.maintenanceStartDate <= refundEnd &&
                     t.data.purchaseDetails.maintenanceEndDate >= refundStart &&
-                    t.data.purchaseDetails.saleDate <= tx.data.purchaseDetails.saleDate
+                    t.data.purchaseDetails.saleDate <= otherTx.data.purchaseDetails.saleDate
                 );
 
                 if (refundedTx) {
@@ -71,19 +74,21 @@ export class PreviousTransactionService {
         let latestTransaction: Transaction | undefined;
         let latestEndDate: string | undefined;
 
-        for (const tx of otherTransactions) {
-            if (tx.data.purchaseDetails.saleType === 'Refund') continue;
+        for (const otherTx of otherTransactions) {
+            if (otherTx.data.purchaseDetails.saleDate > transaction.data.purchaseDetails.saleDate) continue;
+            if (otherTx.data.purchaseDetails.saleType === 'Refund') continue;
 
-            const effectiveEnd = effectiveEndDates.get(tx.id) || tx.data.purchaseDetails.maintenanceEndDate;
+            const effectiveEnd = effectiveEndDates.get(otherTx.id) || otherTx.data.purchaseDetails.maintenanceEndDate;
 
             // Skip fully refunded transactions (where effective end date equals start date)
-            if (effectiveEnd === tx.data.purchaseDetails.maintenanceStartDate) continue;
+            if (effectiveEnd === otherTx.data.purchaseDetails.maintenanceStartDate) continue;
 
             // A transaction is "older" if its maintenance period ended before the current transaction's start
-            if (effectiveEnd < transaction.data.purchaseDetails.maintenanceStartDate) {
+            if (effectiveEnd <= transaction.data.purchaseDetails.maintenanceStartDate ||
+                effectiveEnd <= transaction.data.purchaseDetails.maintenanceEndDate) {
                 // If this transaction ends later than our current latest
                 if (!latestEndDate || effectiveEnd > latestEndDate) {
-                    latestTransaction = tx;
+                    latestTransaction = otherTx;
                     latestEndDate = effectiveEnd;
                 }
             }

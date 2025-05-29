@@ -159,10 +159,105 @@ describe('PreviousTransactionService', () => {
             })
         });
 
+        it('should ignore refunds dated after the current transaction sale date', async () => {
+            const t1 = createTransaction('2024-01-01', '2024-12-31', '2023-12-30', 'New');
+            const t2 = createTransaction('2024-12-31', '2025-04-30', '2024-05-30'); // Sale date before refund date
+            const t3 = createTransaction('2024-01-01', '2024-12-31', '2024-06-30', 'Refund'); // Refund dated after t3's sale date
+
+            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+                t3, t2, t1
+            ]);
+
+            const result = await service.findPreviousTransaction(t2);
+
+            expect(result).toEqual({
+                transaction: t1,
+                effectiveMaintenanceEndDate: '2024-12-31' // Full period since refund is ignored
+            })
+        });
+
+        it('should permit multiple refunds', async () => {
+            const t1 = createTransaction('2024-01-01', '2025-01-01', '2023-12-30', 'New');
+            const t2 = createTransaction('2025-01-01', '2026-01-01', '2024-12-30', 'Renewal');
+            const t3 = createTransaction('2025-01-01', '2026-01-01', '2024-12-30', 'Refund');
+            const t4 = createTransaction('2025-01-01', '2026-01-01', '2024-12-31', 'Renewal');
+            const t5 = createTransaction('2026-01-01', '2027-01-01', '2025-12-30', 'Renewal');
+            const t6 = createTransaction('2026-01-01', '2027-01-01', '2026-01-14', 'Refund');
+            const t7 = createTransaction('2026-01-01', '2027-01-01', '2026-01-15', 'Renewal');
+
+            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+                t6, t5, t4, t3, t2, t1
+            ]);
+
+            const result = await service.findPreviousTransaction(t4);
+
+            expect(result).toEqual({
+                transaction: t1,
+                effectiveMaintenanceEndDate: '2025-01-01'
+            })
+
+            const result2 = await service.findPreviousTransaction(t5);
+
+            expect(result2).toEqual({
+                transaction: t4,
+                effectiveMaintenanceEndDate: '2026-01-01'
+            })
+
+            const result3 = await service.findPreviousTransaction(t7);
+
+            expect(result3).toEqual({
+                transaction: t4,
+                effectiveMaintenanceEndDate: '2026-01-01'
+            })
+        });
+
+        it('should still find previous transactions with overlapping dates', async () => {
+            const t1 = createTransaction('2023-12-31', '2024-12-31', '2023-12-30', 'New');
+            const t2 = createTransaction('2024-12-31', '2025-12-31', '2024-12-30', 'Renewal');
+            const t3 = createTransaction('2025-06-01', '2025-12-31', '2025-05-30', 'Upgrade');
+
+            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+                t3, t2, t1
+            ]);
+
+            const result = await service.findPreviousTransaction(t3);
+
+            expect(result).toEqual({
+                transaction: t2,
+                effectiveMaintenanceEndDate: '2025-12-31'
+            })
+
+            const result2 = await service.findPreviousTransaction(t2);
+
+            expect(result2).toEqual({
+                transaction: t1,
+                effectiveMaintenanceEndDate: '2024-12-31'
+            })
+        });
+
+        it('should permit renewals after refunded upgrade', async () => {
+            const t1 = createTransaction('2023-12-31', '2024-12-31', '2023-12-30', 'New');
+            const t2 = createTransaction('2024-12-31', '2025-12-31', '2024-12-30', 'Renewal');
+            const t3 = createTransaction('2025-06-01', '2025-12-31', '2025-05-30', 'Upgrade');
+            const t4 = createTransaction('2025-06-01', '2025-12-31', '2025-06-01', 'Refund');
+            const t5 = createTransaction('2025-12-31', '2026-12-31', '2025-06-02', 'Renewal');
+
+            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+                t5, t4, t3, t2, t1
+            ]);
+
+            const result = await service.findPreviousTransaction(t5);
+
+            expect(result).toEqual({
+                transaction: t2,
+                effectiveMaintenanceEndDate: '2025-12-31'
+            })
+
+        });
     });
 });
 
-function createTransaction(startDate: string, endDate: string, saleDate: string, saleType: 'New'|'Refund' = 'New'): Transaction {
+function createTransaction(startDate: string, endDate: string, saleDate: string, saleType: 'New'|'Refund'|'Renewal'|'Upgrade' = 'New'): Transaction {
     const transaction = new Transaction();
     transaction.id = '' + uniqueTransactionId++;
     transaction.data = {
