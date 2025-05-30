@@ -47,7 +47,8 @@ export class PreviousTransactionService {
                     t.data.purchaseDetails.saleType !== 'Refund' &&
                     t.data.purchaseDetails.maintenanceStartDate <= refundEnd &&
                     t.data.purchaseDetails.maintenanceEndDate >= refundStart &&
-                    t.data.purchaseDetails.saleDate <= otherTx.data.purchaseDetails.saleDate
+                    t.data.purchaseDetails.saleDate <= otherTx.data.purchaseDetails.saleDate &&
+                    t.data.purchaseDetails.tier === otherTx.data.purchaseDetails.tier
                 );
 
                 if (refundedTx) {

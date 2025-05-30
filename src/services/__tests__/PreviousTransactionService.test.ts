@@ -252,12 +252,33 @@ describe('PreviousTransactionService', () => {
                 transaction: t2,
                 effectiveMaintenanceEndDate: '2025-12-31'
             })
+        });
 
+        it('should handle 0-day renewals and match refunds to the same tier', async () => {
+            const t1 = createTransaction('2022-12-01', '2023-12-01', '2022-11-30', 'New',     '500 Users');
+            const t2 = createTransaction('2023-12-01', '2024-12-01', '2023-12-05', 'Upgrade', '1000 Users'); // upgrade for 2023-2024, but later refundeed by t6
+            const t3 = createTransaction('2023-12-01', '2023-12-01', '2023-12-19', 'Renewal', '1000 Users'); // weird Atlassian 0-day tranx for prior period
+            const t4 = createTransaction('2023-12-01', '2023-12-01', '2023-12-20', 'Renewal', '500 Users');  // weird Atlassian 0-day tranx for prior period
+            const t5 = createTransaction('2023-12-01', '2024-12-01', '2023-12-20', 'Renewal', '500 Users');  // correct one-year renewal at 500 users overlapping with to-be-refunded upgrade in t2
+            const t6 = createTransaction('2023-12-01', '2024-12-01', '2023-12-20', 'Refund',  '1000 Users'); // refund of t2
+            const t7 = createTransaction('2024-01-18', '2024-12-01', '2024-01-16', 'Upgrade', '1000 Users'); // now upgrade from t5
+            const t8 = createTransaction('2024-12-01', '2025-12-01', '2024-11-29', 'Renewal', '1000 Users');
+
+            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+                t8, t7, t6, t5, t4, t3, t2, t1
+            ]);
+
+            const result = await service.findPreviousTransaction(t7);
+
+            expect(result).toEqual({
+                transaction: t5,
+                effectiveMaintenanceEndDate: '2024-12-01'
+            });
         });
     });
 });
 
-function createTransaction(startDate: string, endDate: string, saleDate: string, saleType: 'New'|'Refund'|'Renewal'|'Upgrade' = 'New'): Transaction {
+function createTransaction(startDate: string, endDate: string, saleDate: string, saleType: 'New'|'Refund'|'Renewal'|'Upgrade' = 'New', tier: string = 'Unknown Tier'): Transaction {
     const transaction = new Transaction();
     transaction.id = '' + uniqueTransactionId++;
     transaction.data = {
@@ -265,7 +286,8 @@ function createTransaction(startDate: string, endDate: string, saleDate: string,
             saleDate,
             saleType,
             maintenanceStartDate: startDate,
-            maintenanceEndDate: endDate
+            maintenanceEndDate: endDate,
+            tier
         }
     } as any;
     return transaction;

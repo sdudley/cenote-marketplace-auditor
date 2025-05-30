@@ -58,6 +58,9 @@ async function main() {
             const validationService = container.get<ValidationService>(TYPES.ValidationService);
             await validationService.validateTransactions(startDate);
         }
+    } catch (e) {
+        console.error('Unhandled error:', e);
+        process.exit(1);
     } finally {
         if (dataSource) {
             await dataSource.destroy();
