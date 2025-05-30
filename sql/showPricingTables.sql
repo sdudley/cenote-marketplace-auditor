@@ -1,0 +1,1 @@
+select p.deployment_type,start_date,end_date,pi.* from pricing p left join pricing_info pi on pi.pricing_id=p.id order by deployment_type,start_date;
