@@ -137,6 +137,15 @@ export class ValidationService {
         console.log(`\nSummary: ${transactions.length} transactions; ${expectedPriceCount} have expected price; ${validCount} are reconciled; ${invalidCount} need correction.`);
     }
 
+    /**
+     * Attempt to validate the price for a transaction.
+     *
+     * For a given transaction, we do not know if it was sold with legacy pricing or not, and same for the
+     * transaction from which it was being upgraded (which also impacts the current transaction's sales price).
+     * To account for these scenarios, we try all possible permutations of legacy pricing (or not) for both
+     * transactions. Additionally, the transaction may have been sold with or without a discount, so we try
+     * those permutations as well.
+     */
     private async validateOneTransactionWithPricingPermutations(opts: { transaction: Transaction; discountResult: DiscountResult; }) : Promise<TransactionValidationResult|undefined> {
         const { transaction, discountResult } = opts;
         const { discountToUse } = discountResult;
@@ -204,9 +213,13 @@ export class ValidationService {
         return validationResult;
     }
 
+    /**
+     * Given a single transaction, and with directions as to whether or not to use legacy pricing for that
+     * transaction (or the one it is upgrading), validate if the price is correct.
+     */
     private async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
         const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount } = opts;
-        const { data, entitlementId } = transaction;
+        const { data } = transaction;
         const { addonKey, purchaseDetails } = data;
         const {
             vendorAmount,
