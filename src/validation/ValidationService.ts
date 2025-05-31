@@ -13,6 +13,7 @@ import { ResellerDaoService } from '../services/ResellerDaoService';
 import { TransactionAdjustment } from '../entities/TransactionAdjustment';
 import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
 import { getLicenseDurationInDays } from './licenseDurationCalculator';
+import { PreviousTransactionService } from '../services/PreviousTransactionService';
 
 const DEFAULT_START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
@@ -90,7 +91,8 @@ export class ValidationService {
         @inject(TYPES.TransactionReconcileDaoService) private transactionReconcileDaoService: TransactionReconcileDaoService,
         @inject(TYPES.LicenseDaoService) private licenseDaoService: LicenseDaoService,
         @inject(TYPES.ResellerDaoService) private resellerDaoService: ResellerDaoService,
-        @inject(TYPES.TransactionAdjustmentDaoService) private transactionAdjustmentDaoService: TransactionAdjustmentDaoService
+        @inject(TYPES.TransactionAdjustmentDaoService) private transactionAdjustmentDaoService: TransactionAdjustmentDaoService,
+        @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService
     ) {
     }
 
@@ -224,12 +226,19 @@ export class ValidationService {
         let previousPurchase : Transaction | undefined;
         let previousPurchasePricingTierResult : PricingTierResult | undefined;
         let expectedDiscountForPreviousPurchase : DiscountResult | undefined;
+        let previousPurchaseEffectiveMaintenanceEndDate : string | undefined;
 
         if (saleType==='Upgrade' || saleType==='Renewal') {
-            const relatedTransactions = await this.transactionDaoService.loadRelatedTransactions(entitlementId);
-            previousPurchase = this.getPreviousPurchase({ relatedTransactions, thisTransaction: transaction });
+            const previousPurchaseResult = await this.previousTransactionService.findPreviousTransaction(transaction);
 
-            if (previousPurchase) {
+            if (previousPurchaseResult) {
+                previousPurchase = previousPurchaseResult.transaction;
+                const { effectiveMaintenanceEndDate } = previousPurchaseResult;
+
+                if (effectiveMaintenanceEndDate) {
+                    previousPurchaseEffectiveMaintenanceEndDate = effectiveMaintenanceEndDate;
+                }
+
                 const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
                 previousPurchasePricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
                 expectedDiscountForPreviousPurchase = await this.calculateExpectedDiscountForTransaction(previousPurchase);
@@ -239,12 +248,12 @@ export class ValidationService {
         // Calculate the expected price for the previous purchase, if it exists.
 
         const previousPricing = saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
-                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse })
+                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined  })
                         : undefined;
 
         // Calculate the expected price for the current transaction.
 
-        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount });
+        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate });
 
         let expectedVendorAmount = price.vendorPrice;
 
@@ -276,10 +285,10 @@ export class ValidationService {
 
         // Even if price is as expected, refunds always require approval
 
-        if (saleType==='Refund') {
-            notes.push('Refund requires manual approval');
-            valid = false;
-        }
+        // if (saleType==='Refund') {
+        //     notes.push('Refund requires manual approval');
+        //     valid = false;
+        // }
 
         return {
             isExpectedPrice,
@@ -373,9 +382,18 @@ export class ValidationService {
         previousPurchase?: Transaction|undefined;
         previousPricing?: PriceResult|undefined;
         useLegacyPricingTier: boolean;
+        previousPurchaseEffectiveMaintenanceEndDate: string|undefined;
         expectedDiscount: number;
     }) : PriceWithPricingOpts {
-        const { transaction, isSandbox, pricingTierResult, previousPurchase, previousPricing, useLegacyPricingTier, expectedDiscount } = opts;
+        const {
+            transaction,
+            isSandbox,
+            pricingTierResult,
+            previousPricing,
+            useLegacyPricingTier,
+            expectedDiscount,
+            previousPurchaseEffectiveMaintenanceEndDate
+        } = opts;
         const { purchaseDetails } = transaction.data;
 
         const pricingOpts: PriceCalcOpts = {
@@ -389,7 +407,7 @@ export class ValidationService {
             maintenanceStartDate: purchaseDetails.maintenanceStartDate,
             maintenanceEndDate: purchaseDetails.maintenanceEndDate,
             billingPeriod: purchaseDetails.billingPeriod,
-            previousPurchaseMaintenanceEndDate: previousPurchase?.data.purchaseDetails.maintenanceEndDate,
+            previousPurchaseMaintenanceEndDate: previousPurchaseEffectiveMaintenanceEndDate,
             previousPricing,
             expectedDiscount
         };
@@ -427,26 +445,6 @@ export class ValidationService {
                 !(vendorAmount===0 && expectedVendorAmount > 0));
 
         return { valid, notes: [] };
-    }
-
-    // This function gets the most recent transaction that is not a refund. This may not be entirely correct,
-    // but if the purchase history is more complicated, then it probably needs manual review anyway.
-    //
-    // The relatedTransactions array must be sorted by descending sale date.
-    //
-    // TODO FIXME: what if multiple transactions created on the same day?
-
-    private getPreviousPurchase(opts: { relatedTransactions: Transaction[]; thisTransaction: Transaction; }) : Transaction | undefined {
-        const { relatedTransactions, thisTransaction } = opts;
-
-        const thisTransactionIndex = relatedTransactions.findIndex(t => t.id === thisTransaction.id);
-
-        if (thisTransactionIndex === -1 || thisTransactionIndex === relatedTransactions.length-1) {
-            return undefined;
-        }
-
-        const subsequentTransactions = relatedTransactions.slice(thisTransactionIndex+1);
-        return subsequentTransactions.find(t => t.data.purchaseDetails.saleType !== 'Refund');
     }
 
     private async getActualAdjustments(transaction: Transaction) : Promise<TransactionAdjustment[]> {

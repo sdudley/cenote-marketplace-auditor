@@ -275,6 +275,32 @@ describe('PreviousTransactionService', () => {
                 effectiveMaintenanceEndDate: '2024-12-01'
             });
         });
+
+        it('should handle multiple refunds of different periods within the same original purchase', async () => {
+            const t1 = createTransaction('2025-01-20', '2026-12-12', '2025-01-17', 'New',     '2000 Users'); // original purchase
+            const t2 = createTransaction('2025-05-23', '2025-12-12', '2025-05-23', 'Refund',  '2000 Users'); // refund prorated first year
+            const t3 = createTransaction('2025-12-12', '2026-12-12', '2025-05-23', 'Refund',  '2000 Users'); // refund all of second year
+            const t4 = createTransaction('2025-05-23', '2025-12-12', '2025-05-23', 'Upgrade', '2500 Users'); // upgrade from t1
+            const t5 = createTransaction('2025-12-12', '2026-12-12', '2025-05-23', 'Renewal', '2500 Users'); // renewal of t4
+
+            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+                t5, t4, t3, t2, t1
+            ]);
+
+            const result = await service.findPreviousTransaction(t4);
+
+            expect(result).toEqual({
+                transaction: t1,
+                effectiveMaintenanceEndDate: '2025-05-23'
+            });
+
+            const result2 = await service.findPreviousTransaction(t5);
+
+            expect(result2).toEqual({
+                transaction: t4,
+                effectiveMaintenanceEndDate: '2025-12-12'
+            });
+        });
     });
 });
 

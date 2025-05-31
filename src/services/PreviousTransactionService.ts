@@ -52,18 +52,20 @@ export class PreviousTransactionService {
                 );
 
                 if (refundedTx) {
+                    const currentEnd = effectiveEndDates.get(refundedTx.id) || refundedTx.data.purchaseDetails.maintenanceEndDate;
+
                     // If the refund covers the entire maintenance period, mark it as fully refunded
+
                     if (refundStart <= refundedTx.data.purchaseDetails.maintenanceStartDate &&
-                        refundEnd >= refundedTx.data.purchaseDetails.maintenanceEndDate) {
-                        // Subtract one day since refund includes the entire start day
+                        refundEnd >= currentEnd) {
+
                         effectiveEndDates.set(refundedTx.id, refundedTx.data.purchaseDetails.maintenanceStartDate);
                     } else {
                         // For partial refunds, adjust the effective end date
-                        const currentEnd = effectiveEndDates.get(refundedTx.id) || refundedTx.data.purchaseDetails.maintenanceEndDate;
+
                         if (currentEnd > refundStart) {
                             const newEndDate = refundEnd < currentEnd ? refundEnd : refundStart;
 
-                            // Subtract one day since refund includes the entire start day
                             effectiveEndDates.set(refundedTx.id, newEndDate);
                         }
                     }

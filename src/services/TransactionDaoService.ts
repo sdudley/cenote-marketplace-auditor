@@ -65,6 +65,7 @@ export default class TransactionDaoService {
             .createQueryBuilder('transaction')
             .where('transaction.entitlementId = :entitlementId', { entitlementId })
             .orderBy('transaction.data->\'purchaseDetails\'->>\'saleDate\'', 'DESC')
+            .orderBy('transaction.data->\'purchaseDetails\'->>\'maintenanceStartDate\'', 'DESC')
             .addOrderBy('transaction.created_at', 'DESC')
             .getMany();
 
