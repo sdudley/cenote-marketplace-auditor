@@ -14,7 +14,8 @@ const ignoreLicenseFieldsForDiffDisplay = [
     'contactDetails.',
     'paymentStatus',
     'attribution',
-    'parentProductBillingCycle'
+    'parentProductBillingCycle',
+    'transactionAccountId'
 ];
 
 @injectable()
