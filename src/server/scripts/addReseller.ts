@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import { Reseller, ResellerMatchMode } from '@common/entities/Reseller';
-import { initializeDatabase } from '@common/config/database';
-import { ResellerDaoService } from '@common/database/ResellerDaoService';
-import { configureContainer } from '@common/config/container';
-import { TYPES } from '@common/config/types';
+import { initializeDatabase } from '../config/database';
+import { ResellerDaoService } from '../database/ResellerDaoService';
+import { configureContainer } from '../config/container';
+import { TYPES } from '../config/types';
 
 async function addReseller() {
     const args = process.argv.slice(2);

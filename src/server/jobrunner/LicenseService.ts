@@ -3,10 +3,10 @@ import { LicenseVersion } from '@common/entities/LicenseVersion';
 import { deepEqual, normalizeObject, computeJsonPaths } from '@common/utils/objectUtils';
 import { printJsonDiff } from '@common/utils/diffUtils';
 import { LicenseData } from '@common/types/marketplace';
-import { IgnoredFieldService } from '@common/services/IgnoredFieldService';
-import { TYPES } from '@common/config/types';
+import { IgnoredFieldService } from '../services/IgnoredFieldService';
+import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
-import { LicenseDaoService } from '@common/database/LicenseDaoService';
+import { LicenseDaoService } from '../database/LicenseDaoService';
 import { isProperSubsetOfFields } from '@common/utils/fieldUtils';
 
 const ignoreLicenseFieldsForDiffDisplay = [

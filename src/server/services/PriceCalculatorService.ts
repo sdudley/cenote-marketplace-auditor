@@ -1,6 +1,6 @@
 import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "../../common/utils/licenseDurationCalculator";
-import { PricingTierResult } from '../types/pricingTierResult';
-import { UserTierPricing } from '../types/userTiers';
+import { PricingTierResult } from '../../common/types/pricingTierResult';
+import { UserTierPricing } from '../../common/types/userTiers';
 import { deploymentTypeFromHosting, userCountFromTier } from "../../common/utils/validationUtils";
 import {
     ACADEMIC_CLOUD_PRICE_RATIO,
@@ -9,9 +9,9 @@ import {
     ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE,
     CLOUD_DISCOUNT_RATIO,
     DC_DISCOUNT_RATIO
-} from "../utils/validationConstants";
+} from "../../common/utils/validationConstants";
 import { injectable } from "inversify";
-import { BillingPeriod, DeploymentType, HostingType, LicenseType, SaleType } from "../types/marketplace";
+import { BillingPeriod, DeploymentType, HostingType, LicenseType, SaleType } from "../../common/types/marketplace";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
 

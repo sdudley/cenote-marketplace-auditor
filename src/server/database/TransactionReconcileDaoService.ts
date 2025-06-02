@@ -1,6 +1,6 @@
 import { DataSource, Repository } from "typeorm";
-import { TransactionReconcile } from "../entities/TransactionReconcile";
-import { Transaction } from "../entities/Transaction";
+import { TransactionReconcile } from "@common/entities/TransactionReconcile";
+import { Transaction } from "@common/entities/Transaction";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../config/types";
 

@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { IgnoredField, RecordType } from "../entities/IgnoredField";
+import { IgnoredField, RecordType } from "@common/entities/IgnoredField";
 import { injectable, inject } from "inversify";
 import { TYPES } from "../config/types";
 

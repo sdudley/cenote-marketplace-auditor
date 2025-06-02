@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import { Transaction } from '../entities/Transaction';
+import { Transaction } from '../../common/entities/Transaction';
 import TransactionDaoService from '../database/TransactionDaoService';
 
 export interface PreviousTransactionResult {

@@ -2,7 +2,7 @@ import { injectable, inject } from 'inversify';
 import { DataSource } from 'typeorm';
 import { Addon } from '@common/entities/Addon';
 import { MarketplaceService } from './MarketplaceService';
-import { TYPES } from '@common/config/types';
+import { TYPES } from '../config/types';
 
 @injectable()
 export class AddonService {

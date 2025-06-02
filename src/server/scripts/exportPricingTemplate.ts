@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { AppDataSource, initializeDatabase } from '@common/config/database';
+import { AppDataSource, initializeDatabase } from '../config/database';
 import { Pricing } from '@common/entities/Pricing';
 import * as fs from 'fs';
 import { IsNull } from 'typeorm';

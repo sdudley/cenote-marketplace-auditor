@@ -1,6 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
-import { Transaction } from '../entities/Transaction';
-import { TransactionAdjustment } from '../entities/TransactionAdjustment';
+import { Transaction } from '@common/entities/Transaction';
+import { TransactionAdjustment } from '@common/entities/TransactionAdjustment';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 

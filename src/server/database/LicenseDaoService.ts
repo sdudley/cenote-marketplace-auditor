@@ -1,10 +1,11 @@
 import { DataSource, Repository } from "typeorm";
-import { License } from "../entities/License";
-import { Transaction } from "../entities/Transaction";
+import { License } from "@common/entities/License";
+import { Transaction } from "@common/entities/Transaction";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../config/types";
-import { LicenseVersion } from "../entities/LicenseVersion";
-import { LicenseData } from "../types/marketplace";
+import { LicenseVersion } from "@common/entities/LicenseVersion";
+import { LicenseData } from "@common/types/marketplace";
+
 @injectable()
 export class LicenseDaoService {
     private licenseRepo: Repository<License>;

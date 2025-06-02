@@ -1,6 +1,6 @@
 import { DataSource, Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Addon } from '@common/entities/Addon';
-import { MarketplaceService } from '../services/MarketplaceService';
+import { MarketplaceService } from './MarketplaceService';
 import { Pricing } from '@common/entities/Pricing';
 import { PricingInfo } from '@common/entities/PricingInfo';
 import { isoDateMath } from '@common/utils/dateUtils';

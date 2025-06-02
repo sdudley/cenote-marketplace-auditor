@@ -4,13 +4,12 @@
     "outDir": "../../../dist/jobrunner",
     "rootDir": "../../..",
     "baseUrl": "../../..",
-    "paths": {
-      "@common/*": ["src/common/*"]
-    }
   },
   "include": [
     "./**/*",
-    "../common/**/*"
+    "../common/**/*",
+    "../**/*",
+    "../services/__tests__"
   ],
   "exclude": ["node_modules", "**/*.test.ts", "dist"]
 }
