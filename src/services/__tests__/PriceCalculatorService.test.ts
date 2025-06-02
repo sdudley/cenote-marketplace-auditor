@@ -1,5 +1,5 @@
 import { PriceCalculatorService, PriceResult } from '../PriceCalculatorService';
-import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult, dataCenterLegacyPricing } from './utils/pricingTable';
+import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult, dataCenterLegacyPricing } from './pricingTable';
 
 const stripDailyPrice = (data: PriceResult) => ({ purchasePrice: data.purchasePrice, vendorPrice: data.vendorPrice });
 

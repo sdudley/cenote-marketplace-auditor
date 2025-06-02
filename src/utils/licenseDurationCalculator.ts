@@ -1,4 +1,4 @@
-import { createLocalDateFromString, createUTCDateFromString } from '../utils/dateUtils';
+import { createLocalDateFromString, createUTCDateFromString } from './dateUtils';
 
 /**
  * Calculate the number of days in the old subscription that overlap with the new

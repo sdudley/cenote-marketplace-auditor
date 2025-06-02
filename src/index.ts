@@ -8,7 +8,7 @@ import { AddonService } from './services/AddonService';
 import { TransactionService } from './services/TransactionService';
 import { LicenseService } from './services/LicenseService';
 import { PricingService } from './services/PricingService';
-import { ValidationService } from './validation/ValidationService';
+import { ValidationService } from './services/ValidationService';
 
 
 async function main() {

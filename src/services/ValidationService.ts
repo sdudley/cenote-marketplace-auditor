@@ -1,22 +1,26 @@
 import { Transaction } from '../entities/Transaction';
-import { PricingTierResult, PricingService } from '../services/PricingService';
+import { PricingTierResult, PricingService } from './PricingService';
 import { components } from '../types/marketplace-api';
-import { deploymentTypeFromHosting } from './validationUtils';
+import { deploymentTypeFromHosting } from '../utils/validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import TransactionDaoService from '../services/TransactionDaoService';
-import TransactionReconcileDaoService from '../services/TransactionReconcileDaoService';
-import { LicenseDaoService } from '../services/LicenseDaoService';
+import TransactionDaoService from './TransactionDaoService';
+import TransactionReconcileDaoService from './TransactionReconcileDaoService';
+import { LicenseDaoService } from './LicenseDaoService';
 import { formatCurrency } from '../utils/formatCurrency';
-import { ResellerDaoService } from '../services/ResellerDaoService';
+import { ResellerDaoService } from './ResellerDaoService';
 import { TransactionAdjustment } from '../entities/TransactionAdjustment';
-import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
-import { getLicenseDurationInDays } from './licenseDurationCalculator';
-import { PreviousTransactionService } from '../services/PreviousTransactionService';
+import { TransactionAdjustmentDaoService } from './TransactionAdjustmentDaoService';
+import { getLicenseDurationInDays } from '../utils/licenseDurationCalculator';
+import { PreviousTransactionService } from './PreviousTransactionService';
 
 const DEFAULT_START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
+
+// TODO: evaluate licenses against transactions
+// License end dates that extend those of transactions (see SQL queries)
+// License sizes that do not match transaction sizes
 
 export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];
 
