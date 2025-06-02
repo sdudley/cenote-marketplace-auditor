@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/client",
+    "rootDir": "../..",
+    "baseUrl": "../..",
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@common/*": ["src/common/*"]
+    }
+  },
+  "include": [
+    "./**/*",
+    "../common/**/*"
+  ],
+  "exclude": ["node_modules", "**/*.test.ts", "dist"]
+}
