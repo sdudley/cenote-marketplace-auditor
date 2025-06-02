@@ -14,7 +14,6 @@
     "start:express": "ts-node src/server/express/index.ts",
     "start:jobrunner:js": "node --enable-source-maps dist/jobrunner/src/server/jobrunner/index.js",
     "start:express:js": "node --enable-source-maps dist/express/src/server/express/index.js",
-    "dev": "concurrently \"npm run start:jobrunner\" \"npm run start:express\" \"npm run start:client\"",
     "test": "jest",
     "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.404 --output src/types/marketplace-api.ts",
     "add-addon": "ts-node src/server/scripts/addAddon.ts",
@@ -29,23 +28,33 @@
   "dependencies": {
     "axios": "^1.6.7",
     "chalk": "^4.1.2",
+    "cors": "^2.8.5",
     "csv-parse": "^5.6.0",
     "diff": "^5.1.0",
     "dotenv": "^16.4.5",
+    "express": "^4.18.2",
     "inversify": "^7.5.1",
     "pg": "^8.11.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.20",
     "typeorm-naming-strategies": "^4.1.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/diff": "^5.0.5",
+    "@types/express": "^4.17.21",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.24",
+    "@types/react": "^18.2.61",
+    "@types/react-dom": "^18.2.19",
+    "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "openapi-typescript": "^7.6.1",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
   }
 }
