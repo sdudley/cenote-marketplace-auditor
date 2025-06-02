@@ -1,14 +1,14 @@
 import 'reflect-metadata';
 import 'dotenv/config';
-import { initializeDatabase } from './config/database';
-import { configureContainer } from './config/container';
-import { TYPES } from './config/types';
-import { MarketplaceService } from './services/MarketplaceService';
-import { AddonService } from './services/AddonService';
-import { TransactionService } from './services/TransactionService';
-import { LicenseService } from './services/LicenseService';
-import { PricingService } from './services/PricingService';
-import { ValidationService } from './services/ValidationService';
+import { initializeDatabase } from '../../common/config/database';
+import { configureContainer } from '../../common/config/container';
+import { TYPES } from '../../common/config/types';
+import { MarketplaceService } from './MarketplaceService';
+import { AddonService } from '../../common/services/AddonService';
+import { TransactionService } from './TransactionService';
+import { LicenseService } from './LicenseService';
+import { PricingService } from './PricingService';
+import { ValidationService } from './ValidationService';
 
 
 async function main() {

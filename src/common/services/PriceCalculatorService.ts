@@ -1,7 +1,7 @@
-import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "../utils/licenseDurationCalculator";
-import { DeploymentType, PricingTierResult } from "./PricingService";
+import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "../../common/utils/licenseDurationCalculator";
+import { PricingTierResult } from "../../server/jobrunner/PricingService";
 import { UserTierPricing } from '../types/userTiers';
-import { deploymentTypeFromHosting, userCountFromTier } from "../utils/validationUtils";
+import { deploymentTypeFromHosting, userCountFromTier } from "../../common/utils/validationUtils";
 import {
     ACADEMIC_CLOUD_PRICE_RATIO,
     ACADEMIC_DC_PRICE_RATIO_LEGACY,
@@ -9,25 +9,23 @@ import {
     ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE,
     CLOUD_DISCOUNT_RATIO,
     DC_DISCOUNT_RATIO
-} from "../config/validationConstants";
+} from "./validationConstants";
 import { injectable } from "inversify";
+import { BillingPeriod, DeploymentType, HostingType, LicenseType, SaleType } from "../types/marketplace";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
-
-export type HostingType = "Server" | "Data Center" | "Cloud";
-export type LicenseType = "ACADEMIC" | "COMMERCIAL" | "COMMUNITY" | "EVALUATION" | "OPEN_SOURCE";
 
 export interface PriceCalcOpts {
     pricingTierResult: PricingTierResult;
     saleDate: string;
-    saleType: "New" | "Refund" | "Renewal" | "Upgrade";
+    saleType: SaleType;
     isSandbox: boolean;
     hosting: HostingType;
-    licenseType: "ACADEMIC" | "COMMERCIAL" | "COMMUNITY" | "EVALUATION" | "OPEN_SOURCE";
+    licenseType: LicenseType;
     tier: string;
     maintenanceStartDate: string;
     maintenanceEndDate: string;
-    billingPeriod: "Monthly" | "Annual";
+    billingPeriod: BillingPeriod;
     previousPurchaseMaintenanceEndDate?: string|undefined;
     previousPricing?: PriceResult|undefined;
     expectedDiscount?: number; // always positive, even for refunds

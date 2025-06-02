@@ -1,4 +1,4 @@
-import { PricingTierResult } from "../PricingService";
+import { PricingTierResult } from "../../../server/jobrunner/PricingService";
 import { UserTierPricing } from '../../types/userTiers';
 
 export const cloudPerUserPricingTiers : UserTierPricing[] = [

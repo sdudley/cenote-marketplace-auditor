@@ -1,13 +1,13 @@
-import { License } from '../entities/License';
-import { LicenseVersion } from '../entities/LicenseVersion';
-import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
-import { printJsonDiff } from '../utils/diffUtils';
-import { LicenseData } from '../types/marketplace';
-import { IgnoredFieldService } from './IgnoredFieldService';
-import { TYPES } from '../config/types';
+import { License } from '../../common/entities/License';
+import { LicenseVersion } from '../../common/entities/LicenseVersion';
+import { deepEqual, normalizeObject, computeJsonPaths } from '../../common/utils/objectUtils';
+import { printJsonDiff } from '../../common/utils/diffUtils';
+import { LicenseData } from '../../common/types/marketplace';
+import { IgnoredFieldService } from '../../common/services/IgnoredFieldService';
+import { TYPES } from '../../common/config/types';
 import { inject, injectable } from 'inversify';
-import { LicenseDaoService } from './LicenseDaoService';
-import { isProperSubsetOfFields } from '../utils/fieldUtils';
+import { LicenseDaoService } from '../../common/database/LicenseDaoService';
+import { isProperSubsetOfFields } from '../../common/utils/fieldUtils';
 
 const ignoreLicenseFieldsForDiffDisplay = [
     'lastUpdated',

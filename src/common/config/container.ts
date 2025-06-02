@@ -1,19 +1,19 @@
 import { Container } from 'inversify';
 import { DataSource } from 'typeorm';
-import { MarketplaceService } from '../services/MarketplaceService';
+import { MarketplaceService } from '../../server/jobrunner/MarketplaceService';
 import { AddonService } from '../services/AddonService';
-import { TransactionService } from '../services/TransactionService';
-import { LicenseService } from '../services/LicenseService';
-import { PricingService } from '../services/PricingService';
-import { ValidationService } from '../services/ValidationService';
+import { TransactionService } from '../../server/jobrunner/TransactionService';
+import { LicenseService } from '../../server/jobrunner/LicenseService';
+import { PricingService } from '../../server/jobrunner/PricingService';
+import { ValidationService } from '../../server/jobrunner/ValidationService';
 import { PriceCalculatorService } from '../services/PriceCalculatorService';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
-import TransactionDaoService from '../services/TransactionDaoService';
-import { LicenseDaoService } from '../services/LicenseDaoService';
-import TransactionReconcileDaoService from '../services/TransactionReconcileDaoService';
+import TransactionDaoService from '../database/TransactionDaoService';
+import { LicenseDaoService } from '../database/LicenseDaoService';
+import TransactionReconcileDaoService from '../database/TransactionReconcileDaoService';
 import { TYPES } from './types';
-import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
-import { ResellerDaoService } from '../services/ResellerDaoService';
+import { TransactionAdjustmentDaoService } from '../database/TransactionAdjustmentDaoService';
+import { ResellerDaoService } from '../database/ResellerDaoService';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
 
 export function configureContainer(dataSource: DataSource): Container {

@@ -1,19 +1,19 @@
-import { Transaction } from '../entities/Transaction';
+import { Transaction } from '../../common/entities/Transaction';
 import { PricingTierResult, PricingService } from './PricingService';
-import { components } from '../types/marketplace-api';
-import { deploymentTypeFromHosting } from '../utils/validationUtils';
-import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
+import { components } from '../../common/types/marketplace-api';
+import { deploymentTypeFromHosting } from '../../common/utils/validationUtils';
+import { PriceCalcOpts, PriceCalculatorService, PriceResult } from '../../common/services/PriceCalculatorService';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../config/types';
-import TransactionDaoService from './TransactionDaoService';
-import TransactionReconcileDaoService from './TransactionReconcileDaoService';
-import { LicenseDaoService } from './LicenseDaoService';
-import { formatCurrency } from '../utils/formatCurrency';
-import { ResellerDaoService } from './ResellerDaoService';
-import { TransactionAdjustment } from '../entities/TransactionAdjustment';
-import { TransactionAdjustmentDaoService } from './TransactionAdjustmentDaoService';
-import { getLicenseDurationInDays } from '../utils/licenseDurationCalculator';
-import { PreviousTransactionService } from './PreviousTransactionService';
+import { TYPES } from '../../common/config/types';
+import TransactionDaoService from '../../common/database/TransactionDaoService';
+import TransactionReconcileDaoService from '../../common/database/TransactionReconcileDaoService';
+import { LicenseDaoService } from '../../common/database/LicenseDaoService';
+import { formatCurrency } from '../../common/utils/formatCurrency';
+import { ResellerDaoService } from '../../common/database/ResellerDaoService';
+import { TransactionAdjustment } from '../../common/entities/TransactionAdjustment';
+import { TransactionAdjustmentDaoService } from '../../common/database/TransactionAdjustmentDaoService';
+import { getLicenseDurationInDays } from '../../common/utils/licenseDurationCalculator';
+import { PreviousTransactionService } from '../../common/services/PreviousTransactionService';
 
 const DEFAULT_START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions

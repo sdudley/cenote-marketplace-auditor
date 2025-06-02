@@ -1,4 +1,4 @@
-import { DeploymentType } from "../services/PricingService";
+import { DeploymentType } from "../types/marketplace";
 import { Transaction } from "../entities/Transaction";
 import { Repository } from "typeorm";
 import { License } from "../entities/License";

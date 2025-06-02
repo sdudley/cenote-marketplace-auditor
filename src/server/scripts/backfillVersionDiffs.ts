@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { LicenseVersion } from '../entities/LicenseVersion';
-import { TransactionVersion } from '../entities/TransactionVersion';
-import { computeJsonPaths, normalizeObject } from '../utils/objectUtils';
-import { initializeDatabase } from '../config/database';
+import { LicenseVersion } from '../../common/entities/LicenseVersion';
+import { TransactionVersion } from '../../common/entities/TransactionVersion';
+import { computeJsonPaths, normalizeObject } from '../../common/utils/objectUtils';
+import { initializeDatabase } from '../../common/config/database';
 
 async function backfillVersionDiffs() {
     const dataSource = await initializeDatabase();

@@ -1,6 +1,6 @@
 import { PreviousTransactionService } from '../PreviousTransactionService';
 import { Transaction } from '../../entities/Transaction';
-import TransactionDaoService from '../TransactionDaoService';
+import TransactionDaoService from '../../database/TransactionDaoService';
 
 let uniqueTransactionId = 0;
 

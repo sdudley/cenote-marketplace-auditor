@@ -8,8 +8,8 @@ import {
     LicenseData,
     TransactionData,
     PricingData
-} from '../types/marketplace';
-import { components } from '../types/marketplace-api';
+} from '../../common/types/marketplace';
+import { components } from '../../common/types/marketplace-api';
 
 export type CloudOrServer = 'cloud' | 'datacenter' | 'server';
 export type LiveOrPending = 'live' | 'pending';

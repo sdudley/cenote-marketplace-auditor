@@ -1,11 +1,11 @@
 import 'dotenv/config';
-import { Transaction } from '../entities/Transaction';
-import { TransactionAdjustment } from '../entities/TransactionAdjustment';
-import { initializeDatabase } from '../config/database';
-import { TransactionAdjustmentDaoService } from '../services/TransactionAdjustmentDaoService';
-import { configureContainer } from '../config/container';
-import { TYPES } from '../config/types';
-import { formatCurrency } from '../utils/formatCurrency';
+import { Transaction } from '../../common/entities/Transaction';
+import { TransactionAdjustment } from '../../common/entities/TransactionAdjustment';
+import { initializeDatabase } from '../../common/config/database';
+import { TransactionAdjustmentDaoService } from '../../common/database/TransactionAdjustmentDaoService';
+import { configureContainer } from '../../common/config/container';
+import { TYPES } from '../../common/config/types';
+import { formatCurrency } from '../../common/utils/formatCurrency';
 
 async function addTransactionAdjustment() {
     const args = process.argv.slice(2);

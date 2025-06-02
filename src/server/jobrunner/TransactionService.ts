@@ -1,13 +1,13 @@
-import { Transaction } from '../entities/Transaction';
-import { TransactionVersion } from '../entities/TransactionVersion';
-import { deepEqual, normalizeObject, computeJsonPaths } from '../utils/objectUtils';
-import { printJsonDiff } from '../utils/diffUtils';
-import { TransactionData } from '../types/marketplace';
-import { IgnoredFieldService } from './IgnoredFieldService';
-import { TYPES } from '../config/types';
+import { Transaction } from '../../common/entities/Transaction';
+import { TransactionVersion } from '../../common/entities/TransactionVersion';
+import { deepEqual, normalizeObject, computeJsonPaths } from '../../common/utils/objectUtils';
+import { printJsonDiff } from '../../common/utils/diffUtils';
+import { TransactionData } from '../../common/types/marketplace';
+import { IgnoredFieldService } from '../../common/services/IgnoredFieldService';
+import { TYPES } from '../../common/config/types';
 import { inject, injectable } from 'inversify';
-import TransactionDaoService from './TransactionDaoService';
-import { isProperSubsetOfFields } from '../utils/fieldUtils';
+import TransactionDaoService from '../../common/database/TransactionDaoService';
+import { isProperSubsetOfFields } from '../../common/utils/fieldUtils';
 
 const ignoreTransactionFieldsForDiffDisplay = [
     'lastUpdated',

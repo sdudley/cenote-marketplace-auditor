@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { DataSource } from 'typeorm';
 import { Addon } from '../entities/Addon';
-import { MarketplaceService } from './MarketplaceService';
+import { MarketplaceService } from '../../server/jobrunner/MarketplaceService';
 import { TYPES } from '../config/types';
 
 @injectable()
