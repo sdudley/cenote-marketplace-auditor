@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { initializeDatabase } from '../../common/config/database';
-import { configureContainer } from '../../common/config/container';
-import { TYPES } from '../../common/config/types';
-import { AddonService } from '../../common/services/AddonService';
+import { initializeDatabase } from '@common/config/database';
+import { configureContainer } from '@common/config/container';
+import { TYPES } from '@common/config/types';
+import { AddonService } from '../jobrunner/AddonService';
 
 async function main() {
     const addonKey = process.argv[2];

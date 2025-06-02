@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import 'dotenv/config';
-import { initializeDatabase } from '../../common/config/database';
-import { configureContainer } from '../../common/config/container';
-import { TYPES } from '../../common/config/types';
+import { initializeDatabase } from '@common/config/database';
+import { configureContainer } from '@common/config/container';
+import { TYPES } from '@common/config/types';
 import { MarketplaceService } from './MarketplaceService';
-import { AddonService } from '../../common/services/AddonService';
+import { AddonService } from 'src/server/jobrunner/AddonService';
 import { TransactionService } from './TransactionService';
 import { LicenseService } from './LicenseService';
 import { PricingService } from './PricingService';

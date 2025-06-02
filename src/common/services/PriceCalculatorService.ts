@@ -1,5 +1,5 @@
 import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "../../common/utils/licenseDurationCalculator";
-import { PricingTierResult } from "../../server/jobrunner/PricingService";
+import { PricingTierResult } from '../types/pricingTierResult';
 import { UserTierPricing } from '../types/userTiers';
 import { deploymentTypeFromHosting, userCountFromTier } from "../../common/utils/validationUtils";
 import {
@@ -9,7 +9,7 @@ import {
     ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE,
     CLOUD_DISCOUNT_RATIO,
     DC_DISCOUNT_RATIO
-} from "./validationConstants";
+} from "../utils/validationConstants";
 import { injectable } from "inversify";
 import { BillingPeriod, DeploymentType, HostingType, LicenseType, SaleType } from "../types/marketplace";
 

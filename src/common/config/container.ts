@@ -1,7 +1,7 @@
 import { Container } from 'inversify';
 import { DataSource } from 'typeorm';
 import { MarketplaceService } from '../../server/jobrunner/MarketplaceService';
-import { AddonService } from '../services/AddonService';
+import { AddonService } from '../../server/jobrunner/AddonService';
 import { TransactionService } from '../../server/jobrunner/TransactionService';
 import { LicenseService } from '../../server/jobrunner/LicenseService';
 import { PricingService } from '../../server/jobrunner/PricingService';

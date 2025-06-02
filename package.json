@@ -4,9 +4,10 @@
   "description": "Atlassian Marketplace transaction and license auditor",
   "main": "dist/server/jobrunner/index.js",
   "scripts": {
-    "build": "npm run build:jobrunner && npm run build:express && npm run build:client",
+    "build": "npm run build:jobrunner && npm run build:express && npm run build:scripts && npm run build:client",
     "build:jobrunner": "tsc -p src/server/jobrunner/tsconfig.json",
     "build:express": "tsc -p src/server/express/tsconfig.json",
+    "build:scripts": "tsc -p src/server/scripts/tsconfig.json",
     "build:client": "tsc -p src/client/tsconfig.json",
     "start": "ts-node src/server/jobrunner/index.ts",
     "start:jobrunner": "ts-node src/server/jobrunner/index.ts",
