@@ -8,7 +8,7 @@
     "build:jobs": "tsc -p src/server/jobs/tsconfig.json",
     "build:express": "tsc -p src/server/express/tsconfig.json",
     "build:scripts": "tsc -p src/server/scripts/tsconfig.json",
-    "build:client": "tsc -p src/client/tsconfig.json",
+    "build:client": "vite build",
     "start": "ts-node src/server/jobs/index.ts",
     "start:jobs": "ts-node src/server/jobs/index.ts",
     "start:express": "ts-node src/server/express/index.ts",
@@ -23,9 +23,15 @@
     "export-pricing-template": "ts-node src/server/scripts/exportPricingTemplate.ts",
     "import-pricing": "ts-node src/server/scripts/importPricing.ts",
     "add-reseller": "ts-node src/server/scripts/addReseller.ts",
-    "add-transaction-adjustment": "ts-node src/server/scripts/addTransactionAdjustment.ts"
+    "add-transaction-adjustment": "ts-node src/server/scripts/addTransactionAdjustment.ts",
+    "dev:client": "vite",
+    "preview:client": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
     "axios": "^1.6.7",
     "chalk": "^4.1.2",
     "cors": "^2.8.5",
@@ -49,12 +55,14 @@
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.5.1",
     "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "openapi-typescript": "^7.6.1",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^6.3.5"
   }
 }
