@@ -34,12 +34,9 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     server: {
-      port: 5173,
-      proxy: {
-        '/api': {
-          target: 'http://localhost:3000',
-          changeOrigin: true
-        }
+      middlewareMode: true,
+      hmr: {
+        port: 3000
       }
     },
     // Environment-specific configuration

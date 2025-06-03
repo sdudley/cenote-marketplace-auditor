@@ -6,34 +6,21 @@ import path from 'path';
 import { configureContainer } from './config/container';
 import { ApiRouter } from './routes/api';
 import { initializeDatabase } from '../config/database';
+import { createServer, ViteDevServer } from 'vite';
+import fs from 'fs';
 
 async function startServer() {
     // Create Express application
     const app = express();
     const port = process.env.PORT || 3000;
     const clientDistPath = path.join(__dirname, '../../../dist/client');
+    const isDev = process.env.NODE_ENV !== 'production';
+    let vite: ViteDevServer | undefined;
 
     // Set up basic middleware
     app.use(cors());
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-
-    // Configure static file serving for client assets with caching
-    app.use(express.static(clientDistPath, {
-        maxAge: '1y', // Cache static assets for 1 year
-        etag: true, // Enable ETag
-        lastModified: true, // Enable Last-Modified
-        setHeaders: (res, path) => {
-            // Set appropriate MIME types
-            if (path.endsWith('.js')) {
-                res.setHeader('Content-Type', 'application/javascript');
-            } else if (path.endsWith('.css')) {
-                res.setHeader('Content-Type', 'text/css');
-            } else if (path.endsWith('.html')) {
-                res.setHeader('Content-Type', 'text/html');
-            }
-        }
-    }));
 
     // Initialize database and configure dependency injection
     try {
@@ -44,25 +31,76 @@ async function startServer() {
         const apiRouter = container.get<ApiRouter>('ApiRouter');
         app.use('/api', apiRouter.router);
 
+        if (isDev) {
+            // Create Vite server in middleware mode
+            vite = await createServer({
+                server: { middlewareMode: true },
+                appType: 'custom',
+                root: path.join(process.cwd(), 'src/client'),
+            });
+
+            // Use vite's connect instance as middleware
+            app.use(vite.middlewares);
+
+            // Serve index.html for all routes in development
+            app.use('*', async (req, res, next) => {
+                const url = req.originalUrl;
+
+                try {
+                    // Read the index.html file
+                    let template = fs.readFileSync(
+                        path.resolve(process.cwd(), 'src/client/index.html'),
+                        'utf-8'
+                    );
+
+                    // Apply Vite HTML transforms
+                    template = await vite!.transformIndexHtml(url, template);
+
+                    // Send the transformed HTML
+                    res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+                } catch (e) {
+                    // If an error is caught, let Vite fix the stack trace
+                    vite!.ssrFixStacktrace(e as Error);
+                    next(e);
+                }
+            });
+        } else {
+            // Configure static file serving for client assets with caching in production
+            app.use(express.static(clientDistPath, {
+                maxAge: '1y',
+                etag: true,
+                lastModified: true,
+                setHeaders: (res, path) => {
+                    if (path.endsWith('.js')) {
+                        res.setHeader('Content-Type', 'application/javascript');
+                    } else if (path.endsWith('.css')) {
+                        res.setHeader('Content-Type', 'text/css');
+                    } else if (path.endsWith('.html')) {
+                        res.setHeader('Content-Type', 'text/html');
+                    }
+                }
+            }));
+
+            // Serve index.html for all routes in production
+            app.get('*', (req, res) => {
+                res.sendFile(path.join(clientDistPath, 'index.html'));
+            });
+        }
+
         // Set up error handling middleware
         app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
             console.error(err.stack);
             res.status(500).send('Something broke!');
         });
 
-        // SPA fallback route - must be after API routes
-        app.get('*', (req, res, next) => {
-            // Don't serve index.html for API routes
-            if (req.path.startsWith('/api')) {
-                return next();
-            }
-            res.sendFile(path.join(clientDistPath, 'index.html'));
-        });
-
         // Start the server
         app.listen(port, () => {
             console.log(`Express server is running on port ${port}`);
-            console.log(`Serving static files from ${clientDistPath}`);
+            if (isDev) {
+                console.log('Development mode with HMR enabled');
+            } else {
+                console.log(`Serving static files from ${clientDistPath}`);
+            }
         });
     } catch (error) {
         console.error('Failed to initialize database:', error);
