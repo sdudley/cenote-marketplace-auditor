@@ -5,11 +5,11 @@ services:
     container_name: auditor-app
     build: .
     environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_DATABASE=${DB_DATABASE}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_DATABASE=${DB_DATABASE:-marketplace_auditor}
       - ATLASSIAN_ACCOUNT_USER=${ATLASSIAN_ACCOUNT_USER}
       - ATLASSIAN_ACCOUNT_API_TOKEN=${ATLASSIAN_ACCOUNT_API_TOKEN}
       - ATLASSIAN_VENDOR_ID=${ATLASSIAN_VENDOR_ID}
@@ -17,17 +17,16 @@ services:
       - db
     volumes:
       - .:/app
-      - /app/node_modules
 
   db:
     container_name: auditor-postgres
     image: postgres:16.2-bullseye
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=marketplace_auditor
-    ports:
-      - "5431:5432"
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_DATABASE:-marketplace_auditor}
+#    ports:
+#      - "5431:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
