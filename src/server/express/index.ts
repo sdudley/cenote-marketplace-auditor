@@ -8,6 +8,18 @@ import { ApiRouter } from './routes/api';
 import { initializeDatabase } from '../config/database';
 import { createServer, ViteDevServer } from 'vite';
 import fs from 'fs';
+import { resolveModulePath } from './ModuleResolver';
+
+// Optionally, patch require to use the resolver for #common
+const Module = require('module');
+const originalRequire = Module.prototype.require;
+Module.prototype.require = function (importPath: any) {
+  if (typeof importPath === 'string' && importPath.startsWith('#common')) {
+    const resolved = resolveModulePath(importPath);
+    return originalRequire.call(this, resolved);
+  }
+  return originalRequire.call(this, importPath);
+};
 
 async function startServer() {
     // Create Express application
