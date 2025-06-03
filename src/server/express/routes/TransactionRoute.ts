@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
-import { TransactionDao, TransactionQueryParams } from '../../database/TransactionDao';
 import { TYPES } from '../../config/types';
+import { TransactionDao, TransactionQueryParams } from '../../database/TransactionDao';
 
 @injectable()
 export class TransactionRoute {

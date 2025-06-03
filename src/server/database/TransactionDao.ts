@@ -15,8 +15,13 @@ export interface TransactionQueryParams {
     search?: string;
 }
 
+export interface TransactionResult {
+    transaction: Transaction;
+    versionCount: number;
+}
+
 export interface TransactionQueryResult {
-    transactions: Transaction[];
+    transactions: TransactionResult[];
     total: number;
     count: number;
 }
@@ -110,8 +115,22 @@ class TransactionDao {
             search
         } = params;
 
-        // Build the query
-        const queryBuilder = this.transactionRepo.createQueryBuilder('transaction');
+        // Create subquery for version stats
+        const versionStatsSubquery = this.transactionVersionRepo
+            .createQueryBuilder('version')
+            .select('version.transaction_id', 'transaction_id')
+            .addSelect('COUNT(version.id)', 'version_count')
+            .groupBy('version.transaction_id');
+
+        // Build the main query
+        const queryBuilder = this.transactionRepo
+            .createQueryBuilder('transaction')
+            .leftJoin(
+                `(${versionStatsSubquery.getQuery()})`,
+                'version_stats',
+                'version_stats.transaction_id = transaction.id'
+            )
+            .addSelect('version_stats.version_count', 'version_count')
 
         // Add search condition if provided
         if (search) {
@@ -135,12 +154,18 @@ class TransactionDao {
         queryBuilder.skip(start).take(limit);
 
         // Execute query
-        const transactions = await queryBuilder.getMany();
+        const results = await queryBuilder.getRawAndEntities();
+
+        // Map raw results to TransactionResult objects
+        const transactionResults = results.entities.map((transaction, index) => ({
+            transaction,
+            versionCount: parseInt(results.raw[index].version_count) || 0
+        }));
 
         return {
-            transactions,
+            transactions: transactionResults,
             total,
-            count: transactions.length
+            count: transactionResults.length
         };
     }
 }
