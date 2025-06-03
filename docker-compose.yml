@@ -4,6 +4,7 @@ services:
   app:
     container_name: auditor-app
     build: .
+    env_file: ".env"
     environment:
       - DB_HOST=${DB_HOST:-db}
       - DB_PORT=${DB_PORT:-5432}

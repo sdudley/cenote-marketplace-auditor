@@ -8,8 +8,8 @@ import { TYPES } from '../config/types';
 async function addReseller() {
     const args = process.argv.slice(2);
     if (args.length !== 3) {
-        console.error('Usage: npm run add-reseller <name> <matchMode> <discountAmount>');
-        console.error('Example: npm run add-reseller "Atlassian Reseller Inc" exact 0.00');
+        console.error('Usage: npm run add-reseller <name> <matchMode> <discountPercentAsFraction>');
+        console.error('Example: npm run add-reseller "Atlassian Reseller Inc" exact 0.10');
         process.exit(1);
     }
 

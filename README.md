@@ -199,7 +199,7 @@ Each reseller has:
 To add a new reseller, use the `add-reseller` script:
 
 ```bash
-npm run add-reseller <name> <matchMode> <discountAmount>
+npm run add-reseller <name> <matchMode> <discountAmountAsFraction>
 ```
 
 Example:
@@ -211,7 +211,7 @@ Parameters:
 - `name`: The reseller name (use quotes if it contains spaces)
 - `matchMode`: Either "exact" or "substring". "exact" must match the full
 reseller name, while "substring" will match any portion of the reseller name
-- `discountAmount`: The discount amount as a fraction (for example, 0.10 is
+- `discountAmountAsFraction`: The discount amount as a fraction (for example, 0.10 is
 a 10% discount)
 
 ## Transaction Adjustment Management

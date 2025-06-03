@@ -14,14 +14,27 @@ import { IgnoredField } from '@common/entities/IgnoredField';
 import { TransactionReconcile } from '@common/entities/TransactionReconcile';
 import { Reseller } from '@common/entities/Reseller';
 import { TransactionAdjustment } from '@common/entities/TransactionAdjustment';
+import { assert } from 'console';
+
+function assertString(value: string | undefined, name: string): asserts value is string {
+    if (typeof value !== 'string') {
+        throw new Error(`${name} must be a string`);
+    }
+}
+
+assert(process.env.DB_HOST, 'DB_HOST is not set');
+assert(process.env.DB_USERNAME, 'DB_USERNAME is not set');
+assert(process.env.DB_PASSWORD, 'DB_PASSWORD is not set');
+assert(process.env.DB_DATABASE, 'DB_DATABASE is not set');
+assertString(process.env.DB_PORT, 'DB_PORT');
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_DATABASE || 'marketplace_auditor',
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT),
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
     synchronize: true,
     logging: false,
     namingStrategy: new SnakeNamingStrategy(),

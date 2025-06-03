@@ -366,10 +366,10 @@ export class ValidationJob {
         } else {
             const diff = expectedPurchase - actualPurchase;
             console.log(`*ERROR* ${saleDate} ${saleType.padEnd(7)} L=${entitlementId.padEnd(17)} Expected vendor: ${expectedVendorFormatted.padEnd(10)}; actual vendor: ${actualVendorFormatted.padEnd(10)}; expected purchase: ${expectedPurchaseFormatted.padEnd(10)}; actual purchase: ${actualPurchaseFormatted.padEnd(10)}; difference=${formatCurrency(diff)}; txID=${transaction.id}; Customer=${transaction.data.customerDetails.company}; Partner=${transaction.data.partnerDetails?.partnerName}; ${notes.join('; ')}`);
-            console.log(`Pricing opts: `);
-            console.dir(pricingOpts, { depth: 1 });
+            // console.debug(`Pricing opts: `);
+            // console.dir(pricingOpts, { depth: 1 });
 
-            console.log(`npm run add-transaction-adjustment -- ${transaction.id} ${diff.toFixed(2)} ""\n\n`);
+            console.log(`To accept adjustment: npm run add-transaction-adjustment -- ${transaction.id} ${diff.toFixed(2)} ""\n\n`);
         }
     }
 
