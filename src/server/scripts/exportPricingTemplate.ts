@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import { AppDataSource, initializeDatabase } from '../config/database';
-import { Pricing } from '@common/entities/Pricing';
+import { Pricing } from '#common/entities/Pricing';
 import * as fs from 'fs';
 import { IsNull } from 'typeorm';
-import { userTierSorter } from '@common/utils/userTierSorter';
+import { userTierSorter } from '#common/utils/userTierSorter';
 
 async function main() {
     const addonKey = process.argv[2];

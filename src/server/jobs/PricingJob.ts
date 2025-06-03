@@ -1,7 +1,7 @@
 import { MarketplaceService } from '../services/MarketplaceService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import { DeploymentType } from '@common/types/marketplace';
+import { DeploymentType } from '#common/types/marketplace';
 import { PricingService } from '../services/PricingService';
 import { AddonService } from '../services/AddonService';
 

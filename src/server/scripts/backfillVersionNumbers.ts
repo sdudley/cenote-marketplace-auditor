@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { Transaction } from '@common/entities/Transaction';
-import { TransactionVersion } from '@common/entities/TransactionVersion';
-import { License } from '@common/entities/License';
-import { LicenseVersion } from '@common/entities/LicenseVersion';
+import { Transaction } from '#common/entities/Transaction';
+import { TransactionVersion } from '#common/entities/TransactionVersion';
+import { License } from '#common/entities/License';
+import { LicenseVersion } from '#common/entities/LicenseVersion';
 import { initializeDatabase } from '../config/database';
 
 async function backfillVersionNumbers() {

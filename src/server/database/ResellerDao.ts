@@ -1,5 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
-import { Reseller } from '@common/entities/Reseller';
+import { Reseller } from '#common/entities/Reseller';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 

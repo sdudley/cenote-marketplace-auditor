@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Reseller, ResellerMatchMode } from '@common/entities/Reseller';
+import { Reseller, ResellerMatchMode } from '#common/entities/Reseller';
 import { initializeDatabase } from '../config/database';
 import { ResellerDao } from '../database/ResellerDao';
 import { configureContainer } from '../config/container';

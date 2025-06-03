@@ -1,6 +1,6 @@
 import { injectable, inject } from 'inversify';
 import { DataSource } from 'typeorm';
-import { Addon } from '@common/entities/Addon';
+import { Addon } from '#common/entities/Addon';
 import { TYPES } from '../config/types';
 
 @injectable()

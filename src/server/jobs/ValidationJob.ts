@@ -1,19 +1,19 @@
-import { Transaction } from '@common/entities/Transaction';
+import { Transaction } from '#common/entities/Transaction';
 import { PricingService } from '../services/PricingService';
-import { components } from '@common/types/marketplace-api';
-import { deploymentTypeFromHosting } from '@common/utils/validationUtils';
+import { components } from '#common/types/marketplace-api';
+import { deploymentTypeFromHosting } from '#common/utils/validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from '../services/PriceCalculatorService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 import TransactionDao from '../database/TransactionDao';
 import TransactionReconcileDao from '../database/TransactionReconcileDao';
 import { LicenseDao } from '../database/LicenseDao';
-import { formatCurrency } from '@common/utils/formatCurrency';
+import { formatCurrency } from '#common/utils/formatCurrency';
 import { ResellerDao } from '../database/ResellerDao';
-import { TransactionAdjustment } from '@common/entities/TransactionAdjustment';
+import { TransactionAdjustment } from '#common/entities/TransactionAdjustment';
 import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
-import { getLicenseDurationInDays } from '@common/utils/licenseDurationCalculator';
-import { PricingTierResult } from '@common/types/pricingTierResult';
+import { getLicenseDurationInDays } from '#common/utils/licenseDurationCalculator';
+import { PricingTierResult } from '#common/types/pricingTierResult';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
 
 const DEFAULT_START_DATE = '2024-01-01';
