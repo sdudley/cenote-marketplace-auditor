@@ -23,6 +23,9 @@ Module.prototype.require = function (importPath: any) {
 };
 
 async function startServer() {
+    console.log('Starting development server...');
+    console.log('Initializing database and configuring server...');
+
     // Create Express application
     const app = express();
     const port = process.env.PORT || 3000;

@@ -138,17 +138,17 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Entitlement ID</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
                             <TableCell>Sale Date</TableCell>
-                            <TableCell>Addon Name</TableCell>
+                            <TableCell>App</TableCell>
                             <TableCell>Sale Type</TableCell>
                             <TableCell>Company</TableCell>
                             <TableCell>Hosting</TableCell>
                             <TableCell>Tier</TableCell>
                             <TableCell>Amount</TableCell>
-                            <TableCell>Last Updated</TableCell>
-                            <TableCell>Created</TableCell>
-                            <TableCell>Updated</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Last Updated</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Created</TableCell>
+                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Updated</TableCell>
                             <TableCell>Versions</TableCell>
                             <TableCell>Actions</TableCell>
                         </TableRow>
@@ -156,7 +156,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     <TableBody>
                         {transactions.map((tr) => (
                             <TableRow key={`${tr.transaction.id}`}>
-                                <TableCell>{tr.transaction.entitlementId}</TableCell>
+                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
                                 <TableCell>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>
                                 <TableCell>{tr.transaction.data.addonName}</TableCell>
                                 <TableCell>{tr.transaction.data.purchaseDetails.saleType}</TableCell>
@@ -164,9 +164,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                 <TableCell>{tr.transaction.data.purchaseDetails.hosting}</TableCell>
                                 <TableCell>{tr.transaction.data.purchaseDetails.tier}</TableCell>
                                 <TableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</TableCell>
-                                <TableCell>{tr.transaction.data.lastUpdated}</TableCell>
-                                <TableCell>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCell>
-                                <TableCell>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
+                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.lastUpdated}</TableCell>
+                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCell>
+                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
                                 <TableCell>
                                     {tr.versionCount}
                                     <IconButton size="small" color="primary">
