@@ -97,6 +97,9 @@ class TransactionDao {
         return sortedTransactions;
     }
 
+    /**
+     * Search the entire set of transactions based on criteria.
+     */
     async getTransactions(params: TransactionQueryParams): Promise<TransactionQueryResult> {
         const {
             start = 0,
@@ -106,58 +109,56 @@ class TransactionDao {
             search
         } = params;
 
-        // Create subquery for version stats
-        const versionStatsSubquery = this.transactionVersionRepo
-            .createQueryBuilder('version')
-            .select('version.transaction_id', 'transaction_id')
-            .addSelect('COUNT(version.id)', 'version_count')
-            .groupBy('version.transaction_id');
+        try {
+            const queryBuilder = this.transactionRepo
+                .createQueryBuilder('transaction');
 
-        // Build the main query
-        const queryBuilder = this.transactionRepo
-            .createQueryBuilder('transaction')
-            .leftJoin(
-                `(${versionStatsSubquery.getQuery()})`,
-                'version_stats',
-                'version_stats.transaction_id = transaction.id'
-            )
-            .addSelect('version_stats.version_count', 'version_count')
+            if (search) {
+                queryBuilder.where(
+                    'transaction.data::text ILIKE :search',
+                    { search: `%${search}%` }
+                );
+            }
 
-        // Add search condition if provided
-        if (search) {
-            queryBuilder.where(
-                'transaction.data::text ILIKE :search',
-                { search: `%${search}%` }
+            const total = await queryBuilder.getCount();
+
+            if (sortBy === 'saleDate') {
+                queryBuilder.orderBy("transaction.data->'purchaseDetails'->>'saleDate'", sortOrder);
+            } else {
+                queryBuilder.orderBy('transaction.created_at', sortOrder);
+            }
+
+            queryBuilder.skip(start).take(limit);
+
+            const transactions = await queryBuilder.getMany();
+
+            const transactionIds = transactions.map(t => t.id);
+            const versionCounts = (transactionIds.length > 0) ? await this.transactionVersionRepo
+                .createQueryBuilder('version')
+                .select('version.transaction_id', 'transaction_id')
+                .addSelect('COUNT(version.id)', 'version_count')
+                .where('version.transaction_id IN (:...ids)', { ids: transactionIds })
+                .groupBy('version.transaction_id')
+                .getRawMany() : [];
+
+            const versionCountMap = new Map(
+                versionCounts.map(vc => [vc.transaction_id, parseInt(vc.version_count)])
             );
+
+            // Map results to TransactionResult objects
+            const transactionResults = transactions.map(transaction => ({
+                transaction,
+                versionCount: versionCountMap.get(transaction.id) || 0
+            }));
+
+            return {
+                transactions: transactionResults,
+                total,
+                count: transactionResults.length
+            };
+        } catch (error: any) {
+            throw error;
         }
-
-        // Get total count for pagination
-        const total = await queryBuilder.getCount();
-
-        // Add sorting
-        if (sortBy === 'saleDate') {
-            queryBuilder.orderBy("transaction.data->'purchaseDetails'->>'saleDate'", sortOrder);
-        } else {
-            queryBuilder.orderBy('transaction.createdAt', sortOrder);
-        }
-
-        // Add pagination
-        queryBuilder.skip(start).take(limit);
-
-        // Execute query
-        const results = await queryBuilder.getRawAndEntities();
-
-        // Map raw results to TransactionResult objects
-        const transactionResults = results.entities?.map((transaction, index) => ({
-            transaction,
-            versionCount: parseInt(results.raw[index].version_count) || 0
-        })) ?? [];
-
-        return {
-            transactions: transactionResults,
-            total,
-            count: transactionResults.length
-        };
     }
 }
 

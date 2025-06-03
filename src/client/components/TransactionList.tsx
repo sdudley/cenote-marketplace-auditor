@@ -10,30 +10,56 @@ import {
     TablePagination,
     TextField,
     IconButton,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
     Box,
     Tooltip,
     CircularProgress,
-    SelectChangeEvent
+    TableSortLabel
 } from '@mui/material';
-import { HelpOutline, Add } from '@mui/icons-material';
+import { HelpOutline, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
+import { SortArrows } from '../styles';
 
 interface TransactionListProps {
     // Add props if needed
 }
+
+type SortField = 'createdAt' | 'saleDate';
+type SortOrder = 'ASC' | 'DESC';
+
+const SortableHeader: React.FC<{
+    field: SortField;
+    label: string;
+    currentSort: SortField;
+    currentOrder: SortOrder;
+    onSort: (field: SortField) => void;
+    whiteSpace?: boolean;
+}> = ({ field, label, currentSort, currentOrder, onSort, whiteSpace }) => (
+    <TableCell>
+        <TableSortLabel
+            active={currentSort === field}
+            direction={currentSort === field ? currentOrder.toLowerCase() as 'asc' | 'desc' : 'asc'}
+            onClick={() => onSort(field)}
+            sx={{ whiteSpace: whiteSpace ? 'nowrap' : 'normal' }}
+            IconComponent={currentSort === field ? undefined : () => (
+                <SortArrows>
+                    <ArrowUpward />
+                    <ArrowDownward />
+                </SortArrows>
+            )}
+        >
+            {label}
+        </TableSortLabel>
+    </TableCell>
+);
 
 export const TransactionList: React.FC<TransactionListProps> = () => {
     const [transactions, setTransactions] = useState<TransactionResult[]>([]);
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
-    const [sortBy, setSortBy] = useState<'createdAt' | 'saleDate'>('createdAt');
-    const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+    const [sortBy, setSortBy] = useState<SortField>('createdAt');
+    const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -66,21 +92,18 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         setPage(0);
     };
 
-    const handleSortChange = (event: SelectChangeEvent) => {
-        setSortBy(event.target.value as 'createdAt' | 'saleDate');
-    };
-
-    const handleSortOrderChange = (event: SelectChangeEvent) => {
-        setSortOrder(event.target.value as 'ASC' | 'DESC');
+    const handleSort = (field: SortField) => {
+        if (field === sortBy) {
+            setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+        } else {
+            setSortBy(field);
+            setSortOrder('ASC');
+        }
     };
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(event.target.value);
         setPage(0);
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString();
     };
 
     const formatCurrency = (amount: number) => {
@@ -100,20 +123,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     onChange={handleSearchChange}
                     size="small"
                 />
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel>Sort By</InputLabel>
-                    <Select value={sortBy} onChange={handleSortChange} label="Sort By">
-                        <MenuItem value="createdAt">Created Date</MenuItem>
-                        <MenuItem value="saleDate">Sale Date</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel>Order</InputLabel>
-                    <Select value={sortOrder} onChange={handleSortOrderChange} label="Order">
-                        <MenuItem value="ASC">Ascending</MenuItem>
-                        <MenuItem value="DESC">Descending</MenuItem>
-                    </Select>
-                </FormControl>
             </Box>
 
             <TableContainer component={Paper} sx={{ position: 'relative', minHeight: 400 }}>
@@ -139,15 +148,27 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
-                            <TableCell>Sale Date</TableCell>
+                            <SortableHeader
+                                field="saleDate"
+                                label="Sale Date"
+                                currentSort={sortBy}
+                                currentOrder={sortOrder}
+                                onSort={handleSort}
+                            />
                             <TableCell>App</TableCell>
                             <TableCell>Sale Type</TableCell>
                             <TableCell>Company</TableCell>
                             <TableCell>Hosting</TableCell>
                             <TableCell>Tier</TableCell>
                             <TableCell>Amount</TableCell>
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Last Updated</TableCell>
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Created</TableCell>
+                            <SortableHeader
+                                field="createdAt"
+                                label="Created"
+                                currentSort={sortBy}
+                                currentOrder={sortOrder}
+                                onSort={handleSort}
+                                whiteSpace
+                            />
                             <TableCell sx={{ whiteSpace: 'nowrap' }}>Updated</TableCell>
                             <TableCell>Versions</TableCell>
                             <TableCell>Actions</TableCell>
@@ -164,7 +185,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                 <TableCell>{tr.transaction.data.purchaseDetails.hosting}</TableCell>
                                 <TableCell>{tr.transaction.data.purchaseDetails.tier}</TableCell>
                                 <TableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</TableCell>
-                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.lastUpdated}</TableCell>
                                 <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCell>
                                 <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
                                 <TableCell>

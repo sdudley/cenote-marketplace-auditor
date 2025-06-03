@@ -1,5 +1,6 @@
 import { Box, Container, Drawer, AppBar, styled } from '@mui/material';
 import { styled as muiStyled } from '@mui/material/styles';
+import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
 
 export const drawerWidth = 240;
 
@@ -83,5 +84,18 @@ export const PageContainer = muiStyled(Box)(({ theme }) => ({
 }));
 
 export const PageTitle = muiStyled(Box)(({ theme }) => ({
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(3),
+}));
+
+export const SortArrows = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    color: theme.palette.action.disabled,
+    marginLeft: theme.spacing(0.5),
+    '& .MuiSvgIcon-root': {
+        fontSize: 12,
+    },
+    '& .MuiSvgIcon-root:first-of-type': {
+        marginRight: -4,
+    },
 }));
