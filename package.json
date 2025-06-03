@@ -9,6 +9,8 @@
     "build:express": "tsc -p src/server/express/tsconfig.json",
     "build:scripts": "tsc -p src/server/scripts/tsconfig.json",
     "build:client": "vite build",
+    "build:client:dev": "vite build --mode development",
+    "build:client:prod": "vite build --mode production",
     "start": "ts-node src/server/jobs/index.ts",
     "start:jobs": "ts-node src/server/jobs/index.ts",
     "start:express": "ts-node src/server/express/index.ts",
@@ -25,7 +27,12 @@
     "add-reseller": "ts-node src/server/scripts/addReseller.ts",
     "add-transaction-adjustment": "ts-node src/server/scripts/addTransactionAdjustment.ts",
     "dev:client": "vite",
-    "preview:client": "vite preview"
+    "dev:client:prod": "vite --mode production",
+    "preview:client": "vite preview",
+    "preview:client:prod": "vite preview --mode production",
+    "analyze:client": "vite build --mode analyze",
+    "clean:client": "rimraf dist/client",
+    "dev": "concurrently \"npm run dev:client\" \"npm run start:express\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -59,6 +66,7 @@
     "concurrently": "^8.2.2",
     "jest": "^29.7.0",
     "openapi-typescript": "^7.6.1",
+    "rimraf": "^5.0.5",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
