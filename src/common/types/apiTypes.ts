@@ -10,3 +10,13 @@ export interface TransactionQueryResult {
     total: number;
     count: number;
 }
+
+export type TransactionQuerySortType = 'createdAt' | 'saleDate' | 'updatedAt';
+
+export interface TransactionQueryParams {
+    start?: number;
+    limit?: number;
+    sortBy?: TransactionQuerySortType;
+    sortOrder?: 'ASC' | 'DESC';
+    search?: string;
+}

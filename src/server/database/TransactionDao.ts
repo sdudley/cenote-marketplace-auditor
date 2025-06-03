@@ -6,16 +6,7 @@ import { Repository } from "typeorm";
 import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { IsNull } from "typeorm";
-import { TransactionQueryResult } from "#common/types/apiTypes";
-
-export interface TransactionQueryParams {
-    start?: number;
-    limit?: number;
-    sortBy?: 'createdAt' | 'saleDate';
-    sortOrder?: 'ASC' | 'DESC';
-    search?: string;
-}
-
+import { TransactionQueryParams, TransactionQueryResult } from "#common/types/apiTypes";
 
 @injectable()
 class TransactionDao {
@@ -124,8 +115,12 @@ class TransactionDao {
 
             if (sortBy === 'saleDate') {
                 queryBuilder.orderBy("transaction.data->'purchaseDetails'->>'saleDate'", sortOrder);
-            } else {
+            } else if (sortBy === 'createdAt') {
                 queryBuilder.orderBy('transaction.created_at', sortOrder);
+            } else if (sortBy === 'updatedAt') {
+                queryBuilder.orderBy('transaction.updated_at', sortOrder);
+            } else {
+                throw new Error(`Invalid sortBy: ${sortBy}`);
             }
 
             queryBuilder.skip(start).take(limit);

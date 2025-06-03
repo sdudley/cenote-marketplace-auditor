@@ -3,7 +3,6 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableContainer,
     TableHead,
     TableRow,
     Paper,
@@ -16,7 +15,7 @@ import {
     TableSortLabel
 } from '@mui/material';
 import { HelpOutline, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
-import { TransactionResult } from '#common/types/apiTypes';
+import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { SortArrows, StyledTableContainer, TableWrapper } from '../styles';
 
@@ -24,15 +23,14 @@ interface TransactionListProps {
     // Add props if needed
 }
 
-type SortField = 'createdAt' | 'saleDate';
 type SortOrder = 'ASC' | 'DESC';
 
 const SortableHeader: React.FC<{
-    field: SortField;
+    field: TransactionQuerySortType;
     label: string;
-    currentSort: SortField;
+    currentSort: TransactionQuerySortType;
     currentOrder: SortOrder;
-    onSort: (field: SortField) => void;
+    onSort: (field: TransactionQuerySortType) => void;
     whiteSpace?: boolean;
 }> = ({ field, label, currentSort, currentOrder, onSort, whiteSpace }) => (
     <TableCell>
@@ -58,7 +56,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
-    const [sortBy, setSortBy] = useState<SortField>('createdAt');
+    const [sortBy, setSortBy] = useState<TransactionQuerySortType>('createdAt');
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
@@ -92,7 +90,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         setPage(0);
     };
 
-    const handleSort = (field: SortField) => {
+    const handleSort = (field: TransactionQuerySortType) => {
         if (field === sortBy) {
             setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
         } else {
@@ -173,13 +171,20 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Updated</TableCell>
+                                    <SortableHeader
+                                        field="updatedAt"
+                                        label="Updated"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
                                     <TableCell>Versions</TableCell>
                                     <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {transactions.map((tr) => (
+                                {transactions && transactions.map((tr) => (
                                     <TableRow key={`${tr.transaction.id}`}>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>

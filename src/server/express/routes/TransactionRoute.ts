@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { TransactionDao, TransactionQueryParams } from '../../database/TransactionDao';
+import { TransactionDao } from '../../database/TransactionDao';
+import { TransactionQueryParams, TransactionQuerySortType } from '#common/types/apiTypes';
 
 @injectable()
 export class TransactionRoute {
@@ -23,7 +24,7 @@ export class TransactionRoute {
             const params: TransactionQueryParams = {
                 start: parseInt(req.query.start as string) || 0,
                 limit: parseInt(req.query.limit as string) || 25,
-                sortBy: (req.query.sortBy as 'createdAt' | 'saleDate') || 'createdAt',
+                sortBy: (req.query.sortBy as TransactionQuerySortType) || 'createdAt',
                 sortOrder: (req.query.sortOrder as 'ASC' | 'DESC') || 'DESC',
                 search: req.query.search as string
             };
@@ -35,8 +36,8 @@ export class TransactionRoute {
             if (params.limit! < 1 || params.limit! > 100) {
                 return res.status(400).json({ error: 'limit must be between 1 and 100' });
             }
-            if (params.sortBy !== 'createdAt' && params.sortBy !== 'saleDate') {
-                return res.status(400).json({ error: 'sortBy must be either createdAt or saleDate' });
+            if (params.sortBy !== 'createdAt' && params.sortBy !== 'saleDate' && params.sortBy !== 'updatedAt') {
+                return res.status(400).json({ error: 'sortBy must be one of: createdAt, updatedAt, saleDate' });
             }
             if (params.sortOrder !== 'ASC' && params.sortOrder !== 'DESC') {
                 return res.status(400).json({ error: 'sortOrder must be either ASC or DESC' });
