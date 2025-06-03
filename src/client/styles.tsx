@@ -1,4 +1,4 @@
-import { Box, Container, Drawer, AppBar, styled } from '@mui/material';
+import { Box, Container, Drawer, AppBar, styled, TableContainer as MuiTableContainer, Paper } from '@mui/material';
 import { styled as muiStyled } from '@mui/material/styles';
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
 
@@ -99,3 +99,15 @@ export const SortArrows = styled(Box)(({ theme }) => ({
         marginRight: -4,
     },
 }));
+
+export const TableWrapper = styled(Box)(({ theme }) => ({
+    width: '100%',
+    minWidth: '1024px',
+    overflowX: 'auto'
+}));
+
+export const StyledTableContainer = styled(MuiTableContainer)({
+    position: 'relative',
+    minHeight: 400,
+    width: '100%'
+});

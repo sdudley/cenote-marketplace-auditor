@@ -18,7 +18,7 @@ import {
 import { HelpOutline, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
-import { SortArrows } from '../styles';
+import { SortArrows, StyledTableContainer, TableWrapper } from '../styles';
 
 interface TransactionListProps {
     // Add props if needed
@@ -125,86 +125,93 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 />
             </Box>
 
-            <TableContainer component={Paper} sx={{ position: 'relative', minHeight: 400 }}>
-                {loading && (
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                            zIndex: 1
-                        }}
-                    >
-                        <CircularProgress />
-                    </Box>
-                )}
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
-                            <SortableHeader
-                                field="saleDate"
-                                label="Sale Date"
-                                currentSort={sortBy}
-                                currentOrder={sortOrder}
-                                onSort={handleSort}
-                            />
-                            <TableCell>App</TableCell>
-                            <TableCell>Sale Type</TableCell>
-                            <TableCell>Company</TableCell>
-                            <TableCell>Hosting</TableCell>
-                            <TableCell>Tier</TableCell>
-                            <TableCell>Amount</TableCell>
-                            <SortableHeader
-                                field="createdAt"
-                                label="Created"
-                                currentSort={sortBy}
-                                currentOrder={sortOrder}
-                                onSort={handleSort}
-                                whiteSpace
-                            />
-                            <TableCell sx={{ whiteSpace: 'nowrap' }}>Updated</TableCell>
-                            <TableCell>Versions</TableCell>
-                            <TableCell>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {transactions.map((tr) => (
-                            <TableRow key={`${tr.transaction.id}`}>
-                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
-                                <TableCell>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>
-                                <TableCell>{tr.transaction.data.addonName}</TableCell>
-                                <TableCell>{tr.transaction.data.purchaseDetails.saleType}</TableCell>
-                                <TableCell>{tr.transaction.data.customerDetails.company}</TableCell>
-                                <TableCell>{tr.transaction.data.purchaseDetails.hosting}</TableCell>
-                                <TableCell>{tr.transaction.data.purchaseDetails.tier}</TableCell>
-                                <TableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</TableCell>
-                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCell>
-                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
-                                <TableCell>
-                                    {tr.versionCount}
-                                    <IconButton size="small" color="primary">
-                                        <Add fontSize="small" />
-                                    </IconButton>
-                                </TableCell>
-                                <TableCell>
-                                    <Tooltip title="View Details">
-                                        <IconButton size="small">
-                                            <HelpOutline fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <TableWrapper>
+                <StyledTableContainer>
+                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                        {loading && (
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                    zIndex: 1
+                                }}
+                            >
+                                <CircularProgress />
+                            </Box>
+                        )}
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
+                                    <SortableHeader
+                                        field="saleDate"
+                                        label="Sale Date"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
+                                    <TableCell>App</TableCell>
+                                    <TableCell>Sale Type</TableCell>
+                                    <TableCell>Company</TableCell>
+                                    <TableCell>Hosting</TableCell>
+                                    <TableCell>Tier</TableCell>
+                                    <TableCell>Amount</TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Last Updated</TableCell>
+                                    <SortableHeader
+                                        field="createdAt"
+                                        label="Created"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
+                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Updated</TableCell>
+                                    <TableCell>Versions</TableCell>
+                                    <TableCell>Actions</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {transactions.map((tr) => (
+                                    <TableRow key={`${tr.transaction.id}`}>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>
+                                        <TableCell>{tr.transaction.data.addonName}</TableCell>
+                                        <TableCell>{tr.transaction.data.purchaseDetails.saleType}</TableCell>
+                                        <TableCell>{tr.transaction.data.customerDetails.company}</TableCell>
+                                        <TableCell>{tr.transaction.data.purchaseDetails.hosting}</TableCell>
+                                        <TableCell>{tr.transaction.data.purchaseDetails.tier}</TableCell>
+                                        <TableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.lastUpdated}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCell>
+                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
+                                        <TableCell>
+                                            {tr.versionCount}
+                                            <IconButton size="small" color="primary">
+                                                <Add fontSize="small" />
+                                            </IconButton>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Tooltip title="View Details">
+                                                <IconButton size="small">
+                                                    <HelpOutline fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </Paper>
+                </StyledTableContainer>
+            </TableWrapper>
 
             <TablePagination
                 component="div"
