@@ -1,11 +1,15 @@
 import { Router, Request, Response } from 'express';
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
+import { EXPRESS_TYPES } from '../config/expressTypes';
+import { TransactionRoute } from './TransactionRoute';
 
 @injectable()
 export class ApiRouter {
     public readonly router: Router;
 
-    constructor() {
+    constructor(
+        @inject(EXPRESS_TYPES.TransactionRoute) private transactionRoute: TransactionRoute
+    ) {
         this.router = Router();
         this.initializeRoutes();
     }
@@ -16,6 +20,7 @@ export class ApiRouter {
             res.json({ status: 'ok' });
         });
 
-        // Add more routes here
+        // Transaction routes
+        this.router.use('/transactions', this.transactionRoute.router);
     }
 }

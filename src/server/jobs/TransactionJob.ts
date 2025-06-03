@@ -6,7 +6,7 @@ import { TransactionData } from '#common/types/marketplace';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
-import TransactionDao from '../database/TransactionDao';
+import { TransactionDao } from '../database/TransactionDao';
 import { isProperSubsetOfFields } from '#common/utils/fieldUtils';
 
 const ignoreTransactionFieldsForDiffDisplay = [

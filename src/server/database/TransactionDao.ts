@@ -7,8 +7,22 @@ import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { IsNull } from "typeorm";
 
+export interface TransactionQueryParams {
+    start?: number;
+    limit?: number;
+    sortBy?: 'createdAt' | 'saleDate';
+    sortOrder?: 'ASC' | 'DESC';
+    search?: string;
+}
+
+export interface TransactionQueryResult {
+    transactions: Transaction[];
+    total: number;
+    count: number;
+}
+
 @injectable()
-export default class TransactionDao {
+class TransactionDao {
     private transactionRepo: Repository<Transaction>;
     private transactionVersionRepo: Repository<TransactionVersion>;
 
@@ -86,4 +100,49 @@ export default class TransactionDao {
 
         return sortedTransactions;
     }
+
+    async getTransactions(params: TransactionQueryParams): Promise<TransactionQueryResult> {
+        const {
+            start = 0,
+            limit = 25,
+            sortBy = 'createdAt',
+            sortOrder = 'DESC',
+            search
+        } = params;
+
+        // Build the query
+        const queryBuilder = this.transactionRepo.createQueryBuilder('transaction');
+
+        // Add search condition if provided
+        if (search) {
+            queryBuilder.where(
+                'transaction.data::text ILIKE :search',
+                { search: `%${search}%` }
+            );
+        }
+
+        // Get total count for pagination
+        const total = await queryBuilder.getCount();
+
+        // Add sorting
+        if (sortBy === 'saleDate') {
+            queryBuilder.orderBy("transaction.data->'purchaseDetails'->>'saleDate'", sortOrder);
+        } else {
+            queryBuilder.orderBy('transaction.createdAt', sortOrder);
+        }
+
+        // Add pagination
+        queryBuilder.skip(start).take(limit);
+
+        // Execute query
+        const transactions = await queryBuilder.getMany();
+
+        return {
+            transactions,
+            total,
+            count: transactions.length
+        };
+    }
 }
+
+export { TransactionDao };

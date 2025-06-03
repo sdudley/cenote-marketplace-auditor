@@ -14,7 +14,7 @@ export interface RecordReconcileOpts {
 }
 
 @injectable()
-export default class TransactionReconcileDao {
+export class TransactionReconcileDao {
     private transactionReconcileRepo: Repository<TransactionReconcile>;
 
     constructor(@inject(TYPES.DataSource) dataSource: DataSource) {

@@ -9,6 +9,7 @@ import { initializeDatabase } from '../config/database';
 import { createServer, ViteDevServer } from 'vite';
 import fs from 'fs';
 import { resolveModulePath } from './ModuleResolver';
+import { EXPRESS_TYPES } from './config/expressTypes';
 
 // Optionally, patch require to use the resolver for #common
 const Module = require('module');
@@ -40,7 +41,7 @@ async function startServer() {
         const container = configureContainer(dataSource);
 
         // Set up API routes
-        const apiRouter = container.get<ApiRouter>('ApiRouter');
+        const apiRouter = container.get<ApiRouter>(EXPRESS_TYPES.ApiRouter);
         app.use('/api', apiRouter.router);
 
         if (isDev) {
