@@ -45,12 +45,14 @@ async function startServer() {
         app.use('/api', apiRouter.router);
 
         if (isDev) {
+            console.log('Starting Vite development server...');
             // Create Vite server in middleware mode
             vite = await createServer({
                 server: { middlewareMode: true },
                 appType: 'custom',
                 root: path.join(process.cwd(), 'src/client'),
             });
+            console.log('Vite development server is ready!');
 
             // Use vite's connect instance as middleware
             app.use(vite.middlewares);

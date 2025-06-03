@@ -1,16 +1,17 @@
 import React from 'react';
-import { Container, Typography, Box } from '@mui/material';
+import { Typography } from '@mui/material';
 import { TransactionList } from '../components/TransactionList';
+import { PageContainer, PageTitle } from '../styles';
 
 export const TransactionsPage: React.FC = () => {
     return (
-        <Container maxWidth="xl">
-            <Box sx={{ my: 4 }}>
-                <Typography variant="h4" component="h1" gutterBottom>
+        <PageContainer>
+            <PageTitle>
+                <Typography variant="h4" component="h1">
                     Transactions
                 </Typography>
-                <TransactionList />
-            </Box>
-        </Container>
+            </PageTitle>
+            <TransactionList />
+        </PageContainer>
     );
 };
