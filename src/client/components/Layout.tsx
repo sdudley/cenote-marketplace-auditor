@@ -24,7 +24,7 @@ import {
     StyledDrawer,
     ContentContainer,
     ContentBoxWrapper,
-} from '../components';
+} from '../styles';
 
 const theme = createTheme({
     palette: {

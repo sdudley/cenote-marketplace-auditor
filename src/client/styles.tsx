@@ -5,7 +5,7 @@ export const drawerWidth = 240;
 export const Main = styled('main')(({ theme }) => ({
   flexGrow: 1,
   padding: theme.spacing(3),
-  marginLeft: drawerWidth,
+  marginLeft: 0,
   minHeight: 'calc(100vh - 64px)', // Subtract AppBar height
 }));
 
@@ -46,9 +46,10 @@ export const StyledDrawer = styled(Drawer)({
 
 export const ContentContainer = styled(Container)({
   maxWidth: 'lg',
+  marginLeft: 0
 });
 
 export const ContentBoxWrapper = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
+  marginBottom: theme.spacing(4)
 }));
