@@ -30,7 +30,7 @@ export default defineConfig(({ command, mode }) => {
     },
     resolve: {
       alias: {
-        '@common': path.resolve(__dirname, './src/common')
+        '#common': path.resolve(__dirname, './src/common')
       }
     },
     server: {

@@ -15,7 +15,7 @@
     "inlineSourceMap": false,
     "baseUrl": ".",
     "paths": {
-      "@common/*": ["src/common/*"]
+      "#*": ["src/*"]
     }
   },
   "ts-node": {

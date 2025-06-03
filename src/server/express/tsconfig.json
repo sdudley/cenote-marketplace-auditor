@@ -5,7 +5,7 @@
     "rootDir": "../../..",
     "baseUrl": "../../..",
     "paths": {
-      "@common/*": ["src/common/*"]
+      "#*": ["src/*"]
     }
   },
   "include": [

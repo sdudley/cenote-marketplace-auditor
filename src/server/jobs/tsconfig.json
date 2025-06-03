@@ -4,6 +4,9 @@
     "outDir": "../../../dist/jobrunner",
     "rootDir": "../../..",
     "baseUrl": "../../..",
+    "paths": {
+      "#*": ["src/*"]
+    }
   },
   "include": [
     "./**/*",
