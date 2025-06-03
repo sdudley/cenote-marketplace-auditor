@@ -11,7 +11,7 @@
     "build:client": "vite build",
     "build:client:dev": "vite build --mode development",
     "build:client:prod": "vite build --mode production",
-    "start": "NODE_ENV=production node --enable-source-maps dist/express/src/server/express/index.js",
+    "start": "NODE_ENV=production node --require ./dist/express/src/server/express/ModuleResolver.js --enable-source-maps dist/express/src/server/express/index.js",
     "start:dev": "NODE_ENV=development ts-node src/server/express/index.ts",
     "jobs": "NODE_ENV=production node --enable-source-maps dist/jobs/src/server/jobs/index.js",
     "jobs:dev": "NODE_ENV=development ts-node src/server/jobs/index.ts",
