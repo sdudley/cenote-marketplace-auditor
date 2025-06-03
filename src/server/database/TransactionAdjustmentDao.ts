@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 
 @injectable()
-export class TransactionAdjustmentDaoService {
+export class TransactionAdjustmentDao {
     private transactionAdjustmentRepo: Repository<TransactionAdjustment>;
 
     constructor(

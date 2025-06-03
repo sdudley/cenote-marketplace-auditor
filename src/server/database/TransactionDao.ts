@@ -8,7 +8,7 @@ import { TransactionData } from "@common/types/marketplace";
 import { IsNull } from "typeorm";
 
 @injectable()
-export default class TransactionDaoService {
+export default class TransactionDao {
     private transactionRepo: Repository<Transaction>;
     private transactionVersionRepo: Repository<TransactionVersion>;
 

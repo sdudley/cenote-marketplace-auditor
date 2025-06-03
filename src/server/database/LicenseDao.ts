@@ -7,7 +7,7 @@ import { LicenseVersion } from "@common/entities/LicenseVersion";
 import { LicenseData } from "@common/types/marketplace";
 
 @injectable()
-export class LicenseDaoService {
+export class LicenseDao {
     private licenseRepo: Repository<License>;
     private licenseVersionRepo: Repository<LicenseVersion>;
 

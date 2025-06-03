@@ -2,14 +2,14 @@ version: '3.8'
 
 services:
   app:
-    container_name: auditor-node
+    container_name: auditor-app
     build: .
     environment:
-      - DB_HOST=db
-      - DB_PORT=5431
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_DATABASE=marketplace_auditor
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
       - ATLASSIAN_ACCOUNT_USER=${ATLASSIAN_ACCOUNT_USER}
       - ATLASSIAN_ACCOUNT_API_TOKEN=${ATLASSIAN_ACCOUNT_API_TOKEN}
       - ATLASSIAN_VENDOR_ID=${ATLASSIAN_VENDOR_ID}

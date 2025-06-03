@@ -5,13 +5,13 @@ import { deploymentTypeFromHosting } from '@common/utils/validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from '../services/PriceCalculatorService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import TransactionDaoService from '../database/TransactionDaoService';
-import TransactionReconcileDaoService from '../database/TransactionReconcileDaoService';
-import { LicenseDaoService } from '../database/LicenseDaoService';
+import TransactionDao from '../database/TransactionDao';
+import TransactionReconcileDao from '../database/TransactionReconcileDao';
+import { LicenseDao } from '../database/LicenseDao';
 import { formatCurrency } from '@common/utils/formatCurrency';
-import { ResellerDaoService } from '../database/ResellerDaoService';
+import { ResellerDao } from '../database/ResellerDao';
 import { TransactionAdjustment } from '@common/entities/TransactionAdjustment';
-import { TransactionAdjustmentDaoService } from '../database/TransactionAdjustmentDaoService';
+import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
 import { getLicenseDurationInDays } from '@common/utils/licenseDurationCalculator';
 import { PricingTierResult } from '@common/types/pricingTierResult';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
@@ -88,15 +88,15 @@ interface ValidationOptions {
 }
 
 @injectable()
-export class ValidationService {
+export class ValidationJob {
     constructor(
         @inject(TYPES.PricingService) private pricingService: PricingService,
         @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
-        @inject(TYPES.TransactionDaoService) private transactionDaoService: TransactionDaoService,
-        @inject(TYPES.TransactionReconcileDaoService) private transactionReconcileDaoService: TransactionReconcileDaoService,
-        @inject(TYPES.LicenseDaoService) private licenseDaoService: LicenseDaoService,
-        @inject(TYPES.ResellerDaoService) private resellerDaoService: ResellerDaoService,
-        @inject(TYPES.TransactionAdjustmentDaoService) private transactionAdjustmentDaoService: TransactionAdjustmentDaoService,
+        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao,
+        @inject(TYPES.TransactionReconcileDao) private transactionReconcileDao: TransactionReconcileDao,
+        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao,
+        @inject(TYPES.ResellerDao) private resellerDao: ResellerDao,
+        @inject(TYPES.TransactionAdjustmentDao) private transactionAdjustmentDao: TransactionAdjustmentDao,
         @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService
     ) {
     }
@@ -107,7 +107,7 @@ export class ValidationService {
      */
     async validateTransactions(startDate?: string|null): Promise<void> {
         const actualStartDate = startDate ?? DEFAULT_START_DATE;
-        const transactions = await this.transactionDaoService.getTransactionsBySaleDate(actualStartDate);
+        const transactions = await this.transactionDao.getTransactionsBySaleDate(actualStartDate);
 
         console.log(`\n=== Validating transactions since ${actualStartDate} ===`);
 
@@ -325,7 +325,7 @@ export class ValidationService {
 
         // Check if a reconcile record already exists for this transaction and version
 
-        const existingReconcile = await this.transactionReconcileDaoService.getTransactionReconcileForTransaction(transaction);
+        const existingReconcile = await this.transactionReconcileDao.getTransactionReconcileForTransaction(transaction);
 
         // Don't re-reconcile if no new version has been created
 
@@ -335,7 +335,7 @@ export class ValidationService {
 
         // Record the reconcile record
 
-        await this.transactionReconcileDaoService.recordReconcile({ transaction, existingReconcile, valid, notes, vendorAmount, expectedVendorAmount });
+        await this.transactionReconcileDao.recordReconcile({ transaction, existingReconcile, valid, notes, vendorAmount, expectedVendorAmount });
     }
 
     private async logTransactionValidation(opts: { validationResult: TransactionValidationResult; transaction: Transaction; }) {
@@ -382,7 +382,7 @@ export class ValidationService {
             return false;
         }
 
-        const license = await this.licenseDaoService.loadLicenseForTransaction(transaction);
+        const license = await this.licenseDao.loadLicenseForTransaction(transaction);
 
         if (!license) {
             return false;
@@ -466,13 +466,13 @@ export class ValidationService {
     }
 
     private async getActualAdjustments(transaction: Transaction) : Promise<TransactionAdjustment[]> {
-        const adjustments = await this.transactionAdjustmentDaoService.getAdjustmentsForTransaction(transaction);
+        const adjustments = await this.transactionAdjustmentDao.getAdjustmentsForTransaction(transaction);
         return adjustments;
     }
 
     private async generateExpectedAdjustments(transaction: Transaction) : Promise<TransactionAdjustment[]> {
         const resellerName = transaction.data.partnerDetails?.partnerName;
-        const reseller = await this.resellerDaoService.findMatchingReseller(resellerName);
+        const reseller = await this.resellerDao.findMatchingReseller(resellerName);
 
         if (!reseller) {
             return [];

@@ -6,7 +6,7 @@ import { TransactionData } from '@common/types/marketplace';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
-import TransactionDaoService from '../database/TransactionDaoService';
+import TransactionDao from '../database/TransactionDao';
 import { isProperSubsetOfFields } from '@common/utils/fieldUtils';
 
 const ignoreTransactionFieldsForDiffDisplay = [
@@ -17,12 +17,12 @@ const ignoreTransactionFieldsForDiffDisplay = [
 ];
 
 @injectable()
-export class TransactionService {
+export class TransactionJob {
     private ignoredFields: string[] | null = null;
 
     constructor(
         @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
-        @inject(TYPES.TransactionDaoService) private transactionDaoService: TransactionDaoService
+        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao
     ) {
     }
 
@@ -48,9 +48,9 @@ export class TransactionService {
         await this.getIgnoredFields();
 
         for (const transactionData of transactions) {
-            const transactionKey = this.transactionDaoService.getKeyForTransaction(transactionData);
-            const existingTransaction = await this.transactionDaoService.getTransactionForKey(transactionKey);
-            const entitlementId = this.transactionDaoService.getEntitlementIdForTransaction(transactionData);
+            const transactionKey = this.transactionDao.getKeyForTransaction(transactionData);
+            const existingTransaction = await this.transactionDao.getTransactionForKey(transactionKey);
+            const entitlementId = this.transactionDao.getEntitlementIdForTransaction(transactionData);
 
             // Normalize the incoming data
             const normalizedData : TransactionData = normalizeObject(transactionData);
@@ -78,7 +78,7 @@ export class TransactionService {
                     }
 
                     // Get the current, soon-to-be old version
-                    const oldVersion = await this.transactionDaoService.getCurrentTransactionVersion(existingTransaction);
+                    const oldVersion = await this.transactionDao.getCurrentTransactionVersion(existingTransaction);
 
                     currentVersion = oldVersion ? oldVersion.version + 1 : 1;
 
@@ -99,15 +99,15 @@ export class TransactionService {
                         // link is created (because one object needs to exist before the other can be
                         // saved)
 
-                        await this.transactionDaoService.saveTransactionVersions(oldVersion, version);
+                        await this.transactionDao.saveTransactionVersions(oldVersion, version);
                     } else {
-                        await this.transactionDaoService.saveTransactionVersions(version);
+                        await this.transactionDao.saveTransactionVersions(version);
                     }
 
                     // Update current data
                     existingTransaction.data = normalizedData;
                     existingTransaction.currentVersion = currentVersion;
-                    await this.transactionDaoService.saveTransaction(existingTransaction);
+                    await this.transactionDao.saveTransaction(existingTransaction);
                     modifiedCount++;
                 }
             } else {
@@ -117,7 +117,7 @@ export class TransactionService {
                 transaction.data = normalizedData;
                 transaction.entitlementId = entitlementId;
                 transaction.currentVersion = currentVersion;
-                await this.transactionDaoService.saveTransaction(transaction);
+                await this.transactionDao.saveTransaction(transaction);
 
                 // Create initial version
                 const version = new TransactionVersion();
@@ -125,7 +125,7 @@ export class TransactionService {
                 version.transaction = transaction;
                 version.entitlementId = entitlementId;
                 version.version = currentVersion;
-                await this.transactionDaoService.saveTransactionVersions(version);
+                await this.transactionDao.saveTransactionVersions(version);
 
                 const { saleDate, vendorAmount, tier } = normalizedData.purchaseDetails;
                 const customerName = normalizedData.customerDetails.company;

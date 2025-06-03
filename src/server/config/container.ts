@@ -1,20 +1,22 @@
 import { Container } from 'inversify';
 import { DataSource } from 'typeorm';
 import { MarketplaceService } from '../services/MarketplaceService';
-import { AddonService } from '../services/AddonService';
-import { TransactionService } from '../../server/jobrunner/TransactionService';
-import { LicenseService } from '../../server/jobrunner/LicenseService';
-import { PricingService } from '../services/PricingService';
-import { ValidationService } from '../../server/jobrunner/ValidationService';
+import { AddonJob } from '../jobs/AddonJob';
+import { TransactionJob } from '../jobs/TransactionJob';
+import { LicenseJob } from '../jobs/LicenseJob';
+import { PricingJob } from '../jobs/PricingJob';
+import { ValidationJob } from '../jobs/ValidationJob';
 import { PriceCalculatorService } from '../services/PriceCalculatorService';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
-import TransactionDaoService from '../database/TransactionDaoService';
-import { LicenseDaoService } from '../database/LicenseDaoService';
-import TransactionReconcileDaoService from '../database/TransactionReconcileDaoService';
+import TransactionDao from '../database/TransactionDao';
+import { LicenseDao } from '../database/LicenseDao';
+import TransactionReconcileDao from '../database/TransactionReconcileDao';
 import { TYPES } from './types';
-import { TransactionAdjustmentDaoService } from '../database/TransactionAdjustmentDaoService';
-import { ResellerDaoService } from '../database/ResellerDaoService';
+import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
+import { ResellerDao } from '../database/ResellerDao';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
+import { AddonService } from '../services/AddonService';
+import { PricingService } from '../services/PricingService';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
@@ -24,18 +26,20 @@ export function configureContainer(dataSource: DataSource): Container {
 
     // Bind Services
     container.bind<MarketplaceService>(TYPES.MarketplaceService).to(MarketplaceService).inSingletonScope();
+    container.bind<AddonJob>(TYPES.AddonJob).to(AddonJob).inSingletonScope();
     container.bind<AddonService>(TYPES.AddonService).to(AddonService).inSingletonScope();
-    container.bind<TransactionService>(TYPES.TransactionService).to(TransactionService).inSingletonScope();
-    container.bind<LicenseService>(TYPES.LicenseService).to(LicenseService).inSingletonScope();
+    container.bind<TransactionJob>(TYPES.TransactionJob).to(TransactionJob).inSingletonScope();
+    container.bind<LicenseJob>(TYPES.LicenseJob).to(LicenseJob).inSingletonScope();
+    container.bind<PricingJob>(TYPES.PricingJob).to(PricingJob).inSingletonScope();
     container.bind<PricingService>(TYPES.PricingService).to(PricingService).inSingletonScope();
-    container.bind<ValidationService>(TYPES.ValidationService).to(ValidationService).inSingletonScope();
+    container.bind<ValidationJob>(TYPES.ValidationJob).to(ValidationJob).inSingletonScope();
     container.bind<PriceCalculatorService>(TYPES.PriceCalculatorService).to(PriceCalculatorService).inSingletonScope();
     container.bind<IgnoredFieldService>(TYPES.IgnoredFieldService).to(IgnoredFieldService).inSingletonScope();
-    container.bind<TransactionDaoService>(TYPES.TransactionDaoService).to(TransactionDaoService).inSingletonScope();
-    container.bind<TransactionReconcileDaoService>(TYPES.TransactionReconcileDaoService).to(TransactionReconcileDaoService).inSingletonScope();
-    container.bind<LicenseDaoService>(TYPES.LicenseDaoService).to(LicenseDaoService).inSingletonScope();
-    container.bind<TransactionAdjustmentDaoService>(TYPES.TransactionAdjustmentDaoService).to(TransactionAdjustmentDaoService).inSingletonScope();
-    container.bind<ResellerDaoService>(TYPES.ResellerDaoService).to(ResellerDaoService).inSingletonScope();
+    container.bind<TransactionDao>(TYPES.TransactionDao).to(TransactionDao).inSingletonScope();
+    container.bind<TransactionReconcileDao>(TYPES.TransactionReconcileDao).to(TransactionReconcileDao).inSingletonScope();
+    container.bind<LicenseDao>(TYPES.LicenseDao).to(LicenseDao).inSingletonScope();
+    container.bind<TransactionAdjustmentDao>(TYPES.TransactionAdjustmentDao).to(TransactionAdjustmentDao).inSingletonScope();
+    container.bind<ResellerDao>(TYPES.ResellerDao).to(ResellerDao).inSingletonScope();
     container.bind<PreviousTransactionService>(TYPES.PreviousTransactionService).to(PreviousTransactionService).inSingletonScope();
 
     return container;

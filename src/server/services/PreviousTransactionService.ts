@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 import { Transaction } from '../../common/entities/Transaction';
-import TransactionDaoService from '../database/TransactionDaoService';
+import TransactionDao from '../database/TransactionDao';
 
 export interface PreviousTransactionResult {
     transaction: Transaction;
@@ -11,7 +11,7 @@ export interface PreviousTransactionResult {
 @injectable()
 export class PreviousTransactionService {
     constructor(
-        @inject(TYPES.TransactionDaoService) private transactionDaoService: TransactionDaoService
+        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao
     ) {}
 
     /**
@@ -22,7 +22,7 @@ export class PreviousTransactionService {
      * @returns The previous transaction and its effective maintenance end date, or undefined if no previous transaction exists
      */
     async findPreviousTransaction(transaction: Transaction): Promise<PreviousTransactionResult | undefined> {
-        const relatedTransactions = await this.transactionDaoService.loadRelatedTransactions(transaction.entitlementId);
+        const relatedTransactions = await this.transactionDao.loadRelatedTransactions(transaction.entitlementId);
 
         // Filter out the current transaction
         const otherTransactions = relatedTransactions.filter(t => t.id !== transaction.id);

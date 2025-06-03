@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { Transaction } from '@common/entities/Transaction';
 import { TransactionAdjustment } from '@common/entities/TransactionAdjustment';
 import { initializeDatabase } from '../config/database';
-import { TransactionAdjustmentDaoService } from '../database/TransactionAdjustmentDaoService';
+import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
 import { configureContainer } from '../config/container';
 import { TYPES } from '../config/types';
 import { formatCurrency } from '@common/utils/formatCurrency';
@@ -25,7 +25,7 @@ async function addTransactionAdjustment() {
 
     const dataSource = await initializeDatabase();
     const container = configureContainer(dataSource);
-    const adjustmentService = container.get<TransactionAdjustmentDaoService>(TYPES.TransactionAdjustmentDaoService);
+    const adjustmentService = container.get<TransactionAdjustmentDao>(TYPES.TransactionAdjustmentDao);
     const transactionRepository = dataSource.getRepository(Transaction);
 
     const transaction = await transactionRepository.findOne({ where: { id: transactionId } });

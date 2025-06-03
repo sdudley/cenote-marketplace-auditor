@@ -4,11 +4,11 @@ import { initializeDatabase } from '../config/database';
 import { configureContainer } from '../config/container';
 import { TYPES } from '../config/types';
 import { MarketplaceService } from '../services/MarketplaceService';
-import { AddonService } from '../services/AddonService';
-import { TransactionService } from './TransactionService';
-import { LicenseService } from './LicenseService';
-import { PricingService } from '../services/PricingService';
-import { ValidationService } from './ValidationService';
+import { AddonJob } from './AddonJob';
+import { TransactionJob } from './TransactionJob';
+import { LicenseJob } from './LicenseJob';
+import { PricingJob } from './PricingJob';
+import { ValidationJob } from './ValidationJob';
 
 
 async function main() {
@@ -29,34 +29,34 @@ async function main() {
         const marketplaceService = container.get<MarketplaceService>(TYPES.MarketplaceService);
 
         if (flags.size === 0 || flags.has('--with-fetch-apps')) {
-            const addonService = container.get<AddonService>(TYPES.AddonService);
-            await addonService.syncAddonKeys();
+            const addonJob = container.get<AddonJob>(TYPES.AddonJob);
+            await addonJob.syncAddonKeys();
         }
 
         if (flags.size === 0 || flags.has('--with-pricing')) {
-            const pricingService = container.get<PricingService>(TYPES.PricingService);
-            await pricingService.fetchPricing();
+            const pricingJob = container.get<PricingJob>(TYPES.PricingJob);
+            await pricingJob.fetchPricing();
         }
 
         if (flags.size === 0 || flags.has('--with-transactions')) {
             console.log(`\n=== Fetching transactions ===`);
 
             const transactions = await marketplaceService.getTransactions();
-            const transactionService = container.get<TransactionService>(TYPES.TransactionService);
-            await transactionService.processTransactions(transactions);
+            const transactionJob = container.get<TransactionJob>(TYPES.TransactionJob);
+            await transactionJob.processTransactions(transactions);
         }
 
         if (flags.size === 0 || flags.has('--with-licenses')) {
             console.log(`\n=== Fetching licenses ===`);
 
             const licenses = await marketplaceService.getLicenses();
-            const licenseService = container.get<LicenseService>(TYPES.LicenseService);
-            await licenseService.processLicenses(licenses);
+            const licenseJob = container.get<LicenseJob>(TYPES.LicenseJob);
+            await licenseJob.processLicenses(licenses);
         }
 
         if (flags.size === 0 || flags.has('--validate-transactions')) {
-            const validationService = container.get<ValidationService>(TYPES.ValidationService);
-            await validationService.validateTransactions(startDate);
+            const validationJob = container.get<ValidationJob>(TYPES.ValidationJob);
+            await validationJob.validateTransactions(startDate);
         }
     } catch (e) {
         console.error('Unhandled error:', e);

@@ -1,27 +1,27 @@
 import { PreviousTransactionService } from '../PreviousTransactionService';
 import { Transaction } from '../../../common/entities/Transaction';
-import TransactionDaoService from '../../database/TransactionDaoService';
+import TransactionDao from '../../database/TransactionDao';
 
 let uniqueTransactionId = 0;
 
 describe('PreviousTransactionService', () => {
     let service: PreviousTransactionService;
-    let transactionDaoService: jest.Mocked<TransactionDaoService>;
+    let transactionDao: jest.Mocked<TransactionDao>;
 
     beforeEach(() => {
-        // Create a mock TransactionDaoService
-        transactionDaoService = {
+        // Create a mock TransactionDao
+        transactionDao = {
             loadRelatedTransactions: jest.fn()
         } as any;
 
         // Create the service under test with direct injection
-        service = new PreviousTransactionService(transactionDaoService);
+        service = new PreviousTransactionService(transactionDao);
     });
 
     describe('findPreviousTransaction', () => {
         it('should return undefined when no previous transactions exist', async () => {
             const transaction = createTransaction('2024-01-01', '2024-12-31', '2023-12-30');
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([transaction]);
+            transactionDao.loadRelatedTransactions.mockResolvedValue([transaction]);
 
             const result = await service.findPreviousTransaction(transaction);
 
@@ -32,7 +32,7 @@ describe('PreviousTransactionService', () => {
             const t1 = createTransaction('2023-01-01', '2023-12-31', '2022-12-30');
             const t2 = createTransaction('2024-01-01', '2024-12-31', '2023-12-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t2,
                 t1
             ]);
@@ -50,7 +50,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2023-01-01', '2023-12-31', '2023-01-15', 'Refund');
             const t3 = createTransaction('2024-01-01', '2024-12-31', '2023-12-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -64,7 +64,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2023-07-01', '2023-12-31', '2023-06-30', 'Refund');
             const t3 = createTransaction('2024-01-01', '2024-12-31', '2023-12-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -82,7 +82,7 @@ describe('PreviousTransactionService', () => {
             const t3 = createTransaction('2023-07-01', '2023-12-31', '2023-06-30', 'Refund');
             const t4 = createTransaction('2024-01-01', '2024-12-31', '2023-12-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t4,
                 t3,
                 t2,
@@ -102,7 +102,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2023-01-01', '2023-12-31', '2023-01-01', 'New', );
             const t3 = createTransaction('2024-01-01', '2024-12-31', '2023-12-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -116,7 +116,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2023-01-01', '2023-12-31', '2023-01-01', 'Refund', );
             const t3 = createTransaction('2024-01-01', '2024-12-31', '2023-12-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -130,7 +130,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2024-07-01', '2024-12-31', '2024-06-30', 'Refund');
             const t3 = createTransaction('2024-07-05', '2025-04-30', '2024-06-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -147,7 +147,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2024-01-01', '2024-04-30', '2024-06-30', 'Refund');
             const t3 = createTransaction('2024-12-31', '2025-04-30', '2024-06-30');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -164,7 +164,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2024-12-31', '2025-04-30', '2024-05-30'); // Sale date before refund date
             const t3 = createTransaction('2024-01-01', '2024-12-31', '2024-06-30', 'Refund'); // Refund dated after t3's sale date
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -185,7 +185,7 @@ describe('PreviousTransactionService', () => {
             const t6 = createTransaction('2026-01-01', '2027-01-01', '2026-01-14', 'Refund');
             const t7 = createTransaction('2026-01-01', '2027-01-01', '2026-01-15', 'Renewal');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t6, t5, t4, t3, t2, t1
             ]);
 
@@ -216,7 +216,7 @@ describe('PreviousTransactionService', () => {
             const t2 = createTransaction('2024-12-31', '2025-12-31', '2024-12-30', 'Renewal');
             const t3 = createTransaction('2025-06-01', '2025-12-31', '2025-05-30', 'Upgrade');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t3, t2, t1
             ]);
 
@@ -242,7 +242,7 @@ describe('PreviousTransactionService', () => {
             const t4 = createTransaction('2025-06-01', '2025-12-31', '2025-06-01', 'Refund');
             const t5 = createTransaction('2025-12-31', '2026-12-31', '2025-06-02', 'Renewal');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t5, t4, t3, t2, t1
             ]);
 
@@ -264,7 +264,7 @@ describe('PreviousTransactionService', () => {
             const t7 = createTransaction('2024-01-18', '2024-12-01', '2024-01-16', 'Upgrade', '1000 Users'); // now upgrade from t5
             const t8 = createTransaction('2024-12-01', '2025-12-01', '2024-11-29', 'Renewal', '1000 Users');
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t8, t7, t6, t5, t4, t3, t2, t1
             ]);
 
@@ -283,7 +283,7 @@ describe('PreviousTransactionService', () => {
             const t4 = createTransaction('2025-05-23', '2025-12-12', '2025-05-23', 'Upgrade', '2500 Users'); // upgrade from t1
             const t5 = createTransaction('2025-12-12', '2026-12-12', '2025-05-23', 'Renewal', '2500 Users'); // renewal of t4
 
-            transactionDaoService.loadRelatedTransactions.mockResolvedValue([
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
                 t5, t4, t3, t2, t1
             ]);
 

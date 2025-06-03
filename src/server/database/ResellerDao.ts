@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 
 @injectable()
-export class ResellerDaoService {
+export class ResellerDao {
     private resellerRepo: Repository<Reseller>;
     private resellers: Reseller[] | null = null;
 

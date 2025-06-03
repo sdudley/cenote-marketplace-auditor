@@ -6,7 +6,7 @@ import { LicenseData } from '@common/types/marketplace';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
-import { LicenseDaoService } from '../database/LicenseDaoService';
+import { LicenseDao } from '../database/LicenseDao';
 import { isProperSubsetOfFields } from '@common/utils/fieldUtils';
 
 const ignoreLicenseFieldsForDiffDisplay = [
@@ -20,12 +20,12 @@ const ignoreLicenseFieldsForDiffDisplay = [
 ];
 
 @injectable()
-export class LicenseService {
+export class LicenseJob {
     private ignoredFields: string[] | null = null;
 
     constructor(
         @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
-        @inject(TYPES.LicenseDaoService) private licenseDaoService: LicenseDaoService
+        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao
     ) {
     }
 
@@ -59,8 +59,8 @@ export class LicenseService {
         await this.getIgnoredFields();
 
         for (const licenseData of licenses) {
-            const entitlementId = this.licenseDaoService.getEntitlementIdForLicense(licenseData);
-            const existingLicense = await this.licenseDaoService.getLicenseForEntitlementId(entitlementId);
+            const entitlementId = this.licenseDao.getEntitlementIdForLicense(licenseData);
+            const existingLicense = await this.licenseDao.getLicenseForEntitlementId(entitlementId);
 
             // Normalize the incoming data
             const normalizedData : LicenseData = normalizeObject(licenseData);
@@ -91,7 +91,7 @@ export class LicenseService {
                     }
 
                     // Get the current, soon-to-be old version
-                    const oldVersion = await this.licenseDaoService.getCurrentLicenseVersionForLicense(existingLicense);
+                    const oldVersion = await this.licenseDao.getCurrentLicenseVersionForLicense(existingLicense);
 
                     currentVersion = oldVersion ? oldVersion.version + 1 : 1;
 
@@ -108,15 +108,15 @@ export class LicenseService {
                         version.priorLicenseVersion = oldVersion;
                         oldVersion.nextLicenseVersion = version;
                         // Save both sides of the relationship
-                        await this.licenseDaoService.saveLicenseVersions(oldVersion, version);
+                        await this.licenseDao.saveLicenseVersions(oldVersion, version);
                     } else {
-                        await this.licenseDaoService.saveLicenseVersions(version);
+                        await this.licenseDao.saveLicenseVersions(version);
                     }
 
                     // Update the current data
                     existingLicense.data = normalizedData;
                     existingLicense.currentVersion = currentVersion;
-                    await this.licenseDaoService.saveLicense(existingLicense);
+                    await this.licenseDao.saveLicense(existingLicense);
                     modifiedCount++;
                 }
             } else {
@@ -125,7 +125,7 @@ export class LicenseService {
                 license.entitlementId = entitlementId;
                 license.data = normalizedData;
                 license.currentVersion = currentVersion;
-                await this.licenseDaoService.saveLicense(license);
+                await this.licenseDao.saveLicense(license);
 
                 // Create initial version
                 const version = new LicenseVersion();
@@ -133,7 +133,7 @@ export class LicenseService {
                 version.license = license;
                 version.entitlementId = entitlementId;
                 version.version = currentVersion;
-                await this.licenseDaoService.saveLicenseVersions(version);
+                await this.licenseDao.saveLicenseVersions(version);
 
                 const { maintenanceStartDate, maintenanceEndDate, tier } = normalizedData;
                 const customerName = normalizedData.contactDetails.company;
