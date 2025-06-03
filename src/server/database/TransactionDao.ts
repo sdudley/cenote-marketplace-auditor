@@ -6,6 +6,7 @@ import { Repository } from "typeorm";
 import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { IsNull } from "typeorm";
+import { TransactionQueryResult } from "#common/types/apiTypes";
 
 export interface TransactionQueryParams {
     start?: number;
@@ -15,16 +16,6 @@ export interface TransactionQueryParams {
     search?: string;
 }
 
-export interface TransactionResult {
-    transaction: Transaction;
-    versionCount: number;
-}
-
-export interface TransactionQueryResult {
-    transactions: TransactionResult[];
-    total: number;
-    count: number;
-}
 
 @injectable()
 class TransactionDao {
@@ -157,10 +148,10 @@ class TransactionDao {
         const results = await queryBuilder.getRawAndEntities();
 
         // Map raw results to TransactionResult objects
-        const transactionResults = results.entities.map((transaction, index) => ({
+        const transactionResults = results.entities?.map((transaction, index) => ({
             transaction,
             versionCount: parseInt(results.raw[index].version_count) || 0
-        }));
+        })) ?? [];
 
         return {
             transactions: transactionResults,

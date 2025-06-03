@@ -32,3 +32,7 @@ export function isoDateMath(date: string, days: number): string {
     dateObj.setDate(dateObj.getDate() + days);
     return dateObj.toISOString().split('T')[0];
 }
+
+export function isoStringWithOnlyDate(date: string) : string {
+    return date.substring(0, 10);
+}
