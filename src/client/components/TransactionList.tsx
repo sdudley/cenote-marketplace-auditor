@@ -59,13 +59,22 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [sortBy, setSortBy] = useState<TransactionQuerySortType>('createdAt');
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [search]);
 
     const fetchTransactions = async () => {
         setLoading(true);
         try {
             const response = await fetch(
-                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(search)}`
+                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}`
             );
             const data = await response.json();
             setTransactions(data.transactions);
@@ -79,7 +88,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, rowsPerPage, sortBy, sortOrder, search]);
+    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -104,6 +113,12 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         setPage(0);
     };
 
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            setDebouncedSearch(search);
+        }
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -119,6 +134,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     variant="outlined"
                     value={search}
                     onChange={handleSearchChange}
+                    onKeyPress={handleKeyPress}
                     size="small"
                 />
             </Box>
