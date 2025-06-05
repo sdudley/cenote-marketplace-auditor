@@ -9,7 +9,6 @@ import {
     TablePagination,
     TextField,
     IconButton,
-    Box,
     Tooltip,
     CircularProgress,
     TableSortLabel
@@ -17,7 +16,7 @@ import {
 import { HelpOutline, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
-import { SortArrows, StyledTableContainer, TableWrapper } from './styles';
+import { SortArrows, StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from './styles';
 import { TransactionDetails } from './TransactionDetails';
 
 interface TransactionListProps {
@@ -129,8 +128,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     };
 
     return (
-        <Box sx={{ width: '100%', p: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <TableContainer>
+            <SearchContainer>
                 <TextField
                     label="Search"
                     variant="outlined"
@@ -139,28 +138,15 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     onKeyPress={handleKeyPress}
                     size="small"
                 />
-            </Box>
+            </SearchContainer>
 
             <TableWrapper>
                 <StyledTableContainer>
                     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
                         {loading && (
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                                    zIndex: 1
-                                }}
-                            >
+                            <LoadingOverlay>
                                 <CircularProgress />
-                            </Box>
+                            </LoadingOverlay>
                         )}
                         <Table>
                             <TableHead>
@@ -261,6 +247,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[10, 25, 50, 100]}
             />
-        </Box>
+        </TableContainer>
     );
 };
