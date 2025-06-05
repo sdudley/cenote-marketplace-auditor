@@ -129,7 +129,7 @@ class TransactionDao {
             if (search) {
                 // Inspiration: https://stackoverflow.com/a/45849743/2220556
                 queryBuilder.where(
-                    'jsonb_path_exists(transaction.data, format(\'$.** ? (@.type() == "string" && @ like_regex %s)\', :search::text)::jsonpath)',
+                    'jsonb_path_exists(transaction.data, format(\'$.** ? (@.type() == "string" && @ like_regex %s flag "qi")\', :search::text)::jsonpath)',
                     { search: `"${this.escapeDoubleQuotes(search)}"` }
                 );
             }
