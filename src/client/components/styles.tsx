@@ -134,11 +134,12 @@ export const SortArrows = styled(Box)(({ theme }) => ({
     },
 }));
 
-export const TableWrapper = styled(Box)(({ theme }) => ({
+export const TableWrapper = styled(Box)({
     width: '100%',
     minWidth: '1024px',
-    overflowX: 'auto'
-}));
+    overflowX: 'auto',
+    paddingLeft: 40 // Add padding for the icon
+});
 
 export const StyledTableContainer = styled(MuiTableContainer)({
     position: 'relative',

@@ -13,7 +13,7 @@ import {
     CircularProgress,
     TableSortLabel
 } from '@mui/material';
-import { HelpOutline, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { Visibility, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { SortArrows, StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from './styles';
@@ -105,7 +105,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
             setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
         } else {
             setSortBy(field);
-            setSortOrder('ASC');
+            setSortOrder('DESC');
         }
     };
 
@@ -151,6 +151,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
+                                    <TableCell sx={{ width: 40, padding: 0 }}></TableCell>
                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
                                     <SortableHeader
                                         field={TransactionQuerySortType.SaleDate}
@@ -166,7 +167,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     <TableCell>Hosting</TableCell>
                                     <TableCell>Tier</TableCell>
                                     <TableCell>Amount</TableCell>
-                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Last Updated</TableCell>
                                     <SortableHeader
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"
@@ -191,12 +191,21 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {transactions && transactions.map((tr) => (
                                     <TableRow key={`${tr.transaction.id}`}>
+                                        <TableCell sx={{ width: 40, padding: 0 }}>
+                                            <Tooltip title="View Details">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => setSelectedTransaction(tr)}
+                                                >
+                                                    <Visibility fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>
                                         <TableCell>{tr.transaction.data.addonName}</TableCell>
@@ -205,7 +214,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         <TableCell>{tr.transaction.data.purchaseDetails.hosting}</TableCell>
                                         <TableCell>{tr.transaction.data.purchaseDetails.tier}</TableCell>
                                         <TableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.lastUpdated}</TableCell>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCell>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
                                         <TableCell>
@@ -213,16 +221,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             <IconButton size="small" color="primary">
                                                 <Add fontSize="small" />
                                             </IconButton>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Tooltip title="View Details">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => setSelectedTransaction(tr)}
-                                                >
-                                                    <HelpOutline fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
                                         </TableCell>
                                     </TableRow>
                                 ))}

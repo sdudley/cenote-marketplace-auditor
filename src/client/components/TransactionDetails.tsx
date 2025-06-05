@@ -42,7 +42,8 @@ const formatCurrency = (amount: number): string => {
 };
 
 const formatTransactionData = (data: TransactionData): JsonObject => {
-    const formattedData = { ...data };
+    // Deep clone the data to avoid mutating the original
+    const formattedData = structuredClone(data);
 
     // Format currency values in purchaseDetails
     if (formattedData.purchaseDetails && typeof formattedData.purchaseDetails === 'object') {
