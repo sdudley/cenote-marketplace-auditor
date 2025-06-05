@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { Transaction } from "#common/entities/Transaction";
 import { TYPES } from "../config/types";
 import { TransactionVersion } from "#common/entities/TransactionVersion";
-import { Repository } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { IsNull } from "typeorm";
@@ -101,8 +101,22 @@ class TransactionDao {
         } = params;
 
         try {
-            const queryBuilder = this.transactionRepo
-                .createQueryBuilder('transaction');
+            const queryBuilder = this.transactionRepo.createQueryBuilder('transaction');
+
+            // Add CTE for version counts
+
+            queryBuilder.addCommonTableExpression(`
+                SELECT transaction_version.transaction_id as tid, count(id) as version_count
+                FROM transaction_version
+                GROUP BY transaction_version.transaction_id`,
+                'version_count'
+            );
+
+            // Select all transaction fields and the version count
+            queryBuilder.addSelect('COALESCE(version_count.version_count, 0)', 'transaction_versionCount');
+
+            // Join with the version count CTE
+            queryBuilder.leftJoin('version_count', 'version_count', 'version_count.tid = transaction.id');
 
             if (search) {
                 queryBuilder.where(
@@ -111,40 +125,30 @@ class TransactionDao {
                 );
             }
 
-            const total = await queryBuilder.getCount();
-
             if (sortBy === 'saleDate') {
                 queryBuilder.orderBy("transaction.data->'purchaseDetails'->>'saleDate'", sortOrder);
             } else if (sortBy === 'createdAt') {
-                queryBuilder.orderBy('transaction.created_at', sortOrder);
+                queryBuilder.orderBy('transaction.createdAt', sortOrder);
             } else if (sortBy === 'updatedAt') {
-                queryBuilder.orderBy('transaction.updated_at', sortOrder);
+                queryBuilder.orderBy('transaction.updatedAt', sortOrder);
             } else {
                 throw new Error(`Invalid sortBy: ${sortBy}`);
             }
 
+            const total = await queryBuilder.getCount();
+
             queryBuilder.skip(start).take(limit);
 
-            const transactions = await queryBuilder.getMany();
-
-            const transactionIds = transactions.map(t => t.id);
-            const versionCounts = (transactionIds.length > 0) ? await this.transactionVersionRepo
-                .createQueryBuilder('version')
-                .select('version.transaction_id', 'transaction_id')
-                .addSelect('COUNT(version.id)', 'version_count')
-                .where('version.transaction_id IN (:...ids)', { ids: transactionIds })
-                .groupBy('version.transaction_id')
-                .getRawMany() : [];
-
-            const versionCountMap = new Map(
-                versionCounts.map(vc => [vc.transaction_id, parseInt(vc.version_count)])
-            );
+            const rawResults = await queryBuilder.getRawAndEntities();
 
             // Map results to TransactionResult objects
-            const transactionResults = transactions.map(transaction => ({
-                transaction,
-                versionCount: versionCountMap.get(transaction.id) || 0
-            }));
+            const transactionResults = rawResults.entities.map((transaction, index) => {
+                const versionCount = parseInt(rawResults.raw[index].transaction_versionCount) || 0;
+                return {
+                    transaction,
+                    versionCount
+                };
+            });
 
             return {
                 transactions: transactionResults,
