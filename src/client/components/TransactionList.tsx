@@ -18,6 +18,7 @@ import { HelpOutline, Add, ArrowUpward, ArrowDownward } from '@mui/icons-materia
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { SortArrows, StyledTableContainer, TableWrapper } from '../styles';
+import { TransactionDetails } from './TransactionDetails';
 
 interface TransactionListProps {
     // Add props if needed
@@ -56,11 +57,12 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
-    const [sortBy, setSortBy] = useState<TransactionQuerySortType>('createdAt');
+    const [sortBy, setSortBy] = useState<TransactionQuerySortType>(TransactionQuerySortType.CreatedAt);
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -228,7 +230,10 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Tooltip title="View Details">
-                                                <IconButton size="small">
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => setSelectedTransaction(tr)}
+                                                >
                                                     <HelpOutline fontSize="small" />
                                                 </IconButton>
                                             </Tooltip>
@@ -240,6 +245,12 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     </Paper>
                 </StyledTableContainer>
             </TableWrapper>
+
+            <TransactionDetails
+                transaction={selectedTransaction}
+                open={!!selectedTransaction}
+                onClose={() => setSelectedTransaction(null)}
+            />
 
             <TablePagination
                 component="div"
