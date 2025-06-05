@@ -165,7 +165,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                 <TableRow>
                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
                                     <SortableHeader
-                                        field="saleDate"
+                                        field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
@@ -180,7 +180,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     <TableCell>Amount</TableCell>
                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>Last Updated</TableCell>
                                     <SortableHeader
-                                        field="createdAt"
+                                        field={TransactionQuerySortType.CreatedAt}
                                         label="Created"
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
@@ -188,7 +188,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         whiteSpace
                                     />
                                     <SortableHeader
-                                        field="updatedAt"
+                                        field={TransactionQuerySortType.UpdatedAt}
                                         label="Updated"
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
@@ -196,7 +196,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         whiteSpace
                                     />
                                     <SortableHeader
-                                        field="versionCount"
+                                        field={TransactionQuerySortType.VersionCount}
                                         label="Versions"
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
