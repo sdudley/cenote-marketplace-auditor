@@ -119,10 +119,12 @@ class TransactionDao {
             queryBuilder.leftJoin('version_count', 'version_count', 'version_count.tid = transaction.id');
 
             if (search) {
+                // Inspiration: https://stackoverflow.com/a/45849743/2220556
                 queryBuilder.where(
-                    'transaction.data::text ILIKE :search',
-                    { search: `%${search}%` }
+                    'jsonb_path_exists(transaction.data, format(\'$.** ? (@.type() == "string" && @ like_regex %s)\', :search::text)::jsonpath)',
+                    { search: `"${this.escapeDoubleQuotes(search)}"` }
                 );
+
             }
 
             if (sortBy === 'saleDate') {
@@ -158,6 +160,10 @@ class TransactionDao {
         } catch (error: any) {
             throw error;
         }
+    }
+
+    private escapeDoubleQuotes(str: string) {
+        return str.replace(/"/g, '\\"');
     }
 }
 
