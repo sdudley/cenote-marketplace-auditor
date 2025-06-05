@@ -18,6 +18,7 @@ import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTy
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { SortArrows, StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from './styles';
 import { TransactionDetails } from './TransactionDetails';
+import { VisibilityIcon } from './VisibilityIcon';
 
 interface TransactionListProps {
     // Add props if needed
@@ -196,16 +197,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                             <TableBody>
                                 {transactions && transactions.map((tr) => (
                                     <TableRow key={`${tr.transaction.id}`}>
-                                        <TableCell sx={{ width: 40, padding: 0 }}>
-                                            <Tooltip title="View Details">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => setSelectedTransaction(tr)}
-                                                >
-                                                    <Visibility fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </TableCell>
+                                        <VisibilityIcon onViewDetails={() => setSelectedTransaction(tr)} />
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>
                                         <TableCell>{tr.transaction.data.addonName}</TableCell>

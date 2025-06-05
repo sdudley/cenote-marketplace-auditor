@@ -170,3 +170,8 @@ export const TableContainer = styled(Box)({
     width: '100%',
     padding: 16
 });
+
+export const VisibilityCell = styled(TableCell)({
+    width: 40,
+    padding: 0
+});
