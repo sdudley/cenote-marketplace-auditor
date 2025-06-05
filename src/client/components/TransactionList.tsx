@@ -179,7 +179,14 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <TableCell>Versions</TableCell>
+                                    <SortableHeader
+                                        field="versionCount"
+                                        label="Versions"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
                                     <TableCell>Actions</TableCell>
                                 </TableRow>
                             </TableHead>

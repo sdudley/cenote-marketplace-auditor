@@ -24,7 +24,7 @@ export class TransactionRoute {
             const params: TransactionQueryParams = {
                 start: parseInt(req.query.start as string) || 0,
                 limit: parseInt(req.query.limit as string) || 25,
-                sortBy: (req.query.sortBy as TransactionQuerySortType) || 'createdAt',
+                sortBy: (req.query.sortBy as TransactionQuerySortType) || TransactionQuerySortType.CreatedAt,
                 sortOrder: (req.query.sortOrder as 'ASC' | 'DESC') || 'DESC',
                 search: req.query.search as string
             };
@@ -36,9 +36,14 @@ export class TransactionRoute {
             if (params.limit! < 1 || params.limit! > 100) {
                 return res.status(400).json({ error: 'limit must be between 1 and 100' });
             }
-            if (params.sortBy !== 'createdAt' && params.sortBy !== 'saleDate' && params.sortBy !== 'updatedAt') {
-                return res.status(400).json({ error: 'sortBy must be one of: createdAt, updatedAt, saleDate' });
+
+            // Validate sortBy using TransactionQuerySortType enum
+            if (!Object.values(TransactionQuerySortType).includes(params.sortBy as TransactionQuerySortType)) {
+                return res.status(400).json({
+                    error: `sortBy must be one of: ${Object.values(TransactionQuerySortType).join(', ')}`
+                });
             }
+
             if (params.sortOrder !== 'ASC' && params.sortOrder !== 'DESC') {
                 return res.status(400).json({ error: 'sortOrder must be either ASC or DESC' });
             }

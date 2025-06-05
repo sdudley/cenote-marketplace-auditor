@@ -11,7 +11,12 @@ export interface TransactionQueryResult {
     count: number;
 }
 
-export type TransactionQuerySortType = 'createdAt' | 'saleDate' | 'updatedAt';
+export enum TransactionQuerySortType {
+    CreatedAt = 'createdAt',
+    SaleDate = 'saleDate',
+    UpdatedAt = 'updatedAt',
+    VersionCount = 'versionCount'
+}
 
 export interface TransactionQueryParams {
     start?: number;

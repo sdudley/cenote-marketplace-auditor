@@ -2,16 +2,24 @@ import { inject, injectable } from "inversify";
 import { Transaction } from "#common/entities/Transaction";
 import { TYPES } from "../config/types";
 import { TransactionVersion } from "#common/entities/TransactionVersion";
-import { Repository, SelectQueryBuilder } from "typeorm";
+import { Repository } from "typeorm";
 import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { IsNull } from "typeorm";
-import { TransactionQueryParams, TransactionQueryResult } from "#common/types/apiTypes";
+import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortType } from "#common/types/apiTypes";
+import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
 
 @injectable()
 class TransactionDao {
     private transactionRepo: Repository<Transaction>;
     private transactionVersionRepo: Repository<TransactionVersion>;
+
+    private readonly sortFieldMap: Record<TransactionQuerySortType, string> = {
+        [TransactionQuerySortType.CreatedAt]: 'transaction.createdAt',
+        [TransactionQuerySortType.UpdatedAt]: 'transaction.updatedAt',
+        [TransactionQuerySortType.SaleDate]: "transaction.data ->'purchaseDetails'->>'saleDate'",
+        [TransactionQuerySortType.VersionCount]: 'version_count.version_count'
+    };
 
     constructor(@inject(TYPES.DataSource) private dataSource: DataSource) {
         this.transactionRepo = this.dataSource.getRepository(Transaction);
@@ -124,28 +132,32 @@ class TransactionDao {
                     'jsonb_path_exists(transaction.data, format(\'$.** ? (@.type() == "string" && @ like_regex %s)\', :search::text)::jsonpath)',
                     { search: `"${this.escapeDoubleQuotes(search)}"` }
                 );
-
             }
 
-            if (sortBy === 'saleDate') {
-                queryBuilder.orderBy("transaction.data->'purchaseDetails'->>'saleDate'", sortOrder);
-            } else if (sortBy === 'createdAt') {
-                queryBuilder.orderBy('transaction.createdAt', sortOrder);
-            } else if (sortBy === 'updatedAt') {
-                queryBuilder.orderBy('transaction.updatedAt', sortOrder);
-            } else {
+            // Apply sorting using the sort field map
+            const orderByField = this.sortFieldMap[sortBy as TransactionQuerySortType];
+            if (!orderByField) {
                 throw new Error(`Invalid sortBy: ${sortBy}`);
             }
+            queryBuilder.orderBy(orderByField, sortOrder);
 
             const total = await queryBuilder.getCount();
 
-            queryBuilder.skip(start).take(limit);
+            //queryBuilder.skip(start).take(limit);
+            queryBuilder.offset(start).limit(limit);
 
-            const rawResults = await queryBuilder.getRawAndEntities();
+            // getRawAndEntities crashes with unknown "databaseName" we try to sort by a jsonpath expression
+            // Instead, we use getRawMany and convert them to entities ourself. This also requires
+            // switching to offset/limit instead of skip/take.
 
-            // Map results to TransactionResult objects
-            const transactionResults = rawResults.entities.map((transaction, index) => {
-                const versionCount = parseInt(rawResults.raw[index].transaction_versionCount) || 0;
+            // const rawResults = await queryBuilder.getRawAndEntities();
+            const rawResults = await queryBuilder.getRawMany<Transaction & { transaction_versionCount: string }>();
+
+            const transformer = new RawSqlResultsToEntityTransformer(queryBuilder.expressionMap, this.dataSource.driver, [], []);
+            const transactions = transformer.transform(rawResults, queryBuilder.expressionMap.mainAlias!);
+
+            const transactionResults = transactions.map((transaction, index) => {
+                const versionCount = parseInt(rawResults[index].transaction_versionCount) || 0;
                 return {
                     transaction,
                     versionCount
