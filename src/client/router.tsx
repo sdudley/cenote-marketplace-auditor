@@ -1,12 +1,12 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { TransactionsPage } from './pages/TransactionsPage';
-import { Layout } from './components/Layout';
+import { PageLayout } from './pages/PageLayout';
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <Layout />,
+        element: <PageLayout />,
         children: [
             {
                 path: '/',

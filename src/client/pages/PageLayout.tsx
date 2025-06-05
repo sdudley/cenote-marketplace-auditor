@@ -24,7 +24,7 @@ import {
     StyledDrawer,
     ContentContainer,
     ContentBoxWrapper,
-} from '../styles';
+} from '../components/styles';
 
 const theme = createTheme({
     palette: {
@@ -35,7 +35,7 @@ const theme = createTheme({
     },
 });
 
-export const Layout: React.FC = () => {
+export const PageLayout: React.FC = () => {
     const navigate = useNavigate();
     const menuItems = [
         { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },

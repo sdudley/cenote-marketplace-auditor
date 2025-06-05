@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { TransactionList } from '../components/TransactionList';
-import { PageContainer, PageTitle } from '../styles';
+import { PageContainer, PageTitle } from './styles';
 
 export const TransactionsPage: React.FC = () => {
     return (

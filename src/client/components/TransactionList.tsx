@@ -17,7 +17,7 @@ import {
 import { HelpOutline, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
-import { SortArrows, StyledTableContainer, TableWrapper } from '../styles';
+import { SortArrows, StyledTableContainer, TableWrapper } from './styles';
 import { TransactionDetails } from './TransactionDetails';
 
 interface TransactionListProps {
