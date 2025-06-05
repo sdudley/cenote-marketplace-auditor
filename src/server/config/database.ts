@@ -28,6 +28,8 @@ assert(process.env.DB_PASSWORD, 'DB_PASSWORD is not set');
 assert(process.env.DB_DATABASE, 'DB_DATABASE is not set');
 assertString(process.env.DB_PORT, 'DB_PORT');
 
+const databaseLogging = process.env.DB_LOGGING === 'true';
+
 export const AppDataSource = new DataSource({
     type: 'postgres',
     host: process.env.DB_HOST,
@@ -36,7 +38,7 @@ export const AppDataSource = new DataSource({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     synchronize: true,
-    logging: false,
+    logging: databaseLogging,
     namingStrategy: new SnakeNamingStrategy(),
     entities: [
         Transaction,
