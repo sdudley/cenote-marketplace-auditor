@@ -17,8 +17,9 @@ import { Visibility, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { SortArrows, StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from './styles';
-import { TransactionDetails } from './TransactionDetails';
+import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { VisibilityIcon } from './VisibilityIcon';
+import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 
 interface TransactionListProps {
     // Add props if needed
@@ -63,6 +64,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
+    const [selectedTransactionForVersions, setSelectedTransactionForVersions] = useState<TransactionResult | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -210,7 +212,11 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
                                         <TableCell>
                                             {tr.versionCount}
-                                            <IconButton size="small" color="primary">
+                                            <IconButton
+                                                size="small"
+                                                color="primary"
+                                                onClick={() => setSelectedTransactionForVersions(tr)}
+                                            >
                                                 <Add fontSize="small" />
                                             </IconButton>
                                         </TableCell>
@@ -222,10 +228,16 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 </StyledTableContainer>
             </TableWrapper>
 
-            <TransactionDetails
+            <TransactionDetailsDialog
                 transaction={selectedTransaction}
                 open={!!selectedTransaction}
                 onClose={() => setSelectedTransaction(null)}
+            />
+
+            <TransactionVersionListDialog
+                transaction={selectedTransactionForVersions}
+                open={!!selectedTransactionForVersions}
+                onClose={() => setSelectedTransactionForVersions(null)}
             />
 
             <TablePagination

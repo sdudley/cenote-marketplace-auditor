@@ -59,7 +59,7 @@ const formatTransactionData = (data: TransactionData): JsonObject => {
     return formattedData;
 };
 
-export const TransactionDetails: React.FC<TransactionDetailsProps> = ({ transaction, open, onClose }) => {
+export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ transaction, open, onClose }) => {
     if (!transaction) return null;
 
     // Collect all node IDs
