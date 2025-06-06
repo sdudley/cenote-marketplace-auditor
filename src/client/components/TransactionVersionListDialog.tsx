@@ -10,24 +10,25 @@ import {
 import { Close } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { StyledDialog, DialogContentBox } from './styles';
+import { StyledDialog } from './styles';
+import { TransactionVersionList } from './TransactionVersionList';
 
 interface TransactionVersionListDialogProps {
-    transaction: TransactionResult | null;
+    transactionResult: TransactionResult | null;
     open: boolean;
     onClose: () => void;
 }
 
 export const TransactionVersionListDialog: React.FC<TransactionVersionListDialogProps> = ({
-    transaction,
+    transactionResult,
     open,
     onClose
 }) => {
-    if (!transaction) return null;
+    if (!transactionResult) return null;
 
-    const { saleDate, vendorAmount, saleType, tier } = transaction.transaction.data.purchaseDetails;
-    const { company } = transaction.transaction.data.customerDetails;
-    const { addonKey } = transaction.transaction.data;
+    const { saleDate, vendorAmount, saleType, tier } = transactionResult.transaction.data.purchaseDetails;
+    const { company } = transactionResult.transaction.data.customerDetails;
+    const { addonKey } = transactionResult.transaction.data;
 
     return (
         <Dialog
@@ -57,9 +58,7 @@ export const TransactionVersionListDialog: React.FC<TransactionVersionListDialog
             </DialogTitle>
             <DialogContent>
                 <StyledDialog>
-                    <DialogContentBox>
-                        {/* Version list will be added here in the next step */}
-                    </DialogContentBox>
+                    <TransactionVersionList transactionId={transactionResult.transaction.id} />
                 </StyledDialog>
             </DialogContent>
         </Dialog>

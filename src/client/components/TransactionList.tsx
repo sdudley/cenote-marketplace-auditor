@@ -65,7 +65,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
-    const [selectedTransactionForVersions, setSelectedTransactionForVersions] = useState<TransactionResult | null>(null);
+    const [selectedTransactionResultForVersions, setSelectedTransactionResultForVersions] = useState<TransactionResult | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -209,7 +209,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             <IconButton
                                                 size="small"
                                                 color="primary"
-                                                onClick={() => setSelectedTransactionForVersions(tr)}
+                                                onClick={() => setSelectedTransactionResultForVersions(tr)}
                                             >
                                                 <Add fontSize="small" />
                                             </IconButton>
@@ -229,9 +229,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
             />
 
             <TransactionVersionListDialog
-                transaction={selectedTransactionForVersions}
-                open={!!selectedTransactionForVersions}
-                onClose={() => setSelectedTransactionForVersions(null)}
+                transactionResult={selectedTransactionResultForVersions}
+                open={!!selectedTransactionResultForVersions}
+                onClose={() => setSelectedTransactionResultForVersions(null)}
             />
 
             <TablePagination

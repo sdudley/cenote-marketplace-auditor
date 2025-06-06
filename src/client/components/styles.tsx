@@ -1,4 +1,4 @@
-import { Box, Typography, TableCell, styled, Container, Drawer, AppBar, TableContainer as MuiTableContainer } from '@mui/material';
+import { Box, Typography, TableCell, styled, Container, Drawer, AppBar, TableContainer as MuiTableContainer, Table } from '@mui/material';
 
 export const drawerWidth = 240;
 
@@ -119,8 +119,6 @@ export const ContentBoxWrapper = styled(Box)(({ theme }) => ({
   paddingLeft: 0
 }));
 
-
-
 export const SortArrows = styled(Box)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
@@ -174,4 +172,32 @@ export const TableContainer = styled(Box)({
 export const VisibilityCell = styled(TableCell)({
     width: 40,
     padding: 0
+});
+
+export const VersionListContainer = styled(Box)({
+    width: '100%',
+    marginTop: 16
+});
+
+export const VersionListTable = styled(Table)({
+    width: '100%'
+});
+
+export const VersionNumberCell = styled(TableCell)({
+    width: '100px',
+    fontWeight: 'bold'
+});
+
+export const VersionDateCell = styled(TableCell)({
+    width: '200px',
+    whiteSpace: 'nowrap'
+});
+
+export const VersionDiffCell = styled(TableCell)({
+    fontFamily: 'monospace',
+    whiteSpace: 'pre-wrap'
+});
+
+export const VersionHeaderCell = styled(TableCell)({
+    fontWeight: 'bold'
 });

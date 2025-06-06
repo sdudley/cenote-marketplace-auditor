@@ -187,7 +187,7 @@ class TransactionDao {
 
         return await this.transactionVersionRepo.find({
             where: { transaction: { id: transactionId } },
-            order: { version: 'ASC' }
+            order: { version: 'DESC' }
         });
     }
 }
