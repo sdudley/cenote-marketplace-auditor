@@ -18,6 +18,7 @@ import {
     LoadingOverlay,
     VersionHeaderCell
 } from './styles';
+import { TransactionVersionDialog } from './TransactionVersionDialog';
 
 interface TransactionVersionListProps {
     transactionId: string;
@@ -26,6 +27,7 @@ interface TransactionVersionListProps {
 export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ transactionId }) => {
     const [versions, setVersions] = useState<TransactionVersion[]>([]);
     const [loading, setLoading] = useState(false);
+    const [selectedVersion, setSelectedVersion] = useState<TransactionVersion | null>(null);
 
     useEffect(() => {
         const fetchVersions = async () => {
@@ -43,6 +45,10 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
 
         fetchVersions();
     }, [transactionId]);
+
+    const handleRowClick = (version: TransactionVersion) => {
+        setSelectedVersion(version);
+    };
 
     return (
         <VersionListContainer>
@@ -65,7 +71,11 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
                         </TableRow>
                     )}
                     {versions.map((version) => (
-                        <TableRow key={version.id}>
+                        <TableRow
+                            key={version.id}
+                            onClick={() => handleRowClick(version)}
+                            sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
+                        >
                             <VersionNumberCell>{version.version}</VersionNumberCell>
                             <VersionDateCell>
                                 {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
@@ -75,6 +85,12 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
                     ))}
                 </TableBody>
             </VersionListTable>
+
+            <TransactionVersionDialog
+                version={selectedVersion}
+                open={!!selectedVersion}
+                onClose={() => setSelectedVersion(null)}
+            />
         </VersionListContainer>
     );
 };
