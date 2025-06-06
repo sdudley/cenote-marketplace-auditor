@@ -16,6 +16,7 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
+import { formatCurrency } from '#common/utils/formatCurrency';
 import { JsonTreeView } from './JsonTreeView';
 import { TransactionData } from '#common/types/marketplace.js';
 import {
@@ -33,13 +34,6 @@ interface TransactionDetailsProps {
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 interface JsonObject { [key: string]: JsonValue }
 type JsonArray = JsonValue[];
-
-const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(amount);
-};
 
 const formatTransactionData = (data: TransactionData): JsonObject => {
     // Deep clone the data to avoid mutating the original

@@ -16,6 +16,7 @@ import {
 import { Visibility, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
+import { formatCurrency } from '#common/utils/formatCurrency';
 import { SortArrows, StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from './styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { VisibilityIcon } from './VisibilityIcon';
@@ -121,13 +122,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         if (event.key === 'Enter') {
             setDebouncedSearch(search);
         }
-    };
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount);
     };
 
     return (
