@@ -123,7 +123,30 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
     };
 };
 
+const processNewObject = (obj: JsonObject): JsonDelta => {
+    const children: { [key: string]: JsonDelta } = {};
+
+    Object.entries(obj).forEach(([key, value]) => {
+        if (isObject(value)) {
+            children[key] = processNewObject(value);
+        } else {
+            children[key] = {
+                changeType: 'added',
+                newValue: value
+            };
+        }
+    });
+
+    return {
+        changeType: 'added',
+        children
+    };
+};
+
 export const getObjectDiff = (oldObj: JsonObject | undefined, newObj: JsonObject): JsonDiffObject => {
-    const diff = compareObjects(oldObj || {}, newObj);
+    if (!oldObj) {
+        return processNewObject(newObj).children || {};
+    }
+    const diff = compareObjects(oldObj, newObj);
     return diff.children || {};
 };

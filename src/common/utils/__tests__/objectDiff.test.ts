@@ -163,4 +163,64 @@ describe('objectDiff', () => {
             newValue: 42
         });
     });
+
+    it('should handle undefined oldObj with nested objects', () => {
+        const oldObj = undefined;
+        const newObj = {
+            user: {
+                name: 'John',
+                age: 30,
+                address: {
+                    city: 'New York',
+                    zip: '02108'
+                }
+            },
+            metadata: {
+                version: 1,
+                tags: ['important', 'new']
+            }
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.user).toEqual({
+            changeType: 'added',
+            children: {
+                name: {
+                    changeType: 'added',
+                    newValue: 'John'
+                },
+                age: {
+                    changeType: 'added',
+                    newValue: 30
+                },
+                address: {
+                    changeType: 'added',
+                    children: {
+                        city: {
+                            changeType: 'added',
+                            newValue: 'New York'
+                        },
+                        zip: {
+                            changeType: 'added',
+                            newValue: '02108'
+                        }
+                    }
+                }
+            }
+        });
+        expect(diff.metadata).toEqual({
+            changeType: 'added',
+            children: {
+                version: {
+                    changeType: 'added',
+                    newValue: 1
+                },
+                tags: {
+                    changeType: 'added',
+                    newValue: ['important', 'new']
+                }
+            }
+        });
+    });
 });
