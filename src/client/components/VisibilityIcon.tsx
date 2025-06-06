@@ -2,7 +2,6 @@ import React from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import { Visibility } from '@mui/icons-material';
 import { VisibilityCell } from './styles';
-import { TransactionResult } from '#common/types/apiTypes';
 
 interface VisibilityIconProps {
     onViewDetails: () => void;
