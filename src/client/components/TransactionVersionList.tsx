@@ -28,6 +28,7 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
     const [versions, setVersions] = useState<TransactionVersion[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedVersion, setSelectedVersion] = useState<TransactionVersion | null>(null);
+    const [priorVersion, setPriorVersion] = useState<TransactionVersion | null>(null);
 
     useEffect(() => {
         const fetchVersions = async () => {
@@ -48,6 +49,10 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
 
     const handleRowClick = (version: TransactionVersion) => {
         setSelectedVersion(version);
+
+        // Find the prior version from our existing versions array
+        const prior = versions.find(v => v.version === version.version - 1);
+        setPriorVersion(prior || null);
     };
 
     return (
@@ -88,8 +93,12 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
 
             <TransactionVersionDialog
                 version={selectedVersion}
+                priorVersion={priorVersion}
                 open={!!selectedVersion}
-                onClose={() => setSelectedVersion(null)}
+                onClose={() => {
+                    setSelectedVersion(null);
+                    setPriorVersion(null);
+                }}
             />
         </VersionListContainer>
     );

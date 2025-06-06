@@ -26,6 +26,7 @@ import {
 
 interface TransactionVersionDialogProps {
     version: TransactionVersion | null;
+    priorVersion: TransactionVersion | null;
     open: boolean;
     onClose: () => void;
 }
@@ -52,7 +53,7 @@ const formatVersionData = (data: any): JsonObject => {
     return formattedData;
 };
 
-export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> = ({ version, open, onClose }) => {
+export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> = ({ version, priorVersion, open, onClose }) => {
     if (!version) return null;
 
     // Collect all node IDs
