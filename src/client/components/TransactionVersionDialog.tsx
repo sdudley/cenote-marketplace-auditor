@@ -1,21 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
     Button,
-    Typography,
     Table,
     TableBody,
     TableCell,
-    TableRow
+    TableRow,
+    IconButton,
+    Typography,
+    Box
 } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { ExpandMore, ExpandLess, Close as CloseIcon } from '@mui/icons-material';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { JsonTreeView } from './JsonTreeView';
 import {
     VersionDialogContentBox,
     VersionDataBox,
@@ -23,6 +24,10 @@ import {
     InfoTableBox,
     InfoTableHeader
 } from './styles';
+import { JsonDiffObjectTreeView } from './JsonDiffObjectTreeView';
+import { getObjectDiff } from '#common/utils/objectDiff.js';
+import { JsonDiffObject, JsonDelta } from '../../common/utils/objectDiff';
+import { JsonTreeView } from './JsonTreeView';
 
 interface TransactionVersionDialogProps {
     version: TransactionVersion | null;
@@ -31,9 +36,9 @@ interface TransactionVersionDialogProps {
     onClose: () => void;
 }
 
-type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 interface JsonObject { [key: string]: JsonValue }
 type JsonArray = JsonValue[];
+type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 
 const formatVersionData = (data: any): JsonObject => {
     // Deep clone the data to avoid mutating the original
@@ -53,20 +58,41 @@ const formatVersionData = (data: any): JsonObject => {
     return formattedData;
 };
 
+const collectIds = (obj: JsonDiffObject): string[] => {
+    const ids: string[] = [];
+
+    const processValue = (value: any) => {
+        if (value && typeof value === 'object') {
+            if (Array.isArray(value)) {
+                value.forEach(item => processValue(item));
+            } else {
+                Object.entries(value).forEach(([key, val]) => {
+                    if (key === 'id' && typeof val === 'string') {
+                        ids.push(val);
+                    }
+                    processValue(val);
+                });
+            }
+        }
+    };
+
+    Object.values(obj).forEach((delta: JsonDelta) => {
+        if (delta.oldValue) processValue(delta.oldValue);
+        if (delta.newValue) processValue(delta.newValue);
+        if (delta.children) collectIds(delta.children);
+    });
+
+    return ids;
+};
+
 export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> = ({ version, priorVersion, open, onClose }) => {
     if (!version) return null;
 
-    // Collect all node IDs
-    const collectIds = (obj: JsonValue, nodeId: string = ''): string[] => {
-        if (!obj || typeof obj !== 'object') return [nodeId];
-        return [nodeId, ...Object.entries(obj as JsonObject).flatMap(([key, value]) =>
-            collectIds(value, nodeId ? `${nodeId}.${key}` : key)
-        )];
-    };
+    const formattedOld = priorVersion ? formatVersionData(priorVersion.data) : undefined;
+    const formattedNew = formatVersionData(version.data);
 
-    // Format the version data
-    const formattedData = formatVersionData(version.data);
-    const allIds = collectIds(formattedData, 'root');
+    const jsonDiffObject = getObjectDiff(formattedOld, formattedNew);
+    const allIds = collectIds(jsonDiffObject);
 
     return (
         <Dialog
@@ -81,7 +107,20 @@ export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> =
                 }
             }}
         >
-            <DialogTitle>Transaction Version Details</DialogTitle>
+            <DialogTitle>
+                Transaction Version Details
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
             <DialogContent dividers>
                 <InfoTableBox>
                     <Table size="small">
@@ -103,7 +142,8 @@ export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> =
                 </InfoTableBox>
 
                 <VersionDataBox>
-                    <VersionDataHeader variant="h6">Version Data</VersionDataHeader>
+                    <VersionDataHeader variant="h6">Version Information</VersionDataHeader>
+
                     <VersionDialogContentBox>
                         <SimpleTreeView
                             slots={{
@@ -112,7 +152,7 @@ export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> =
                             }}
                             defaultExpandedItems={allIds}
                         >
-                            <JsonTreeView data={formattedData} nodeId="root" />
+                            <JsonDiffObjectTreeView data={jsonDiffObject} />
                         </SimpleTreeView>
                     </VersionDialogContentBox>
                 </VersionDataBox>

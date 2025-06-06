@@ -123,7 +123,7 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
     };
 };
 
-export const getObjectDiff = (oldObj: JsonObject, newObj: JsonObject): JsonDiffObject => {
-    const diff = compareObjects(oldObj, newObj);
+export const getObjectDiff = (oldObj: JsonObject | undefined, newObj: JsonObject): JsonDiffObject => {
+    const diff = compareObjects(oldObj || {}, newObj);
     return diff.children || {};
 };
