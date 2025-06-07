@@ -3,8 +3,6 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions,
-    Button,
     Typography,
     Link,
     Table,
@@ -24,16 +22,14 @@ import {
     InfoTableBox,
     InfoTableHeader
 } from '../styles';
+import { JsonObject, collectIds } from '../utils';
+import { CloseButton } from '../CloseButton';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;
     open: boolean;
     onClose: () => void;
 }
-
-type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
-interface JsonObject { [key: string]: JsonValue }
-type JsonArray = JsonValue[];
 
 const formatTransactionData = (data: TransactionData): JsonObject => {
     // Deep clone the data to avoid mutating the original
@@ -56,14 +52,6 @@ const formatTransactionData = (data: TransactionData): JsonObject => {
 export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ transaction, open, onClose }) => {
     if (!transaction) return null;
 
-    // Collect all node IDs
-    const collectIds = (obj: JsonValue, nodeId: string = ''): string[] => {
-        if (!obj || typeof obj !== 'object') return [nodeId];
-        return [nodeId, ...Object.entries(obj as JsonObject).flatMap(([key, value]) =>
-            collectIds(value, nodeId ? `${nodeId}.${key}` : key)
-        )];
-    };
-
     // Format the transaction data
     const formattedData = formatTransactionData(transaction.transaction.data);
     const allIds = collectIds(formattedData, 'root');
@@ -74,14 +62,11 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
             onClose={onClose}
             maxWidth="lg"
             fullWidth
-            PaperProps={{
-                sx: {
-                    minHeight: '80vh',
-                    maxHeight: '90vh'
-                }
-            }}
         >
-            <DialogTitle>Transaction Details</DialogTitle>
+            <DialogTitle>
+                Transaction Details
+                <CloseButton onClose={onClose} />
+            </DialogTitle>
             <DialogContent dividers>
                 <InfoTableBox>
                     <Table size="small">
@@ -113,21 +98,13 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                 <Typography variant="h6" sx={{ mb: 2 }}>Transaction Data</Typography>
                 <DialogContentBox>
                     <SimpleTreeView
-                        slots={{
-                            expandIcon: ExpandMore,
-                            collapseIcon: ExpandLess
-                        }}
+                        slots={{expandIcon: ExpandMore, collapseIcon: ExpandLess}}
                         defaultExpandedItems={allIds}
                     >
                         <JsonTreeView data={formattedData} nodeId="root" />
                     </SimpleTreeView>
                 </DialogContentBox>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} sx={{ textTransform: 'none' }}>
-                    Close
-                </Button>
-            </DialogActions>
         </Dialog>
     );
 };

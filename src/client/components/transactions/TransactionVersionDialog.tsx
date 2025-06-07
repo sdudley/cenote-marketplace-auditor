@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions,
-    Button,
     Table,
     TableBody,
     TableCell,
-    TableRow,
-    IconButton,
-    Typography,
-    Box
+    TableRow
 } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
-import { ExpandMore, ExpandLess, Close as CloseIcon } from '@mui/icons-material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { formatCurrency } from '#common/utils/formatCurrency';
 import {
@@ -26,9 +21,9 @@ import {
 } from '../styles';
 import { JsonDiffObjectTreeView } from '../JsonDiffObjectTreeView';
 import { getObjectDiff } from '#common/utils/objectDiff.js';
-import { JsonDiffObject, JsonDelta } from '../../../common/utils/objectDiff';
-import { JsonTreeView } from '../JsonTreeView';
 import { normalizeObject } from '#common/utils/objectUtils';
+import { CloseButton } from '../CloseButton';
+import { JsonObject, collectIdsForDiffObject } from '../utils';
 
 interface TransactionVersionDialogProps {
     version: TransactionVersion | null;
@@ -37,11 +32,7 @@ interface TransactionVersionDialogProps {
     onClose: () => void;
 }
 
-interface JsonObject { [key: string]: JsonValue }
-type JsonArray = JsonValue[];
-type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
-
-const formatVersionData = (data: any): JsonObject => {
+const formatTransactionVersionData = (data: any): JsonObject => {
     // Deep clone the data to avoid mutating the original
     const formattedData = normalizeObject(structuredClone(data));
 
@@ -59,32 +50,14 @@ const formatVersionData = (data: any): JsonObject => {
     return formattedData;
 };
 
-const collectIds = (obj: JsonDiffObject): string[] => {
-    const ids: string[] = [];
-
-    const processDiffObject = (diffObj: JsonDiffObject, parentKey: string = '') => {
-        Object.entries(diffObj).forEach(([key, delta]) => {
-            const fullKey = parentKey ? `${parentKey}.${key}` : key;
-            ids.push(fullKey);
-
-            if (delta.children) {
-                processDiffObject(delta.children, fullKey);
-            }
-        });
-    };
-
-    processDiffObject(obj);
-    return ids;
-};
-
 export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> = ({ version, priorVersion, open, onClose }) => {
     if (!version) return null;
 
-    const formattedOld = priorVersion ? formatVersionData(priorVersion.data) : undefined;
-    const formattedNew = formatVersionData(version.data);
+    const formattedOld = priorVersion ? formatTransactionVersionData(priorVersion.data) : undefined;
+    const formattedNew = formatTransactionVersionData(version.data);
 
     const jsonDiffObject = getObjectDiff(formattedOld, formattedNew);
-    const allIds = collectIds(jsonDiffObject);
+    const allIds = collectIdsForDiffObject(jsonDiffObject);
 
     return (
         <Dialog
@@ -92,26 +65,10 @@ export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> =
             onClose={onClose}
             maxWidth="lg"
             fullWidth
-            PaperProps={{
-                sx: {
-                    minHeight: '80vh',
-                    maxHeight: '90vh'
-                }
-            }}
         >
             <DialogTitle>
                 Transaction Version Details
-                <IconButton
-                    aria-label="close"
-                    onClick={onClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                    }}
-                >
-                    <CloseIcon />
-                </IconButton>
+                <CloseButton onClose={onClose} />
             </DialogTitle>
             <DialogContent dividers>
                 <InfoTableBox>
@@ -149,11 +106,6 @@ export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> =
                     </VersionDialogContentBox>
                 </VersionDataBox>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} sx={{ textTransform: 'none' }}>
-                    Close
-                </Button>
-            </DialogActions>
         </Dialog>
     );
 };

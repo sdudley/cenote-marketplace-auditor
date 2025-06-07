@@ -9,11 +9,10 @@ import {
     TablePagination,
     TextField,
     IconButton,
-    Tooltip,
     CircularProgress,
     TableSortLabel
 } from '@mui/material';
-import { Visibility, Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';

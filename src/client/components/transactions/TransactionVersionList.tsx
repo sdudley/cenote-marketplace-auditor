@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Table,
     TableBody,
     TableCell,
     TableHead,
@@ -8,7 +7,6 @@ import {
     CircularProgress
 } from '@mui/material';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
-import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import {
     VersionListContainer,
     VersionListTable,

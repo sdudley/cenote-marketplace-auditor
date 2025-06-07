@@ -3,15 +3,14 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    IconButton,
     Typography,
     Box
 } from '@mui/material';
-import { Close } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { formatCurrency } from '#common/utils/formatCurrency';
 import { StyledDialog } from '../styles';
 import { TransactionVersionList } from './TransactionVersionList';
+import { CloseButton } from '../CloseButton';
 
 interface TransactionVersionListDialogProps {
     transactionResult: TransactionResult | null;
@@ -44,17 +43,7 @@ export const TransactionVersionListDialog: React.FC<TransactionVersionListDialog
                         {saleDate} • {addonKey} • {saleType} • {tier} • {formatCurrency(vendorAmount)} • {company}
                     </Typography>
                 </Box>
-                <IconButton
-                    aria-label="close"
-                    onClick={onClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8
-                    }}
-                >
-                    <Close />
-                </IconButton>
+                <CloseButton onClose={onClose} />
             </DialogTitle>
             <DialogContent>
                 <StyledDialog>
