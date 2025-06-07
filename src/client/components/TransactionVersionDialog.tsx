@@ -28,6 +28,7 @@ import { JsonDiffObjectTreeView } from './JsonDiffObjectTreeView';
 import { getObjectDiff } from '#common/utils/objectDiff.js';
 import { JsonDiffObject, JsonDelta } from '../../common/utils/objectDiff';
 import { JsonTreeView } from './JsonTreeView';
+import { normalizeObject } from '#common/utils/objectUtils';
 
 interface TransactionVersionDialogProps {
     version: TransactionVersion | null;
@@ -42,7 +43,7 @@ type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 
 const formatVersionData = (data: any): JsonObject => {
     // Deep clone the data to avoid mutating the original
-    const formattedData = structuredClone(data);
+    const formattedData = normalizeObject(structuredClone(data));
 
     // Format currency values in purchaseDetails
     if (formattedData.purchaseDetails && typeof formattedData.purchaseDetails === 'object') {
