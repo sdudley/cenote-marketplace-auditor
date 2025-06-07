@@ -3,7 +3,6 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    Typography,
     Link,
     Table,
     TableBody,
@@ -13,41 +12,21 @@ import {
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
-import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
-import { formatCurrency } from '#common/utils/formatCurrency';
 import { JsonTreeView } from '../JsonTreeView';
-import { TransactionData } from '#common/types/marketplace.js';
 import {
-    DialogContentBox,
     InfoTableBox,
     InfoTableHeader
 } from '../styles';
-import { JsonObject, collectIds } from '../utils';
+import { collectIds } from '../utils';
 import { CloseButton } from '../CloseButton';
+import { isoStringWithDateAndTime } from '#common/utils/dateUtils';
+import { formatTransactionData } from './transactionUtils';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;
     open: boolean;
     onClose: () => void;
 }
-
-const formatTransactionData = (data: TransactionData): JsonObject => {
-    // Deep clone the data to avoid mutating the original
-    const formattedData = structuredClone(data);
-
-    // Format currency values in purchaseDetails
-    if (formattedData.purchaseDetails && typeof formattedData.purchaseDetails === 'object') {
-        const purchaseDetails = formattedData.purchaseDetails as JsonObject;
-        if (typeof purchaseDetails.vendorAmount === 'number') {
-            purchaseDetails.vendorAmount = formatCurrency(purchaseDetails.vendorAmount);
-        }
-        if (typeof purchaseDetails.purchasePrice === 'number') {
-            purchaseDetails.purchasePrice = formatCurrency(purchaseDetails.purchasePrice);
-        }
-    }
-
-    return formattedData;
-};
 
 export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ transaction, open, onClose }) => {
     if (!transaction) return null;
@@ -73,9 +52,9 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                         <TableBody>
                             <TableRow>
                                 <InfoTableHeader>Created At</InfoTableHeader>
-                                <TableCell>{isoStringWithOnlyDate(transaction.transaction.createdAt.toString())}</TableCell>
+                                <TableCell>{isoStringWithDateAndTime(transaction.transaction.createdAt.toString())}</TableCell>
                                 <InfoTableHeader>Updated At</InfoTableHeader>
-                                <TableCell>{isoStringWithOnlyDate(transaction.transaction.updatedAt.toString())}</TableCell>
+                                <TableCell>{isoStringWithDateAndTime(transaction.transaction.updatedAt.toString())}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <InfoTableHeader>Entitlement ID</InfoTableHeader>
@@ -95,15 +74,12 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                     </Table>
                 </InfoTableBox>
 
-                <Typography variant="h6" sx={{ mb: 2 }}>Transaction Data</Typography>
-                <DialogContentBox>
-                    <SimpleTreeView
-                        slots={{expandIcon: ExpandMore, collapseIcon: ExpandLess}}
-                        defaultExpandedItems={allIds}
-                    >
-                        <JsonTreeView data={formattedData} nodeId="root" />
-                    </SimpleTreeView>
-                </DialogContentBox>
+                <SimpleTreeView
+                    slots={{expandIcon: ExpandMore, collapseIcon: ExpandLess}}
+                    defaultExpandedItems={allIds}
+                >
+                    <JsonTreeView data={formattedData} nodeId="root" />
+                </SimpleTreeView>
             </DialogContent>
         </Dialog>
     );

@@ -222,23 +222,9 @@ export const VersionHeaderCell = styled(StyledTableCell)({
     fontWeight: 'bold'
 });
 
-export const VersionDialogContentBox = styled(Box)({
-    maxHeight: '50vh',
-    overflow: 'auto',
-    border: '1px solid',
-    borderColor: 'divider',
-    borderRadius: 1,
-    padding: 16,
-    marginTop: 16
-});
-
 export const VersionDataBox = styled(Box)({
     marginTop: 16
 });
-
-export const VersionDataHeader = styled(Typography)({
-    marginBottom: 8
-}) as typeof Typography;
 
 export const TreeContainer = styled(Box)({
     padding: '8px',

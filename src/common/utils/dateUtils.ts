@@ -36,3 +36,7 @@ export function isoDateMath(date: string, days: number): string {
 export function isoStringWithOnlyDate(date: string) : string {
     return date.substring(0, 10);
 }
+
+export function isoStringWithDateAndTime(date: string) : string {
+    return date.substring(0, 16).replace('T', ' ') + ' UTC';
+}
