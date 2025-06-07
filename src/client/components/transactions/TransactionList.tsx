@@ -18,7 +18,6 @@ import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
 import { SortArrows, StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
-import { VisibilityIcon } from '../VisibilityIcon';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 
 interface TransactionListProps {
@@ -147,7 +146,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ width: 40, padding: 0 }}></TableCell>
                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
                                     <SortableHeader
                                         field={TransactionQuerySortType.SaleDate}
@@ -191,8 +189,16 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                             </TableHead>
                             <TableBody>
                                 {transactions && transactions.map((tr) => (
-                                    <TableRow key={`${tr.transaction.id}`}>
-                                        <VisibilityIcon onViewDetails={() => setSelectedTransaction(tr)} />
+                                    <TableRow
+                                        key={`${tr.transaction.id}`}
+                                        onClick={() => setSelectedTransaction(tr)}
+                                        sx={{
+                                            cursor: 'pointer',
+                                            '&:hover': {
+                                                backgroundColor: 'action.hover'
+                                            }
+                                        }}
+                                    >
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
                                         <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>
                                         <TableCell>{tr.transaction.data.addonName}</TableCell>
@@ -208,7 +214,10 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             <IconButton
                                                 size="small"
                                                 color="primary"
-                                                onClick={() => setSelectedTransactionResultForVersions(tr)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedTransactionResultForVersions(tr);
+                                                }}
                                             >
                                                 <Add fontSize="small" />
                                             </IconButton>

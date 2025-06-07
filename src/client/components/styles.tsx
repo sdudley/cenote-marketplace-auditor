@@ -55,7 +55,7 @@ export const InfoTableHeader = styled(TableCell)({
 
 export const Main = styled('main')(({ theme }) => ({
     flexGrow: 1,
-    padding: theme.spacing(3),
+    paddingTop: theme.spacing(3),
     marginLeft: 0,
     minHeight: 'calc(100vh - 64px)', // Subtract AppBar height
 }));
@@ -133,8 +133,7 @@ export const SortArrows = styled(Box)(({ theme }) => ({
 export const TableWrapper = styled(Box)({
     width: '100%',
     minWidth: '1024px',
-    overflowX: 'auto',
-    paddingLeft: 40 // Add padding for the icon
+    overflowX: 'auto'
 });
 
 export const StyledTableContainer = styled(MuiTableContainer)({
