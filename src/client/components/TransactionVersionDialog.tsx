@@ -62,27 +62,18 @@ const formatVersionData = (data: any): JsonObject => {
 const collectIds = (obj: JsonDiffObject): string[] => {
     const ids: string[] = [];
 
-    const processValue = (value: any) => {
-        if (value && typeof value === 'object') {
-            if (Array.isArray(value)) {
-                value.forEach(item => processValue(item));
-            } else {
-                Object.entries(value).forEach(([key, val]) => {
-                    if (key === 'id' && typeof val === 'string') {
-                        ids.push(val);
-                    }
-                    processValue(val);
-                });
+    const processDiffObject = (diffObj: JsonDiffObject, parentKey: string = '') => {
+        Object.entries(diffObj).forEach(([key, delta]) => {
+            const fullKey = parentKey ? `${parentKey}.${key}` : key;
+            ids.push(fullKey);
+
+            if (delta.children) {
+                processDiffObject(delta.children, fullKey);
             }
-        }
+        });
     };
 
-    Object.values(obj).forEach((delta: JsonDelta) => {
-        if (delta.oldValue) processValue(delta.oldValue);
-        if (delta.newValue) processValue(delta.newValue);
-        if (delta.children) collectIds(delta.children);
-    });
-
+    processDiffObject(obj);
     return ids;
 };
 

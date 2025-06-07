@@ -32,9 +32,11 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
         return String(value);
     };
 
-    const renderDelta = (key: string, delta: JsonDelta) => {
+    const renderDelta = (key: string, delta: JsonDelta, parentKey: string = '') => {
         const isExpanded = expanded[key] ?? initialExpanded;
         const hasChildren = delta.children && Object.keys(delta.children).length > 0;
+
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
         const label = (
             <LabelContainer>
@@ -68,11 +70,11 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
         );
 
         return (
-            <TreeItem key={key} label={label} itemId={key}>
+            <TreeItem key={key} label={label} itemId={fullKey}>
                 {hasChildren && isExpanded && (
                     <Box>
                         {Object.entries(delta.children!).map(([childKey, childDelta]) =>
-                            renderDelta(childKey, childDelta)
+                            renderDelta(childKey, childDelta, fullKey)
                         )}
                     </Box>
                 )}
