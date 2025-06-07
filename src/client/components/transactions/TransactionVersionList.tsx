@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     TableBody,
-    TableCell,
     TableHead,
     TableRow,
     CircularProgress
@@ -17,6 +16,7 @@ import {
     VersionHeaderCell
 } from '../styles';
 import { TransactionVersionDialog } from './TransactionVersionDialog';
+import { StyledTableCell } from '../styles';
 
 interface TransactionVersionListProps {
     transactionId: string;
@@ -66,11 +66,11 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
                 <TableBody>
                     {loading && (
                         <TableRow>
-                            <TableCell colSpan={3}>
+                            <StyledTableCell colSpan={3}>
                                 <LoadingOverlay>
                                     <CircularProgress />
                                 </LoadingOverlay>
-                            </TableCell>
+                            </StyledTableCell>
                         </TableRow>
                     )}
                     {versions.map((version) => (
@@ -80,9 +80,11 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
                             sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
                         >
                             <VersionNumberCell>{version.version}</VersionNumberCell>
+
                             <VersionDateCell>
                                 {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
                             </VersionDateCell>
+
                             <VersionDiffCell>{version.diff}</VersionDiffCell>
                         </TableRow>
                     ))}

@@ -161,6 +161,10 @@ export const StyledTableRow = styled(TableRow)(({ theme }) => ({
     }
 }));
 
+export const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    padding: '8px'
+}));
+
 export const SearchContainer = styled(Box)({
     display: 'flex',
     gap: 16,
@@ -199,22 +203,22 @@ export const VersionListTable = styled(Table)({
     width: '100%'
 });
 
-export const VersionNumberCell = styled(TableCell)({
+export const VersionNumberCell = styled(StyledTableCell)({
     width: '100px',
     fontWeight: 'bold'
 });
 
-export const VersionDateCell = styled(TableCell)({
+export const VersionDateCell = styled(StyledTableCell)({
     width: '200px',
     whiteSpace: 'nowrap'
 });
 
-export const VersionDiffCell = styled(TableCell)({
+export const VersionDiffCell = styled(StyledTableCell)({
     fontFamily: 'monospace',
     whiteSpace: 'pre-wrap'
 });
 
-export const VersionHeaderCell = styled(TableCell)({
+export const VersionHeaderCell = styled(StyledTableCell)({
     fontWeight: 'bold'
 });
 
@@ -280,6 +284,6 @@ export const StyledListPaper = styled(Paper)({
     overflow: 'hidden'
 });
 
-export const TableCellNoWrap = styled(TableCell)({
+export const TableCellNoWrap = styled(StyledTableCell)({
     whiteSpace: 'nowrap'
 });

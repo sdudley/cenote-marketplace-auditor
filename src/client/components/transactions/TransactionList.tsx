@@ -18,7 +18,7 @@ import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, Ta
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
-import { StyledTableRow, StyledListPaper, TableCellNoWrap } from '../styles';
+import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell } from '../styles';
 
 interface TransactionListProps {
     // Add props if needed
@@ -167,15 +167,15 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     >
                                         <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
                                         <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
-                                        <TableCell>{tr.transaction.data.addonName}</TableCell>
-                                        <TableCell>{tr.transaction.data.purchaseDetails.saleType}</TableCell>
-                                        <TableCell>{tr.transaction.data.customerDetails.company}</TableCell>
-                                        <TableCell>{tr.transaction.data.purchaseDetails.hosting}</TableCell>
-                                        <TableCell>{tr.transaction.data.purchaseDetails.tier}</TableCell>
-                                        <TableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</TableCell>
+                                        <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
+                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.saleType}</StyledTableCell>
+                                        <StyledTableCell>{tr.transaction.data.customerDetails.company}</StyledTableCell>
+                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.hosting}</StyledTableCell>
+                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.tier}</StyledTableCell>
+                                        <StyledTableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
-                                        <TableCell>
+                                        <StyledTableCell>
                                             {tr.versionCount}
                                             <IconButton
                                                 size="small"
@@ -187,7 +187,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             >
                                                 <Add fontSize="small" />
                                             </IconButton>
-                                        </TableCell>
+                                        </StyledTableCell>
                                     </StyledTableRow>
                                 ))}
                             </TableBody>
