@@ -34,7 +34,7 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
     const renderValue = (value: any): string => {
         if (value === null) return 'null';
         if (value === undefined) return 'undefined';
-        if (typeof value === 'string') return `"${value}"`;
+        if (typeof value === 'string') return `${value}`;
         if (typeof value === 'object') return JSON.stringify(value);
         return String(value);
     };
