@@ -132,7 +132,14 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     <TableCell>Company</TableCell>
                                     <TableCell>Hosting</TableCell>
                                     <TableCell>Tier</TableCell>
-                                    <TableCell>Amount</TableCell>
+                                    <SortableHeader<TransactionQuerySortType>
+                                        field={TransactionQuerySortType.VendorAmount}
+                                        label="Amount"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"

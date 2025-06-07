@@ -5,7 +5,6 @@ import { TransactionVersion } from "#common/entities/TransactionVersion";
 import { Repository } from "typeorm";
 import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
-import { IsNull } from "typeorm";
 import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortType } from "#common/types/apiTypes";
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
 import { isUUID } from "validator";
@@ -19,7 +18,8 @@ class TransactionDao {
         [TransactionQuerySortType.CreatedAt]: 'transaction.createdAt',
         [TransactionQuerySortType.UpdatedAt]: 'transaction.updatedAt',
         [TransactionQuerySortType.SaleDate]: "transaction.data ->'purchaseDetails'->>'saleDate'",
-        [TransactionQuerySortType.VersionCount]: 'version_count.version_count'
+        [TransactionQuerySortType.VersionCount]: 'version_count.version_count',
+        [TransactionQuerySortType.VendorAmount]: '(transaction.data ->\'purchaseDetails\'->>\'vendorAmount\')::numeric(14,3)'
     };
 
     constructor(@inject(TYPES.DataSource) private dataSource: DataSource) {

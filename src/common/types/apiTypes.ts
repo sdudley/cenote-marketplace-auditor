@@ -15,7 +15,8 @@ export enum TransactionQuerySortType {
     CreatedAt = 'createdAt',
     SaleDate = 'saleDate',
     UpdatedAt = 'updatedAt',
-    VersionCount = 'versionCount'
+    VersionCount = 'versionCount',
+    VendorAmount = 'vendorAmount'
 }
 
 export interface TransactionQueryParams {
