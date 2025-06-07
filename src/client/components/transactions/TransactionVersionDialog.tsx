@@ -23,11 +23,11 @@ import {
     VersionDataHeader,
     InfoTableBox,
     InfoTableHeader
-} from './styles';
-import { JsonDiffObjectTreeView } from './JsonDiffObjectTreeView';
+} from '../styles';
+import { JsonDiffObjectTreeView } from '../JsonDiffObjectTreeView';
 import { getObjectDiff } from '#common/utils/objectDiff.js';
-import { JsonDiffObject, JsonDelta } from '../../common/utils/objectDiff';
-import { JsonTreeView } from './JsonTreeView';
+import { JsonDiffObject, JsonDelta } from '../../../common/utils/objectDiff';
+import { JsonTreeView } from '../JsonTreeView';
 import { normalizeObject } from '#common/utils/objectUtils';
 
 interface TransactionVersionDialogProps {

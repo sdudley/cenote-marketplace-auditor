@@ -17,7 +17,7 @@ import {
     VersionDiffCell,
     LoadingOverlay,
     VersionHeaderCell
-} from './styles';
+} from '../styles';
 import { TransactionVersionDialog } from './TransactionVersionDialog';
 
 interface TransactionVersionListProps {

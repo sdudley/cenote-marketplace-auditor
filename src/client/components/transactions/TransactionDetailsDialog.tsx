@@ -17,13 +17,13 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { JsonTreeView } from './JsonTreeView';
+import { JsonTreeView } from '../JsonTreeView';
 import { TransactionData } from '#common/types/marketplace.js';
 import {
     DialogContentBox,
     InfoTableBox,
     InfoTableHeader
-} from './styles';
+} from '../styles';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;

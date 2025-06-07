@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { TransactionList } from '../components/TransactionList';
+import { TransactionList } from '../components/transactions/TransactionList';
 import { PageContainer, PageTitle } from './styles';
 
 export const TransactionsPage: React.FC = () => {

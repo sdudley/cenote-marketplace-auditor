@@ -10,7 +10,7 @@ import {
 import { Close } from '@mui/icons-material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { StyledDialog } from './styles';
+import { StyledDialog } from '../styles';
 import { TransactionVersionList } from './TransactionVersionList';
 
 interface TransactionVersionListDialogProps {
