@@ -1,9 +1,8 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
     Typography,
     List,
-    ListItemButton,
     ListItemIcon,
     ListItemText,
     Toolbar,
@@ -25,6 +24,7 @@ import {
     ContentContainer,
     ContentBoxWrapper,
 } from '../components/styles';
+import { StyledListItemButton } from './styles';
 
 const theme = createTheme({
     palette: {
@@ -37,6 +37,7 @@ const theme = createTheme({
 
 export const PageLayout: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const menuItems = [
         { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
         { text: 'Licenses', icon: <CardMembershipIcon />, path: '/licenses' },
@@ -61,13 +62,23 @@ export const PageLayout: React.FC = () => {
                     >
                         <List>
                             {menuItems.map((item) => (
-                                <ListItemButton
+                                <StyledListItemButton
                                     key={item.text}
                                     onClick={() => navigate(item.path)}
+                                    selected={location.pathname.startsWith(item.path)}
                                 >
-                                    <ListItemIcon>{item.icon}</ListItemIcon>
-                                    <ListItemText primary={item.text} />
-                                </ListItemButton>
+                                    <ListItemIcon sx={{
+                                        color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                    }}>
+                                        {item.icon}
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={item.text}
+                                        sx={{
+                                            color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                        }}
+                                    />
+                                </StyledListItemButton>
                             ))}
                         </List>
                     </StyledDrawer>
