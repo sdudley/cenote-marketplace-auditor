@@ -54,13 +54,10 @@ export const InfoTableHeader = styled(TableCell)({
 });
 
 export const Main = styled('main')(({ theme }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  marginLeft: 0,
-  paddingLeft: 0,
-  marginTop: 0,
-  paddingTop: 0,
-  minHeight: 'calc(100vh - 64px)', // Subtract AppBar height
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    marginLeft: 0,
+    minHeight: 'calc(100vh - 64px)', // Subtract AppBar height
 }));
 
 export const StyledAppBar = styled(AppBar)({
@@ -84,39 +81,37 @@ export const RootBox = styled(Box)({
 });
 
 export const ContentBox = styled(Box)({
-  display: 'flex',
-  marginTop: '64px',
-  marginLeft: 0,
-  paddingLeft: 0,
-  flex: 1
+    display: 'flex',
+    marginTop: '64px',
+    flex: 1
 });
 
 export const StyledDrawer = styled(Drawer)({
-  width: drawerWidth,
-  flexShrink: 0,
-  '& .MuiDrawer-paper': {
     width: drawerWidth,
-    boxSizing: 'border-box',
-    position: 'relative',
-    height: 'calc(100vh - 64px)', // Subtract AppBar height
-  },
-  marginLeft: 0,
-  paddingLeft: 0
+    flexShrink: 0,
+    '& .MuiDrawer-paper': {
+        width: drawerWidth,
+        boxSizing: 'border-box',
+        position: 'fixed',
+        top: '64px', // AppBar height
+        height: 'calc(100vh - 64px)', // Subtract AppBar height
+        borderRight: '1px solid rgba(0, 0, 0, 0.12)',
+    },
 });
 
 export const ContentContainer = styled(Container)({
-  className: 'content-container',
-  width: '100%',
-  maxWidth: '100% !important',
-  marginLeft: 0,
-  paddingLeft: 0,
-  marginTop: 0,
-  paddingTop: 0
+    className: 'content-container',
+    width: '100%',
+    maxWidth: '100% !important',
+    marginLeft: 0,
+    paddingLeft: 0,
+    marginTop: 0,
+    paddingTop: 0
 });
 
 export const ContentBoxWrapper = styled(Box)(({ theme }) => ({
   width: '100%',
-  marginTop: theme.spacing(4),
+  marginTop: 0,
   marginBottom: theme.spacing(4),
   marginLeft: 0,
   paddingLeft: 0
