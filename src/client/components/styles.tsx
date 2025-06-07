@@ -1,4 +1,16 @@
-import { Box, Typography, TableCell, styled, Container, Drawer, AppBar, TableContainer as MuiTableContainer, Table } from '@mui/material';
+import {
+    Box,
+    Typography,
+    TableCell,
+    styled,
+    Container,
+    Drawer,
+    AppBar,
+    TableContainer as MuiTableContainer,
+    Table,
+    TableRow,
+    Paper
+} from '@mui/material';
 
 export const drawerWidth = 240;
 
@@ -142,6 +154,13 @@ export const StyledTableContainer = styled(MuiTableContainer)({
     width: '100%'
 });
 
+export const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    cursor: 'pointer',
+    '&:hover': {
+        backgroundColor: theme.palette.action.hover
+    }
+}));
+
 export const SearchContainer = styled(Box)({
     display: 'flex',
     gap: 16,
@@ -254,4 +273,13 @@ export const TreeToggle = styled(Box)({
 export const TreeBorder = styled(Box)({
     border: '1px solid gainsboro',
     padding: '8px'
+});
+
+export const StyledListPaper = styled(Paper)({
+    width: '100%',
+    overflow: 'hidden'
+});
+
+export const TableCellNoWrap = styled(TableCell)({
+    whiteSpace: 'nowrap'
 });

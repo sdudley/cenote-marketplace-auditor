@@ -5,52 +5,24 @@ import {
     TableCell,
     TableHead,
     TableRow,
-    Paper,
     TablePagination,
     TextField,
     IconButton,
-    CircularProgress,
-    TableSortLabel
+    CircularProgress
 } from '@mui/material';
-import { Add, ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { SortArrows, StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from '../styles';
+import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
+import { SortOrder, SortableHeader } from '../SortableHeader';
+import { StyledTableRow, StyledListPaper, TableCellNoWrap } from '../styles';
 
 interface TransactionListProps {
     // Add props if needed
 }
-
-type SortOrder = 'ASC' | 'DESC';
-
-const SortableHeader: React.FC<{
-    field: TransactionQuerySortType;
-    label: string;
-    currentSort: TransactionQuerySortType;
-    currentOrder: SortOrder;
-    onSort: (field: TransactionQuerySortType) => void;
-    whiteSpace?: boolean;
-}> = ({ field, label, currentSort, currentOrder, onSort, whiteSpace }) => (
-    <TableCell>
-        <TableSortLabel
-            active={currentSort === field}
-            direction={currentSort === field ? currentOrder.toLowerCase() as 'asc' | 'desc' : 'asc'}
-            onClick={() => onSort(field)}
-            sx={{ whiteSpace: whiteSpace ? 'nowrap' : 'normal' }}
-            IconComponent={currentSort === field ? undefined : () => (
-                <SortArrows>
-                    <ArrowUpward />
-                    <ArrowDownward />
-                </SortArrows>
-            )}
-        >
-            {label}
-        </TableSortLabel>
-    </TableCell>
-);
 
 export const TransactionList: React.FC<TransactionListProps> = () => {
     const [transactions, setTransactions] = useState<TransactionResult[]>([]);
@@ -137,7 +109,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
             <TableWrapper>
                 <StyledTableContainer>
-                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                    <StyledListPaper>
                         {loading && (
                             <LoadingOverlay>
                                 <CircularProgress />
@@ -147,7 +119,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
-                                    <SortableHeader
+                                    <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
                                         currentSort={sortBy}
@@ -161,7 +133,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     <TableCell>Hosting</TableCell>
                                     <TableCell>Tier</TableCell>
                                     <TableCell>Amount</TableCell>
-                                    <SortableHeader
+                                    <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"
                                         currentSort={sortBy}
@@ -169,7 +141,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <SortableHeader
+                                    <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.UpdatedAt}
                                         label="Updated"
                                         currentSort={sortBy}
@@ -177,7 +149,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <SortableHeader
+                                    <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.VersionCount}
                                         label="Versions"
                                         currentSort={sortBy}
@@ -189,26 +161,20 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                             </TableHead>
                             <TableBody>
                                 {transactions && transactions.map((tr) => (
-                                    <TableRow
+                                    <StyledTableRow
                                         key={`${tr.transaction.id}`}
                                         onClick={() => setSelectedTransaction(tr)}
-                                        sx={{
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                                backgroundColor: 'action.hover'
-                                            }
-                                        }}
                                     >
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.entitlementId}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{tr.transaction.data.purchaseDetails.saleDate}</TableCell>
+                                        <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
+                                        <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
                                         <TableCell>{tr.transaction.data.addonName}</TableCell>
                                         <TableCell>{tr.transaction.data.purchaseDetails.saleType}</TableCell>
                                         <TableCell>{tr.transaction.data.customerDetails.company}</TableCell>
                                         <TableCell>{tr.transaction.data.purchaseDetails.hosting}</TableCell>
                                         <TableCell>{tr.transaction.data.purchaseDetails.tier}</TableCell>
                                         <TableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCell>
-                                        <TableCell sx={{ whiteSpace: 'nowrap' }}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCell>
+                                        <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
+                                        <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
                                         <TableCell>
                                             {tr.versionCount}
                                             <IconButton
@@ -222,11 +188,11 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                                 <Add fontSize="small" />
                                             </IconButton>
                                         </TableCell>
-                                    </TableRow>
+                                    </StyledTableRow>
                                 ))}
                             </TableBody>
                         </Table>
-                    </Paper>
+                    </StyledListPaper>
                 </StyledTableContainer>
             </TableWrapper>
 
