@@ -1,7 +1,7 @@
 import React from 'react';
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
-import { KeyColumn, ValueColumn, LabelContainer, JsonValue, JsonKey } from './styles';
+import { KeyColumn, ValueColumn, LabelContainer, JsonValue, JsonKey, TreeBorder } from './styles';
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 interface JsonObject { [key: string]: JsonValue }
@@ -43,10 +43,14 @@ export const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data, nodeId = '' })
                 </LabelContainer>
             );
 
+            const BorderObject = value && typeof value === 'object' ? TreeBorder : Box;
+
             return (
-                <TreeItem key={currentId} itemId={currentId} label={label}>
-                    {value && typeof value === 'object' && <JsonTreeView data={value} nodeId={currentId} />}
-                </TreeItem>
+                <BorderObject>
+                    <TreeItem key={currentId} itemId={currentId} label={label}>
+                        {value && typeof value === 'object' && <JsonTreeView data={value} nodeId={currentId} />}
+                    </TreeItem>
+                </BorderObject>
             );
         });
 };

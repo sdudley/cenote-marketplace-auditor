@@ -1,6 +1,5 @@
 import React from 'react';
 import { JsonDiffObject, JsonDelta } from '../../common/utils/objectDiff';
-import { Box } from '@mui/material';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import {
     TreeContainer,
@@ -10,20 +9,18 @@ import {
     KeyColumn,
     JsonKey,
     JsonValue,
-    ValueColumn
+    ValueColumn,
+    TreeBorder
 } from './styles';
+import { Box } from '@mui/material';
 
 interface JsonDiffObjectTreeViewProps {
     data: JsonDiffObject;
-    initialExpanded?: boolean;
 }
 
 export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
-    data,
-    initialExpanded = true
+    data
 }) => {
-    const [expanded, setExpanded] = React.useState<{ [key: string]: boolean }>({});
-
     const renderValue = (value: any): string => {
         if (value === null) return 'null';
         if (value === undefined) return 'undefined';
@@ -33,7 +30,6 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
     };
 
     const renderDelta = (key: string, delta: JsonDelta, parentKey: string = '') => {
-        const isExpanded = expanded[key] ?? initialExpanded;
         const hasChildren = delta.children && Object.keys(delta.children).length > 0;
 
         const fullKey = parentKey ? `${parentKey}.${key}` : key;
@@ -69,16 +65,18 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
             </LabelContainer>
         );
 
+        const BorderObject = hasChildren ? TreeBorder : Box;
+
         return (
-            <TreeItem key={key} label={label} itemId={fullKey}>
-                {hasChildren && isExpanded && (
-                    <Box>
-                        {Object.entries(delta.children!).map(([childKey, childDelta]) =>
+            <BorderObject>
+                <TreeItem key={key} label={label} itemId={fullKey}>
+                    {hasChildren && (
+                        Object.entries(delta.children!).map(([childKey, childDelta]) =>
                             renderDelta(childKey, childDelta, fullKey)
-                        )}
-                    </Box>
-                )}
-            </TreeItem>
+                        )
+                    )}
+                </TreeItem>
+            </BorderObject>
         );
     };
 

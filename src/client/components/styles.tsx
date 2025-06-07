@@ -3,8 +3,8 @@ import { Box, Typography, TableCell, styled, Container, Drawer, AppBar, TableCon
 export const drawerWidth = 240;
 
 export const KeyColumn = styled(Box)({
-    width: '220px',
-    textAlign: 'right',
+    width: '250px',
+    textAlign: 'left',
     paddingRight: '16px'
 });
 
@@ -240,10 +240,12 @@ export const TreeValueOld = styled(TreeValue)({
     color: '#A61A1A',
     textDecoration: 'line-through',
     marginRight: '8px',
+    fontWeight: 'bold'
 }) as typeof Typography;
 
 export const TreeValueNew = styled(TreeValue)({
     color: '#1AA61A',
+    fontWeight: 'bold'
 }) as typeof Typography;
 
 export const TreeToggle = styled(Box)({
@@ -253,4 +255,9 @@ export const TreeToggle = styled(Box)({
     userSelect: 'none',
     width: '20px',
     height: '20px',
+});
+
+export const TreeBorder = styled(Box)({
+    border: '1px solid gainsboro',
+    padding: '8px'
 });
