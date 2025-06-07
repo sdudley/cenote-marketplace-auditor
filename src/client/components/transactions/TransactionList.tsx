@@ -118,7 +118,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
@@ -127,11 +126,12 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
+                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
                                     <TableCell>App</TableCell>
                                     <TableCell>Sale Type</TableCell>
-                                    <TableCell>Company</TableCell>
                                     <TableCell>Hosting</TableCell>
                                     <TableCell>Tier</TableCell>
+                                    <TableCell>Company</TableCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.VendorAmount}
                                         label="Amount"
@@ -172,13 +172,13 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         key={`${tr.transaction.id}`}
                                         onClick={() => setSelectedTransaction(tr)}
                                     >
-                                        <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
                                         <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
+                                        <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
                                         <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
                                         <StyledTableCell>{tr.transaction.data.purchaseDetails.saleType}</StyledTableCell>
-                                        <StyledTableCell>{tr.transaction.data.customerDetails.company}</StyledTableCell>
                                         <StyledTableCell>{tr.transaction.data.purchaseDetails.hosting}</StyledTableCell>
                                         <StyledTableCell>{tr.transaction.data.purchaseDetails.tier}</StyledTableCell>
+                                        <StyledTableCell>{tr.transaction.data.customerDetails.company}</StyledTableCell>
                                         <StyledTableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
