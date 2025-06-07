@@ -91,9 +91,9 @@ export class LicenseJob {
                     }
 
                     // Get the current, soon-to-be old version
-                    const oldVersion = await this.licenseDao.getCurrentLicenseVersionForLicense(existingLicense);
+                    const oldVersionNum = await this.licenseDao.getLicenseHighestVersion(existingLicense);
 
-                    currentVersion = oldVersion ? oldVersion.version + 1 : 1;
+                    currentVersion = oldVersionNum + 1;
 
                     // Create new version
                     const version = new LicenseVersion();
@@ -103,15 +103,7 @@ export class LicenseJob {
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
                     version.version = currentVersion;
 
-                    // Set up the version chain
-                    if (oldVersion) {
-                        version.priorLicenseVersion = oldVersion;
-                        oldVersion.nextLicenseVersion = version;
-                        // Save both sides of the relationship
-                        await this.licenseDao.saveLicenseVersions(oldVersion, version);
-                    } else {
-                        await this.licenseDao.saveLicenseVersions(version);
-                    }
+                    await this.licenseDao.saveLicenseVersions(version);
 
                     // Update the current data
                     existingLicense.data = normalizedData;

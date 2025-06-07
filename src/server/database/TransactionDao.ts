@@ -31,12 +31,14 @@ class TransactionDao {
         return await this.transactionRepo.findOne({ where: { marketplaceTransactionId: transactionKey } });
     }
 
-    public async getCurrentTransactionVersion(transaction: Transaction) : Promise<TransactionVersion|null> {
-        return await this.transactionVersionRepo.findOne({
-            where: { transaction, nextTransactionVersion: IsNull() },
-            order: { createdAt: 'DESC' },
-            relations: ['nextTransactionVersion', 'priorTransactionVersion']
-        });
+    public async getTransactionHighestVersion(transaction: Transaction) : Promise<number> {
+        const queryBuilder = this.transactionVersionRepo.createQueryBuilder('transaction_version');
+        queryBuilder.select('MAX(transaction_version.version)', 'maxVersion');
+        queryBuilder.where('transaction_version.transaction_id = :transactionId', { transactionId: transaction.id });
+
+        const result = await queryBuilder.getRawOne();
+        const maxVersion = result?.maxVersion;
+        return maxVersion ?? 0;
     }
 
     public async saveTransactionVersions(...versions: TransactionVersion[]) : Promise<void> {

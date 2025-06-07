@@ -22,7 +22,6 @@
     "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.404 --output src/types/marketplace-api.ts",
     "add-addon": "ts-node src/server/scripts/addAddon.ts",
     "add-ignored-field": "ts-node src/server/scripts/addIgnoredField.ts",
-    "backfill-version-diffs": "ts-node src/server/scripts/backfillVersionDiffs.ts",
     "backfill-version-numbers": "ts-node src/server/scripts/backfillVersionNumbers.ts",
     "export-pricing-template": "ts-node src/server/scripts/exportPricingTemplate.ts",
     "import-pricing": "ts-node src/server/scripts/importPricing.ts",

@@ -4,6 +4,7 @@ import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { License } from '#common/entities/License';
 import { LicenseVersion } from '#common/entities/LicenseVersion';
 import { initializeDatabase } from '../config/database';
+import { computeJsonPaths } from '#common/utils/objectUtils';
 
 async function backfillVersionNumbers() {
     const dataSource = await initializeDatabase();
@@ -12,7 +13,7 @@ async function backfillVersionNumbers() {
     const licenseRepo = dataSource.getRepository(License);
     const licenseVersionRepo = dataSource.getRepository(LicenseVersion);
 
-    console.log('Starting to backfill version numbers and linked list relationships...');
+    console.log('Starting to backfill version numbers and version diffs...');
 
     // Process transaction versions
     const transactions = await transactionRepo.find();
@@ -27,23 +28,21 @@ async function backfillVersionNumbers() {
         });
 
         if (versions.length > 0) {
-            // Reset all version relationships
-            for (const version of versions) {
-                version.priorTransactionVersion = undefined;
-                version.nextTransactionVersion = undefined;
-                await transactionVersionRepo.save(version);
-            }
-
             // Rebuild version chain
+
             for (let i = 0; i < versions.length; i++) {
                 const version = versions[i];
                 version.version = i + 1;
 
                 if (i > 0) {
-                    version.priorTransactionVersion = versions[i - 1];
-                }
-                if (i < versions.length - 1) {
-                    version.nextTransactionVersion = versions[i + 1];
+                    const currentDataNorm = versions[i].data;
+                    const priorDataNorm = versions[i-1].data;
+
+                    const changedPaths = computeJsonPaths(priorDataNorm, currentDataNorm);
+
+                    if (changedPaths.length > 0) {
+                        version.diff = changedPaths.join(' | ');
+                    }
                 }
 
                 await transactionVersionRepo.save(version);
@@ -69,12 +68,6 @@ async function backfillVersionNumbers() {
         });
 
         if (versions.length > 0) {
-            // Reset all version relationships
-            for (const version of versions) {
-                version.priorLicenseVersion = undefined;
-                version.nextLicenseVersion = undefined;
-                await licenseVersionRepo.save(version);
-            }
 
             // Rebuild version chain
             for (let i = 0; i < versions.length; i++) {
@@ -82,10 +75,14 @@ async function backfillVersionNumbers() {
                 version.version = i + 1;
 
                 if (i > 0) {
-                    version.priorLicenseVersion = versions[i - 1];
-                }
-                if (i < versions.length - 1) {
-                    version.nextLicenseVersion = versions[i + 1];
+                    const currentDataNorm = versions[i].data;
+                    const priorDataNorm = versions[i-1].data;
+
+                    const changedPaths = computeJsonPaths(priorDataNorm, currentDataNorm);
+
+                    if (changedPaths.length > 0) {
+                        version.diff = changedPaths.join(' | ');
+                    }
                 }
 
                 await licenseVersionRepo.save(version);

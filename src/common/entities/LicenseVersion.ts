@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index, Unique } from 'typeorm';
 import { License } from './License';
 
 @Entity()
+@Unique(['license', 'version'])
 export class LicenseVersion {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
@@ -25,12 +26,4 @@ export class LicenseVersion {
 
     @ManyToOne(() => License, license => license.versions)
     license!: License;
-
-    @OneToOne(() => LicenseVersion, { nullable: true })
-    @JoinColumn()
-    nextLicenseVersion?: LicenseVersion;
-
-    @OneToOne(() => LicenseVersion, { nullable: true })
-    @JoinColumn()
-    priorLicenseVersion?: LicenseVersion;
 }

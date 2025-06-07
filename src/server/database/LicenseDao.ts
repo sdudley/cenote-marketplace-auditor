@@ -31,12 +31,14 @@ export class LicenseDao {
             });
     }
 
-    public async getCurrentLicenseVersionForLicense(license: License): Promise<LicenseVersion | null> {
-        return await this.licenseVersionRepo.findOne({
-            where: { license },
-            order: { createdAt: 'DESC' },
-            relations: ['nextLicenseVersion', 'priorLicenseVersion']
-        });
+    public async getLicenseHighestVersion(license: License) : Promise<number> {
+        const queryBuilder = this.licenseVersionRepo.createQueryBuilder('license_version');
+        queryBuilder.select('MAX(license_version.version)', 'maxVersion');
+        queryBuilder.where('license_version.license_id = :licenseId', { licenseId: license.id });
+
+        const result = await queryBuilder.getRawOne();
+        const maxVersion = result?.maxVersion;
+        return maxVersion ?? 0;
     }
 
     public async saveLicenseVersions(...versions: LicenseVersion[]) : Promise<void> {

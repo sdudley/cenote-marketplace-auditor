@@ -77,10 +77,9 @@ export class TransactionJob {
                         printJsonDiff(existingTransaction.data, normalizedData);
                     }
 
-                    // Get the current, soon-to-be old version
-                    const oldVersion = await this.transactionDao.getCurrentTransactionVersion(existingTransaction);
-
-                    currentVersion = oldVersion ? oldVersion.version + 1 : 1;
+                    // Get the current highest version number
+                    const oldVersionNum = await this.transactionDao.getTransactionHighestVersion(existingTransaction);
+                    currentVersion = oldVersionNum + 1;
 
                     // Create new version
                     const version = new TransactionVersion();
@@ -90,19 +89,7 @@ export class TransactionJob {
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
                     version.version = currentVersion;
 
-                    // Set up the version chain
-                    if (oldVersion) {
-                        version.priorTransactionVersion = oldVersion;
-                        oldVersion.nextTransactionVersion = version;
-
-                        // Save both sides of the relationship at once to ensure that the relationship
-                        // link is created (because one object needs to exist before the other can be
-                        // saved)
-
-                        await this.transactionDao.saveTransactionVersions(oldVersion, version);
-                    } else {
-                        await this.transactionDao.saveTransactionVersions(version);
-                    }
+                    await this.transactionDao.saveTransactionVersions(version);
 
                     // Update current data
                     existingTransaction.data = normalizedData;
