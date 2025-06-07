@@ -1,16 +1,16 @@
 import React from 'react';
 import { JsonDiffObject, JsonDelta } from '../../common/utils/objectDiff';
 import { Box } from '@mui/material';
-import { ChevronRight, ExpandMore } from '@mui/icons-material';
+import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import {
     TreeContainer,
-    TreeItem,
-    TreeRow,
-    TreeKey,
-    TreeValueContainer,
     TreeValueOld,
     TreeValueNew,
-    TreeToggle
+    LabelContainer,
+    KeyColumn,
+    JsonKey,
+    JsonValue,
+    ValueColumn
 } from './styles';
 
 interface JsonDiffObjectTreeViewProps {
@@ -24,13 +24,6 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
 }) => {
     const [expanded, setExpanded] = React.useState<{ [key: string]: boolean }>({});
 
-    const toggleExpand = (key: string) => {
-        setExpanded(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
-    };
-
     const renderValue = (value: any): string => {
         if (value === null) return 'null';
         if (value === undefined) return 'undefined';
@@ -43,31 +36,39 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
         const isExpanded = expanded[key] ?? initialExpanded;
         const hasChildren = delta.children && Object.keys(delta.children).length > 0;
 
+        const label = (
+            <LabelContainer>
+                <KeyColumn>
+                    <JsonKey component="span">
+                        {key}:
+                    </JsonKey>
+                </KeyColumn>
+                <ValueColumn>
+                    {typeof delta.newValue !== 'object' && (
+                        <JsonValue>
+                            {!hasChildren && (
+                            <>
+                                { delta.changeType==='changed'
+                                ? <>
+                                    {delta.oldValue !== undefined && (
+                                        <TreeValueOld component="span">{renderValue(delta.oldValue)}</TreeValueOld>
+                                    )}
+                                    {delta.newValue !== undefined && (
+                                        <TreeValueNew component="span">{renderValue(delta.newValue)}</TreeValueNew>
+                                    )}
+                                </>
+                                : renderValue(delta.newValue)
+                                }
+                            </>
+                            )}
+                        </JsonValue>
+                    )}
+                </ValueColumn>
+            </LabelContainer>
+        );
+
         return (
-            <TreeItem key={key}>
-                <TreeRow>
-                    {hasChildren && (
-                        <TreeToggle onClick={() => toggleExpand(key)}>
-                            {isExpanded ? <ExpandMore /> : <ChevronRight />}
-                        </TreeToggle>
-                    )}
-                    <TreeKey>{key}:</TreeKey>
-                    {!hasChildren && (
-                        <TreeValueContainer>
-                        { delta.changeType==='changed'
-                        ? <>
-                            {delta.oldValue !== undefined && (
-                                <TreeValueOld>{renderValue(delta.oldValue)}</TreeValueOld>
-                            )}
-                            {delta.newValue !== undefined && (
-                                <TreeValueNew>{renderValue(delta.newValue)}</TreeValueNew>
-                            )}
-                        </>
-                        : renderValue(delta.newValue)
-                        }
-                        </TreeValueContainer>
-                    )}
-                </TreeRow>
+            <TreeItem key={key} label={label} itemId={key}>
                 {hasChildren && isExpanded && (
                     <Box>
                         {Object.entries(delta.children!).map(([childKey, childDelta]) =>

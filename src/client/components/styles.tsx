@@ -25,7 +25,10 @@ export const JsonValue = styled(Typography)({
 }) as typeof Typography;
 
 export const JsonKey = styled(Typography)({
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    color: '#881391',
+    marginRight: '8px',
+    userSelect: 'none'
 }) as typeof Typography;
 
 export const DialogContentBox = styled(Box)({
@@ -228,27 +231,6 @@ export const TreeContainer = styled(Box)({
     color: '#333',
 });
 
-export const TreeItem = styled(Box)({
-    display: 'flex',
-    flexDirection: 'column',
-    marginLeft: '20px',
-});
-
-export const TreeRow = styled(Box)({
-    display: 'flex',
-    alignItems: 'center',
-    padding: '2px 0',
-    '&:hover': {
-        backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    },
-});
-
-export const TreeKey = styled(Typography)({
-    color: '#881391',
-    marginRight: '8px',
-    userSelect: 'none',
-}) as typeof Typography;
-
 export const TreeValue = styled(Typography)({
     color: '#1A1AA6',
     userSelect: 'none',
@@ -263,12 +245,6 @@ export const TreeValueOld = styled(TreeValue)({
 export const TreeValueNew = styled(TreeValue)({
     color: '#1AA61A',
 }) as typeof Typography;
-
-export const TreeValueContainer = styled(Box)({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-});
 
 export const TreeToggle = styled(Box)({
     display: 'inline-flex',

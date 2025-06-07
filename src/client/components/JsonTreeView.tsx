@@ -43,14 +43,10 @@ export const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data, nodeId = '' })
                 </LabelContainer>
             );
 
-            if (value && typeof value === 'object') {
-                return (
-                    <TreeItem key={currentId} itemId={currentId} label={label}>
-                        <JsonTreeView data={value} nodeId={currentId} />
-                    </TreeItem>
-                );
-            }
-
-            return <TreeItem key={currentId} itemId={currentId} label={label} />;
+            return (
+                <TreeItem key={currentId} itemId={currentId} label={label}>
+                    {value && typeof value === 'object' && <JsonTreeView data={value} nodeId={currentId} />}
+                </TreeItem>
+            );
         });
 };
