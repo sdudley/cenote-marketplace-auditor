@@ -7,7 +7,6 @@ import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortType } from "#common/types/apiTypes";
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
-import { isUUID } from "validator";
 
 @injectable()
 class TransactionDao {
@@ -179,18 +178,6 @@ class TransactionDao {
 
     private escapeDoubleQuotes(str: string) {
         return str.replace(/"/g, '\\"');
-    }
-
-    public async getTransactionVersions(transactionId: string): Promise<TransactionVersion[]> {
-
-        if (!isUUID(transactionId)) {
-            throw new Error('Invalid transaction ID: must be a valid UUID');
-        }
-
-        return await this.transactionVersionRepo.find({
-            where: { transaction: { id: transactionId } },
-            order: { version: 'DESC' }
-        });
     }
 }
 

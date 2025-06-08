@@ -17,6 +17,7 @@ import { ResellerDao } from '../database/ResellerDao';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
 import { AddonService } from '../services/AddonService';
 import { PricingService } from '../services/PricingService';
+import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
@@ -41,6 +42,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionAdjustmentDao>(TYPES.TransactionAdjustmentDao).to(TransactionAdjustmentDao).inSingletonScope();
     container.bind<ResellerDao>(TYPES.ResellerDao).to(ResellerDao).inSingletonScope();
     container.bind<PreviousTransactionService>(TYPES.PreviousTransactionService).to(PreviousTransactionService).inSingletonScope();
+    container.bind<TransactionVersionDao>(TYPES.TransactionVersionDao).to(TransactionVersionDao).inSingletonScope();
 
     return container;
 }

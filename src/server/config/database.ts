@@ -15,6 +15,7 @@ import { TransactionReconcile } from '#common/entities/TransactionReconcile';
 import { Reseller } from '#common/entities/Reseller';
 import { TransactionAdjustment } from '#common/entities/TransactionAdjustment';
 import { assert } from 'console';
+import { TransactionReconcileNote } from '#common/entities/TransactionReconcileNote';
 
 function assertString(value: string | undefined, name: string): asserts value is string {
     if (typeof value !== 'string') {
@@ -51,7 +52,8 @@ export const AppDataSource = new DataSource({
         PricingInfo,
         Reseller,
         IgnoredField,
-        TransactionReconcile
+        TransactionReconcile,
+        TransactionReconcileNote
     ],
     subscribers: [],
     migrations: [

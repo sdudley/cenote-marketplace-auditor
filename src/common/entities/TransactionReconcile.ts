@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
 import { Transaction } from './Transaction';
 
 @Entity()
@@ -12,7 +12,7 @@ export class TransactionReconcile {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @ManyToOne(() => Transaction)
+    @OneToOne(() => Transaction)
     @JoinColumn()
     transaction!: Transaction;
 
@@ -24,9 +24,6 @@ export class TransactionReconcile {
 
     @Column()
     automatic!: boolean;
-
-    @Column({ type: 'text', nullable: true })
-    notes?: string;
 
     @Column('decimal', {
         precision: 14,
@@ -47,7 +44,4 @@ export class TransactionReconcile {
             from: (value: string) => parseFloat(value)
         } })
     expectedVendorAmount?: number;
-
-    @Column()
-    current!: boolean;
 }

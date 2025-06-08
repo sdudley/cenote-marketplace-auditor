@@ -15,9 +15,16 @@ import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
 import { getLicenseDurationInDays } from '#common/utils/licenseDurationCalculator';
 import { PricingTierResult } from '#common/types/pricingTierResult';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
+import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
+import { TransactionVersion } from '#common/entities/TransactionVersion';
+import { dateDiff } from '#common/utils/dateUtils';
 
 const DEFAULT_START_DATE = '2024-01-01';
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
+
+// Do not reconcile automatically if legacy price used this late:
+// Allow for at least 60-day grandfathering, 90-day quote, 30-day purchase
+const ALERT_DAYS_AFTER_PRICING_CHANGE = 180;
 
 // TODO: evaluate licenses against transactions
 // License end dates that extend those of transactions (see SQL queries)
@@ -38,6 +45,11 @@ interface TransactionValidationResult {
     expectedVendorAmount: number;
     notes: string[];
     pricingOpts: PriceCalcOpts;
+    legacyPricingEndDate: string|undefined;
+    previousPurchaseLegacyPricingEndDate: string|undefined;
+    useLegacyPricingTierForCurrent: boolean;
+    expectedDiscountApplied: number;
+    hasActualAdjustments: boolean;
 }
 
 interface LegacyPricePermutation {
@@ -85,6 +97,7 @@ interface ValidationOptions {
     useLegacyPricingTierForCurrent: boolean;
     useLegacyPricingTierForPrevious: boolean;
     expectedDiscount: number;
+    hasActualAdjustments: boolean;
 }
 
 @injectable()
@@ -97,7 +110,8 @@ export class ValidationJob {
         @inject(TYPES.LicenseDao) private licenseDao: LicenseDao,
         @inject(TYPES.ResellerDao) private resellerDao: ResellerDao,
         @inject(TYPES.TransactionAdjustmentDao) private transactionAdjustmentDao: TransactionAdjustmentDao,
-        @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService
+        @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService,
+        @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao
     ) {
     }
 
@@ -178,6 +192,7 @@ export class ValidationJob {
 
             for (const useExpectedDiscount of discountPermutations) {
                 const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;
+                const { hasActualAdjustments } = discountResult;
 
                 // Try to see if the price matches with this permutation of legacy pricing (or not)
 
@@ -185,26 +200,37 @@ export class ValidationJob {
                     transaction,
                     useLegacyPricingTierForCurrent,
                     useLegacyPricingTierForPrevious,
-                    expectedDiscount: useExpectedDiscount ? discountToUse : 0
+                    expectedDiscount: useExpectedDiscount ? discountToUse : 0,
+                    hasActualAdjustments
                 });
 
                 const { isExpectedPrice, notes } = validationResult;
 
                 if (isExpectedPrice) {
                     if (useLegacyPricingTierForCurrent) {
-                        notes.push(`Price is correct but uses legacy pricing for current transaction`);
+                        const { saleDate } = transaction.data.purchaseDetails;
+                        const { legacyPricingEndDate } = validationResult;
+
+                        notes.push(`Price is correct but uses legacy pricing for current transaction (sold on ${saleDate}, but prior pricing ended on ${legacyPricingEndDate})`);
                     }
 
                     if (useLegacyPricingTierForPrevious) {
                         notes.push(`Price is correct but uses legacy pricing for previous transaction`);
                     }
 
-                    if (!useExpectedDiscount) {
+                    if (useExpectedDiscount) {
+                        discountResult.adjustmentNotes.forEach(n => {
+                            if (discountResult.hasActualAdjustments) {
+                                notes.push(`Reconciled using manual adjustment: ${n}`);
+                            } else {
+                                // Otherwise, these are expected discounts, so just add the message directly.
+                                notes.push(n);
+                            }
+                        });
+                    } else {
                         notes.push(`Price is correct but expected discount of ${formatCurrency(discountToUse)} was not applied`);
                     }
                 }
-
-                discountResult.adjustmentNotes.forEach(n => notes.push(`Adjustment: ${n}`));
 
                 // Now return early if we find the expected price
 
@@ -223,7 +249,7 @@ export class ValidationJob {
      * transaction (or the one it is upgrading), validate if the price is correct.
      */
     private async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
-        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount } = opts;
+        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount, hasActualAdjustments } = opts;
         const { data } = transaction;
         const { addonKey, purchaseDetails } = data;
         const {
@@ -308,20 +334,29 @@ export class ValidationJob {
         //     valid = false;
         // }
 
-        return {
+        const result : TransactionValidationResult = {
             isExpectedPrice,
             valid,
             vendorAmount,
             expectedVendorAmount,
+            expectedDiscountApplied: expectedDiscount,
             notes,
             price,
-            pricingOpts
+            pricingOpts,
+            legacyPricingEndDate: pricingTierResult.priorPricingEndDate,
+            previousPurchaseLegacyPricingEndDate: previousPurchasePricingTierResult?.priorPricingEndDate,
+            useLegacyPricingTierForCurrent,
+            hasActualAdjustments
         };
+
+        return result;
     }
 
     private async recordTransactionReconcile(opts: { validationResult: TransactionValidationResult, transaction: Transaction; }) : Promise<void> {
         const { validationResult, transaction } = opts;
-        const { valid, notes, vendorAmount, expectedVendorAmount } = validationResult;
+        const { valid: currentValid, notes, vendorAmount, expectedVendorAmount } = validationResult;
+
+        let reconciled = currentValid;
 
         // Check if a reconcile record already exists for this transaction and version
 
@@ -333,9 +368,129 @@ export class ValidationJob {
             return;
         }
 
-        // Record the reconcile record
+        // Now fetch the prior version of the transaction, if it exists
 
-        await this.transactionReconcileDao.recordReconcile({ transaction, existingReconcile, valid, notes, vendorAmount, expectedVendorAmount });
+        let priorVersion : TransactionVersion | null = null;
+
+        if (transaction.currentVersion > 1) {
+            priorVersion = await this.transactionVersionDao.getTransactionVersionByNumber({
+                transactionId: transaction.id,
+                version: transaction.currentVersion - 1
+            });
+
+            if (!priorVersion) {
+                throw new Error(`Could not find prior version of transaction ${transaction.id} (expected to find version ${transaction.currentVersion - 1})`);
+            }
+        }
+
+        if (reconciled && validationResult.useLegacyPricingTierForCurrent) {
+            const { legacyPricingEndDate } = validationResult;
+
+            if (legacyPricingEndDate) {
+                const days = dateDiff(legacyPricingEndDate, transaction.data.purchaseDetails.saleDate);
+
+                if (days > ALERT_DAYS_AFTER_PRICING_CHANGE) {
+                    notes.push(`Legacy pricing was still applied more than ${ALERT_DAYS_AFTER_PRICING_CHANGE} days after pricing change on ${legacyPricingEndDate}`);
+                    reconciled = false;
+                }
+            }
+        }
+
+        if (existingReconcile) {
+            if (reconciled && !existingReconcile.reconciled) {
+                notes.push('Price now matches, but prior version of transaction was not reconciled, so requiring manual approval.');
+                reconciled = false;
+            }
+
+            if (priorVersion) {
+                const notes = await this.generateNotesIfTransactionHasImportantMutations({ transaction, priorVersion, validationResult });
+
+                if (notes.length > 0) {
+                    notes.forEach(n => notes.push(n));
+                    reconciled = false;
+                }
+            }
+        }
+
+        if (reconciled) {
+            const actualAdjustments = await this.getActualAdjustments(transaction);
+
+            const totalAdjustment = actualAdjustments.reduce((acc, adjustment) => acc + (adjustment.purchasePriceDiscount || 0), 0);
+
+            let autoReconcileMessage = `Automatically reconciled with vendor price of ${formatCurrency(vendorAmount)}`;
+
+            const { expectedDiscountApplied, hasActualAdjustments } = validationResult;
+
+            if (expectedDiscountApplied !== 0 && !hasActualAdjustments) {
+                autoReconcileMessage += `; includes expected discount of ${formatCurrency(validationResult.expectedDiscountApplied)}`;
+            } else if (totalAdjustment !== 0) {
+                autoReconcileMessage += `; includes manual transaction adjustments of ${formatCurrency(totalAdjustment)}`;
+            }
+
+            notes.push(autoReconcileMessage);
+        }
+
+        await this.transactionReconcileDao.recordReconcile({
+            transaction,
+            existingReconcile,
+            reconciled,
+            notes,
+            actualVendorAmount:
+            vendorAmount,
+            expectedVendorAmount,
+            automatic: true
+        });
+    }
+
+    /**
+     * Test to see if any important fields have been updated, and if so, add notes
+     * indicating why it should be unreconciled. If no notes are returned, we are
+     * not requesting an unreconciliation.
+     *
+     */
+    private async generateNotesIfTransactionHasImportantMutations(opts: { transaction: Transaction; priorVersion: TransactionVersion; validationResult: TransactionValidationResult; }) : Promise<string[]> {
+        const { transaction, priorVersion } = opts;
+
+        const currentData = transaction.data;
+        const priorData = priorVersion.data;
+
+        const notes : string[] = [];
+
+        if (currentData.purchaseDetails.purchasePrice !== priorData.purchaseDetails.purchasePrice) {
+            notes.push('Unreconciling because purchase price has changed from ${formatCurrency(priorData.purchaseDetails.purchasePrice)} to ${formatCurrency(currentData.purchaseDetails.purchasePrice)}');
+        }
+
+        if (currentData.purchaseDetails.maintenanceStartDate !== priorData.purchaseDetails.maintenanceStartDate) {
+            notes.push(`Unreconciling because maintenance start date has changed from ${priorData.purchaseDetails.maintenanceStartDate} to ${currentData.purchaseDetails.maintenanceStartDate}`);
+        }
+
+        if (currentData.purchaseDetails.maintenanceEndDate !== priorData.purchaseDetails.maintenanceEndDate) {
+            notes.push(`Unreconciling because maintenance end date has changed from ${priorData.purchaseDetails.maintenanceEndDate} to ${currentData.purchaseDetails.maintenanceEndDate}`);
+        }
+
+        if (currentData.purchaseDetails.hosting !== priorData.purchaseDetails.hosting) {
+            notes.push(`Unreconciling because hosting has changed from ${priorData.purchaseDetails.hosting} to ${currentData.purchaseDetails.hosting}`);
+        }
+
+        if (currentData.purchaseDetails.licenseType !== priorData.purchaseDetails.licenseType) {
+            notes.push(`Unreconciling because license type has changed from ${priorData.purchaseDetails.licenseType} to ${currentData.purchaseDetails.licenseType}`);
+        }
+
+        if (currentData.purchaseDetails.tier !== priorData.purchaseDetails.tier) {
+            notes.push(`Unreconciling because tier has changed from ${priorData.purchaseDetails.tier} to ${currentData.purchaseDetails.tier}`);
+        }
+
+        if (currentData.purchaseDetails.billingPeriod !== priorData.purchaseDetails.billingPeriod) {
+            notes.push(`Unreconciling because billing period has changed from ${priorData.purchaseDetails.billingPeriod} to ${currentData.purchaseDetails.billingPeriod}`);
+        }
+
+        // TODO FIXME: this is a test to see if we can unreconcile transactions using commonly-updated but
+        // unimportant fields.
+        if (currentData.lastUpdated !== priorData.lastUpdated) {
+            notes.push(`Unreconciling because last updated date has changed from ${priorData.lastUpdated} to ${currentData.lastUpdated}`);
+        }
+
+        return notes;
     }
 
     private async logTransactionValidation(opts: { validationResult: TransactionValidationResult; transaction: Transaction; }) {
@@ -515,6 +670,14 @@ export class ValidationJob {
         return [adjustment];
     }
 
+    /**
+     * Get the set of expected discounts to be applied to the transaction, which consist
+     * of automatically-calculated discounts for specific resellers, plus actual
+     * adjustments that have been manually applied to the database.
+     *
+     * If we have actual adjustments in the database, these override any expected
+     * discounts we have calculated and we use only the actual adjustments instead.
+     */
     private async calculateExpectedDiscountForTransaction(transaction: Transaction) : Promise<DiscountResult> {
         // Check to see if we expect any reseller adjustments for this transaction
 
@@ -528,12 +691,14 @@ export class ValidationJob {
         const adjustmentsToApply = shouldApplyActualAdjustments ? actualAdjustments : expectedAdjustments;
         const expectedDiscount = adjustmentsToApply.reduce((acc, adjustment) => acc + (adjustment.purchasePriceDiscount || 0), 0);
 
+        const hasActualAdjustments = actualAdjustments.length > 0;
+
         return {
             discountToUse: expectedDiscount,
             hasExpectedAdjustments: expectedAdjustments.length > 0,
-            hasActualAdjustments: actualAdjustments.length > 0,
+            hasActualAdjustments,
             adjustmentNotes: adjustmentsToApply
-                .map(a => a.notes)
+                .map(a => hasActualAdjustments ? `${formatCurrency(a.purchasePriceDiscount)} (${a.notes})` : a.notes)
                 .filter((n): n is string => typeof n === 'string')
         };
     }

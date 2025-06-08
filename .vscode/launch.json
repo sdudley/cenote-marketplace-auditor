@@ -65,7 +65,7 @@
             ],
             "program": "${workspaceFolder}/node_modules/.bin/ts-node",
             "args": [
-                "${workspaceFolder}/src/index.ts",
+                "${workspaceFolder}/src/server/jobs/index.ts",
                 "--validate-transactions"
             ],
             "outFiles": [

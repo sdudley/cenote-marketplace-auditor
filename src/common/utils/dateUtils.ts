@@ -40,3 +40,12 @@ export function isoStringWithOnlyDate(date: string) : string {
 export function isoStringWithDateAndTime(date: string) : string {
     return date.substring(0, 16).replace('T', ' ') + ' UTC';
 }
+
+export function dateDiff(startDate: string, endDate: string) : number {
+    const d1 = createUTCDateFromString(startDate);
+    const d2 = createUTCDateFromString(endDate);
+
+    // Calculate exact days between dates
+    const diffTime = d2.getTime() - d1.getTime();
+    return Math.round(diffTime / (1000 * 60 * 60 * 24));
+};

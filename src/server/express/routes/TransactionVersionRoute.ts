@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { TransactionDao } from '../../database/TransactionDao';
+import { TransactionVersionDao } from '../../database/TransactionVersionDao';
 
 @injectable()
 export class TransactionVersionRoute {
     public readonly router: Router;
 
     constructor(
-        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao
+        @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -27,7 +27,7 @@ export class TransactionVersionRoute {
                 return;
             }
 
-            const versions = await this.transactionDao.getTransactionVersions(transactionId);
+            const versions = await this.transactionVersionDao.getTransactionVersions(transactionId);
             res.json(versions);
         } catch (error) {
             console.error('Error fetching transaction versions:', error);

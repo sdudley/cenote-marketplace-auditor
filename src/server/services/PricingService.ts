@@ -94,7 +94,7 @@ export class PricingService {
             }
         }
 
-        const result = {
+        const result : PricingTierResult = {
             tiers,
             priorTiers,
             priorPricingEndDate
