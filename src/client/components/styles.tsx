@@ -275,6 +275,15 @@ export const TableCellNoWrap = styled(StyledTableCell)({
 });
 
 export const TableCellCheckbox = styled(TableCell)({
-    width: 40,
-    paddingLeft: '8px'
+    width: 48,
+    padding: '0 8px',
+    textAlign: 'center',
+    '& .MuiSvgIcon-root': {
+        cursor: 'pointer',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+            transform: 'scale(1.1)',
+            opacity: 0.8
+        }
+    }
 });

@@ -18,6 +18,7 @@ import { formatCurrency } from '#common/utils/formatCurrency';
 import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
+import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox } from '../styles';
 
@@ -37,6 +38,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [loading, setLoading] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
     const [selectedTransactionResultForVersions, setSelectedTransactionResultForVersions] = useState<TransactionResult | null>(null);
+    const [selectedTransactionForReconcile, setSelectedTransactionForReconcile] = useState<TransactionResult | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -95,6 +97,22 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         }
     };
 
+    const handleReconcileSave = async (reconciled: boolean, notes: string) => {
+        if (!selectedTransactionForReconcile) return;
+
+        try {
+            // TODO: Implement the API call to save reconciliation
+            console.log('Saving reconciliation:', {
+                transactionId: selectedTransactionForReconcile.transaction.id,
+                reconciled,
+                notes
+            });
+        } catch (error) {
+            console.error('Error saving reconciliation:', error);
+            throw error;
+        }
+    };
+
     return (
         <TableContainer>
             <SearchContainer>
@@ -119,7 +137,13 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCellCheckbox>Status</TableCellCheckbox>
+                                    <TableCellCheckbox>
+                                        {transactions.some(tr => tr.transaction.reconcile?.reconciled) ? (
+                                            <CheckBox color="success" />
+                                        ) : (
+                                            <CheckBoxOutlineBlank />
+                                        )}
+                                    </TableCellCheckbox>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
@@ -177,9 +201,20 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     >
                                         <TableCellCheckbox>
                                             {tr.transaction.reconcile?.reconciled ? (
-                                                <CheckBox sx={{ color: 'success.main' }} />
+                                                <CheckBox
+                                                    color="success"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedTransactionForReconcile(tr);
+                                                    }}
+                                                />
                                             ) : (
-                                                <CheckBoxOutlineBlank />
+                                                <CheckBoxOutlineBlank
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedTransactionForReconcile(tr);
+                                                    }}
+                                                />
                                             )}
                                         </TableCellCheckbox>
                                         <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
@@ -224,6 +259,13 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 transactionResult={selectedTransactionResultForVersions}
                 open={!!selectedTransactionResultForVersions}
                 onClose={() => setSelectedTransactionResultForVersions(null)}
+            />
+
+            <TransactionReconcileDialog
+                transaction={selectedTransactionForReconcile}
+                open={!!selectedTransactionForReconcile}
+                onClose={() => setSelectedTransactionForReconcile(null)}
+                onSave={handleReconcileSave}
             />
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>

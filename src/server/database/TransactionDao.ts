@@ -1,19 +1,17 @@
 import { inject, injectable } from "inversify";
 import { Transaction } from "#common/entities/Transaction";
 import { TYPES } from "../config/types";
-import { TransactionVersion } from "#common/entities/TransactionVersion";
 import { Repository } from "typeorm";
 import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortType } from "#common/types/apiTypes";
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
-import { TransactionReconcile } from "#common/entities/TransactionReconcile";
-import { TransactionReconcileNote } from "#common/entities/TransactionReconcileNote";
+import { In } from "typeorm";
+import { SelectQueryBuilder } from "typeorm";
 
 @injectable()
 class TransactionDao {
     private transactionRepo: Repository<Transaction>;
-    private transactionVersionRepo: Repository<TransactionVersion>;
 
     private readonly sortFieldMap: Record<TransactionQuerySortType, string> = {
         [TransactionQuerySortType.CreatedAt]: 'transaction.createdAt',
@@ -25,7 +23,6 @@ class TransactionDao {
 
     constructor(@inject(TYPES.DataSource) private dataSource: DataSource) {
         this.transactionRepo = this.dataSource.getRepository(Transaction);
-        this.transactionVersionRepo = this.dataSource.getRepository(TransactionVersion);
     }
 
     public async getTransactionForKey(transactionKey: string) : Promise<Transaction|null> {
@@ -87,9 +84,56 @@ class TransactionDao {
         return sortedTransactions;
     }
 
-    /**
-     * Search the entire set of transactions based on criteria.
-     */
+    private async getRawResultsAndTransformToEntities(queryBuilder: SelectQueryBuilder<Transaction>): Promise<{ rawResults: any[], transactions: Transaction[] }> {
+        // getRawAndEntities crashes with unknown "databaseName" we try to sort by a jsonpath expression
+        // Instead, we use getRawMany and convert them to entities ourself. This also requires
+        // switching to offset/limit instead of skip/take.
+
+        // const rawResults = await queryBuilder.getRawAndEntities();
+        const rawResults = await queryBuilder.getRawMany();
+
+        const transformer = new RawSqlResultsToEntityTransformer(queryBuilder.expressionMap, this.dataSource.driver, [], []);
+        const transactions = transformer.transform(rawResults, queryBuilder.expressionMap.mainAlias!);
+
+        return { rawResults, transactions };
+    }
+
+    private async loadNotesForTransactions(transactions: Transaction[]): Promise<void> {
+        const transactionIds = transactions.map(t => t.id);
+        const notes = await this.dataSource
+            .getRepository('transaction_reconcile_note')
+            .find({
+                where: {
+                    transactionReconcile: {
+                        transaction: {
+                            id: In(transactionIds)
+                        }
+                    }
+                },
+                relations: ['transactionReconcile'],
+                order: {
+                    createdAt: 'ASC'
+                }
+            });
+
+        // Group notes by transaction reconcile ID
+        const notesByReconcileId = notes.reduce((acc, note) => {
+            const reconcileId = note.transactionReconcile.id;
+            if (!acc[reconcileId]) {
+                acc[reconcileId] = [];
+            }
+            acc[reconcileId].push(note);
+            return acc;
+        }, {} as Record<string, typeof notes>);
+
+        // Attach notes to their respective reconcile records
+        transactions.forEach(transaction => {
+            if (transaction.reconcile) {
+                transaction.reconcile.notes = notesByReconcileId[transaction.reconcile.id] || [];
+            }
+        });
+    }
+
     async getTransactions(params: TransactionQueryParams): Promise<TransactionQueryResult> {
         const {
             start = 0,
@@ -103,7 +147,6 @@ class TransactionDao {
             const queryBuilder = this.transactionRepo.createQueryBuilder('transaction');
 
             // Add CTE for version counts
-
             queryBuilder.addCommonTableExpression(`
                 SELECT transaction_version.transaction_id as tid, count(id) as version_count
                 FROM transaction_version
@@ -117,9 +160,8 @@ class TransactionDao {
             // Join with the version count CTE
             queryBuilder.leftJoin('version_count', 'version_count', 'version_count.tid = transaction.id');
 
-            // Add joins for reconcile and notes
+            // Add join for reconcile
             queryBuilder.leftJoinAndSelect('transaction.reconcile', 'reconcile');
-            queryBuilder.leftJoinAndSelect('reconcile.notes', 'notes');
 
             if (search) {
                 // Inspiration: https://stackoverflow.com/a/45849743/2220556
@@ -141,15 +183,9 @@ class TransactionDao {
             //queryBuilder.skip(start).take(limit);
             queryBuilder.offset(start).limit(limit);
 
-            // getRawAndEntities crashes with unknown "databaseName" we try to sort by a jsonpath expression
-            // Instead, we use getRawMany and convert them to entities ourself. This also requires
-            // switching to offset/limit instead of skip/take.
+            const { rawResults, transactions } = await this.getRawResultsAndTransformToEntities(queryBuilder);
 
-            // const rawResults = await queryBuilder.getRawAndEntities();
-            const rawResults = await queryBuilder.getRawMany<Transaction & { transaction_versionCount: string }>();
-
-            const transformer = new RawSqlResultsToEntityTransformer(queryBuilder.expressionMap, this.dataSource.driver, [], []);
-            const transactions = transformer.transform(rawResults, queryBuilder.expressionMap.mainAlias!);
+            await this.loadNotesForTransactions(transactions);
 
             const transactionResults = transactions.map((transaction, index) => {
                 const versionCount = parseInt(rawResults[index].transaction_versionCount) || 0;
