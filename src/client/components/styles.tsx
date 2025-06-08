@@ -273,3 +273,8 @@ export const StyledListPaper = styled(Paper)({
 export const TableCellNoWrap = styled(StyledTableCell)({
     whiteSpace: 'nowrap'
 });
+
+export const TableCellCheckbox = styled(TableCell)({
+    width: 40,
+    paddingLeft: '8px'
+});

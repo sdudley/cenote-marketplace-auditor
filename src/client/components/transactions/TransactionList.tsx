@@ -10,7 +10,7 @@ import {
     IconButton,
     CircularProgress
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
@@ -18,7 +18,7 @@ import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, Ta
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
-import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell } from '../styles';
+import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox } from '../styles';
 
 interface TransactionListProps {
     // Add props if needed
@@ -118,6 +118,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
+                                    <TableCellCheckbox>Status</TableCellCheckbox>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
@@ -140,6 +141,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
+                                    <TableCell>Maintenance</TableCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"
@@ -172,6 +174,13 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         key={`${tr.transaction.id}`}
                                         onClick={() => setSelectedTransaction(tr)}
                                     >
+                                        <TableCellCheckbox>
+                                            {tr.transaction.reconcile?.reconciled ? (
+                                                <CheckBox sx={{ color: 'success.main' }} />
+                                            ) : (
+                                                <CheckBoxOutlineBlank />
+                                            )}
+                                        </TableCellCheckbox>
                                         <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
                                         <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
                                         <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
@@ -180,6 +189,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         <StyledTableCell>{tr.transaction.data.purchaseDetails.tier}</StyledTableCell>
                                         <StyledTableCell>{tr.transaction.data.customerDetails.company}</StyledTableCell>
                                         <StyledTableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
+                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.maintenanceStartDate} - {tr.transaction.data.purchaseDetails.maintenanceEndDate}</StyledTableCell>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
                                         <StyledTableCell>
