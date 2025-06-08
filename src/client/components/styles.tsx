@@ -287,3 +287,7 @@ export const TableCellCheckbox = styled(TableCell)({
         }
     }
 });
+
+export const TableHeaderCell = styled(TableCell)({
+    fontWeight: 'bold'
+});

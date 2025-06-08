@@ -21,6 +21,7 @@ import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox } from '../styles';
+import { TableHeaderCell } from '../styles';
 
 interface TransactionListProps {
     // Add props if needed
@@ -137,13 +138,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCellCheckbox>
-                                        {transactions.some(tr => tr.transaction.reconcile?.reconciled) ? (
-                                            <CheckBox color="success" />
-                                        ) : (
-                                            <CheckBoxOutlineBlank />
-                                        )}
-                                    </TableCellCheckbox>
+                                    <TableHeaderCell>Reconciled</TableHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
@@ -152,12 +147,12 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <TableCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableCell>
-                                    <TableCell>App</TableCell>
-                                    <TableCell>Sale Type</TableCell>
-                                    <TableCell>Hosting</TableCell>
-                                    <TableCell>Tier</TableCell>
-                                    <TableCell>Company</TableCell>
+                                    <TableHeaderCell sx={{ whiteSpace: 'nowrap' }}>Entitlement ID</TableHeaderCell>
+                                    <TableHeaderCell>App</TableHeaderCell>
+                                    <TableHeaderCell>Sale Type</TableHeaderCell>
+                                    <TableHeaderCell>Hosting</TableHeaderCell>
+                                    <TableHeaderCell>Tier</TableHeaderCell>
+                                    <TableHeaderCell>Company</TableHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.VendorAmount}
                                         label="Amount"
@@ -166,7 +161,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <TableCell>Maintenance</TableCell>
+                                    <TableHeaderCell>Maintenance</TableHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"

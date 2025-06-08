@@ -1,6 +1,7 @@
 import { TableSortLabel } from "@mui/material";
 import { UnsortedArrows } from "./UnsortedArrows";
 import { TableCell } from "@mui/material";
+import { TableHeaderCell } from "./styles";
 
 export type SortOrder = 'ASC' | 'DESC';
 
@@ -14,7 +15,7 @@ interface SortableHeaderProps<T> {
 }
 
 export const SortableHeader = <T,>({ field, label, currentSort, currentOrder, onSort, whiteSpace }: SortableHeaderProps<T>) => (
-    <TableCell>
+    <TableHeaderCell>
         <TableSortLabel
             active={currentSort === field}
             direction={currentSort === field ? currentOrder.toLowerCase() as 'asc' | 'desc' : 'asc'}
@@ -24,5 +25,5 @@ export const SortableHeader = <T,>({ field, label, currentSort, currentOrder, on
         >
             {label}
         </TableSortLabel>
-    </TableCell>
+    </TableHeaderCell>
 );
