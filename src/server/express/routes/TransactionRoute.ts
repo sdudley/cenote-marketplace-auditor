@@ -3,6 +3,7 @@ import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { TransactionDao } from '../../database/TransactionDao';
 import { TransactionQueryParams, TransactionQuerySortType } from '#common/types/apiTypes';
+import { TransactionQueryResult } from '#common/types/apiTypes';
 
 @injectable()
 export class TransactionRoute {
@@ -48,7 +49,7 @@ export class TransactionRoute {
                 return res.status(400).json({ error: 'sortOrder must be either ASC or DESC' });
             }
 
-            const result = await this.transactionDao.getTransactions(params);
+            const result : TransactionQueryResult = await this.transactionDao.getTransactions(params);
             res.json(result);
         } catch (error) {
             console.error('Error fetching transactions:', error);

@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Transaction } from './Transaction';
+import { TransactionReconcileNote } from './TransactionReconcileNote';
 
 @Entity()
 export class TransactionReconcile {
@@ -44,4 +45,7 @@ export class TransactionReconcile {
             from: (value: string) => parseFloat(value)
         } })
     expectedVendorAmount?: number;
+
+    @OneToMany(() => TransactionReconcileNote, (note: TransactionReconcileNote) => note.transactionReconcile)
+    notes!: TransactionReconcileNote[];
 }

@@ -7,6 +7,8 @@ import { DataSource } from "typeorm";
 import { TransactionData } from "#common/types/marketplace";
 import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortType } from "#common/types/apiTypes";
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
+import { TransactionReconcile } from "#common/entities/TransactionReconcile";
+import { TransactionReconcileNote } from "#common/entities/TransactionReconcileNote";
 
 @injectable()
 class TransactionDao {
@@ -30,19 +32,6 @@ class TransactionDao {
         return await this.transactionRepo.findOne({ where: { marketplaceTransactionId: transactionKey } });
     }
 
-    public async getTransactionHighestVersion(transaction: Transaction) : Promise<number> {
-        const queryBuilder = this.transactionVersionRepo.createQueryBuilder('transaction_version');
-        queryBuilder.select('MAX(transaction_version.version)', 'maxVersion');
-        queryBuilder.where('transaction_version.transaction_id = :transactionId', { transactionId: transaction.id });
-
-        const result = await queryBuilder.getRawOne();
-        const maxVersion = result?.maxVersion;
-        return maxVersion ?? 0;
-    }
-
-    public async saveTransactionVersions(...versions: TransactionVersion[]) : Promise<void> {
-        await this.transactionVersionRepo.save(versions);
-    }
 
     public async saveTransaction(transaction: Transaction) : Promise<void> {
         await this.transactionRepo.save(transaction);
@@ -127,6 +116,10 @@ class TransactionDao {
 
             // Join with the version count CTE
             queryBuilder.leftJoin('version_count', 'version_count', 'version_count.tid = transaction.id');
+
+            // Add joins for reconcile and notes
+            queryBuilder.leftJoinAndSelect('transaction.reconcile', 'reconcile');
+            queryBuilder.leftJoinAndSelect('reconcile.notes', 'notes');
 
             if (search) {
                 // Inspiration: https://stackoverflow.com/a/45849743/2220556

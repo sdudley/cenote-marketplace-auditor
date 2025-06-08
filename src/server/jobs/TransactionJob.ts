@@ -8,6 +8,7 @@ import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
 import { TransactionDao } from '../database/TransactionDao';
 import { isProperSubsetOfFields } from '#common/utils/fieldUtils';
+import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
 
 const ignoreTransactionFieldsForDiffDisplay = [
     'lastUpdated',
@@ -22,7 +23,8 @@ export class TransactionJob {
 
     constructor(
         @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
-        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao
+        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao,
+        @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao
     ) {
     }
 
@@ -78,7 +80,7 @@ export class TransactionJob {
                     }
 
                     // Get the current highest version number
-                    const oldVersionNum = await this.transactionDao.getTransactionHighestVersion(existingTransaction);
+                    const oldVersionNum = await this.transactionVersionDao.getTransactionHighestVersion(existingTransaction);
                     currentVersion = oldVersionNum + 1;
 
                     // Create new version
@@ -89,7 +91,7 @@ export class TransactionJob {
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
                     version.version = currentVersion;
 
-                    await this.transactionDao.saveTransactionVersions(version);
+                    await this.transactionVersionDao.saveTransactionVersions(version);
 
                     // Update current data
                     existingTransaction.data = normalizedData;
@@ -112,7 +114,7 @@ export class TransactionJob {
                 version.transaction = transaction;
                 version.entitlementId = entitlementId;
                 version.version = currentVersion;
-                await this.transactionDao.saveTransactionVersions(version);
+                await this.transactionVersionDao.saveTransactionVersions(version);
 
                 const { saleDate, vendorAmount, tier } = normalizedData.purchaseDetails;
                 const customerName = normalizedData.customerDetails.company;

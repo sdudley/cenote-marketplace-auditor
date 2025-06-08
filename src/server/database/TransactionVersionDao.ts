@@ -1,4 +1,5 @@
 import { TransactionVersion } from "#common/entities/TransactionVersion";
+import { Transaction } from "#common/entities/Transaction";
 import { TYPES } from "#server/config/types";
 import { inject, injectable } from "inversify";
 import { DataSource, Repository } from "typeorm";
@@ -33,5 +34,19 @@ export class TransactionVersionDao {
         return await this.transactionVersionRepo.findOne({
             where: { transaction: { id: transactionId }, version }
         });
+    }
+
+    public async getTransactionHighestVersion(transaction: Transaction) : Promise<number> {
+        const queryBuilder = this.transactionVersionRepo.createQueryBuilder('transaction_version');
+        queryBuilder.select('MAX(transaction_version.version)', 'maxVersion');
+        queryBuilder.where('transaction_version.transaction_id = :transactionId', { transactionId: transaction.id });
+
+        const result = await queryBuilder.getRawOne();
+        const maxVersion = result?.maxVersion;
+        return maxVersion ?? 0;
+    }
+
+    public async saveTransactionVersions(...versions: TransactionVersion[]) : Promise<void> {
+        await this.transactionVersionRepo.save(versions);
     }
 }

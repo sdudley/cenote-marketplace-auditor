@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { TransactionVersion } from './TransactionVersion';
 import type { TransactionData } from '../types/marketplace';
 import { License } from './License';
+import { TransactionReconcile } from './TransactionReconcile';
 
 @Entity()
 export class Transaction {
@@ -35,4 +36,7 @@ export class Transaction {
 
     @OneToMany(() => TransactionVersion, version => version.transaction)
     versions!: TransactionVersion[];
+
+    @OneToOne(() => TransactionReconcile, reconcile => reconcile.transaction)
+    reconcile!: TransactionReconcile;
 }
