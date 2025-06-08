@@ -8,7 +8,8 @@ import {
     TablePagination,
     TextField,
     IconButton,
-    CircularProgress
+    CircularProgress,
+    Box
 } from '@mui/material';
 import { Add, CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
@@ -225,15 +226,17 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 onClose={() => setSelectedTransactionResultForVersions(null)}
             />
 
-            <TablePagination
-                component="div"
-                count={total}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[10, 25, 50, 100]}
-            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <TablePagination
+                    component="div"
+                    count={total}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[10, 25, 50, 100]}
+                />
+            </Box>
         </TableContainer>
     );
 };
