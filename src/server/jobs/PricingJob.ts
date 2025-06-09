@@ -54,8 +54,16 @@ export class PricingJob {
                         // await this.pricingRepository.delete(existingPricing.id);
                     }
 
+                    const { expertDiscountOptOut } = pricingData;
+
                     // Store the pricing data
-                    const pricing = await this.pricingService.savePricing({ addonKey, deploymentType, startDate: undefined, endDate: undefined });
+                    const pricing = await this.pricingService.savePricing({
+                        addonKey,
+                        deploymentType,
+                        startDate: undefined,
+                        endDate: undefined,
+                        expertDiscountOptOut
+                    });
 
                     // console.log(`\n=== Pricing for ${addon.addonKey} with deployment type ${deploymentType} ===`);
                     // console.dir(pricingData, { depth: null });

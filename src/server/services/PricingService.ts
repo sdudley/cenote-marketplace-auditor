@@ -114,14 +114,15 @@ export class PricingService {
             .sort(userTierSorter);
     }
 
-    public async savePricing(opts: { addonKey: string, deploymentType: DeploymentType, startDate: string|undefined, endDate: string|undefined }) : Promise<Pricing> {
-        const { addonKey, deploymentType, startDate, endDate } = opts;
+    public async savePricing(opts: { addonKey: string, deploymentType: DeploymentType, startDate: string|undefined, endDate: string|undefined, expertDiscountOptOut: boolean }) : Promise<Pricing> {
+        const { addonKey, deploymentType, startDate, endDate, expertDiscountOptOut } = opts;
 
         const pricing = new Pricing();
         pricing.addonKey = addonKey;
         pricing.deploymentType = deploymentType;
         pricing.startDate = startDate;
         pricing.endDate = endDate;
+        pricing.expertDiscountOptOut = expertDiscountOptOut;
         return await this.pricingRepository.save(pricing);
     }
 

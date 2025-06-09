@@ -14,6 +14,9 @@ export class Pricing {
     @Index()
     deploymentType!: string;
 
+    @Column({ type: 'boolean', default: false })
+    expertDiscountOptOut!: boolean;
+
     @Column({ type: 'date', nullable: true })
     startDate?: string;
 
