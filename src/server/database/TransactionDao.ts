@@ -14,12 +14,12 @@ import { TransactionResult } from "#common/types/apiTypes";
 class TransactionDao {
     private transactionRepo: Repository<Transaction>;
 
-    private readonly sortFieldMap: Record<TransactionQuerySortType, string> = {
-        [TransactionQuerySortType.CreatedAt]: 'transaction.createdAt',
-        [TransactionQuerySortType.UpdatedAt]: 'transaction.updatedAt',
-        [TransactionQuerySortType.SaleDate]: "transaction.data ->'purchaseDetails'->>'saleDate'",
-        [TransactionQuerySortType.VersionCount]: 'version_count.version_count',
-        [TransactionQuerySortType.VendorAmount]: '(transaction.data ->\'purchaseDetails\'->>\'vendorAmount\')::numeric(14,3)'
+    private readonly sortFieldMap: Record<TransactionQuerySortType, string[]> = {
+        [TransactionQuerySortType.CreatedAt]: [ 'transaction.createdAt' ],
+        [TransactionQuerySortType.UpdatedAt]: [ 'transaction.updatedAt' ],
+        [TransactionQuerySortType.SaleDate]: [ "transaction.data ->'purchaseDetails'->>'saleDate'", 'transaction.createdAt' ],
+        [TransactionQuerySortType.VersionCount]: [ 'version_count.version_count', 'transaction.createdAt' ],
+        [TransactionQuerySortType.VendorAmount]: [ '(transaction.data ->\'purchaseDetails\'->>\'vendorAmount\')::numeric(14,3)', 'transaction.createdAt' ]
     };
 
     constructor(@inject(TYPES.DataSource) private dataSource: DataSource) {
@@ -194,7 +194,8 @@ class TransactionDao {
             if (!orderByField) {
                 throw new Error(`Invalid sortBy: ${sortBy}`);
             }
-            queryBuilder.orderBy(orderByField, sortOrder);
+
+            orderByField.forEach(field => queryBuilder.addOrderBy(field, sortOrder));
 
             const total = await queryBuilder.getCount();
 
