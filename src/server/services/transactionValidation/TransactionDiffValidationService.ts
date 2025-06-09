@@ -48,12 +48,6 @@ export class TransactionDiffValidationService {
             notes.push(`Unreconciling because billing period has changed from ${priorData.purchaseDetails.billingPeriod} to ${currentData.purchaseDetails.billingPeriod}`);
         }
 
-        // TODO FIXME:    this is a test to see if we can unreconcile transactions using commonly-updated but
-        // unimportant fields.
-        if (currentData.lastUpdated !== priorData.lastUpdated) {
-            notes.push(`Unreconciling because last updated date has changed from ${priorData.lastUpdated} to ${currentData.lastUpdated}`);
-        }
-
         return notes;
     }
 }
