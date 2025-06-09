@@ -20,6 +20,9 @@ import { PricingService } from '../services/PricingService';
 import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
 import { TransactionValidationService } from '#server/services/transactionValidation/TransactionValidationService';
 import { TransactionSandboxService } from '#server/services/transactionValidation/TransactionSandboxService';
+import { TransactionValidator } from '#server/services/transactionValidation/TransactionValidator';
+import { TransactionAdjustmentValidationService } from '#server/services/transactionValidation/TransactionAdjustmentValidationService';
+import { TransactionDiffValidationService } from '#server/services/transactionValidation/TransactionDiffValidationService';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
@@ -47,6 +50,8 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionVersionDao>(TYPES.TransactionVersionDao).to(TransactionVersionDao).inSingletonScope();
     container.bind<TransactionValidationService>(TYPES.TransactionValidationService).to(TransactionValidationService).inSingletonScope();
     container.bind<TransactionSandboxService>(TYPES.TransactionSandboxService).to(TransactionSandboxService).inSingletonScope();
-
+    container.bind<TransactionValidator>(TYPES.TransactionValidator).to(TransactionValidator).inSingletonScope();
+    container.bind<TransactionAdjustmentValidationService>(TYPES.TransactionAdjustmentValidationService).to(TransactionAdjustmentValidationService).inSingletonScope();
+    container.bind<TransactionDiffValidationService>(TYPES.TransactionDiffValidationService).to(TransactionDiffValidationService).inSingletonScope();
     return container;
 }

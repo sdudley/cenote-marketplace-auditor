@@ -5,14 +5,13 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 import { TransactionDao } from '../database/TransactionDao';
 import { TransactionReconcileDao } from '../database/TransactionReconcileDao';
-import { LicenseDao } from '../database/LicenseDao';
-import { ResellerDao } from '../database/ResellerDao';
 import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
-import { PreviousTransactionService } from '../services/PreviousTransactionService';
 import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
 import { TransactionValidationService } from '../services/transactionValidation/TransactionValidationService';
 import { TransactionValidationResult } from '../services/transactionValidation/types';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
+import { TransactionDiffValidationService } from '#server/services/transactionValidation/TransactionDiffValidationService';
+import { PricingService } from '#server/services/PricingService';
 
 const DEFAULT_START_DATE = '2024-01-01';
 
@@ -32,11 +31,10 @@ export class ValidationJob {
         @inject(TYPES.TransactionValidationService) private transactionValidationService: TransactionValidationService,
         @inject(TYPES.TransactionDao) private transactionDao: TransactionDao,
         @inject(TYPES.TransactionReconcileDao) private transactionReconcileDao: TransactionReconcileDao,
-        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao,
-        @inject(TYPES.ResellerDao) private resellerDao: ResellerDao,
         @inject(TYPES.TransactionAdjustmentDao) private transactionAdjustmentDao: TransactionAdjustmentDao,
-        @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService,
-        @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao
+        @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao,
+        @inject(TYPES.TransactionDiffValidationService) private transactionDiffValidationService: TransactionDiffValidationService,
+        @inject(TYPES.PricingService) private pricingService: PricingService
     ) {
     }
 
@@ -55,7 +53,8 @@ export class ValidationJob {
 
         for (const transaction of transactions) {
             try {
-                const validationResult = await this.transactionValidationService.transactionValidator(transaction);
+                const pricing = await this.pricingService.getPricingForTransaction(transaction);
+                const validationResult = await this.transactionValidationService.validateTransaction({ transaction, pricing });
 
                 if (validationResult) {
                     await this.recordTransactionReconcile({ validationResult, transaction });
@@ -118,7 +117,7 @@ export class ValidationJob {
             }
 
             if (priorVersion) {
-                const notes = await this.transactionValidationService.generateNotesIfTransactionHasImportantMutations({ transaction, priorVersion, validationResult });
+                const notes = await this.transactionDiffValidationService.createNotesForImportantTransactionMutations({ transaction, priorVersion, validationResult });
 
                 if (notes.length > 0) {
                     notes.forEach(n => notes.push(n));

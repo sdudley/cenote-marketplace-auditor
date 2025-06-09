@@ -1,0 +1,213 @@
+import { inject, injectable } from "inversify";
+import { ValidationOptions } from "./types";
+import { TransactionValidationResult } from "./types";
+import { deploymentTypeFromHosting } from "#common/utils/validationUtils";
+import { Transaction } from "#common/entities/Transaction";
+import { PricingTierResult } from "#common/types/pricingTierResult";
+import { DiscountResult } from "./types";
+import { PreviousTransactionService } from "#server/services/PreviousTransactionService";
+import { PricingService } from "#server/services/PricingService";
+import { TransactionAdjustmentValidationService } from "#server/services/transactionValidation/TransactionAdjustmentValidationService";
+import { PriceCalculatorService } from "#server/services/PriceCalculatorService";
+import { PriceWithPricingOpts } from "./types";
+import { MAX_JPY_DRIFT } from "./constants";
+import { TYPES } from "#server/config/types";
+import { getLicenseDurationInDays } from "#common/utils/licenseDurationCalculator";
+import { PriceResult, PriceCalcOpts } from "../PriceCalculatorService";
+
+@injectable()
+export class TransactionValidator {
+    constructor(
+        @inject(TYPES.PricingService) private pricingService: PricingService,
+        @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService,
+        @inject(TYPES.TransactionAdjustmentValidationService) private transactionAdjustmentValidationService: TransactionAdjustmentValidationService,
+        @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
+    ) {}
+
+    /**
+     * Given a single transaction, and with directions as to whether or not to use legacy pricing for that
+     * transaction (or the one it is upgrading), validate if the price is correct.
+     */
+    public async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
+        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount, hasActualAdjustments, partnerDiscountFraction, isSandbox } = opts;
+        const { data } = transaction;
+        const { addonKey, purchaseDetails } = data;
+        const {
+            vendorAmount,
+            saleType,
+            saleDate,
+            maintenanceStartDate,
+            maintenanceEndDate
+        } = purchaseDetails;
+
+        const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
+        const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
+
+        // If it is an upgrade, we need to also load the previous purchase and potentially-different
+        // pricing tiers for that transaction.
+
+        let previousPurchase : Transaction | undefined;
+        let previousPurchasePricingTierResult : PricingTierResult | undefined;
+        let expectedDiscountForPreviousPurchase : DiscountResult | undefined;
+        let previousPurchaseEffectiveMaintenanceEndDate : string | undefined;
+
+        if (saleType==='Upgrade' || saleType==='Renewal') {
+            const previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(transaction);
+
+            if (previousPurchaseFindResult) {
+                previousPurchase = previousPurchaseFindResult.transaction;
+                const { effectiveMaintenanceEndDate } = previousPurchaseFindResult;
+
+                if (effectiveMaintenanceEndDate) {
+                    previousPurchaseEffectiveMaintenanceEndDate = effectiveMaintenanceEndDate;
+                }
+
+                const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
+                previousPurchasePricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
+                expectedDiscountForPreviousPurchase = await this.transactionAdjustmentValidationService.calculateFinalExpectedDiscountForTransaction(previousPurchase);
+            }
+        }
+
+        // Calculate the expected price for the previous purchase, if it exists. The previous transaction is
+        // only relevant to pricing if we are performing an upgrade, since the prior license cost then comes into play
+        // for overlapping maintenance periods.
+
+        const previousPurchasePricing =
+                    saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
+                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, partnerDiscountFraction })
+                        : undefined;
+
+        // Calculate the expected price for the current transaction.
+
+        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPurchasePricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate, partnerDiscountFraction });
+
+        let expectedVendorAmount = price.vendorPrice;
+
+        // Now compare the prices and see if the actual price is what we expect.
+
+        let { valid, notes } = this.isPriceValid({ vendorAmount, expectedVendorAmount, country: transaction.data.customerDetails.country });
+        const isExpectedPrice = valid;
+
+        // Also validate the start/end dates of the license
+        const licenseDurationInDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
+        const { licenseType } = purchaseDetails;
+
+        if ((saleType==='Upgrade' || saleType==='Renewal') &&
+            licenseDurationInDays !== 0  &&
+            licenseType !== 'COMMUNITY') {
+
+            if (!previousPurchase) {
+                notes.push('Could not find previous purchase');
+                valid = false;
+            } else {
+                const { maintenanceEndDate: priorMaintenanceEndDate } = previousPurchase?.data.purchaseDetails;
+
+                if (priorMaintenanceEndDate < maintenanceStartDate) {
+                    notes.push(`Gap in licensing: previous maintenance ended on ${priorMaintenanceEndDate} but this license starts on ${maintenanceStartDate}`);
+                    valid = false;
+                }
+            }
+        }
+
+        // Even if price is as expected, refunds always require approval
+
+        // if (saleType==='Refund') {
+        //     notes.push('Refund requires manual approval');
+        //     valid = false;
+        // }
+
+        const result : TransactionValidationResult = {
+            isExpectedPrice,
+            valid,
+            vendorAmount,
+            expectedVendorAmount,
+            expectedDiscountApplied: expectedDiscount,
+            notes,
+            price,
+            pricingOpts,
+            legacyPricingEndDate: pricingTierResult.priorPricingEndDate,
+            previousPurchaseLegacyPricingEndDate: previousPurchasePricingTierResult?.priorPricingEndDate,
+            useLegacyPricingTierForCurrent,
+            hasActualAdjustments
+        };
+
+        return result;
+    }
+
+    // Invokes the PriceCalculatorService to calculate the expected price for a transaction.
+
+    private calculatePriceForTransaction(opts: {
+        transaction: Transaction;
+        isSandbox: boolean;
+        pricingTierResult: PricingTierResult;
+        previousPurchase?: Transaction|undefined;
+        previousPricing?: PriceResult|undefined;
+        useLegacyPricingTier: boolean;
+        previousPurchaseEffectiveMaintenanceEndDate: string|undefined;
+        expectedDiscount: number;
+        partnerDiscountFraction: number;
+    }) : PriceWithPricingOpts {
+        const {
+            transaction,
+            isSandbox,
+            pricingTierResult,
+            previousPricing,
+            useLegacyPricingTier,
+            expectedDiscount,
+            previousPurchaseEffectiveMaintenanceEndDate,
+            partnerDiscountFraction
+        } = opts;
+        const { purchaseDetails } = transaction.data;
+
+        const pricingOpts: PriceCalcOpts = {
+            pricingTierResult: pricingTierResult,
+            saleType: purchaseDetails.saleType,
+            saleDate: purchaseDetails.saleDate,
+            isSandbox,
+            hosting: purchaseDetails.hosting,
+            licenseType: purchaseDetails.licenseType,
+            tier: purchaseDetails.tier,
+            maintenanceStartDate: purchaseDetails.maintenanceStartDate,
+            maintenanceEndDate: purchaseDetails.maintenanceEndDate,
+            billingPeriod: purchaseDetails.billingPeriod,
+            previousPurchaseMaintenanceEndDate: previousPurchaseEffectiveMaintenanceEndDate,
+            previousPricing,
+            expectedDiscount,
+            partnerDiscountFraction
+        };
+
+        // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator
+
+        if (useLegacyPricingTier && pricingTierResult.priorTiers) {
+            pricingOpts.pricingTierResult = {
+                tiers: pricingTierResult.priorTiers,
+                priorTiers: undefined,
+                priorPricingEndDate: undefined
+            };
+        };
+
+        const price = this.priceCalculatorService.calculateExpectedPrice(pricingOpts);
+        return { price, pricingOpts };
+    }
+
+    // Tests to see if the expected price is within a reasonable range of the actual price, given
+    // Atlassian's pricing logic.
+
+    isPriceValid(opts: { expectedVendorAmount: number; vendorAmount: number; country: string; }) : { valid: boolean; notes: string[] } {
+        const { expectedVendorAmount, vendorAmount, country } = opts;
+
+        if (country==='Japan') {
+            const valid = vendorAmount >= expectedVendorAmount*(1-MAX_JPY_DRIFT) &&
+                vendorAmount <= expectedVendorAmount*(1+MAX_JPY_DRIFT) &&
+                !(vendorAmount===0 && expectedVendorAmount > 0);
+
+            return { valid, notes: [`Japan sales priced in JPY are allowed drift of up to ${MAX_JPY_DRIFT*100}%`] };
+        }
+
+        const valid = (vendorAmount >= expectedVendorAmount-10 &&
+                vendorAmount <= expectedVendorAmount+10 &&
+                !(vendorAmount===0 && expectedVendorAmount > 0));
+
+        return { valid, notes: [] };
+    }
+}

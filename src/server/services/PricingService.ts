@@ -8,6 +8,8 @@ import { UserTierPricing } from '#common/types/userTiers';
 import { userTierSorter } from '#common/utils/userTierSorter';
 import { DeploymentType } from '#common/types/marketplace';
 import { PricingTierResult } from '#common/types/pricingTierResult';
+import { Transaction } from '#common/entities/Transaction';
+import { deploymentTypeFromHosting } from "#common/utils/validationUtils";
 
 @injectable()
 export class PricingService {
@@ -79,6 +81,22 @@ export class PricingService {
         this.pricingTierCache.set(cacheKey, result);
 
         return result;
+    }
+
+    public async getPricingForTransaction(transaction: Transaction) : Promise<Pricing> {
+        const { addonKey, purchaseDetails } = transaction.data;
+        const {
+            saleDate,
+        } = purchaseDetails;
+
+        const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
+        const pricing = await this.getPricing({ addonKey, deploymentType, saleDate });
+
+        if (!pricing) {
+            throw new Error(`No pricing found for ${addonKey} on ${saleDate}`);
+        }
+
+        return pricing;
     }
 
     /**
