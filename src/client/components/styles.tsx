@@ -291,3 +291,10 @@ export const TableCellCheckbox = styled(TableCell)({
 export const TableHeaderCell = styled(TableCell)({
     fontWeight: 'bold'
 });
+
+export const StyledSandboxAnnotation = styled('p')({
+    color: 'purple',
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    fontSize: '10px'
+});

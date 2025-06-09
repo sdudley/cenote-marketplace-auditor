@@ -167,6 +167,7 @@ class TransactionDao {
             // Add join with license table
             queryBuilder.leftJoin('license', 'license', 'license.entitlement_id = transaction.entitlement_id');
             queryBuilder.addSelect('license.data->>\'installedOnSandbox\'', 'license_installedOnSandbox');
+            queryBuilder.addSelect('license.data->>\'cloudSiteHostname\'', 'license_cloudSiteHostname');
 
             if (search) {
                 // Inspiration: https://stackoverflow.com/a/45849743/2220556
@@ -195,11 +196,14 @@ class TransactionDao {
             const transactionResults = transactions.map((transaction, index) => {
                 const versionCount = parseInt(rawResults[index].transaction_versionCount) || 0;
                 const isSandbox = rawResults[index].license_installedOnSandbox === 'Yes';
+                const cloudSiteHostname = rawResults[index].license_cloudSiteHostname;
+
                 return {
                     transaction,
                     versionCount,
-                    isSandbox
-                } as TransactionResult;
+                    isSandbox,
+                    cloudSiteHostname
+                };
             });
 
             return {

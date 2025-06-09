@@ -4,6 +4,7 @@ export interface TransactionResult {
     transaction: Transaction;
     isSandbox: boolean;
     versionCount: number;
+    cloudSiteHostname: string;
 }
 
 export interface TransactionQueryResult {

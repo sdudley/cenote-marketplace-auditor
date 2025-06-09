@@ -22,6 +22,7 @@ import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox } from '../styles';
 import { TableHeaderCell } from '../styles';
+import { StyledSandboxAnnotation } from '../styles';
 
 interface TransactionListProps {
     // Add props if needed
@@ -217,8 +218,14 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
                                         <StyledTableCell>{tr.transaction.data.purchaseDetails.saleType}</StyledTableCell>
                                         <StyledTableCell>{tr.transaction.data.purchaseDetails.hosting}</StyledTableCell>
-                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.tier}</StyledTableCell>
-                                        <StyledTableCell>{tr.transaction.data.customerDetails.company}</StyledTableCell>
+                                        <StyledTableCell>
+                                            {tr.transaction.data.purchaseDetails.tier}
+                                            {tr.isSandbox && <StyledSandboxAnnotation>Sandbox</StyledSandboxAnnotation>}
+                                        </StyledTableCell>
+                                        <StyledTableCell>
+                                            {tr.transaction.data.customerDetails.company}
+                                            {tr.isSandbox && tr.cloudSiteHostname &&<StyledSandboxAnnotation>({tr.cloudSiteHostname})</StyledSandboxAnnotation>}
+                                        </StyledTableCell>
                                         <StyledTableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
                                         <StyledTableCell>{tr.transaction.data.purchaseDetails.maintenanceStartDate} - {tr.transaction.data.purchaseDetails.maintenanceEndDate}</StyledTableCell>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
