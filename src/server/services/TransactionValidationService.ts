@@ -5,8 +5,6 @@ import { deploymentTypeFromHosting } from '#common/utils/validationUtils';
 import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import { TransactionDao } from '../database/TransactionDao';
-import { TransactionReconcileDao } from '../database/TransactionReconcileDao';
 import { LicenseDao } from '../database/LicenseDao';
 import { formatCurrency } from '#common/utils/formatCurrency';
 import { ResellerDao } from '../database/ResellerDao';
@@ -15,9 +13,9 @@ import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
 import { getLicenseDurationInDays } from '#common/utils/licenseDurationCalculator';
 import { PricingTierResult } from '#common/types/pricingTierResult';
 import { PreviousTransactionService } from './PreviousTransactionService';
-import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { dateDiff } from '#common/utils/dateUtils';
+import { Pricing } from '#common/entities/Pricing';
 
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
 
@@ -87,12 +85,32 @@ const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS : boolean[] = [
     false // Ends with no discounts applied on failure, so that our summary does not show the impact of potentially-incorrect estimated discounts
 ];
 
+// Are these right?!
+const PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD : number[] = [
+    0.10,
+    0.05,
+    0.00
+];
+
+// Are these right?!
+const PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER : number[] = [
+    0.25,
+    0.20,
+    0.10,
+    0.00
+];
+
+const PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT : number[] = [
+    0.00
+];
+
 interface ValidationOptions {
     transaction: Transaction;
     useLegacyPricingTierForCurrent: boolean;
     useLegacyPricingTierForPrevious: boolean;
     expectedDiscount: number;
     hasActualAdjustments: boolean;
+    partnerDiscountFraction: number;
 }
 
 @injectable()
@@ -108,7 +126,7 @@ export class TransactionValidationService {
     }
 
     public async transactionValidator(transaction: Transaction) : Promise<TransactionValidationResult|undefined> {
-        const discountResult = await this.calculateExpectedDiscountForTransaction(transaction);
+        const discountResult = await this.calculateFinalExpectedDiscountForTransaction(transaction);
         const validationResult = await this.validateOneTransactionWithPricingPermutations({ transaction, discountResult });
         return this.applyPostValidationRules({ transaction, validationResult });
     }
@@ -128,9 +146,15 @@ export class TransactionValidationService {
 
         let validationResult : TransactionValidationResult|undefined = undefined;
 
+        const pricing = await this.getPricingForTransaction(transaction);
+
         const legacyPricePermutations = transaction.data.purchaseDetails.saleType === 'Upgrade'
                                             ? LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE
                                             : LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE;
+
+        const partnerDiscountFractionPermutations = pricing.expertDiscountOptOut                           ? PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT
+                                            : transaction.data.purchaseDetails.hosting === 'Cloud' ? PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD
+                                                                                                   : PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER;
 
         // For this transaction, try various permutations of legacy pricing (or not) for both
         // the main transaction, as well as the license we are upgrading from (if any).
@@ -151,48 +175,56 @@ export class TransactionValidationService {
                 const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;
                 const { hasActualAdjustments } = discountResult;
 
-                // Try to see if the price matches with this permutation of legacy pricing (or not)
+                for (const partnerDiscountFraction of partnerDiscountFractionPermutations) {
 
-                validationResult = await this.validateOneTransaction({
-                    transaction,
-                    useLegacyPricingTierForCurrent,
-                    useLegacyPricingTierForPrevious,
-                    expectedDiscount: useExpectedDiscount ? discountToUse : 0,
-                    hasActualAdjustments
-                });
+                    // Try to see if the price matches with this permutation of legacy pricing (or not)
 
-                const { isExpectedPrice, notes } = validationResult;
+                    validationResult = await this.validateOneTransaction({
+                        transaction,
+                        useLegacyPricingTierForCurrent,
+                        useLegacyPricingTierForPrevious,
+                        expectedDiscount: useExpectedDiscount ? discountToUse : 0,
+                        hasActualAdjustments,
+                        partnerDiscountFraction
+                    });
 
-                if (isExpectedPrice) {
-                    if (useLegacyPricingTierForCurrent) {
-                        const { saleDate } = transaction.data.purchaseDetails;
-                        const { legacyPricingEndDate } = validationResult;
+                    const { isExpectedPrice, notes } = validationResult;
 
-                        notes.push(`Price is correct but uses legacy pricing for current transaction (sold on ${saleDate}, but prior pricing ended on ${legacyPricingEndDate})`);
+                    if (isExpectedPrice) {
+                        if (useLegacyPricingTierForCurrent) {
+                            const { saleDate } = transaction.data.purchaseDetails;
+                            const { legacyPricingEndDate } = validationResult;
+
+                            notes.push(`Price is correct but uses legacy pricing for current transaction (sold on ${saleDate}, but prior pricing ended on ${legacyPricingEndDate})`);
+                        }
+
+                        if (useLegacyPricingTierForPrevious) {
+                            notes.push(`Price is correct but uses legacy pricing for previous transaction`);
+                        }
+
+                        if (partnerDiscountFraction > 0) {
+                            notes.push(`Price is correct but assumes Solutions Partner discount of ${partnerDiscountFraction*100}%`);
+                        }
+
+                        if (useExpectedDiscount) {
+                            discountResult.adjustmentNotes.forEach(n => {
+                                if (discountResult.hasActualAdjustments) {
+                                    notes.push(`Reconciled using manual adjustment: ${n}`);
+                                } else {
+                                    // Otherwise, these are expected discounts, so just add the message directly.
+                                    notes.push(n);
+                                }
+                            });
+                        } else {
+                            notes.push(`Price is correct but expected discount of ${formatCurrency(discountToUse)} was not applied`);
+                        }
                     }
 
-                    if (useLegacyPricingTierForPrevious) {
-                        notes.push(`Price is correct but uses legacy pricing for previous transaction`);
+                    // Now return early if we find the expected price
+
+                    if (isExpectedPrice) {
+                        return validationResult;
                     }
-
-                    if (useExpectedDiscount) {
-                        discountResult.adjustmentNotes.forEach(n => {
-                            if (discountResult.hasActualAdjustments) {
-                                notes.push(`Reconciled using manual adjustment: ${n}`);
-                            } else {
-                                // Otherwise, these are expected discounts, so just add the message directly.
-                                notes.push(n);
-                            }
-                        });
-                    } else {
-                        notes.push(`Price is correct but expected discount of ${formatCurrency(discountToUse)} was not applied`);
-                    }
-                }
-
-                // Now return early if we find the expected price
-
-                if (isExpectedPrice) {
-                    return validationResult;
                 }
             }
         }
@@ -206,7 +238,7 @@ export class TransactionValidationService {
      * transaction (or the one it is upgrading), validate if the price is correct.
      */
     private async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
-        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount, hasActualAdjustments } = opts;
+        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount, hasActualAdjustments, partnerDiscountFraction } = opts;
         const { data } = transaction;
         const { addonKey, purchaseDetails } = data;
         const {
@@ -242,19 +274,19 @@ export class TransactionValidationService {
 
                 const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
                 previousPurchasePricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
-                expectedDiscountForPreviousPurchase = await this.calculateExpectedDiscountForTransaction(previousPurchase);
+                expectedDiscountForPreviousPurchase = await this.calculateFinalExpectedDiscountForTransaction(previousPurchase);
             }
         }
 
         // Calculate the expected price for the previous purchase, if it exists.
 
         const previousPricing = saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
-                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined  })
+                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, partnerDiscountFraction })
                         : undefined;
 
         // Calculate the expected price for the current transaction.
 
-        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate });
+        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate, partnerDiscountFraction });
 
         let expectedVendorAmount = price.vendorPrice;
 
@@ -339,6 +371,7 @@ export class TransactionValidationService {
         useLegacyPricingTier: boolean;
         previousPurchaseEffectiveMaintenanceEndDate: string|undefined;
         expectedDiscount: number;
+        partnerDiscountFraction: number;
     }) : PriceWithPricingOpts {
         const {
             transaction,
@@ -347,7 +380,8 @@ export class TransactionValidationService {
             previousPricing,
             useLegacyPricingTier,
             expectedDiscount,
-            previousPurchaseEffectiveMaintenanceEndDate
+            previousPurchaseEffectiveMaintenanceEndDate,
+            partnerDiscountFraction
         } = opts;
         const { purchaseDetails } = transaction.data;
 
@@ -364,7 +398,8 @@ export class TransactionValidationService {
             billingPeriod: purchaseDetails.billingPeriod,
             previousPurchaseMaintenanceEndDate: previousPurchaseEffectiveMaintenanceEndDate,
             previousPricing,
-            expectedDiscount
+            expectedDiscount,
+            partnerDiscountFraction
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator
@@ -402,7 +437,11 @@ export class TransactionValidationService {
         return { valid, notes: [] };
     }
 
-    private async generateExpectedAdjustments(transaction: Transaction) : Promise<TransactionAdjustment[]> {
+    /**
+     * If we have a defined set of resellers with individual discounts, generate the expected adjustments that
+     * correspond to their discount.
+     */
+    private async generateExpectedAdjustmentsForPromoCodes(transaction: Transaction) : Promise<TransactionAdjustment[]> {
         const resellerName = transaction.data.partnerDetails?.partnerName;
         const reseller = await this.resellerDao.findMatchingReseller(resellerName);
 
@@ -455,10 +494,10 @@ export class TransactionValidationService {
      * If we have actual adjustments in the database, these override any expected
      * discounts we have calculated and we use only the actual adjustments instead.
      */
-    private async calculateExpectedDiscountForTransaction(transaction: Transaction) : Promise<DiscountResult> {
+    private async calculateFinalExpectedDiscountForTransaction(transaction: Transaction) : Promise<DiscountResult> {
         // Check to see if we expect any reseller adjustments for this transaction
 
-        const expectedAdjustments = await this.generateExpectedAdjustments(transaction);
+        const expectedAdjustments = await this.generateExpectedAdjustmentsForPromoCodes(transaction);
         const actualAdjustments = await this.transactionAdjustmentDao.getAdjustmentsForTransaction(transaction);
 
         // If any adjustments were actually persisted to the database, use those. If not,
@@ -466,12 +505,11 @@ export class TransactionValidationService {
 
         const shouldApplyActualAdjustments = actualAdjustments.length > 0;
         const adjustmentsToApply = shouldApplyActualAdjustments ? actualAdjustments : expectedAdjustments;
-        const expectedDiscount = adjustmentsToApply.reduce((acc, adjustment) => acc + (adjustment.purchasePriceDiscount || 0), 0);
-
+        const discountToUse = adjustmentsToApply.reduce((acc, adjustment) => acc + (adjustment.purchasePriceDiscount || 0), 0);
         const hasActualAdjustments = actualAdjustments.length > 0;
 
         return {
-            discountToUse: expectedDiscount,
+            discountToUse,
             hasExpectedAdjustments: expectedAdjustments.length > 0,
             hasActualAdjustments,
             adjustmentNotes: adjustmentsToApply
@@ -557,5 +595,21 @@ export class TransactionValidationService {
         }
 
         return validationResult;
+    }
+
+    private async getPricingForTransaction(transaction: Transaction) : Promise<Pricing> {
+        const { addonKey, purchaseDetails } = transaction.data;
+        const {
+            saleDate,
+        } = purchaseDetails;
+
+        const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
+        const pricing = await this.pricingService.getPricing({ addonKey, deploymentType, saleDate });
+
+        if (!pricing) {
+            throw new Error(`No pricing found for ${addonKey} on ${saleDate}`);
+        }
+
+        return pricing;
     }
 }

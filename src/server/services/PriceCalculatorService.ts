@@ -29,6 +29,7 @@ export interface PriceCalcOpts {
     previousPurchaseMaintenanceEndDate?: string|undefined;
     previousPricing?: PriceResult|undefined;
     expectedDiscount?: number; // always positive, even for refunds
+    partnerDiscountFraction: number;
 }
 
 export interface PriceResult {
@@ -57,7 +58,8 @@ export class PriceCalculatorService {
             maintenanceEndDate,
             billingPeriod,
             previousPurchaseMaintenanceEndDate,
-            expectedDiscount
+            expectedDiscount,
+            partnerDiscountFraction
         } = opts;
 
         if (isSandbox) {
@@ -146,6 +148,10 @@ export class PriceCalculatorService {
 
         if (expectedDiscount) {
             basePrice -= expectedDiscount * (saleType==='Refund' ? -1 : 1);
+        }
+
+        if (partnerDiscountFraction !== 0) {
+            basePrice *= (1-partnerDiscountFraction);
         }
 
         if (billingPeriod === 'Annual') {

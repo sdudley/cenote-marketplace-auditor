@@ -23,6 +23,12 @@ export class PricingService {
         this.pricingInfoRepository = this.dataSource.getRepository(PricingInfo);
     }
 
+    /**
+     * Get the pricing tiers for a given addon, deployment type, and sale date.
+     *
+     * @param opts
+     * @returns
+     */
     public async getPricingTiers(opts: { addonKey: string, deploymentType: DeploymentType, saleDate: string }): Promise<PricingTierResult> {
         const { addonKey, deploymentType, saleDate } = opts;
 
@@ -32,39 +38,9 @@ export class PricingService {
             return this.pricingTierCache.get(cacheKey) as PricingTierResult;
         }
 
-        const pricing = await this.pricingRepository.findOne({
-            where: [
-                // Case 1: startDate is null (beginning of time) and endDate is null (end of time)
-                {
-                    addonKey,
-                    deploymentType,
-                    startDate: IsNull(),
-                    endDate: IsNull()
-                },
-                // Case 2: startDate is null (beginning of time) and saleDate is before or equal to endDate
-                {
-                    addonKey,
-                    deploymentType,
-                    startDate: IsNull(),
-                    endDate: MoreThanOrEqual(saleDate)
-                },
-                // Case 3: endDate is null (end of time) and saleDate is after or equal to startDate
-                {
-                    addonKey,
-                    deploymentType,
-                    startDate: LessThanOrEqual(saleDate),
-                    endDate: IsNull()
-                },
-                // Case 4: saleDate falls between startDate and endDate
-                {
-                    addonKey,
-                    deploymentType,
-                    startDate: LessThanOrEqual(saleDate),
-                    endDate: MoreThanOrEqual(saleDate)
-                }
-            ],
-            relations: ['items']
-        });
+        // Fetch the pricing record corresponding to the period of the sale date
+
+        const pricing = await this.getPricing(opts);
 
         if (!pricing) {
             throw new Error(`No ${deploymentType} pricing found for addon ${addonKey} on date ${saleDate}`);
@@ -103,6 +79,49 @@ export class PricingService {
         this.pricingTierCache.set(cacheKey, result);
 
         return result;
+    }
+
+    /**
+     * Get the top-level pricing record (only metadata, not the tiers) for a given sale date.
+     */
+    public async getPricing(opts: { addonKey: string, deploymentType: DeploymentType, saleDate: string }) : Promise<Pricing|null> {
+        const { addonKey, deploymentType, saleDate } = opts;
+
+        const pricing = await this.pricingRepository.findOne({
+            where: [
+                // Case 1: startDate is null (beginning of time) and endDate is null (end of time)
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: IsNull(),
+                    endDate: IsNull()
+                },
+                // Case 2: startDate is null (beginning of time) and saleDate is before or equal to endDate
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: IsNull(),
+                    endDate: MoreThanOrEqual(saleDate)
+                },
+                // Case 3: endDate is null (end of time) and saleDate is after or equal to startDate
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: LessThanOrEqual(saleDate),
+                    endDate: IsNull()
+                },
+                // Case 4: saleDate falls between startDate and endDate
+                {
+                    addonKey,
+                    deploymentType,
+                    startDate: LessThanOrEqual(saleDate),
+                    endDate: MoreThanOrEqual(saleDate)
+                }
+            ],
+            relations: ['items']
+        });
+
+        return pricing;
     }
 
     private pricingToUserTiers(pricing: Pricing): UserTierPricing[] {
