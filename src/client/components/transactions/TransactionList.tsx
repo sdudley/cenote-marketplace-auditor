@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     Table,
     TableBody,
-    TableCell,
     TableHead,
     TableRow,
     TablePagination,
     TextField,
-    IconButton,
     CircularProgress,
     Box
 } from '@mui/material';
@@ -17,7 +15,6 @@ import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
 import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
-import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox } from '../styles';
@@ -40,7 +37,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
-    const [selectedTransactionResultForVersions, setSelectedTransactionResultForVersions] = useState<TransactionResult | null>(null);
     const [selectedTransactionForReconcile, setSelectedTransactionForReconcile] = useState<TransactionResult | null>(null);
 
     useEffect(() => {
@@ -233,16 +229,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
                                         <StyledTableCell>
                                             {tr.versionCount}
-                                            <IconButton
-                                                size="small"
-                                                color="primary"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedTransactionResultForVersions(tr);
-                                                }}
-                                            >
-                                                <Add fontSize="small" />
-                                            </IconButton>
                                         </StyledTableCell>
                                     </StyledTableRow>
                                 ))}
@@ -256,12 +242,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 transaction={selectedTransaction}
                 open={!!selectedTransaction}
                 onClose={() => setSelectedTransaction(null)}
-            />
-
-            <TransactionVersionListDialog
-                transactionResult={selectedTransactionResultForVersions}
-                open={!!selectedTransactionResultForVersions}
-                onClose={() => setSelectedTransactionResultForVersions(null)}
             />
 
             <TransactionReconcileDialog

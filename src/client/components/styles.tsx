@@ -298,3 +298,9 @@ export const StyledSandboxAnnotation = styled('p')({
     fontWeight: 'bold',
     fontSize: '10px'
 });
+
+export const VersionButton = styled(Box)({
+    position: 'absolute',
+    right: 48,
+    top: 8
+});
