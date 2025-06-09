@@ -10,6 +10,7 @@ import { TransactionSandboxService } from './TransactionSandboxService';
 import { TransactionAdjustmentValidationService } from './TransactionAdjustmentValidationService';
 import { TransactionValidator } from './TransactionValidator';
 import { ALERT_DAYS_AFTER_PRICING_CHANGE } from './constants';
+import { PreviousTransactionService, PreviousTransactionResult } from '../PreviousTransactionService';
 
 @injectable()
 export class TransactionValidationService {
@@ -17,6 +18,7 @@ export class TransactionValidationService {
         @inject(TYPES.TransactionSandboxService) private transactionSandboxService: TransactionSandboxService,
         @inject(TYPES.TransactionAdjustmentValidationService) private transactionAdjustmentValidationService: TransactionAdjustmentValidationService,
         @inject(TYPES.TransactionValidator) private transactionValidator: TransactionValidator,
+        @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService
     ) {
     }
 
@@ -51,6 +53,21 @@ export class TransactionValidationService {
                                             : transaction.data.purchaseDetails.hosting === 'Cloud' ? PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD
                                                                                                    : PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER;
 
+        // But first, load details about the previous purchase (if any). We do this at the top level so we only need to do
+        // it once (which is somewhat expensive), rather than for each permutation.
+
+        const { saleType } = transaction.data.purchaseDetails;
+        let previousPurchaseFindResult : PreviousTransactionResult|undefined = undefined;
+        let expectedDiscountForPreviousPurchase : DiscountResult | undefined = undefined;
+
+        if (saleType==='Upgrade' || saleType==='Renewal') {
+            previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(transaction);
+
+            if (previousPurchaseFindResult) {
+                expectedDiscountForPreviousPurchase = await this.transactionAdjustmentValidationService.calculateFinalExpectedDiscountForTransaction(previousPurchaseFindResult.transaction);
+            }
+        }
+
         // For this transaction, try various permutations of legacy pricing (or not) for both
         // the main transaction, as well as the license we are upgrading from (if any).
 
@@ -81,7 +98,9 @@ export class TransactionValidationService {
                         expectedDiscount: useExpectedDiscount ? discountToUse : 0,
                         hasActualAdjustments,
                         partnerDiscountFraction,
-                        isSandbox
+                        isSandbox,
+                        previousPurchaseFindResult,
+                        expectedDiscountForPreviousPurchase
                     });
 
                     const { isExpectedPrice, notes } = validationResult;

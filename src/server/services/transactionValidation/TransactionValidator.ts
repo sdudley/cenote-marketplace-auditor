@@ -4,10 +4,7 @@ import { TransactionValidationResult } from "./types";
 import { deploymentTypeFromHosting } from "#common/utils/validationUtils";
 import { Transaction } from "#common/entities/Transaction";
 import { PricingTierResult } from "#common/types/pricingTierResult";
-import { DiscountResult } from "./types";
-import { PreviousTransactionService } from "#server/services/PreviousTransactionService";
 import { PricingService } from "#server/services/PricingService";
-import { TransactionAdjustmentValidationService } from "#server/services/transactionValidation/TransactionAdjustmentValidationService";
 import { PriceCalculatorService } from "#server/services/PriceCalculatorService";
 import { PriceWithPricingOpts } from "./types";
 import { MAX_JPY_DRIFT } from "./constants";
@@ -19,8 +16,6 @@ import { PriceResult, PriceCalcOpts } from "../PriceCalculatorService";
 export class TransactionValidator {
     constructor(
         @inject(TYPES.PricingService) private pricingService: PricingService,
-        @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService,
-        @inject(TYPES.TransactionAdjustmentValidationService) private transactionAdjustmentValidationService: TransactionAdjustmentValidationService,
         @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
     ) {}
 
@@ -29,7 +24,16 @@ export class TransactionValidator {
      * transaction (or the one it is upgrading), validate if the price is correct.
      */
     public async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
-        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount, hasActualAdjustments, partnerDiscountFraction, isSandbox } = opts;
+        const { transaction,
+            useLegacyPricingTierForCurrent,
+            useLegacyPricingTierForPrevious,
+            expectedDiscount,
+            hasActualAdjustments,
+            partnerDiscountFraction,
+            isSandbox,
+            previousPurchaseFindResult,
+            expectedDiscountForPreviousPurchase
+        } = opts;
         const { data } = transaction;
         const { addonKey, purchaseDetails } = data;
         const {
@@ -43,34 +47,28 @@ export class TransactionValidator {
         const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
         const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
 
-        // If it is an upgrade, we need to also load the previous purchase and potentially-different
+        // If it is an upgrade, we need to also load details about the previous purchase and potentially-different
         // pricing tiers for that transaction.
 
         let previousPurchase : Transaction | undefined;
         let previousPurchasePricingTierResult : PricingTierResult | undefined;
-        let expectedDiscountForPreviousPurchase : DiscountResult | undefined;
         let previousPurchaseEffectiveMaintenanceEndDate : string | undefined;
 
-        if (saleType==='Upgrade' || saleType==='Renewal') {
-            const previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(transaction);
+        if ((saleType==='Upgrade' || saleType==='Renewal') && previousPurchaseFindResult) {
+            previousPurchase = previousPurchaseFindResult.transaction;
+            const { effectiveMaintenanceEndDate } = previousPurchaseFindResult;
 
-            if (previousPurchaseFindResult) {
-                previousPurchase = previousPurchaseFindResult.transaction;
-                const { effectiveMaintenanceEndDate } = previousPurchaseFindResult;
-
-                if (effectiveMaintenanceEndDate) {
-                    previousPurchaseEffectiveMaintenanceEndDate = effectiveMaintenanceEndDate;
-                }
-
-                const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
-                previousPurchasePricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
-                expectedDiscountForPreviousPurchase = await this.transactionAdjustmentValidationService.calculateFinalExpectedDiscountForTransaction(previousPurchase);
+            if (effectiveMaintenanceEndDate) {
+                previousPurchaseEffectiveMaintenanceEndDate = effectiveMaintenanceEndDate;
             }
+
+            const { saleDate: previousSaleDate } = previousPurchase.data.purchaseDetails;
+            previousPurchasePricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate: previousSaleDate });
         }
 
-        // Calculate the expected price for the previous purchase, if it exists. The previous transaction is
+        // Calculate the expected price for the previous transaction, if it exists. The previous transaction is
         // only relevant to pricing if we are performing an upgrade, since the prior license cost then comes into play
-        // for overlapping maintenance periods.
+        // if there are overlapping maintenance periods.
 
         const previousPurchasePricing =
                     saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
@@ -92,9 +90,9 @@ export class TransactionValidator {
         const licenseDurationInDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
         const { licenseType } = purchaseDetails;
 
-        if ((saleType==='Upgrade' || saleType==='Renewal') &&
-            licenseDurationInDays !== 0  &&
-            licenseType !== 'COMMUNITY') {
+        // Check for continuity for upgrade and renewal transactions. Community licenses are exempt because they are free anyway.
+
+        if ((saleType==='Upgrade' || saleType==='Renewal') && licenseDurationInDays !== 0  && licenseType !== 'COMMUNITY') {
 
             if (!previousPurchase) {
                 notes.push('Could not find previous purchase');
@@ -108,13 +106,6 @@ export class TransactionValidator {
                 }
             }
         }
-
-        // Even if price is as expected, refunds always require approval
-
-        // if (saleType==='Refund') {
-        //     notes.push('Refund requires manual approval');
-        //     valid = false;
-        // }
 
         const result : TransactionValidationResult = {
             isExpectedPrice,
