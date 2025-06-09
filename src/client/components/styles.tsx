@@ -318,3 +318,68 @@ export const FilterLabel = styled(Typography)({
     marginRight: 8,
     whiteSpace: 'nowrap'
 }) as typeof Typography;
+
+export const ReconciliationStatus = styled(Typography)(({ theme }) => ({
+    fontWeight: 'bold',
+    '&.automatic': {
+        color: theme.palette.success.main
+    },
+    '&.manual': {
+        color: theme.palette.secondary.main
+    },
+    '&.unreconciled': {
+        color: theme.palette.error.main
+    }
+})) as typeof Typography;
+
+export const AmountMismatch = styled(Typography)(({ theme }) => ({
+    fontWeight: 'bold',
+    color: theme.palette.error.main
+})) as typeof Typography;
+
+export const ReconciliationGrid = styled(Box)({
+    display: 'grid',
+    gridTemplateColumns: '150px 1fr 150px 1fr',
+    gap: 8,
+    marginBottom: 16
+});
+
+export const AmountsBox = styled(Box)({
+    display: 'grid',
+    gridTemplateColumns: '150px 1fr 150px 1fr',
+    gap: 8,
+    marginBottom: 16
+});
+
+export const NotesList = styled(Box)({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    marginBottom: 16
+});
+
+export const NoteRow = styled(Box)({
+    display: 'grid',
+    gridTemplateColumns: '200px 1fr',
+    gap: 16,
+    alignItems: 'center'
+});
+
+export const DialogTitleBox = styled(Box)({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4
+});
+
+export const DialogTitleSubtitle = styled(Typography)(({ theme }) => ({
+    color: theme.palette.text.secondary
+}));
+
+export const NotesHeadingBox = styled(Box)(({ theme }) => ({
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    marginBottom: theme.spacing(2)
+}));
+
+export const NotesSectionBox = styled(Box)(({ theme }) => ({
+    marginBottom: theme.spacing(3)
+}));

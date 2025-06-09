@@ -7,20 +7,26 @@ import {
     Button,
     TextField,
     Box,
-    Typography,
-    FormControlLabel,
-    Checkbox,
-    List,
-    ListItem,
-    ListItemText,
-    Divider,
-    Paper
+    Typography
 } from '@mui/material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { TransactionReconcileNote } from '#common/entities/TransactionReconcileNote';
 import { formatCurrency } from '#common/utils/formatCurrency';
 import { isoStringWithDateAndTime } from '#common/utils/dateUtils';
-import { StyledDialog, DialogContentBox, InfoTableBox } from '../styles';
+import {
+    StyledDialog,
+    InfoTableBox,
+    ReconciliationStatus,
+    AmountMismatch,
+    ReconciliationGrid,
+    AmountsBox,
+    NotesList,
+    NoteRow,
+    DialogTitleBox,
+    DialogTitleSubtitle,
+    NotesHeadingBox,
+    NotesSectionBox
+} from '../styles';
 import { CloseButton } from '../CloseButton';
 
 interface TransactionReconcileDialogProps {
@@ -36,7 +42,6 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
     onClose,
     onSave
 }) => {
-    const [reconciled, setReconciled] = useState(transaction?.transaction.reconcile?.reconciled || false);
     const [notes, setNotes] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [existingNotes, setExistingNotes] = useState<TransactionReconcileNote[]>([]);
@@ -57,13 +62,23 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await onSave(reconciled, notes);
+            await onSave(reconcile?.reconciled || false, notes);
             onClose();
         } catch (error) {
             console.error('Error saving reconciliation:', error);
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const getStatusClass = () => {
+        if (!reconcile?.reconciled) return 'unreconciled';
+        return reconcile.automatic ? 'automatic' : 'manual';
+    };
+
+    const getStatusText = () => {
+        if (!reconcile?.reconciled) return 'Unreconciled';
+        return reconcile.automatic ? 'Reconciled (Automatic)' : 'Reconciled (Manual)';
     };
 
     return (
@@ -74,96 +89,74 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
             fullWidth
         >
             <DialogTitle>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <DialogTitleBox>
                     <Typography variant="h6">Reconcile Transaction</Typography>
-                    <Typography variant="subtitle1" color="text.secondary">
+                    <DialogTitleSubtitle variant="subtitle1">
                         {saleDate} • {addonKey} • {saleType} • {tier} • {formatCurrency(vendorAmount)} • {company}
-                    </Typography>
-                </Box>
+                    </DialogTitleSubtitle>
+                </DialogTitleBox>
                 <CloseButton onClose={onClose} />
             </DialogTitle>
             <DialogContent>
                 <StyledDialog>
                     <InfoTableBox>
-                        <Box sx={{ mb: 2 }}>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={reconciled}
-                                        onChange={(e) => setReconciled(e.target.checked)}
-                                    />
-                                }
-                                label="Mark as Reconciled"
-                            />
-                        </Box>
-
                         {reconcile && (
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Current Reconciliation Status
-                                </Typography>
-                                <Paper variant="outlined" sx={{ p: 2 }}>
-                                    <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 1 }}>
-                                        <Typography variant="body2" color="text.secondary">Status:</Typography>
+                            <>
+                                <ReconciliationGrid>
+                                    <Typography variant="body2" fontWeight="bold" color="text.secondary">Status:</Typography>
+                                    <ReconciliationStatus variant="body2" className={getStatusClass()}>
+                                        {getStatusText()}
+                                    </ReconciliationStatus>
+
+                                    <Typography variant="body2" fontWeight="bold" color="text.secondary">Transaction Version:</Typography>
+                                    <Typography variant="body2">{reconcile.transactionVersion}</Typography>
+
+                                    <Typography variant="body2" fontWeight="bold" color="text.secondary">Last Updated:</Typography>
+                                    <Typography variant="body2">
+                                        {isoStringWithDateAndTime(reconcile.updatedAt.toString())}
+                                    </Typography>
+                                </ReconciliationGrid>
+
+                                <AmountsBox>
+                                    <Typography variant="body2" fontWeight="bold" color="text.secondary">Expected Amount:</Typography>
+                                    <Typography variant="body2">
+                                        {reconcile.expectedVendorAmount !== undefined ? formatCurrency(reconcile.expectedVendorAmount) : '-'}
+                                    </Typography>
+
+                                    <Typography variant="body2" fontWeight="bold" color="text.secondary">Actual Amount:</Typography>
+                                    {!reconcile.reconciled && reconcile.actualVendorAmount !== reconcile.expectedVendorAmount ? (
+                                        <AmountMismatch variant="body2">
+                                            {reconcile.actualVendorAmount !== undefined ? formatCurrency(reconcile.actualVendorAmount) : '-'}
+                                        </AmountMismatch>
+                                    ) : (
                                         <Typography variant="body2">
-                                            {reconcile.reconciled ? 'Reconciled' : 'Not Reconciled'}
+                                            {reconcile.actualVendorAmount !== undefined ? formatCurrency(reconcile.actualVendorAmount) : '-'}
                                         </Typography>
-
-                                        <Typography variant="body2" color="text.secondary">Created:</Typography>
-                                        <Typography variant="body2">
-                                            {isoStringWithDateAndTime(reconcile.createdAt.toString())}
-                                        </Typography>
-
-                                        <Typography variant="body2" color="text.secondary">Last Updated:</Typography>
-                                        <Typography variant="body2">
-                                            {isoStringWithDateAndTime(reconcile.updatedAt.toString())}
-                                        </Typography>
-
-                                        <Typography variant="body2" color="text.secondary">Transaction Version:</Typography>
-                                        <Typography variant="body2">{reconcile.transactionVersion}</Typography>
-
-                                        <Typography variant="body2" color="text.secondary">Automatic:</Typography>
-                                        <Typography variant="body2">{reconcile.automatic ? 'Yes' : 'No'}</Typography>
-
-                                        {reconcile.actualVendorAmount !== undefined && (
-                                            <>
-                                                <Typography variant="body2" color="text.secondary">Actual Amount:</Typography>
-                                                <Typography variant="body2">{formatCurrency(reconcile.actualVendorAmount)}</Typography>
-                                            </>
-                                        )}
-
-                                        {reconcile.expectedVendorAmount !== undefined && (
-                                            <>
-                                                <Typography variant="body2" color="text.secondary">Expected Amount:</Typography>
-                                                <Typography variant="body2">{formatCurrency(reconcile.expectedVendorAmount)}</Typography>
-                                            </>
-                                        )}
-                                    </Box>
-                                </Paper>
-                            </Box>
+                                    )}
+                                </AmountsBox>
+                            </>
                         )}
 
                         {existingNotes.length > 0 && (
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                    Existing Notes
-                                </Typography>
-                                <Paper variant="outlined">
-                                    <List dense>
-                                        {existingNotes.map((note, index) => (
-                                            <React.Fragment key={note.id}>
-                                                <ListItem>
-                                                    <ListItemText
-                                                        primary={note.note}
-                                                        secondary={isoStringWithDateAndTime(note.createdAt.toString())}
-                                                    />
-                                                </ListItem>
-                                                {index < existingNotes.length - 1 && <Divider />}
-                                            </React.Fragment>
-                                        ))}
-                                    </List>
-                                </Paper>
-                            </Box>
+                            <NotesSectionBox>
+                                <NotesHeadingBox>
+                                    <Typography variant="subtitle1" fontWeight="bold" color="text.secondary" gutterBottom>
+                                        Notes
+                                    </Typography>
+                                </NotesHeadingBox>
+                                <NotesList>
+                                    {existingNotes.map((note) => (
+                                        <NoteRow key={note.id}>
+                                            <Typography variant="body2" color="text.secondary">
+                                                {isoStringWithDateAndTime(note.createdAt.toString())}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                {note.note}
+                                            </Typography>
+                                        </NoteRow>
+                                    ))}
+                                </NotesList>
+                            </NotesSectionBox>
                         )}
 
                         <TextField
