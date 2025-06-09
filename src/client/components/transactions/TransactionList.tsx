@@ -83,6 +83,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
             setSortBy(field);
             setSortOrder('DESC');
         }
+        setPage(0);
     };
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
