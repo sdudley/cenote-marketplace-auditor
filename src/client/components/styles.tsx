@@ -404,14 +404,9 @@ export const StatusDot = styled(Box)({
 export const StatusControlsBox = styled(Box)({
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    gap: '8px',
     width: '100%',
-    '& .actions': {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        marginLeft: 'auto'
-    }
+    justifyContent: 'flex-end'
 });
 
 export const HoverActions = styled(Box)({
@@ -478,6 +473,7 @@ export const StatusCell = styled(TableCell)(({ theme }) => ({
     right: 0,
     backgroundColor: theme.palette.background.paper,
     zIndex: 1,
+    width: '80px',
     '&::after': {
         content: '""',
         position: 'absolute',

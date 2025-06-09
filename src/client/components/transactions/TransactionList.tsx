@@ -234,7 +234,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
-                                    <ReconciliationHeaderCell>Reconciled</ReconciliationHeaderCell>
+                                    <ReconciliationHeaderCell></ReconciliationHeaderCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
