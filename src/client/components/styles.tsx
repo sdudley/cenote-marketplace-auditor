@@ -71,6 +71,9 @@ export const Main = styled('main')(({ theme }) => ({
     paddingTop: theme.spacing(3),
     marginLeft: 0,
     minHeight: 'calc(100vh - 64px)', // Subtract AppBar height
+    width: 'calc(100% - 240px)',
+    maxWidth: 'calc(100% - 240px)',
+    overflow: 'hidden'
 }));
 
 export const StyledAppBar = styled(AppBar)({
@@ -96,7 +99,8 @@ export const RootBox = styled(Box)({
 export const ContentBox = styled(Box)({
     display: 'flex',
     marginTop: '64px',
-    flex: 1
+    flex: 1,
+    overflow: 'hidden'
 });
 
 export const StyledDrawer = styled(Drawer)({
@@ -145,14 +149,17 @@ export const SortArrows = styled(Box)(({ theme }) => ({
 
 export const TableWrapper = styled(Box)({
     width: '100%',
-    minWidth: '1024px',
-    overflowX: 'auto'
+    maxWidth: '100%',
+    overflowX: 'auto',
+    overflowY: 'hidden'
 });
 
 export const StyledTableContainer = styled(MuiTableContainer)({
     position: 'relative',
     minHeight: 400,
-    width: '100%'
+    width: '100%',
+    maxWidth: '100%',
+    overflowX: 'auto'
 });
 
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -269,7 +276,8 @@ export const TreeBorder = styled(Box)({
 
 export const StyledListPaper = styled(Paper)({
     width: '100%',
-    overflow: 'hidden'
+    overflowX: 'auto',
+    overflowY: 'hidden'
 });
 
 export const TableCellNoWrap = styled(StyledTableCell)({
@@ -445,14 +453,39 @@ export const UnreconcileButton = styled(StatusIconButton)({
     }
 });
 
-export const ReconciliationHeaderCell = styled(TableHeaderCell)({
-    paddingLeft: 0,
-    paddingRight: 0
-});
+export const ReconciliationHeaderCell = styled(TableHeaderCell)(({ theme }) => ({
+    padding: '0 8px 0 16px',
+    position: 'sticky',
+    right: 0,
+    backgroundColor: theme.palette.background.paper,
+    zIndex: 2,
+    '&::after': {
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: '1px',
+        backgroundColor: 'rgba(224, 224, 224, 1)'
+    }
+}));
 
-export const StatusCell = styled(TableCell)({
-    padding: '0 8px',
+export const StatusCell = styled(TableCell)(({ theme }) => ({
+    padding: '0 8px 0 16px',
     cursor: 'default',
-    textAlign: 'right'
-});
+    textAlign: 'right',
+    position: 'sticky',
+    right: 0,
+    backgroundColor: theme.palette.background.paper,
+    zIndex: 1,
+    '&::after': {
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: '1px',
+        backgroundColor: 'rgba(224, 224, 224, 1)'
+    }
+}));
 
