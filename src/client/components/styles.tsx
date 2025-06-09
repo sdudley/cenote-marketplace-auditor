@@ -162,7 +162,7 @@ export const TableWrapper = styled(Box)({
     width: '100%',
     maxWidth: '100%',
     position: 'relative',
-    height: 'calc(100vh - 200px)'
+    height: 'calc(100vh - 280px)'  // Adjusted to account for search and pagination
 });
 
 export const StyledTableContainer = styled(MuiTableContainer)({
@@ -172,6 +172,15 @@ export const StyledTableContainer = styled(MuiTableContainer)({
     overflowX: 'auto',
     overflowY: 'auto',
     height: '100%'
+});
+
+export const PaginationWrapper = styled(Box)({
+    position: 'sticky',
+    bottom: 0,
+    backgroundColor: 'white',
+    borderTop: '1px solid rgba(224, 224, 224, 1)',
+    padding: '8px 0',
+    zIndex: 2
 });
 
 export const StyledTableHead = styled(TableHead)(({ theme }) => ({

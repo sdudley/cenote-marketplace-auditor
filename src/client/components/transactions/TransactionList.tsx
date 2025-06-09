@@ -18,7 +18,7 @@ import { Search as SearchIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel, StyledTable, StyledTableHead, StyledTableBody } from '../styles';
+import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { ReconciliationControls } from './ReconciliationControls';
@@ -278,6 +278,18 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 </StyledTableContainer>
             </TableWrapper>
 
+            <PaginationWrapper>
+                <TablePagination
+                    component="div"
+                    count={total}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[10, 25, 50, 100]}
+                />
+            </PaginationWrapper>
+
             <TransactionDetailsDialog
                 transaction={selectedTransaction}
                 open={!!selectedTransaction}
@@ -290,18 +302,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 onClose={() => setSelectedTransactionForReconcile(null)}
                 onSave={handleReconcileSave}
             />
-
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <TablePagination
-                    component="div"
-                    count={total}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[10, 25, 50, 100]}
-                />
-            </Box>
         </TableContainer>
     );
 };
