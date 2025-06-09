@@ -8,6 +8,7 @@ import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortTyp
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
 import { In } from "typeorm";
 import { SelectQueryBuilder } from "typeorm";
+import { TransactionResult } from "#common/types/apiTypes";
 
 @injectable()
 class TransactionDao {
@@ -163,6 +164,10 @@ class TransactionDao {
             // Add join for reconcile
             queryBuilder.leftJoinAndSelect('transaction.reconcile', 'reconcile');
 
+            // Add join with license table
+            queryBuilder.leftJoin('license', 'license', 'license.entitlement_id = transaction.entitlement_id');
+            queryBuilder.addSelect('license.data->>\'installedOnSandbox\'', 'license_installedOnSandbox');
+
             if (search) {
                 // Inspiration: https://stackoverflow.com/a/45849743/2220556
                 queryBuilder.where(
@@ -189,10 +194,12 @@ class TransactionDao {
 
             const transactionResults = transactions.map((transaction, index) => {
                 const versionCount = parseInt(rawResults[index].transaction_versionCount) || 0;
+                const isSandbox = rawResults[index].license_installedOnSandbox === 'Yes';
                 return {
                     transaction,
-                    versionCount
-                };
+                    versionCount,
+                    isSandbox
+                } as TransactionResult;
             });
 
             return {

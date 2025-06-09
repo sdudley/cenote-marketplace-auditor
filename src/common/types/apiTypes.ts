@@ -2,6 +2,7 @@ import { Transaction } from "#common/entities/Transaction";
 
 export interface TransactionResult {
     transaction: Transaction;
+    isSandbox: boolean;
     versionCount: number;
 }
 
