@@ -20,5 +20,10 @@ module.exports = {
     // Add these settings to ensure proper source map handling
     testEnvironmentOptions: {
         NODE_OPTIONS: '--enable-source-maps'
-    }
+    },
+    // Exclude test files in the dist/ directory
+    testPathIgnorePatterns: [
+        '/node_modules/',
+        '/dist/'
+    ]
 };
