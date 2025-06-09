@@ -15,10 +15,6 @@ import { PricingService } from '#server/services/PricingService';
 
 const DEFAULT_START_DATE = '2024-01-01';
 
-// Do not reconcile automatically if legacy price used this late:
-// Allow for at least 60-day grandfathering, 90-day quote, 30-day purchase
-const ALERT_DAYS_AFTER_PRICING_CHANGE = 180;
-
 // TODO: evaluate licenses against transactions
 // License end dates that extend those of transactions (see SQL queries)
 // License sizes that do not match transaction sizes
