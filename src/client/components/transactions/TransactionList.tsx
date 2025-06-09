@@ -187,7 +187,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <ReconciliationHeaderCell>Reconciled</ReconciliationHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
@@ -235,6 +234,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
+                                    <ReconciliationHeaderCell>Reconciled</ReconciliationHeaderCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -243,13 +243,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         key={`${tr.transaction.id}`}
                                         onClick={() => setSelectedTransaction(tr)}
                                     >
-                                        <StatusCell onClick={(e) => e.stopPropagation()}>
-                                            <ReconciliationControls
-                                                transaction={tr}
-                                                onQuickReconcile={handleQuickReconcile}
-                                                onShowDetails={setSelectedTransactionForReconcile}
-                                            />
-                                        </StatusCell>
                                         <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
                                         <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
                                         <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
@@ -270,6 +263,13 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         <StyledTableCell>
                                             {tr.versionCount}
                                         </StyledTableCell>
+                                        <StatusCell onClick={(e) => e.stopPropagation()}>
+                                            <ReconciliationControls
+                                                transaction={tr}
+                                                onQuickReconcile={handleQuickReconcile}
+                                                onShowDetails={setSelectedTransactionForReconcile}
+                                            />
+                                        </StatusCell>
                                     </StyledTableRow>
                                 ))}
                             </TableBody>

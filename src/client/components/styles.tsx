@@ -385,12 +385,6 @@ export const NotesSectionBox = styled(Box)(({ theme }) => ({
     marginBottom: theme.spacing(3)
 }));
 
-export const StatusCell = styled(TableCell)({
-    padding: '0 8px',
-    cursor: 'default',
-    textAlign: 'right'
-});
-
 export const StatusDot = styled(Box)({
     width: 8,
     height: 8,
@@ -455,3 +449,10 @@ export const ReconciliationHeaderCell = styled(TableHeaderCell)({
     paddingLeft: 0,
     paddingRight: 0
 });
+
+export const StatusCell = styled(TableCell)({
+    padding: '0 8px',
+    cursor: 'default',
+    textAlign: 'right'
+});
+
