@@ -9,7 +9,8 @@ import {
     TableContainer as MuiTableContainer,
     Table,
     TableRow,
-    Paper
+    Paper,
+    IconButton
 } from '@mui/material';
 
 export const drawerWidth = 240;
@@ -383,3 +384,74 @@ export const NotesHeadingBox = styled(Box)(({ theme }) => ({
 export const NotesSectionBox = styled(Box)(({ theme }) => ({
     marginBottom: theme.spacing(3)
 }));
+
+export const StatusCell = styled(TableCell)({
+    padding: '0 8px',
+    cursor: 'default',
+    textAlign: 'right'
+});
+
+export const StatusDot = styled(Box)({
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    display: 'inline-block',
+    cursor: 'default'
+});
+
+export const StatusControlsBox = styled(Box)({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    width: '100%',
+    '& .actions': {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        marginLeft: 'auto'
+    }
+});
+
+export const HoverActions = styled(Box)({
+    opacity: 0,
+    transition: 'opacity 0.2s ease-in-out',
+    '&:hover': {
+        opacity: 1
+    },
+    '&:hover, .MuiTableRow-root:hover &': {
+        opacity: 1
+    }
+});
+
+export const StatusIconButton = styled(IconButton)({
+    padding: 0.5,
+    '& .MuiSvgIcon-root': {
+        fontSize: 16
+    },
+    '&:hover': {
+        '& .MuiSvgIcon-root': {
+            color: 'inherit'
+        }
+    }
+});
+
+export const ReconcileButton = styled(StatusIconButton)({
+    '&:hover': {
+        '& .MuiSvgIcon-root': {
+            color: '#4CAF50'
+        }
+    }
+});
+
+export const UnreconcileButton = styled(StatusIconButton)({
+    '&:hover': {
+        '& .MuiSvgIcon-root': {
+            color: '#F44336'
+        }
+    }
+});
+
+export const ReconciliationHeaderCell = styled(TableHeaderCell)({
+    paddingLeft: 0,
+    paddingRight: 0
+});

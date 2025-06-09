@@ -13,9 +13,10 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
-    InputAdornment
+    InputAdornment,
+    Tooltip
 } from '@mui/material';
-import { Add, CheckBox, CheckBoxOutlineBlank, Search as SearchIcon } from '@mui/icons-material';
+import { Add, CheckBox, CheckBoxOutlineBlank, Search as SearchIcon, Check, Close, InfoOutlined } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
@@ -23,7 +24,7 @@ import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, Ta
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
-import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox } from '../styles';
+import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox, StatusCell, StatusDot, StatusControlsBox, StatusIconButton, ReconcileButton, UnreconcileButton, ReconciliationHeaderCell, HoverActions } from '../styles';
 import { TableHeaderCell } from '../styles';
 import { StyledSandboxAnnotation } from '../styles';
 import { dateDiff } from '#common/utils/dateUtils';
@@ -106,20 +107,24 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         }
     };
 
-    const handleReconcileSave = async (reconciled: boolean, notes: string) => {
-        if (!selectedTransactionForReconcile) return;
-
+    const handleQuickReconcile = async (transaction: TransactionResult, reconciled: boolean) => {
         try {
             // TODO: Implement the API call to save reconciliation
-            console.log('Saving reconciliation:', {
-                transactionId: selectedTransactionForReconcile.transaction.id,
+            console.log('Quick reconciliation:', {
+                transactionId: transaction.transaction.id,
                 reconciled,
-                notes
+                notes: [`${reconciled ? 'Reconciled' : 'Unreconciled'} via quick action`]
             });
+            // Refresh the transaction list after reconciliation
+            await fetchTransactions();
         } catch (error) {
-            console.error('Error saving reconciliation:', error);
-            throw error;
+            console.error('Error during quick reconciliation:', error);
         }
+    };
+
+    const handleReconcileSave = async (reconciled: boolean, notes: string) => {
+        if (!selectedTransactionForReconcile) return;
+        await handleQuickReconcile(selectedTransactionForReconcile, reconciled);
     };
 
     const handleReconciledFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -172,7 +177,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableHeaderCell>Reconciled</TableHeaderCell>
+                                    <ReconciliationHeaderCell>Reconciled</ReconciliationHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
                                         label="Sale Date"
@@ -228,24 +233,56 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         key={`${tr.transaction.id}`}
                                         onClick={() => setSelectedTransaction(tr)}
                                     >
-                                        <TableCellCheckbox>
-                                            {tr.transaction.reconcile?.reconciled ? (
-                                                <CheckBox
-                                                    color="success"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSelectedTransactionForReconcile(tr);
-                                                    }}
-                                                />
-                                            ) : (
-                                                <CheckBoxOutlineBlank
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSelectedTransactionForReconcile(tr);
-                                                    }}
-                                                />
-                                            )}
-                                        </TableCellCheckbox>
+                                        <StatusCell onClick={(e) => e.stopPropagation()}>
+                                            <StatusControlsBox>
+                                                {tr.transaction.reconcile?.reconciled ? (
+                                                    <Tooltip title={tr.transaction.reconcile.automatic ? "Auto Reconciled" : "Manually Reconciled"}>
+                                                        <StatusDot
+                                                            sx={{
+                                                                bgcolor: tr.transaction.reconcile.automatic ? '#81C784' : '#4CAF50'
+                                                            }}
+                                                        />
+                                                    </Tooltip>
+                                                ) : (
+                                                    <StatusDot />
+                                                )}
+                                                <HoverActions className="actions">
+                                                    {!tr.transaction.reconcile?.reconciled ? (
+                                                        <Tooltip title="Quick Reconcile">
+                                                            <ReconcileButton
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleQuickReconcile(tr, true);
+                                                                }}
+                                                            >
+                                                                <Check />
+                                                            </ReconcileButton>
+                                                        </Tooltip>
+                                                    ) : (
+                                                        <Tooltip title="Quick Unreconcile">
+                                                            <UnreconcileButton
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleQuickReconcile(tr, false);
+                                                                }}
+                                                            >
+                                                                <Close />
+                                                            </UnreconcileButton>
+                                                        </Tooltip>
+                                                    )}
+                                                    <Tooltip title="Reconciliation Details">
+                                                        <StatusIconButton
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedTransactionForReconcile(tr);
+                                                            }}
+                                                        >
+                                                            <InfoOutlined />
+                                                        </StatusIconButton>
+                                                    </Tooltip>
+                                                </HoverActions>
+                                            </StatusControlsBox>
+                                        </StatusCell>
                                         <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
                                         <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
                                         <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
