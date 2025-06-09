@@ -179,7 +179,11 @@ class TransactionDao {
             }
 
             if (typeof reconciled === 'boolean') {
-                queryBuilder.where('reconcile.reconciled = :reconciled', { reconciled });
+                if (reconciled) {
+                    queryBuilder.andWhere('reconcile.reconciled = :reconciled', { reconciled });
+                } else {
+                    queryBuilder.andWhere('reconcile.reconciled = :reconciled or reconcile.reconciled is null', { reconciled });
+                }
             }
 
             // Apply sorting using the sort field map

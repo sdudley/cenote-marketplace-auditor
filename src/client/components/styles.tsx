@@ -168,7 +168,8 @@ export const StyledTableCell = styled(TableCell)(({ theme }) => ({
 export const SearchContainer = styled(Box)({
     display: 'flex',
     gap: 16,
-    marginBottom: 16
+    marginBottom: 16,
+    alignItems: 'center'
 });
 
 export const LoadingOverlay = styled(Box)({
@@ -304,3 +305,16 @@ export const VersionButton = styled(Box)({
     right: 48,
     top: 8
 });
+
+export const FilterContainer = styled(Box)({
+    display: 'flex',
+    gap: 16,
+    marginBottom: 16,
+    alignItems: 'center'
+});
+
+export const FilterLabel = styled(Typography)({
+    fontWeight: 500,
+    marginRight: 8,
+    whiteSpace: 'nowrap'
+}) as typeof Typography;

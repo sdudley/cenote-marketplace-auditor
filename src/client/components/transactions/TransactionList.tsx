@@ -6,14 +6,20 @@ import {
     TableRow,
     TablePagination,
     TextField,
+    IconButton,
     CircularProgress,
-    Box
+    Box,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    InputAdornment
 } from '@mui/material';
-import { Add, CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material';
+import { Add, CheckBox, CheckBoxOutlineBlank, Search as SearchIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer } from '../styles';
+import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterContainer, FilterLabel } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
@@ -37,7 +43,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
+    const [selectedTransactionResultForVersions, setSelectedTransactionResultForVersions] = useState<TransactionResult | null>(null);
     const [selectedTransactionForReconcile, setSelectedTransactionForReconcile] = useState<TransactionResult | null>(null);
+    const [reconciledFilter, setReconciledFilter] = useState<string>('');
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -50,8 +58,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const fetchTransactions = async () => {
         setLoading(true);
         try {
+            const reconciledParam = reconciledFilter ? `&reconciled=${reconciledFilter}` : '';
             const response = await fetch(
-                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}`
+                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${reconciledParam}`
             );
             const data = await response.json();
             setTransactions(data.transactions);
@@ -65,7 +74,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch]);
+    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, reconciledFilter]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -113,17 +122,43 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         }
     };
 
+    const handleReconciledFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        setReconciledFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
     return (
         <TableContainer>
             <SearchContainer>
                 <TextField
-                    label="Search"
+                    label=""
                     variant="outlined"
                     value={search}
                     onChange={handleSearchChange}
                     onKeyPress={handleKeyPress}
                     size="small"
+                    placeholder="Search"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon fontSize="small" />
+                            </InputAdornment>
+                        ),
+                    }}
                 />
+                <FilterLabel>Filters:</FilterLabel>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Reconciliation Status</InputLabel>
+                    <Select
+                        value={reconciledFilter}
+                        label="Reconciliation Status"
+                        onChange={handleReconciledFilterChange}
+                    >
+                        <MenuItem value="">All Transactions</MenuItem>
+                        <MenuItem value="Y">Reconciled</MenuItem>
+                        <MenuItem value="N">Unreconciled</MenuItem>
+                    </Select>
+                </FormControl>
             </SearchContainer>
 
             <TableWrapper>
