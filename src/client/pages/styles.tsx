@@ -2,15 +2,10 @@ import { styled as muiStyled } from '@mui/material/styles';
 import { Box, ListItemButton } from '@mui/material';
 
 export const PageContainer = muiStyled(Box)(({ theme }) => ({
-    padding: theme.spacing(3),
     backgroundColor: theme.palette.background.default,
-    minHeight: '100vh',
-    marginLeft: 0,
-    marginRight: 0,
-    paddingLeft: 0,
-    paddingRight: 0,
-    marginTop: 0,
-    paddingTop: 0
+    //minHeight: '100vh',
+    margin: 0,
+    padding: 0
 }));
 
 export const PageTitle = muiStyled(Box)(({ theme }) => ({

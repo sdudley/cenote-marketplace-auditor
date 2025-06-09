@@ -127,6 +127,7 @@ export const ContentContainer = styled(Container)({
     marginRight: 0,
     paddingLeft: 0,
     paddingRight: 0,
+    paddingBottom: 0,
     marginTop: 0,
     paddingTop: 0,
     '&.MuiContainer-root': {
@@ -138,11 +139,12 @@ export const ContentContainer = styled(Container)({
 export const ContentBoxWrapper = styled(Box)(({ theme }) => ({
     width: '100%',
     marginTop: 0,
-    marginBottom: theme.spacing(4),
+    marginBottom: 0,
     marginLeft: 0,
     marginRight: 0,
     paddingLeft: 0,
-    paddingRight: 0
+    paddingRight: 0,
+    paddingBottom: 0
 }));
 
 export const SortArrows = styled(Box)(({ theme }) => ({
@@ -162,7 +164,8 @@ export const TableWrapper = styled(Box)({
     width: '100%',
     maxWidth: '100%',
     position: 'relative',
-    height: 'calc(100vh - 280px)'  // Adjusted to account for search and pagination
+    height: 'calc(100vh - 280px)',
+    marginBottom: 0
 });
 
 export const StyledTableContainer = styled(MuiTableContainer)({
@@ -171,7 +174,8 @@ export const StyledTableContainer = styled(MuiTableContainer)({
     maxWidth: '100%',
     overflowX: 'auto',
     overflowY: 'auto',
-    height: '100%'
+    height: '100%',
+    marginBottom: 0
 });
 
 export const PaginationWrapper = styled(Box)({
@@ -180,7 +184,8 @@ export const PaginationWrapper = styled(Box)({
     backgroundColor: 'white',
     borderTop: '1px solid rgba(224, 224, 224, 1)',
     padding: '8px 0',
-    zIndex: 2
+    zIndex: 2,
+    marginBottom: 0
 });
 
 export const StyledTableHead = styled(TableHead)(({ theme }) => ({
@@ -227,7 +232,7 @@ export const LoadingOverlay = styled(Box)({
 
 export const TableContainer = styled(Box)({
     width: '100%',
-    padding: 16
+    padding: '16px 16px 0 16px'
 });
 
 export const VisibilityCell = styled(TableCell)({
