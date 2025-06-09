@@ -6,7 +6,9 @@ export const PageContainer = muiStyled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
     minHeight: '100vh',
     marginLeft: 0,
+    marginRight: 0,
     paddingLeft: 0,
+    paddingRight: 0,
     marginTop: 0,
     paddingTop: 0
 }));

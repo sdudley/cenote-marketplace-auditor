@@ -70,6 +70,7 @@ export const Main = styled('main')(({ theme }) => ({
     flexGrow: 1,
     paddingTop: theme.spacing(3),
     marginLeft: 0,
+    marginRight: 0,
     minHeight: 'calc(100vh - 64px)', // Subtract AppBar height
     width: 'calc(100% - 240px)',
     maxWidth: 'calc(100% - 240px)',
@@ -121,17 +122,25 @@ export const ContentContainer = styled(Container)({
     width: '100%',
     maxWidth: '100% !important',
     marginLeft: 0,
+    marginRight: 0,
     paddingLeft: 0,
+    paddingRight: 0,
     marginTop: 0,
-    paddingTop: 0
+    paddingTop: 0,
+    '&.MuiContainer-root': {
+        paddingLeft: 0,
+        paddingRight: 0
+    }
 });
 
 export const ContentBoxWrapper = styled(Box)(({ theme }) => ({
-  width: '100%',
-  marginTop: 0,
-  marginBottom: theme.spacing(4),
-  marginLeft: 0,
-  paddingLeft: 0
+    width: '100%',
+    marginTop: 0,
+    marginBottom: theme.spacing(4),
+    marginLeft: 0,
+    marginRight: 0,
+    paddingLeft: 0,
+    paddingRight: 0
 }));
 
 export const SortArrows = styled(Box)(({ theme }) => ({
