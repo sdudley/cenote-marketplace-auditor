@@ -30,6 +30,9 @@ class TransactionDao {
         return await this.transactionRepo.findOne({ where: { marketplaceTransactionId: transactionKey } });
     }
 
+    public async getTransactionById(id: string): Promise<Transaction | null> {
+        return await this.transactionRepo.findOne({ where: { id } });
+    }
 
     public async saveTransaction(transaction: Transaction) : Promise<void> {
         await this.transactionRepo.save(transaction);

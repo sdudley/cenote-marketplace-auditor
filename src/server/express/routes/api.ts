@@ -3,6 +3,7 @@ import { injectable, inject } from 'inversify';
 import { EXPRESS_TYPES } from '../config/expressTypes';
 import { TransactionRoute } from './TransactionRoute';
 import { TransactionVersionRoute } from './TransactionVersionRoute';
+import { TransactionReconcileRoute } from './TransactionReconcileRoute';
 
 @injectable()
 export class ApiRouter {
@@ -10,7 +11,8 @@ export class ApiRouter {
 
     constructor(
         @inject(EXPRESS_TYPES.TransactionRoute) private transactionRoute: TransactionRoute,
-        @inject(EXPRESS_TYPES.TransactionVersionRoute) private transactionVersionRoute: TransactionVersionRoute
+        @inject(EXPRESS_TYPES.TransactionVersionRoute) private transactionVersionRoute: TransactionVersionRoute,
+        @inject(EXPRESS_TYPES.TransactionReconcileRoute) private transactionReconcileRoute: TransactionReconcileRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -25,5 +27,6 @@ export class ApiRouter {
         // Transaction routes
         this.router.use('/transactions', this.transactionRoute.router);
         this.router.use('/transactions', this.transactionVersionRoute.router);
+        this.router.use('/transactions', this.transactionReconcileRoute.router);
     }
 }

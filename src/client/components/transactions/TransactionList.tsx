@@ -108,16 +108,27 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     const handleQuickReconcile = async (transaction: TransactionResult, reconciled: boolean) => {
         try {
-            // TODO: Implement the API call to save reconciliation
-            console.log('Quick reconciliation:', {
-                transactionId: transaction.transaction.id,
-                reconciled,
-                notes: [`${reconciled ? 'Reconciled' : 'Unreconciled'} via quick action`]
+            const response = await fetch(`/api/transactions/${transaction.transaction.id}/reconcile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    reconciled,
+                    notes: [`${reconciled ? 'Reconciled' : 'Unreconciled'} manually via quick action`]
+                })
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to update reconciliation status');
+            }
+
             // Refresh the transaction list after reconciliation
             await fetchTransactions();
         } catch (error) {
             console.error('Error during quick reconciliation:', error);
+            // TODO: Show error to user
         }
     };
 

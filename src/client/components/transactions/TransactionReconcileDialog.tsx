@@ -90,7 +90,7 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
         >
             <DialogTitle>
                 <DialogTitleBox>
-                    <Typography variant="h6">Reconcile Transaction</Typography>
+                    <Typography variant="h6">Transaction Reconciliation Details</Typography>
                     <DialogTitleSubtitle variant="subtitle1">
                         {saleDate} • {addonKey} • {saleType} • {tier} • {formatCurrency(vendorAmount)} • {company}
                     </DialogTitleSubtitle>
