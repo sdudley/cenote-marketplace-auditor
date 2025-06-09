@@ -43,7 +43,7 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
 
     useEffect(() => {
         if (transaction?.transaction.reconcile?.notes) {
-            transaction.transaction.reconcile.notes.then(setExistingNotes);
+            setExistingNotes(transaction.transaction.reconcile.notes);
         }
     }, [transaction]);
 

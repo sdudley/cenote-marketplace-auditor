@@ -47,5 +47,5 @@ export class TransactionReconcile {
     expectedVendorAmount?: number;
 
     @OneToMany(() => TransactionReconcileNote, (note: TransactionReconcileNote) => note.transactionReconcile)
-    notes!: Promise<TransactionReconcileNote[]>;
+    notes!: TransactionReconcileNote[];
 }
