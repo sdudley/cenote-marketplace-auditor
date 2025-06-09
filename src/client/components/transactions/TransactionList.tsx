@@ -23,6 +23,7 @@ import { SortOrder, SortableHeader } from '../SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox } from '../styles';
 import { TableHeaderCell } from '../styles';
 import { StyledSandboxAnnotation } from '../styles';
+import { dateDiff } from '#common/utils/dateUtils';
 
 interface TransactionListProps {
     // Add props if needed
@@ -227,7 +228,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             {tr.isSandbox && tr.cloudSiteHostname &&<StyledSandboxAnnotation>({tr.cloudSiteHostname})</StyledSandboxAnnotation>}
                                         </StyledTableCell>
                                         <StyledTableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
-                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.maintenanceStartDate} - {tr.transaction.data.purchaseDetails.maintenanceEndDate}</StyledTableCell>
+                                        <StyledTableCell>{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
                                         <StyledTableCell>

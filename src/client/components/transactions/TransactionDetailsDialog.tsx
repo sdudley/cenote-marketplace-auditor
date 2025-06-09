@@ -58,17 +58,9 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                             </TableRow>
                             <TableRow>
                                 <InfoTableHeader>Entitlement ID</InfoTableHeader>
-                                <TableCell>
-                                    {transaction.transaction.entitlementId ? (
-                                        <Link href="#" underline="hover">
-                                            {transaction.transaction.entitlementId}
-                                        </Link>
-                                    ) : (
-                                        'N/A'
-                                    )}
-                                </TableCell>
+                                <TableCell>{transaction.transaction.entitlementId}</TableCell>
                                 <InfoTableHeader>Transaction Version</InfoTableHeader>
-                                <TableCell>{transaction.transaction.currentVersion || 'N/A'}</TableCell>
+                                <TableCell>{transaction.transaction.currentVersion}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>

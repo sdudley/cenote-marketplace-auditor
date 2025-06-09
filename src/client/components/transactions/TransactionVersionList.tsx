@@ -85,7 +85,7 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
                                 {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
                             </VersionDateCell>
 
-                            <VersionDiffCell>{version.diff}</VersionDiffCell>
+                            <VersionDiffCell>{version.diff ?? 'Initial version'}</VersionDiffCell>
                         </TableRow>
                     ))}
                 </TableBody>
