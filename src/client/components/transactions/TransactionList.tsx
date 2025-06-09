@@ -6,7 +6,6 @@ import {
     TableRow,
     TablePagination,
     TextField,
-    IconButton,
     CircularProgress,
     Box,
     Select,
@@ -14,15 +13,15 @@ import {
     FormControl,
     InputLabel,
     InputAdornment,
-    Tooltip
 } from '@mui/material';
-import { Add, CheckBox, CheckBoxOutlineBlank, Search as SearchIcon, Check, Close, InfoOutlined } from '@mui/icons-material';
+import { Search as SearchIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterContainer, FilterLabel } from '../styles';
+import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
+import { ReconciliationControls } from './ReconciliationControls';
 import { SortOrder, SortableHeader } from '../SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox, StatusCell, StatusDot, StatusControlsBox, StatusIconButton, ReconcileButton, UnreconcileButton, ReconciliationHeaderCell, HoverActions } from '../styles';
 import { TableHeaderCell } from '../styles';
@@ -234,54 +233,11 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onClick={() => setSelectedTransaction(tr)}
                                     >
                                         <StatusCell onClick={(e) => e.stopPropagation()}>
-                                            <StatusControlsBox>
-                                                {tr.transaction.reconcile?.reconciled ? (
-                                                    <Tooltip title={tr.transaction.reconcile.automatic ? "Auto Reconciled" : "Manually Reconciled"}>
-                                                        <StatusDot
-                                                            sx={{
-                                                                bgcolor: tr.transaction.reconcile.automatic ? '#81C784' : '#4CAF50'
-                                                            }}
-                                                        />
-                                                    </Tooltip>
-                                                ) : (
-                                                    <StatusDot />
-                                                )}
-                                                <HoverActions className="actions">
-                                                    {!tr.transaction.reconcile?.reconciled ? (
-                                                        <Tooltip title="Quick Reconcile">
-                                                            <ReconcileButton
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleQuickReconcile(tr, true);
-                                                                }}
-                                                            >
-                                                                <Check />
-                                                            </ReconcileButton>
-                                                        </Tooltip>
-                                                    ) : (
-                                                        <Tooltip title="Quick Unreconcile">
-                                                            <UnreconcileButton
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleQuickReconcile(tr, false);
-                                                                }}
-                                                            >
-                                                                <Close />
-                                                            </UnreconcileButton>
-                                                        </Tooltip>
-                                                    )}
-                                                    <Tooltip title="Reconciliation Details">
-                                                        <StatusIconButton
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSelectedTransactionForReconcile(tr);
-                                                            }}
-                                                        >
-                                                            <InfoOutlined />
-                                                        </StatusIconButton>
-                                                    </Tooltip>
-                                                </HoverActions>
-                                            </StatusControlsBox>
+                                            <ReconciliationControls
+                                                transaction={tr}
+                                                onQuickReconcile={handleQuickReconcile}
+                                                onShowDetails={setSelectedTransactionForReconcile}
+                                            />
                                         </StatusCell>
                                         <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
                                         <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
