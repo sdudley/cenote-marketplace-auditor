@@ -10,7 +10,9 @@ import {
     Table,
     TableRow,
     Paper,
-    IconButton
+    IconButton,
+    TableHead,
+    TableBody
 } from '@mui/material';
 
 export const drawerWidth = 240;
@@ -71,10 +73,10 @@ export const Main = styled('main')(({ theme }) => ({
     paddingTop: theme.spacing(3),
     marginLeft: 0,
     marginRight: 0,
-    minHeight: 'calc(100vh - 64px)', // Subtract AppBar height
+    height: 'calc(100vh - 64px)', // Changed from minHeight to height
     width: 'calc(100% - 240px)',
     maxWidth: 'calc(100% - 240px)',
-    overflow: 'hidden'
+    overflow: 'auto'  // Changed back to just 'auto'
 }));
 
 export const StyledAppBar = styled(AppBar)({
@@ -159,17 +161,29 @@ export const SortArrows = styled(Box)(({ theme }) => ({
 export const TableWrapper = styled(Box)({
     width: '100%',
     maxWidth: '100%',
-    overflowX: 'auto',
-    overflowY: 'hidden'
+    position: 'relative',
+    height: 'calc(100vh - 200px)'
 });
 
 export const StyledTableContainer = styled(MuiTableContainer)({
     position: 'relative',
-    minHeight: 400,
     width: '100%',
     maxWidth: '100%',
-    overflowX: 'auto'
+    overflowX: 'auto',
+    overflowY: 'auto',
+    height: '100%'
 });
+
+export const StyledTableHead = styled(TableHead)(({ theme }) => ({
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
+    backgroundColor: theme.palette.background.paper,
+    '& th': {
+        backgroundColor: theme.palette.background.paper,
+        borderBottom: `2px solid ${theme.palette.divider}`
+    }
+}));
 
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
     cursor: 'pointer',
@@ -285,8 +299,7 @@ export const TreeBorder = styled(Box)({
 
 export const StyledListPaper = styled(Paper)({
     width: '100%',
-    overflowX: 'auto',
-    overflowY: 'hidden'
+    position: 'relative'  // Removed overflowX
 });
 
 export const TableCellNoWrap = styled(StyledTableCell)({
@@ -493,4 +506,15 @@ export const StatusCell = styled(TableCell)(({ theme }) => ({
         backgroundColor: 'rgba(224, 224, 224, 1)'
     }
 }));
+
+export const StyledTable = styled(Table)({
+    //tableLayout: 'fixed',
+    //width: '100%'
+});
+
+export const StyledTableBody = styled(TableBody)({
+    '& tr:last-child td': {
+        borderBottom: 0
+    }
+});
 

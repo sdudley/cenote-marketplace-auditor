@@ -18,7 +18,7 @@ import { Search as SearchIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel } from '../styles';
+import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel, StyledTable, StyledTableHead, StyledTableBody } from '../styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { ReconciliationControls } from './ReconciliationControls';
@@ -184,8 +184,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                 <CircularProgress />
                             </LoadingOverlay>
                         )}
-                        <Table>
-                            <TableHead>
+                        <StyledTable>
+                            <StyledTableHead>
                                 <TableRow>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.SaleDate}
@@ -236,8 +236,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     />
                                     <ReconciliationHeaderCell></ReconciliationHeaderCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
+                            </StyledTableHead>
+                            <StyledTableBody>
                                 {transactions && transactions.map((tr) => (
                                     <StyledTableRow
                                         key={`${tr.transaction.id}`}
@@ -272,8 +272,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         </StatusCell>
                                     </StyledTableRow>
                                 ))}
-                            </TableBody>
-                        </Table>
+                            </StyledTableBody>
+                        </StyledTable>
                     </StyledListPaper>
                 </StyledTableContainer>
             </TableWrapper>
