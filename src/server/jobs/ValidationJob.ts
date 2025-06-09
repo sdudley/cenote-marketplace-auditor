@@ -10,8 +10,8 @@ import { ResellerDao } from '../database/ResellerDao';
 import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
 import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
-import { TransactionValidationService, TransactionValidationResult } from '#server/services/TransactionValidationService';
-import { dateDiff } from '#common/utils/dateUtils';
+import { TransactionValidationService } from '../services/transactionValidation/TransactionValidationService';
+import { TransactionValidationResult } from '../services/transactionValidation/types';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
 
 const DEFAULT_START_DATE = '2024-01-01';

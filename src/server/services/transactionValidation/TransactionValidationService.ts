@@ -1,21 +1,22 @@
 import { Transaction } from '#common/entities/Transaction';
-import { PricingService } from './PricingService';
-import { components } from '#common/types/marketplace-api';
+import { PricingService } from '../PricingService';
 import { deploymentTypeFromHosting } from '#common/utils/validationUtils';
-import { PriceCalcOpts, PriceCalculatorService, PriceResult } from './PriceCalculatorService';
+import { PriceCalcOpts, PriceCalculatorService, PriceResult } from '../PriceCalculatorService';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../config/types';
-import { LicenseDao } from '../database/LicenseDao';
+import { TYPES } from '../../config/types';
 import { formatCurrency } from '#common/utils/formatCurrency';
-import { ResellerDao } from '../database/ResellerDao';
+import { ResellerDao } from '../../database/ResellerDao';
 import { TransactionAdjustment } from '#common/entities/TransactionAdjustment';
-import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
+import { TransactionAdjustmentDao } from '../../database/TransactionAdjustmentDao';
 import { getLicenseDurationInDays } from '#common/utils/licenseDurationCalculator';
 import { PricingTierResult } from '#common/types/pricingTierResult';
-import { PreviousTransactionService } from './PreviousTransactionService';
+import { PreviousTransactionService } from '../PreviousTransactionService';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { dateDiff } from '#common/utils/dateUtils';
 import { Pricing } from '#common/entities/Pricing';
+import { TransactionValidationResult, DiscountResult, ValidationOptions, PriceWithPricingOpts } from './types';
+import { EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS, EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS, LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE, LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE, PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD, PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER, PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT } from './pricingPermutations';
+import { TransactionSandboxService } from './TransactionSandboxService';
 
 const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japanese Yen transactions
 
@@ -23,111 +24,22 @@ const MAX_JPY_DRIFT = 0.15; // Atlassian generally allows a 15% buffer for Japan
 // Allow for at least 60-day grandfathering, 90-day quote, 30-day purchase
 const ALERT_DAYS_AFTER_PRICING_CHANGE = 180;
 
-export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];
-
-interface PriceWithPricingOpts {
-    price: PriceResult;
-    pricingOpts: PriceCalcOpts;
-}
-
-export interface TransactionValidationResult {
-    isExpectedPrice: boolean;
-    valid: boolean;
-    vendorAmount: number;
-    price: PriceResult;
-    expectedVendorAmount: number;
-    notes: string[];
-    pricingOpts: PriceCalcOpts;
-    legacyPricingEndDate: string|undefined;
-    previousPurchaseLegacyPricingEndDate: string|undefined;
-    useLegacyPricingTierForCurrent: boolean;
-    expectedDiscountApplied: number;
-    hasActualAdjustments: boolean;
-}
-
-interface LegacyPricePermutation {
-    useLegacyPricingTierForCurrent: boolean;
-    useLegacyPricingTierForPrevious: boolean;
-}
-
-interface DiscountResult {
-    discountToUse: number;
-    hasExpectedAdjustments: boolean;
-    hasActualAdjustments: boolean;
-    adjustmentNotes: string[];
-}
-
-// List of various permutations of legacy pricing (or not) for both the main transaction and the
-// license we are upgrading from (if any).
-
-const LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE : LegacyPricePermutation[] = [
-    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // start with no legacy pricing
-    { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: false },   // try different permutations of legacy pricing
-    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: true },
-    { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: true },
-    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // Must end with no legacy pricing (again) if we find no match
-];
-
-const LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE : LegacyPricePermutation[] = [
-    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // start with no legacy pricing
-    { useLegacyPricingTierForCurrent: true, useLegacyPricingTierForPrevious: false },
-    { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // Must end with no legacy pricing (again) if we find no match
-];
-
-const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS : boolean[] = [
-    true,
-    false,
-    true // Must end with true (again) if we find no match to produce expected price with discounts
-];
-
-const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS : boolean[] = [
-    true,
-    false // Ends with no discounts applied on failure, so that our summary does not show the impact of potentially-incorrect estimated discounts
-];
-
-// Are these right?!
-const PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD : number[] = [
-    0.10,
-    0.05,
-    0.00
-];
-
-// Are these right?!
-const PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER : number[] = [
-    0.25,
-    0.20,
-    0.10,
-    0.00
-];
-
-const PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT : number[] = [
-    0.00
-];
-
-interface ValidationOptions {
-    transaction: Transaction;
-    useLegacyPricingTierForCurrent: boolean;
-    useLegacyPricingTierForPrevious: boolean;
-    expectedDiscount: number;
-    hasActualAdjustments: boolean;
-    partnerDiscountFraction: number;
-}
-
 @injectable()
 export class TransactionValidationService {
     constructor(
         @inject(TYPES.PricingService) private pricingService: PricingService,
         @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
-        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao,
         @inject(TYPES.ResellerDao) private resellerDao: ResellerDao,
         @inject(TYPES.TransactionAdjustmentDao) private transactionAdjustmentDao: TransactionAdjustmentDao,
         @inject(TYPES.PreviousTransactionService) private previousTransactionService: PreviousTransactionService,
+        @inject(TYPES.TransactionSandboxService) private transactionSandboxService: TransactionSandboxService,
     ) {
     }
 
     public async transactionValidator(transaction: Transaction) : Promise<TransactionValidationResult|undefined> {
         const discountResult = await this.calculateFinalExpectedDiscountForTransaction(transaction);
-        const validationResult = await this.validateOneTransactionWithPricingPermutations({ transaction, discountResult });
+        const isSandbox = await this.transactionSandboxService.isTransactionForSandbox(transaction);
+        const validationResult = await this.validateOneTransactionWithPricingPermutations({ transaction, discountResult, isSandbox });
         return this.applyPostValidationRules({ transaction, validationResult });
     }
 
@@ -140,8 +52,8 @@ export class TransactionValidationService {
      * transactions. Additionally, the transaction may have been sold with or without a discount, so we try
      * those permutations as well.
      */
-    private async validateOneTransactionWithPricingPermutations(opts: { transaction: Transaction; discountResult: DiscountResult; }) : Promise<TransactionValidationResult|undefined> {
-        const { transaction, discountResult } = opts;
+    private async validateOneTransactionWithPricingPermutations(opts: { transaction: Transaction; discountResult: DiscountResult; isSandbox: boolean; }) : Promise<TransactionValidationResult|undefined> {
+        const { transaction, discountResult, isSandbox } = opts;
         const { discountToUse } = discountResult;
 
         let validationResult : TransactionValidationResult|undefined = undefined;
@@ -185,7 +97,8 @@ export class TransactionValidationService {
                         useLegacyPricingTierForPrevious,
                         expectedDiscount: useExpectedDiscount ? discountToUse : 0,
                         hasActualAdjustments,
-                        partnerDiscountFraction
+                        partnerDiscountFraction,
+                        isSandbox
                     });
 
                     const { isExpectedPrice, notes } = validationResult;
@@ -238,7 +151,7 @@ export class TransactionValidationService {
      * transaction (or the one it is upgrading), validate if the price is correct.
      */
     private async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
-        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount, hasActualAdjustments, partnerDiscountFraction } = opts;
+        const { transaction, useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious, expectedDiscount, hasActualAdjustments, partnerDiscountFraction, isSandbox } = opts;
         const { data } = transaction;
         const { addonKey, purchaseDetails } = data;
         const {
@@ -251,7 +164,6 @@ export class TransactionValidationService {
 
         const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
         const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
-        const isSandbox = await this.isSandbox({ vendorAmount, transaction });
 
         // If it is an upgrade, we need to also load the previous purchase and potentially-different
         // pricing tiers for that transaction.
@@ -339,25 +251,6 @@ export class TransactionValidationService {
         };
 
         return result;
-    }
-
-
-    // Returns true if the transaction represents a sandbox instance
-
-    private async isSandbox(opts: { vendorAmount: number; transaction: Transaction }) : Promise<boolean> {
-        const { vendorAmount, transaction } = opts;
-
-        if (vendorAmount !== 0) {
-            return false;
-        }
-
-        const license = await this.licenseDao.loadLicenseForTransaction(transaction);
-
-        if (!license) {
-            return false;
-        }
-
-        return license.data.installedOnSandbox ? true : false;
     }
 
     // Invokes the PriceCalculatorService to calculate the expected price for a transaction.
@@ -560,7 +453,7 @@ export class TransactionValidationService {
             notes.push(`Unreconciling because billing period has changed from ${priorData.purchaseDetails.billingPeriod} to ${currentData.purchaseDetails.billingPeriod}`);
         }
 
-        // TODO FIXME:  this is a test to see if we can unreconcile transactions using commonly-updated but
+        // TODO FIXME:    this is a test to see if we can unreconcile transactions using commonly-updated but
         // unimportant fields.
         if (currentData.lastUpdated !== priorData.lastUpdated) {
             notes.push(`Unreconciling because last updated date has changed from ${priorData.lastUpdated} to ${currentData.lastUpdated}`);

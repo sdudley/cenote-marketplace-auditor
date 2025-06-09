@@ -18,7 +18,8 @@ import { PreviousTransactionService } from '../services/PreviousTransactionServi
 import { AddonService } from '../services/AddonService';
 import { PricingService } from '../services/PricingService';
 import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
-import { TransactionValidationService } from '#server/services/TransactionValidationService';
+import { TransactionValidationService } from '#server/services/transactionValidation/TransactionValidationService';
+import { TransactionSandboxService } from '#server/services/transactionValidation/TransactionSandboxService';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
@@ -45,6 +46,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<PreviousTransactionService>(TYPES.PreviousTransactionService).to(PreviousTransactionService).inSingletonScope();
     container.bind<TransactionVersionDao>(TYPES.TransactionVersionDao).to(TransactionVersionDao).inSingletonScope();
     container.bind<TransactionValidationService>(TYPES.TransactionValidationService).to(TransactionValidationService).inSingletonScope();
+    container.bind<TransactionSandboxService>(TYPES.TransactionSandboxService).to(TransactionSandboxService).inSingletonScope();
 
     return container;
 }

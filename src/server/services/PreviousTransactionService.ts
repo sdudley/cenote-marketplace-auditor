@@ -21,7 +21,7 @@ export class PreviousTransactionService {
      * @param transaction The transaction to find the previous transaction for
      * @returns The previous transaction and its effective maintenance end date, or undefined if no previous transaction exists
      */
-    async findPreviousTransaction(transaction: Transaction): Promise<PreviousTransactionResult | undefined> {
+    public async findPreviousTransaction(transaction: Transaction): Promise<PreviousTransactionResult | undefined> {
         const relatedTransactions = await this.transactionDao.loadRelatedTransactions(transaction.entitlementId);
 
         // Filter out the current transaction

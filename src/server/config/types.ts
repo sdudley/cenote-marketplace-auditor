@@ -17,5 +17,6 @@ export const TYPES = {
     TransactionVersionDao: Symbol.for('TransactionVersionDao'),
     ResellerDao: Symbol.for('ResellerDao'),
     PreviousTransactionService: Symbol.for('PreviousTransactionService'),
-    TransactionValidationService: Symbol.for('TransactionValidationService')
+    TransactionValidationService: Symbol.for('TransactionValidationService'),
+    TransactionSandboxService: Symbol.for('TransactionSandboxService')
 };
