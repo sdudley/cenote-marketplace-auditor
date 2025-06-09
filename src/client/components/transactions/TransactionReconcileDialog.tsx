@@ -159,7 +159,7 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
                             </NotesSectionBox>
                         )}
 
-                        <TextField
+                        {/* <TextField
                             fullWidth
                             multiline
                             rows={4}
@@ -167,11 +167,11 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Add any notes about this reconciliation..."
-                        />
+                        /> */}
                     </InfoTableBox>
                 </StyledDialog>
             </DialogContent>
-            <DialogActions>
+            {/* <DialogActions>
                 <Button onClick={onClose}>Cancel</Button>
                 <Button
                     onClick={handleSave}
@@ -181,7 +181,7 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
                 >
                     {isSaving ? 'Saving...' : 'Save'}
                 </Button>
-            </DialogActions>
+            </DialogActions> */}
         </Dialog>
     );
 };
