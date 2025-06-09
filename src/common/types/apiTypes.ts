@@ -26,5 +26,6 @@ export interface TransactionQueryParams {
     limit?: number;
     sortBy?: TransactionQuerySortType;
     sortOrder?: 'ASC' | 'DESC';
+    reconciled: boolean|undefined;
     search?: string;
 }

@@ -141,7 +141,8 @@ class TransactionDao {
             limit = 25,
             sortBy = 'createdAt',
             sortOrder = 'DESC',
-            search
+            search,
+            reconciled
         } = params;
 
         try {
@@ -175,6 +176,10 @@ class TransactionDao {
                     'jsonb_path_exists(transaction.data, format(\'$.** ? (@.type() == "string" && @ like_regex %s flag "qi")\', :search::text)::jsonpath)',
                     { search: `"${this.escapeDoubleQuotes(search)}"` }
                 );
+            }
+
+            if (typeof reconciled === 'boolean') {
+                queryBuilder.where('reconcile.reconciled = :reconciled', { reconciled });
             }
 
             // Apply sorting using the sort field map

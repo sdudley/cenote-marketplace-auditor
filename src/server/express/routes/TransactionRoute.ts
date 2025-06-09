@@ -27,7 +27,8 @@ export class TransactionRoute {
                 limit: parseInt(req.query.limit as string) || 25,
                 sortBy: (req.query.sortBy as TransactionQuerySortType) || TransactionQuerySortType.CreatedAt,
                 sortOrder: (req.query.sortOrder as 'ASC' | 'DESC') || 'DESC',
-                search: req.query.search as string
+                search: req.query.search as string,
+                reconciled: req.query.reconciled === 'Y' ? true : req.query.reconciled==='N' ? false : undefined
             };
 
             // Validate parameters
