@@ -102,7 +102,7 @@ export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, o
             <LicenseVersionListDialog
                 open={showVersions}
                 onClose={() => setShowVersions(false)}
-                licenseId={license.license.id}
+                licenseResult={license}
             />
         </>
     );

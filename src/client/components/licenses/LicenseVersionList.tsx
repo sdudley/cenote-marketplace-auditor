@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import {
+    TableBody,
+    TableHead,
     TableRow,
-    TablePagination,
-    CircularProgress,
+    CircularProgress
 } from '@mui/material';
 import { LicenseVersion } from '#common/entities/LicenseVersion';
-import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
-import { StyledTableContainer, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../styles';
-import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableHeaderCell } from '../styles';
+import {
+    VersionListContainer,
+    VersionListTable,
+    VersionNumberCell,
+    VersionDateCell,
+    VersionDiffCell,
+    LoadingOverlay,
+    VersionHeaderCell
+} from '../styles';
+import { LicenseVersionDialog } from './LicenseVersionDialog';
+import { StyledTableCell } from '../styles';
 
 interface LicenseVersionListProps {
     licenseId: string;
@@ -15,82 +24,82 @@ interface LicenseVersionListProps {
 
 export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({ licenseId }) => {
     const [versions, setVersions] = useState<LicenseVersion[]>([]);
-    const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(25);
     const [loading, setLoading] = useState(false);
-
-    const fetchVersions = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch(
-                `/api/licenses/${licenseId}/versions?start=${page * rowsPerPage}&limit=${rowsPerPage}`
-            );
-            const data = await response.json();
-            setVersions(data.versions);
-            setTotal(data.total);
-        } catch (error) {
-            console.error('Error fetching license versions:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [selectedVersion, setSelectedVersion] = useState<LicenseVersion | null>(null);
+    const [priorVersion, setPriorVersion] = useState<LicenseVersion | null>(null);
 
     useEffect(() => {
+        const fetchVersions = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(`/api/licenses/${licenseId}/versions`);
+                const data = await response.json();
+                setVersions(data);
+            } catch (error) {
+                console.error('Error fetching license versions:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchVersions();
-    }, [licenseId, page, rowsPerPage]);
+    }, [licenseId]);
 
-    const handleChangePage = (event: unknown, newPage: number) => {
-        setPage(newPage);
-    };
+    const handleRowClick = (version: LicenseVersion) => {
+        setSelectedVersion(version);
 
-    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
+        // Find the prior version from our existing versions array
+        const prior = versions.find(v => v.version === version.version - 1);
+        setPriorVersion(prior || null);
     };
 
     return (
-        <TableContainer>
-            <TableWrapper>
-                <StyledTableContainer>
-                    <StyledListPaper>
-                        {loading && (
-                            <LoadingOverlay>
-                                <CircularProgress />
-                            </LoadingOverlay>
-                        )}
-                        <StyledTable>
-                            <StyledTableHead>
-                                <TableRow>
-                                    <TableHeaderCell>Version</TableHeaderCell>
-                                    <TableHeaderCell>Created</TableHeaderCell>
-                                    <TableHeaderCell>Updated</TableHeaderCell>
-                                </TableRow>
-                            </StyledTableHead>
-                            <StyledTableBody>
-                                {versions && versions.map((version) => (
-                                    <StyledTableRow key={version.id}>
-                                        <TableCellNoWrap>{version.version}</TableCellNoWrap>
-                                        <TableCellNoWrap>{isoStringWithOnlyDate(version.createdAt.toString())}</TableCellNoWrap>
-                                    </StyledTableRow>
-                                ))}
-                            </StyledTableBody>
-                        </StyledTable>
-                    </StyledListPaper>
-                </StyledTableContainer>
-            </TableWrapper>
+        <VersionListContainer>
+            <VersionListTable>
+                <TableHead>
+                    <TableRow>
+                        <VersionHeaderCell>Version</VersionHeaderCell>
+                        <VersionHeaderCell>Created</VersionHeaderCell>
+                        <VersionHeaderCell>Changes</VersionHeaderCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {loading && (
+                        <TableRow>
+                            <StyledTableCell colSpan={3}>
+                                <LoadingOverlay>
+                                    <CircularProgress />
+                                </LoadingOverlay>
+                            </StyledTableCell>
+                        </TableRow>
+                    )}
+                    {versions.map((version) => (
+                        <TableRow
+                            key={version.id}
+                            onClick={() => handleRowClick(version)}
+                            sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
+                        >
+                            <VersionNumberCell>{version.version}</VersionNumberCell>
 
-            <PaginationWrapper>
-                <TablePagination
-                    component="div"
-                    count={total}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[10, 25, 50, 100]}
-                />
-            </PaginationWrapper>
-        </TableContainer>
+                            <VersionDateCell>
+                                {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
+                            </VersionDateCell>
+
+                            <VersionDiffCell>{version.diff ?? 'Initial version'}</VersionDiffCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </VersionListTable>
+
+            <LicenseVersionDialog
+                version={selectedVersion}
+                priorVersion={priorVersion}
+                open={!!selectedVersion}
+                onClose={() => {
+                    setSelectedVersion(null);
+                    setPriorVersion(null);
+                }}
+            />
+        </VersionListContainer>
     );
 };

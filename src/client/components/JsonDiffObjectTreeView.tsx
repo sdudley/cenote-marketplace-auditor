@@ -68,8 +68,8 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
         const BorderObject = hasChildren ? TreeBorder : Box;
 
         return (
-            <BorderObject>
-                <TreeItem key={key} label={label} itemId={fullKey}>
+            <BorderObject key={fullKey}>
+                <TreeItem label={label} itemId={fullKey}>
                     {hasChildren && (
                         Object.entries(delta.children!).map(([childKey, childDelta]) =>
                             renderDelta(childKey, childDelta, fullKey)
