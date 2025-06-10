@@ -6,6 +6,8 @@ import { TransactionVersionRoute } from './TransactionVersionRoute';
 import { TransactionReconcileRoute } from './TransactionReconcileRoute';
 import { ConfigRoute } from './ConfigRoute';
 import { JobRoute } from './JobRoute';
+import { LicenseRoute } from './LicenseRoute';
+import { LicenseVersionRoute } from './LicenseVersionRoute';
 
 @injectable()
 export class ApiRouter {
@@ -16,7 +18,9 @@ export class ApiRouter {
         @inject(EXPRESS_TYPES.TransactionVersionRoute) private transactionVersionRoute: TransactionVersionRoute,
         @inject(EXPRESS_TYPES.TransactionReconcileRoute) private transactionReconcileRoute: TransactionReconcileRoute,
         @inject(EXPRESS_TYPES.ConfigRoute) private configRoute: ConfigRoute,
-        @inject(EXPRESS_TYPES.JobRoute) private jobRoute: JobRoute
+        @inject(EXPRESS_TYPES.JobRoute) private jobRoute: JobRoute,
+        @inject(EXPRESS_TYPES.LicenseRoute) private licenseRoute: LicenseRoute,
+        @inject(EXPRESS_TYPES.LicenseVersionRoute) private licenseVersionRoute: LicenseVersionRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -45,10 +49,19 @@ export class ApiRouter {
         this.router.use('/transactions', this.transactionVersionRoute.router);
         this.router.use('/transactions', this.transactionReconcileRoute.router);
 
+        // License routes
+        this.router.use('/licenses', this.licenseRoute.router);
+        this.router.use('/licenses', this.licenseVersionRoute.router);
+
         // Config routes
         this.router.use('/config', this.configRoute.getRouter());
 
         // Job routes
         this.router.use('/jobs', this.jobRoute.getRouter());
+
+        // 404 handler for non-existent API endpoints
+        this.router.use('*', (req: Request, res: Response) => {
+            res.status(404).json({ error: 'API endpoint not found' });
+        });
     }
 }

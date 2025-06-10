@@ -4,5 +4,7 @@ export const EXPRESS_TYPES = {
     TransactionReconcileRoute: Symbol.for('TransactionReconcileRoute'),
     ConfigRoute: Symbol.for('ConfigRoute'),
     JobRoute: Symbol.for('JobRoute'),
-    ApiRouter: Symbol.for('ApiRouter')
+    ApiRouter: Symbol.for('ApiRouter'),
+    LicenseRoute: Symbol.for('LicenseRoute'),
+    LicenseVersionRoute: Symbol.for('LicenseVersionRoute')
 };

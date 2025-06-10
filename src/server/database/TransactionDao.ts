@@ -8,7 +8,6 @@ import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortTyp
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
 import { In } from "typeorm";
 import { SelectQueryBuilder } from "typeorm";
-import { TransactionResult } from "#common/types/apiTypes";
 
 @injectable()
 class TransactionDao {

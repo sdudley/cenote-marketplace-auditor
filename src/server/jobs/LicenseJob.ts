@@ -8,6 +8,7 @@ import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
 import { LicenseDao } from '../database/LicenseDao';
 import { isProperSubsetOfFields } from '#common/utils/fieldUtils';
+import { LicenseVersionDao } from '#server/database/LicenseVersionDao';
 
 const ignoreLicenseFieldsForDiffDisplay = [
     'lastUpdated',
@@ -25,7 +26,8 @@ export class LicenseJob {
 
     constructor(
         @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
-        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao
+        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao,
+        @inject(TYPES.LicenseVersionDao) private licenseVersionDao: LicenseVersionDao
     ) {
     }
 
@@ -91,7 +93,7 @@ export class LicenseJob {
                     }
 
                     // Get the current, soon-to-be old version
-                    const oldVersionNum = await this.licenseDao.getLicenseHighestVersion(existingLicense);
+                    const oldVersionNum = await this.licenseVersionDao.getLicenseHighestVersion(existingLicense);
 
                     currentVersion = oldVersionNum + 1;
 
@@ -103,7 +105,7 @@ export class LicenseJob {
                     version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
                     version.version = currentVersion;
 
-                    await this.licenseDao.saveLicenseVersions(version);
+                    await this.licenseVersionDao.saveLicenseVersions(version);
 
                     // Update the current data
                     existingLicense.data = normalizedData;
@@ -125,7 +127,7 @@ export class LicenseJob {
                 version.license = license;
                 version.entitlementId = entitlementId;
                 version.version = currentVersion;
-                await this.licenseDao.saveLicenseVersions(version);
+                await this.licenseVersionDao.saveLicenseVersions(version);
 
                 const { maintenanceStartDate, maintenanceEndDate, tier } = normalizedData;
                 const customerName = normalizedData.contactDetails.company;

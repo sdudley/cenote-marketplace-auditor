@@ -8,6 +8,8 @@ import { EXPRESS_TYPES } from './expressTypes';
 import { TransactionReconcileRoute } from '../routes/TransactionReconcileRoute';
 import { ConfigRoute } from '../routes/ConfigRoute';
 import { JobRoute } from '../routes/JobRoute';
+import { LicenseRoute } from '../routes/LicenseRoute';
+import { LicenseVersionRoute } from '../routes/LicenseVersionRoute';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = configureCommonContainer(dataSource);
@@ -19,6 +21,8 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionReconcileRoute>(EXPRESS_TYPES.TransactionReconcileRoute).to(TransactionReconcileRoute).inSingletonScope();
     container.bind<ConfigRoute>(EXPRESS_TYPES.ConfigRoute).to(ConfigRoute).inSingletonScope();
     container.bind<JobRoute>(EXPRESS_TYPES.JobRoute).to(JobRoute).inSingletonScope();
+    container.bind<LicenseRoute>(EXPRESS_TYPES.LicenseRoute).to(LicenseRoute).inSingletonScope();
+    container.bind<LicenseVersionRoute>(EXPRESS_TYPES.LicenseVersionRoute).to(LicenseVersionRoute).inSingletonScope();
 
     return container;
 }
