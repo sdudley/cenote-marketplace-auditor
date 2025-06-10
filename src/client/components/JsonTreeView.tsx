@@ -46,8 +46,8 @@ export const JsonTreeView: React.FC<JsonTreeViewProps> = ({ data, nodeId = '' })
             const BorderObject = value && typeof value === 'object' ? TreeBorder : Box;
 
             return (
-                <BorderObject>
-                    <TreeItem key={currentId} itemId={currentId} label={label}>
+                <BorderObject key={currentId}>
+                    <TreeItem itemId={currentId} label={label}>
                         {value && typeof value === 'object' && <JsonTreeView data={value} nodeId={currentId} />}
                     </TreeItem>
                 </BorderObject>
