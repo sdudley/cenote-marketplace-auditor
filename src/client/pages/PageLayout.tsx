@@ -9,12 +9,14 @@ import {
     CssBaseline,
     ThemeProvider,
     createTheme,
+    Box
 } from '@mui/material';
 import {
     Receipt as ReceiptIcon,
     CardMembership as CardMembershipIcon,
     Verified as VerifiedIcon,
-    Settings as SettingsIcon
+    Settings as SettingsIcon,
+    PlayArrow
 } from '@mui/icons-material';
 import {
     Main,
@@ -26,6 +28,7 @@ import {
     ContentBoxWrapper,
 } from '../components/styles';
 import { StyledListItemButton } from './styles';
+import { JobsPage } from './JobsPage/JobsPage';
 
 const theme = createTheme({
     palette: {
@@ -43,6 +46,7 @@ export const PageLayout: React.FC = () => {
         { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
         { text: 'Licenses', icon: <CardMembershipIcon />, path: '/licenses' },
         { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
+        { text: 'Tasks', icon: <PlayArrow />, path: '/tasks' }
     ];
 
     return (

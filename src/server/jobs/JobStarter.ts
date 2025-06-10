@@ -88,4 +88,53 @@ export class JobStarter {
             await this.validationJob.validateTransactions(startDate)
         );
     }
+
+    async startAllJobs(): Promise<{ job: string, success: boolean, error?: string }[]> {
+        const results: { job: string, success: boolean, error?: string }[] = [];
+        try {
+            // 1. Fetch Apps
+            try {
+                await this.startAddonJob(true);
+                results.push({ job: 'Fetch Apps', success: true });
+            } catch (e: any) {
+                results.push({ job: 'Fetch Apps', success: false, error: e?.message || String(e) });
+                return results;
+            }
+            // 2. Fetch App Pricing
+            try {
+                await this.startPricingJob(true);
+                results.push({ job: 'Fetch App Pricing', success: true });
+            } catch (e: any) {
+                results.push({ job: 'Fetch App Pricing', success: false, error: e?.message || String(e) });
+                return results;
+            }
+            // 3. Fetch Transactions
+            try {
+                await this.startTransactionJob(true);
+                results.push({ job: 'Fetch Transactions', success: true });
+            } catch (e: any) {
+                results.push({ job: 'Fetch Transactions', success: false, error: e?.message || String(e) });
+                return results;
+            }
+            // 4. Fetch Licenses
+            try {
+                await this.startLicenseJob(true);
+                results.push({ job: 'Fetch Licenses', success: true });
+            } catch (e: any) {
+                results.push({ job: 'Fetch Licenses', success: false, error: e?.message || String(e) });
+                return results;
+            }
+            // 5. Validate Transactions
+            try {
+                await this.startValidationJob(undefined, true);
+                results.push({ job: 'Validate Transactions', success: true });
+            } catch (e: any) {
+                results.push({ job: 'Validate Transactions', success: false, error: e?.message || String(e) });
+                return results;
+            }
+            return results;
+        } catch (error) {
+            return results;
+        }
+    }
 }
