@@ -21,5 +21,6 @@ export const TYPES = {
     TransactionSandboxService: Symbol.for('TransactionSandboxService'),
     TransactionAdjustmentValidationService: Symbol.for('TransactionAdjustmentValidationService'),
     TransactionDiffValidationService: Symbol.for('TransactionDiffValidationService'),
-    TransactionValidator: Symbol.for('TransactionValidator')
+    TransactionValidator: Symbol.for('TransactionValidator'),
+    ConfigDao: Symbol.for('ConfigDao')
 };

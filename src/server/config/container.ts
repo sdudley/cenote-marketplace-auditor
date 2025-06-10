@@ -23,6 +23,7 @@ import { TransactionSandboxService } from '#server/services/transactionValidatio
 import { TransactionValidator } from '#server/services/transactionValidation/TransactionValidator';
 import { TransactionAdjustmentValidationService } from '#server/services/transactionValidation/TransactionAdjustmentValidationService';
 import { TransactionDiffValidationService } from '#server/services/transactionValidation/TransactionDiffValidationService';
+import { ConfigDao } from '../database/ConfigDao';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
@@ -53,5 +54,6 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionValidator>(TYPES.TransactionValidator).to(TransactionValidator).inSingletonScope();
     container.bind<TransactionAdjustmentValidationService>(TYPES.TransactionAdjustmentValidationService).to(TransactionAdjustmentValidationService).inSingletonScope();
     container.bind<TransactionDiffValidationService>(TYPES.TransactionDiffValidationService).to(TransactionDiffValidationService).inSingletonScope();
+    container.bind<ConfigDao>(TYPES.ConfigDao).to(ConfigDao).inSingletonScope();
     return container;
 }
