@@ -1,4 +1,4 @@
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import axios from 'axios';
 import {
     InitiateAsyncLicenseCollection,
@@ -10,6 +10,9 @@ import {
     PricingData
 } from '#common/types/marketplace';
 import { components } from '#common/types/marketplace-api';
+import { TYPES } from '../config/types';
+import { ConfigDao } from '../database/ConfigDao';
+import { ConfigKey } from '#common/types/configItem';
 
 export type CloudOrServer = 'cloud' | 'datacenter' | 'server';
 export type LiveOrPending = 'live' | 'pending';
@@ -31,14 +34,22 @@ const licenseKey = (license : LicenseData) : string => license.appEntitlementNum
 @injectable()
 export class MarketplaceService {
     private readonly baseUrl = 'https://marketplace.atlassian.com';
+    private username: string = '';
+    private password: string = '';
+    private vendorId: string = '';
 
     constructor(
-        private readonly username: string = process.env.ATLASSIAN_ACCOUNT_USER || '',
-        private readonly password: string = process.env.ATLASSIAN_ACCOUNT_API_TOKEN || '',
-        private readonly vendorId: string = process.env.ATLASSIAN_VENDOR_ID || ''
+        @inject(TYPES.ConfigDao) private readonly configDao: ConfigDao
     ) {}
 
-    private getAuthHeader(): string {
+    private async initializeConfig(): Promise<void> {
+        this.username = await this.configDao.get<string>(ConfigKey.AtlassianAccountUser) || '';
+        this.password = await this.configDao.get<string>(ConfigKey.AtlassianAccountApiToken) || '';
+        this.vendorId = await this.configDao.get<string>(ConfigKey.AtlassianVendorId) || '';
+    }
+
+    private async getAuthHeader(): Promise<string> {
+        await this.initializeConfig();
         const credentials = Buffer.from(`${this.username}:${this.password}`).toString('base64');
         return `Basic ${credentials}`;
     }
@@ -66,7 +77,7 @@ export class MarketplaceService {
 
             const statusResponse = await axios.get<T>(this.baseUrl + statusLink, {
                 headers: {
-                    'Authorization': this.getAuthHeader()
+                    'Authorization': await this.getAuthHeader()
                 }
             });
 
@@ -86,6 +97,7 @@ export class MarketplaceService {
     }
 
     private async fetchTransactionsWithParams(params: TransactionQueryParams): Promise<TransactionData[]> {
+        await this.initializeConfig();
         const exportUrl = this.buildUrlWithParams(
             `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`,
             params
@@ -98,7 +110,7 @@ export class MarketplaceService {
             {},
             {
                 headers: {
-                    'Authorization': this.getAuthHeader(),
+                    'Authorization': await this.getAuthHeader(),
                     'Content-Type': 'application/json'
                 }
             }
@@ -116,7 +128,7 @@ export class MarketplaceService {
 
         const resultResponse = await axios.get<TransactionData[]>(resultUrl, {
             headers: {
-                'Authorization': this.getAuthHeader()
+                'Authorization': await this.getAuthHeader()
             }
         });
 
@@ -124,6 +136,7 @@ export class MarketplaceService {
     }
 
     private async fetchLicensesWithParams(params: LicenseQueryParams): Promise<LicenseData[]> {
+        await this.initializeConfig();
         const exportUrl = this.buildUrlWithParams(
             `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
             params
@@ -136,7 +149,7 @@ export class MarketplaceService {
             {},
             {
                 headers: {
-                    'Authorization': this.getAuthHeader(),
+                    'Authorization': await this.getAuthHeader(),
                     'Content-Type': 'application/json'
                 }
             }
@@ -154,7 +167,7 @@ export class MarketplaceService {
 
         const resultResponse = await axios.get<LicenseData[]>(resultUrl, {
             headers: {
-                'Authorization': this.getAuthHeader()
+                'Authorization': await this.getAuthHeader()
             }
         });
 
@@ -201,12 +214,13 @@ export class MarketplaceService {
         cloudOrServer: CloudOrServer,
         liveOrPending: LiveOrPending
     ): Promise<PricingData> {
+        await this.initializeConfig();
         const url = `${this.baseUrl}/rest/2/addons/${addonKey}/pricing/${cloudOrServer}/${liveOrPending}`;
         console.log(`Calling Marketplace API: ${url}`);
 
         const response = await axios.get<PricingData>(url, {
             headers: {
-                'Authorization': this.getAuthHeader()
+                'Authorization': await this.getAuthHeader()
             }
         });
 
@@ -214,6 +228,7 @@ export class MarketplaceService {
     }
 
     async getVendorSpecificAddonKeys(): Promise<string[]> {
+        await this.initializeConfig();
         const url = this.buildUrlWithParams(
             `${this.baseUrl}/rest/2/addons`,
             {
@@ -225,7 +240,7 @@ export class MarketplaceService {
 
         const response = await axios.get<components['schemas']['AddonCollection']>(url, {
             headers: {
-                'Authorization': this.getAuthHeader()
+                'Authorization': await this.getAuthHeader()
             }
         });
 
