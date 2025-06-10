@@ -10,6 +10,8 @@ import { createServer, ViteDevServer } from 'vite';
 import fs from 'fs';
 import { resolveModulePath } from './ModuleResolver';
 import { EXPRESS_TYPES } from './config/expressTypes';
+import { JobDao } from '#server/database/JobDao';
+import { TYPES } from '#server/config/types';
 
 // Optionally, patch require to use the resolver for #common
 const Module = require('module');
@@ -42,6 +44,9 @@ async function startServer() {
     try {
         const dataSource = await initializeDatabase();
         const container = configureContainer(dataSource);
+
+        const jobDao = container.get<JobDao>(TYPES.JobDao);
+        await jobDao.recordApplicationStart();
 
         // Set up API routes
         const apiRouter = container.get<ApiRouter>(EXPRESS_TYPES.ApiRouter);

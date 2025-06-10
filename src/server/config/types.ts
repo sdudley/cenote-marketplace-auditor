@@ -22,5 +22,7 @@ export const TYPES = {
     TransactionAdjustmentValidationService: Symbol.for('TransactionAdjustmentValidationService'),
     TransactionDiffValidationService: Symbol.for('TransactionDiffValidationService'),
     TransactionValidator: Symbol.for('TransactionValidator'),
-    ConfigDao: Symbol.for('ConfigDao')
+    ConfigDao: Symbol.for('ConfigDao'),
+    JobDao: Symbol.for('JobDao'),
+    JobRunner: Symbol.for('JobRunner')
 };
