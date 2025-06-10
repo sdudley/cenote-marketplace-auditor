@@ -13,8 +13,6 @@ services:
       - DB_DATABASE=${DB_DATABASE:-marketplace_auditor}
     depends_on:
       - db
-    volumes:
-      - .:/app
 
   db:
     container_name: auditor-postgres
@@ -29,4 +27,4 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  postgres_data: 
+  postgres_data:
