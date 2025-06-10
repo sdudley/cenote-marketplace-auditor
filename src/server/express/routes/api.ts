@@ -5,6 +5,7 @@ import { TransactionRoute } from './TransactionRoute';
 import { TransactionVersionRoute } from './TransactionVersionRoute';
 import { TransactionReconcileRoute } from './TransactionReconcileRoute';
 import { ConfigRoute } from './ConfigRoute';
+import { JobRoute } from './JobRoute';
 
 @injectable()
 export class ApiRouter {
@@ -14,7 +15,8 @@ export class ApiRouter {
         @inject(EXPRESS_TYPES.TransactionRoute) private transactionRoute: TransactionRoute,
         @inject(EXPRESS_TYPES.TransactionVersionRoute) private transactionVersionRoute: TransactionVersionRoute,
         @inject(EXPRESS_TYPES.TransactionReconcileRoute) private transactionReconcileRoute: TransactionReconcileRoute,
-        @inject(EXPRESS_TYPES.ConfigRoute) private configRoute: ConfigRoute
+        @inject(EXPRESS_TYPES.ConfigRoute) private configRoute: ConfigRoute,
+        @inject(EXPRESS_TYPES.JobRoute) private jobRoute: JobRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -45,5 +47,8 @@ export class ApiRouter {
 
         // Config routes
         this.router.use('/config', this.configRoute.getRouter());
+
+        // Job routes
+        this.router.use('/jobs', this.jobRoute.getRouter());
     }
 }

@@ -3,5 +3,6 @@ export const EXPRESS_TYPES = {
     TransactionVersionRoute: Symbol.for('TransactionVersionRoute'),
     TransactionReconcileRoute: Symbol.for('TransactionReconcileRoute'),
     ConfigRoute: Symbol.for('ConfigRoute'),
+    JobRoute: Symbol.for('JobRoute'),
     ApiRouter: Symbol.for('ApiRouter')
 };
