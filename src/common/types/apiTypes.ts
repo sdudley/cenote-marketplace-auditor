@@ -27,7 +27,8 @@ export enum LicenseQuerySortType {
     UpdatedAt = 'updatedAt',
     MaintenanceStartDate = 'maintenanceStartDate',
     MaintenanceEndDate = 'maintenanceEndDate',
-    VersionCount = 'versionCount'
+    VersionCount = 'versionCount',
+    AtlassianLastUpdated = 'atlassianLastUpdated'
 }
 
 export interface TransactionQueryParams {

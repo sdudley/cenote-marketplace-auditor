@@ -163,6 +163,14 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         whiteSpace
                                     />
                                     <SortableHeader<LicenseQuerySortType>
+                                        field={LicenseQuerySortType.AtlassianLastUpdated}
+                                        label="Atlassian Last Updated"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
+                                    <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.VersionCount}
                                         label="Versions"
                                         currentSort={sortBy}
@@ -188,6 +196,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         <TableCellNoWrap>{license.license.data.maintenanceEndDate}</TableCellNoWrap>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(license.license.createdAt.toString())}</TableCellNoWrap>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(license.license.updatedAt.toString())}</TableCellNoWrap>
+                                        <TableCellNoWrap>{isoStringWithOnlyDate(license.license.data.lastUpdated)}</TableCellNoWrap>
                                         <TableCellNoWrap>{license.versionCount}</TableCellNoWrap>
                                     </StyledTableRow>
                                 ))}
