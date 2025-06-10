@@ -208,8 +208,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        align="right"
                                     />
-                                    <TableHeaderCell>Maintenance</TableHeaderCell>
+                                    <TableHeaderCell align="right">Maintenance</TableHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"
@@ -256,8 +257,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             {tr.transaction.data.customerDetails.company}
                                             {tr.isSandbox && tr.cloudSiteHostname &&<StyledSandboxAnnotation>({tr.cloudSiteHostname})</StyledSandboxAnnotation>}
                                         </StyledTableCell>
-                                        <StyledTableCell>{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
-                                        <StyledTableCell>{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
+                                        <StyledTableCell align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
+                                        <StyledTableCell align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
                                         <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
                                         <StyledTableCell>
