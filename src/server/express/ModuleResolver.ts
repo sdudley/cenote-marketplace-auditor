@@ -8,11 +8,11 @@ import path from 'path';
  * @returns The resolved absolute path
  */
 export function resolveModulePath(importPath: string): string {
-  if (importPath.startsWith('#common')) {
-    const resolved = importPath.replace(
-      '#common',
-      path.join(__dirname, '../../../src/common')
-    );
+  if (importPath.startsWith('#')) {
+    const resolved = importPath
+    .replace('#common', path.join(__dirname, '../../../src/common'))
+    .replace('#server', path.join(__dirname, '../../../src/server'))
+    .replace('#client', path.join(__dirname, '../../../src/client'));
     // console.log('[ModuleResolver] Resolving:', importPath, '->', resolved);
     return resolved;
   }
@@ -24,7 +24,7 @@ const Module = require('module');
 const originalRequire = Module.prototype.require;
 Module.prototype.require = function (importPath: any) {
 //   console.log('[ModuleResolver] Require called with:', importPath);
-  if (typeof importPath === 'string' && importPath.startsWith('#common')) {
+  if (typeof importPath === 'string' && importPath.startsWith('#')) {
     const resolved = resolveModulePath(importPath);
     // console.log('[ModuleResolver] Resolving #common import:', importPath, '->', resolved);
     return originalRequire.call(this, resolved);
