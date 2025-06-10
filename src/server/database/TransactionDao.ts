@@ -184,7 +184,7 @@ class TransactionDao {
                 if (reconciled) {
                     queryBuilder.andWhere('reconcile.reconciled = :reconciled', { reconciled });
                 } else {
-                    queryBuilder.andWhere('reconcile.reconciled = :reconciled or reconcile.reconciled is null', { reconciled });
+                    queryBuilder.andWhere('(reconcile.reconciled = :reconciled or reconcile.reconciled is null)', { reconciled });
                 }
             }
 
