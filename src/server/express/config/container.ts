@@ -6,6 +6,7 @@ import { TransactionRoute } from '../routes/TransactionRoute';
 import { TransactionVersionRoute } from '../routes/TransactionVersionRoute';
 import { EXPRESS_TYPES } from './expressTypes';
 import { TransactionReconcileRoute } from '../routes/TransactionReconcileRoute';
+import { ConfigRoute } from '../routes/ConfigRoute';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = configureCommonContainer(dataSource);
@@ -15,6 +16,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionRoute>(EXPRESS_TYPES.TransactionRoute).to(TransactionRoute).inSingletonScope();
     container.bind<TransactionVersionRoute>(EXPRESS_TYPES.TransactionVersionRoute).to(TransactionVersionRoute).inSingletonScope();
     container.bind<TransactionReconcileRoute>(EXPRESS_TYPES.TransactionReconcileRoute).to(TransactionReconcileRoute).inSingletonScope();
+    container.bind<ConfigRoute>(EXPRESS_TYPES.ConfigRoute).to(ConfigRoute).inSingletonScope();
 
     return container;
 }
