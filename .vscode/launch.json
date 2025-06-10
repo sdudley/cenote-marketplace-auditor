@@ -26,7 +26,7 @@
             ],
             "env": {
                 "NODE_ENV": "development",
-                "DB_LOGGING": "true",
+                //"DB_LOGGING": "true",
                 //"NODE_OPTIONS": "--enable-source-maps"
             }
         },
@@ -79,7 +79,8 @@
             ],
             "env": {
                 "NODE_ENV": "development",
-                "NODE_OPTIONS": "--enable-source-maps"
+                "NODE_OPTIONS": "--enable-source-maps",
+                // "DB_LOGGING": "true"
             }
         },
         {
