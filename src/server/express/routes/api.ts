@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
 import { EXPRESS_TYPES } from '../config/expressTypes';
 import { TransactionRoute } from './TransactionRoute';
@@ -20,7 +20,19 @@ export class ApiRouter {
         this.initializeRoutes();
     }
 
+    private setNoCacheHeaders(req: Request, res: Response, next: NextFunction): void {
+        res.set({
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        });
+        next();
+    }
+
     private initializeRoutes(): void {
+        // Apply no-cache headers to all API routes
+        this.router.use(this.setNoCacheHeaders.bind(this));
+
         // Health check endpoint
         this.router.get('/health', (req: Request, res: Response) => {
             res.json({ status: 'ok' });

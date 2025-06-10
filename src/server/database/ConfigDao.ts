@@ -41,9 +41,9 @@ export class ConfigDao {
         this.cacheInitialized = true;
     }
 
-    async get<T extends ConfigValue>(key: string): Promise<T | null> {
+    async get<T extends ConfigValue>(key: string): Promise<T | undefined> {
         await this.initializeCache();
-        return this.cache.get(key) as T | null;
+        return this.cache.get(key) as T | undefined;
     }
 
     async set<T extends ConfigValue>(key: string, value: T, description?: string): Promise<void> {

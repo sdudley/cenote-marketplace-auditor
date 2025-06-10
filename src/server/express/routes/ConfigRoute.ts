@@ -2,13 +2,7 @@ import { Router } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { ConfigDao } from '../../database/ConfigDao';
-import { ConfigKey, ConfigValueType, getConfigKeyType, ConfigValueForKey } from '#common/types/configItem';
-
-interface ConfigValue {
-    key: ConfigKey;
-    value: string | number | boolean;
-    description?: string;
-}
+import { ConfigKey, getConfigKeyType, ConfigValueForKey } from '#common/types/configItem';
 
 @injectable()
 export class ConfigRoute {
@@ -37,23 +31,6 @@ export class ConfigRoute {
     }
 
     private initializeRoutes(): void {
-        // Get all config values
-        this.router.get('/', async (req, res) => {
-            try {
-                const values: ConfigValue[] = [];
-                for (const key of Object.values(ConfigKey)) {
-                    const value = await this.configDao.get(key);
-                    if (value !== null) {
-                        values.push({ key: key as ConfigKey, value });
-                    }
-                }
-                res.json(values);
-            } catch (error) {
-                console.error('Error getting config values:', error);
-                res.status(500).json({ error: 'Failed to get config values' });
-            }
-        });
-
         // Get a specific config value
         this.router.get('/:key', async (req, res) => {
             try {
@@ -63,8 +40,8 @@ export class ConfigRoute {
                 }
 
                 const value = await this.configDao.get(key);
-                if (value === null) {
-                    return res.status(404).json({ error: 'Config value not found' });
+                if (typeof value === 'undefined') {
+                    return res.status(404).end();
                 }
 
                 res.json({ key, value });
@@ -108,6 +85,11 @@ export class ConfigRoute {
                 const key = req.params.key as ConfigKey;
                 if (!Object.values(ConfigKey).includes(key)) {
                     return res.status(400).json({ error: 'Invalid config key' });
+                }
+
+                const value = await this.configDao.get(key);
+                if (typeof value === 'undefined') {
+                    return res.status(404).end();
                 }
 
                 await this.configDao.delete(key);
