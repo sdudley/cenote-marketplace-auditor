@@ -78,6 +78,11 @@ export class JobDao {
         return this.repository.findOne({ where: { jobType } });
     }
 
+    async isJobRunning(jobType: JobType): Promise<boolean> {
+        const jobStatus = await this.getJobStatus(jobType);
+        return jobStatus?.lastStartTime !== null && jobStatus?.lastEndTime === null;
+    }
+
     /**
      * Fetches the status of all jobs
      */

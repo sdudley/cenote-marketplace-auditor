@@ -3,15 +3,7 @@ import 'dotenv/config';
 import { initializeDatabase } from '../config/database';
 import { configureContainer } from '../config/container';
 import { TYPES } from '../config/types';
-import { MarketplaceService } from '../services/MarketplaceService';
-import { AddonJob } from './AddonJob';
-import { TransactionJob } from './TransactionJob';
-import { LicenseJob } from './LicenseJob';
-import { PricingJob } from './PricingJob';
-import { ValidationJob } from './ValidationJob';
-import { JobRunner } from './JobRunner';
-import { JobType } from '#common/entities/JobStatus';
-
+import { JobStarter } from './JobStarter';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -28,42 +20,28 @@ async function main() {
     }
 
     try {
-        const marketplaceService = container.get<MarketplaceService>(TYPES.MarketplaceService);
-        const jobRunner = container.get<JobRunner>(TYPES.JobRunner);
+        const jobStarter = container.get<JobStarter>(TYPES.JobStarter);
 
         if (flags.size === 0 || flags.has('--with-fetch-apps')) {
-            const addonJob = container.get<AddonJob>(TYPES.AddonJob);
-            await jobRunner.runJob(JobType.AddonJob, () => addonJob.syncAddonKeys());
+            await jobStarter.startAddonJob(true);
         }
 
         if (flags.size === 0 || flags.has('--with-pricing')) {
-            const pricingJob = container.get<PricingJob>(TYPES.PricingJob);
-            await jobRunner.runJob(JobType.PricingJob, () => pricingJob.fetchPricing());
+            await jobStarter.startPricingJob(true);
         }
 
         if (flags.size === 0 || flags.has('--with-transactions')) {
             console.log(`\n=== Fetching transactions ===`);
-
-            await jobRunner.runJob(JobType.TransactionJob, async () => {
-                const transactions = await marketplaceService.getTransactions();
-                const transactionJob = container.get<TransactionJob>(TYPES.TransactionJob);
-                await transactionJob.processTransactions(transactions);
-            });
+            await jobStarter.startTransactionJob(true);
         }
 
         if (flags.size === 0 || flags.has('--with-licenses')) {
             console.log(`\n=== Fetching licenses ===`);
-
-            await jobRunner.runJob(JobType.LicenseJob, async () => {
-                const licenses = await marketplaceService.getLicenses();
-                const licenseJob = container.get<LicenseJob>(TYPES.LicenseJob);
-                await licenseJob.processLicenses(licenses);
-            });
+            await jobStarter.startLicenseJob(true);
         }
 
         if (flags.size === 0 || flags.has('--validate-transactions')) {
-            const validationJob = container.get<ValidationJob>(TYPES.ValidationJob);
-            await jobRunner.runJob(JobType.ValidationJob, () => validationJob.validateTransactions(startDate));
+            await jobStarter.startValidationJob(startDate, true);
         }
     } catch (e) {
         console.error('Unhandled error:', e);

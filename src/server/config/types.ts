@@ -24,5 +24,5 @@ export const TYPES = {
     TransactionValidator: Symbol.for('TransactionValidator'),
     ConfigDao: Symbol.for('ConfigDao'),
     JobDao: Symbol.for('JobDao'),
-    JobRunner: Symbol.for('JobRunner')
+    JobStarter: Symbol.for('JobStarter')
 };

@@ -25,7 +25,7 @@ import { TransactionAdjustmentValidationService } from '#server/services/transac
 import { TransactionDiffValidationService } from '#server/services/transactionValidation/TransactionDiffValidationService';
 import { ConfigDao } from '../database/ConfigDao';
 import { JobDao } from '../database/JobDao';
-import { JobRunner } from '#server/jobs/JobRunner';
+import { JobStarter } from '../jobs/JobStarter';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
@@ -58,6 +58,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionDiffValidationService>(TYPES.TransactionDiffValidationService).to(TransactionDiffValidationService).inSingletonScope();
     container.bind<ConfigDao>(TYPES.ConfigDao).to(ConfigDao).inSingletonScope();
     container.bind<JobDao>(TYPES.JobDao).to(JobDao).inSingletonScope();
-    container.bind<JobRunner>(TYPES.JobRunner).to(JobRunner).inSingletonScope();
+    container.bind<JobStarter>(TYPES.JobStarter).to(JobStarter).inSingletonScope();
+
     return container;
 }
