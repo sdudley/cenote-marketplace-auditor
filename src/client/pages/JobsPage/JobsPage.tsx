@@ -46,19 +46,20 @@ export const JobsPage: React.FC = () => {
             if (!response.ok) throw new Error('Failed to fetch job statuses');
             const statuses: JobStatusResponse[] = await response.json();
 
-            setJobs(prevJobs => prevJobs.map(job => {
-                const status = statuses.find(s => s.jobType === job.type) || null;
-                const isRunning = Boolean(status?.lastStartTime && !status.lastEndTime);
-                return { ...job, status, isRunning };
-            }));
+            setJobs(prevJobs => {
+                const newJobs = prevJobs.map(job => {
+                    const status = statuses.find(s => s.jobType === job.type) || null;
+                    const isRunning = Boolean(status?.lastStartTime && !status.lastEndTime);
+                    return { ...job, status, isRunning };
+                });
 
-            console.log(`Set jobs to:`);
-            console.dir(jobs);
+                if (isPolling && !newJobs.some(job => job.isRunning)) {
+                    setIsPolling(false);
+                }
 
-            if (isPolling && !jobs.some(job => job.isRunning)) {
-                console.log(`Stopping polling`);
-                setIsPolling(false);
-            }
+                return newJobs;
+            });
+
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to fetch job statuses';
             setError(errorMessage);
@@ -72,7 +73,7 @@ export const JobsPage: React.FC = () => {
     useEffect(() => {
         if (!isPolling) return;
 
-        const interval = setInterval(fetchJobStatuses, 5000);
+        const interval = setInterval(fetchJobStatuses, 2000);
         return () => clearInterval(interval);
     }, [isPolling]);
 
