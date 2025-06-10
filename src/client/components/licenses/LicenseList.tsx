@@ -181,25 +181,33 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                 </TableRow>
                             </StyledTableHead>
                             <StyledTableBody>
-                                {licenses && licenses.map((license) => (
-                                    <StyledTableRow
-                                        key={`${license.license.id}`}
-                                        onClick={() => setSelectedLicense(license)}
-                                    >
-                                        <TableCellNoWrap>{license.license.entitlementId}</TableCellNoWrap>
-                                        <StyledTableCell>{license.license.data.addonName}</StyledTableCell>
-                                        <StyledTableCell>{license.license.data.licenseType}</StyledTableCell>
-                                        <StyledTableCell>{license.license.data.hosting}</StyledTableCell>
-                                        <StyledTableCell>{license.license.data.tier}</StyledTableCell>
-                                        <StyledTableCell>{license.license.data.contactDetails.company}</StyledTableCell>
-                                        <TableCellNoWrap>{license.license.data.maintenanceStartDate}</TableCellNoWrap>
-                                        <TableCellNoWrap>{license.license.data.maintenanceEndDate}</TableCellNoWrap>
-                                        <TableCellNoWrap>{isoStringWithOnlyDate(license.license.createdAt.toString())}</TableCellNoWrap>
-                                        <TableCellNoWrap>{isoStringWithOnlyDate(license.license.updatedAt.toString())}</TableCellNoWrap>
-                                        <TableCellNoWrap>{isoStringWithOnlyDate(license.license.data.lastUpdated)}</TableCellNoWrap>
-                                        <TableCellNoWrap>{license.versionCount}</TableCellNoWrap>
+                                {licenses && licenses.length > 0 ? (
+                                    licenses.map((license) => (
+                                        <StyledTableRow
+                                            key={`${license.license.id}`}
+                                            onClick={() => setSelectedLicense(license)}
+                                        >
+                                            <TableCellNoWrap>{license.license.entitlementId}</TableCellNoWrap>
+                                            <StyledTableCell>{license.license.data.addonName}</StyledTableCell>
+                                            <StyledTableCell>{license.license.data.licenseType}</StyledTableCell>
+                                            <StyledTableCell>{license.license.data.hosting}</StyledTableCell>
+                                            <StyledTableCell>{license.license.data.tier}</StyledTableCell>
+                                            <StyledTableCell>{license.license.data.contactDetails.company}</StyledTableCell>
+                                            <TableCellNoWrap>{license.license.data.maintenanceStartDate}</TableCellNoWrap>
+                                            <TableCellNoWrap>{license.license.data.maintenanceEndDate}</TableCellNoWrap>
+                                            <TableCellNoWrap>{isoStringWithOnlyDate(license.license.createdAt.toString())}</TableCellNoWrap>
+                                            <TableCellNoWrap>{isoStringWithOnlyDate(license.license.updatedAt.toString())}</TableCellNoWrap>
+                                            <TableCellNoWrap>{isoStringWithOnlyDate(license.license.data.lastUpdated)}</TableCellNoWrap>
+                                            <TableCellNoWrap>{license.versionCount}</TableCellNoWrap>
+                                        </StyledTableRow>
+                                    ))
+                                ) : (
+                                    <StyledTableRow>
+                                        <StyledTableCell colSpan={13} align="center" sx={{ py: 4 }}>
+                                            No licenses. Please configure the application through the Configuration page, then start all tasks on the Tasks page.
+                                        </StyledTableCell>
                                     </StyledTableRow>
-                                ))}
+                                )}
                             </StyledTableBody>
                         </StyledTable>
                     </StyledListPaper>

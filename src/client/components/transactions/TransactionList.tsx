@@ -239,40 +239,48 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                 </TableRow>
                             </StyledTableHead>
                             <StyledTableBody>
-                                {transactions && transactions.map((tr) => (
-                                    <StyledTableRow
-                                        key={`${tr.transaction.id}`}
-                                        onClick={() => setSelectedTransaction(tr)}
-                                    >
-                                        <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
-                                        <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
-                                        <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
-                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.saleType}</StyledTableCell>
-                                        <StyledTableCell>{tr.transaction.data.purchaseDetails.hosting}</StyledTableCell>
-                                        <StyledTableCell>
-                                            {tr.transaction.data.purchaseDetails.tier}
-                                            {tr.isSandbox && <StyledSandboxAnnotation>Sandbox</StyledSandboxAnnotation>}
+                                {transactions && transactions.length > 0 ? (
+                                    transactions.map((tr) => (
+                                        <StyledTableRow
+                                            key={`${tr.transaction.id}`}
+                                            onClick={() => setSelectedTransaction(tr)}
+                                        >
+                                            <TableCellNoWrap>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>
+                                            <TableCellNoWrap>{tr.transaction.entitlementId}</TableCellNoWrap>
+                                            <StyledTableCell>{tr.transaction.data.addonName}</StyledTableCell>
+                                            <StyledTableCell>{tr.transaction.data.purchaseDetails.saleType}</StyledTableCell>
+                                            <StyledTableCell>{tr.transaction.data.purchaseDetails.hosting}</StyledTableCell>
+                                            <StyledTableCell>
+                                                {tr.transaction.data.purchaseDetails.tier}
+                                                {tr.isSandbox && <StyledSandboxAnnotation>Sandbox</StyledSandboxAnnotation>}
+                                            </StyledTableCell>
+                                            <StyledTableCell>
+                                                {tr.transaction.data.customerDetails.company}
+                                                {tr.isSandbox && tr.cloudSiteHostname &&<StyledSandboxAnnotation>({tr.cloudSiteHostname})</StyledSandboxAnnotation>}
+                                            </StyledTableCell>
+                                            <StyledTableCell align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
+                                            <StyledTableCell align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
+                                            <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
+                                            <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
+                                            <StyledTableCell>
+                                                {tr.versionCount}
+                                            </StyledTableCell>
+                                            <StatusCell onClick={(e) => e.stopPropagation()}>
+                                                <ReconciliationControls
+                                                    transaction={tr}
+                                                    onQuickReconcile={handleQuickReconcile}
+                                                    onShowDetails={setSelectedTransactionForReconcile}
+                                                />
+                                            </StatusCell>
+                                        </StyledTableRow>
+                                    ))
+                                ) : (
+                                    <StyledTableRow>
+                                        <StyledTableCell colSpan={14} align="center" sx={{ py: 4 }}>
+                                            No transactions. Please configure the application through the Configuration page, then start all tasks on the Tasks page.
                                         </StyledTableCell>
-                                        <StyledTableCell>
-                                            {tr.transaction.data.customerDetails.company}
-                                            {tr.isSandbox && tr.cloudSiteHostname &&<StyledSandboxAnnotation>({tr.cloudSiteHostname})</StyledSandboxAnnotation>}
-                                        </StyledTableCell>
-                                        <StyledTableCell align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
-                                        <StyledTableCell align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
-                                        <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
-                                        <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
-                                        <StyledTableCell>
-                                            {tr.versionCount}
-                                        </StyledTableCell>
-                                        <StatusCell onClick={(e) => e.stopPropagation()}>
-                                            <ReconciliationControls
-                                                transaction={tr}
-                                                onQuickReconcile={handleQuickReconcile}
-                                                onShowDetails={setSelectedTransactionForReconcile}
-                                            />
-                                        </StatusCell>
                                     </StyledTableRow>
-                                ))}
+                                )}
                             </StyledTableBody>
                         </StyledTable>
                     </StyledListPaper>
