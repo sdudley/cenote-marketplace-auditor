@@ -53,7 +53,9 @@ export const JobsPage: React.FC = () => {
                     return { ...job, status, isRunning };
                 });
 
-                if (isPolling && !newJobs.some(job => job.isRunning)) {
+                if (newJobs.some(job => job.isRunning)) {
+                    setIsPolling(true);
+                } else if (isPolling) {
                     setIsPolling(false);
                 }
 
