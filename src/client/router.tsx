@@ -2,6 +2,7 @@ import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { PageLayout } from './pages/PageLayout';
+import { ConfigPage } from './pages/ConfigPage';
 
 export const router = createBrowserRouter([
     {
@@ -15,6 +16,10 @@ export const router = createBrowserRouter([
             {
                 path: '/transactions',
                 element: <TransactionsPage />,
+            },
+            {
+                path: '/config',
+                element: <ConfigPage />,
             }
         ]
     }

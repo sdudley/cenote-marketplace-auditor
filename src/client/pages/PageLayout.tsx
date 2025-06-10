@@ -13,7 +13,8 @@ import {
 import {
     Receipt as ReceiptIcon,
     CardMembership as CardMembershipIcon,
-    Verified as VerifiedIcon
+    Verified as VerifiedIcon,
+    Settings as SettingsIcon
 } from '@mui/icons-material';
 import {
     Main,
@@ -41,7 +42,7 @@ export const PageLayout: React.FC = () => {
     const menuItems = [
         { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
         { text: 'Licenses', icon: <CardMembershipIcon />, path: '/licenses' },
-        { text: 'Validation', icon: <VerifiedIcon />, path: '/validation' },
+        { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
     ];
 
     return (

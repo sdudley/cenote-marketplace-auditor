@@ -1,5 +1,5 @@
 import { styled as muiStyled } from '@mui/material/styles';
-import { Box, ListItemButton } from '@mui/material';
+import { Box, ListItemButton, Typography } from '@mui/material';
 
 export const PageContainer = muiStyled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
@@ -10,6 +10,7 @@ export const PageContainer = muiStyled(Box)(({ theme }) => ({
 
 export const PageTitle = muiStyled(Box)(({ theme }) => ({
     marginBottom: theme.spacing(3),
+    paddingLeft: theme.spacing(2),
 }));
 
 export const StyledListItemButton = muiStyled(ListItemButton)(({ theme }) => ({
@@ -19,4 +20,35 @@ export const StyledListItemButton = muiStyled(ListItemButton)(({ theme }) => ({
             backgroundColor: 'rgba(25, 118, 210, 0.12)',
         },
     },
+}));
+
+export const ConfigPageTitle = muiStyled(Typography)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+})) as typeof Typography;
+
+export const ConfigFormContainer = muiStyled(Box)(({ theme }) => ({
+    maxWidth: 600,
+    margin: '0 auto',
+    padding: theme.spacing(3),
+}));
+
+export const ConfigFormFields = muiStyled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(3),
+}));
+
+export const ConfigSaveButtonContainer = muiStyled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: theme.spacing(2),
+}));
+
+export const LoadingContainer = muiStyled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
 }));
