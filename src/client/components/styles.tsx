@@ -164,7 +164,7 @@ export const TableWrapper = styled(Box)({
     width: '100%',
     maxWidth: '100%',
     position: 'relative',
-    height: 'calc(100vh - 280px)',
+    height: 'calc(100vh - 280px - 16px)', // Increased to 16px to ensure full scrollbar visibility
     marginBottom: 0
 });
 
@@ -175,7 +175,21 @@ export const StyledTableContainer = styled(MuiTableContainer)({
     overflowX: 'auto',
     overflowY: 'auto',
     height: '100%',
-    marginBottom: 0
+    marginBottom: 0,
+    '&::-webkit-scrollbar': {
+        width: '8px',
+        height: '8px'
+    },
+    '&::-webkit-scrollbar-track': {
+        background: '#f1f1f1'
+    },
+    '&::-webkit-scrollbar-thumb': {
+        background: '#888',
+        borderRadius: '4px'
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+        background: '#555'
+    }
 });
 
 export const PaginationWrapper = styled(Box)({
