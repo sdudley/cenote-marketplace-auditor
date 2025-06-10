@@ -17,7 +17,7 @@ export class LicenseDao {
         [LicenseQuerySortType.UpdatedAt]: ['license.updatedAt'],
         [LicenseQuerySortType.MaintenanceStartDate]: ["license.data->'maintenanceStartDate'", 'license.createdAt'],
         [LicenseQuerySortType.MaintenanceEndDate]: ["license.data->'maintenanceEndDate'", 'license.createdAt'],
-        [LicenseQuerySortType.VersionCount]: [ 'version_count.version_count', 'transaction.createdAt' ],
+        [LicenseQuerySortType.VersionCount]: [ 'version_count.version_count', 'license.createdAt' ],
     };
 
     constructor(@inject(TYPES.DataSource) dataSource: DataSource) {

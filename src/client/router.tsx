@@ -4,6 +4,7 @@ import { TransactionsPage } from './pages/TransactionsPage';
 import { PageLayout } from './pages/PageLayout';
 import { ConfigPage } from './pages/ConfigPage';
 import { JobsPage } from './pages/JobsPage/JobsPage';
+import { LicensesPage } from './pages/LicensesPage';
 
 export const router = createBrowserRouter([
     {
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
             {
                 path: '/transactions',
                 element: <TransactionsPage />,
+            },
+            {
+                path: '/licenses',
+                element: <LicensesPage />,
             },
             {
                 path: '/config',
