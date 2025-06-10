@@ -56,7 +56,7 @@ export const PageLayout: React.FC = () => {
                 <StyledAppBar position="fixed">
                     <Toolbar>
                         <Typography variant="h6" noWrap component="div">
-                            Marketplace Auditor
+                            Cenote Marketplace Auditor
                         </Typography>
                     </Toolbar>
                 </StyledAppBar>
