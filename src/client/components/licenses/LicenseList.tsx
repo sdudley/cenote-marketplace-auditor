@@ -127,6 +127,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                     <TableHeaderCell>Entitlement ID</TableHeaderCell>
                                     <TableHeaderCell>App</TableHeaderCell>
                                     <TableHeaderCell>License Type</TableHeaderCell>
+                                    <TableHeaderCell>Status</TableHeaderCell>
                                     <TableHeaderCell>Hosting</TableHeaderCell>
                                     <TableHeaderCell>Tier</TableHeaderCell>
                                     <TableHeaderCell>Company</TableHeaderCell>
@@ -190,6 +191,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                             <TableCellNoWrap>{license.license.entitlementId}</TableCellNoWrap>
                                             <StyledTableCell>{license.license.data.addonName}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.licenseType}</StyledTableCell>
+                                            <StyledTableCell>{license.license.data.status ? license.license.data.status.charAt(0).toUpperCase() + license.license.data.status.slice(1) : ''}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.hosting}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.tier}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.contactDetails.company}</StyledTableCell>
