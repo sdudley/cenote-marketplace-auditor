@@ -8,6 +8,8 @@ import { encodeSlackText } from '../utils/SlackUtils';
 import { formatCurrency } from '#common/utils/formatCurrency';
 import { dateDiff } from '#common/utils/dateUtils';
 import { Transaction } from '#common/entities/Transaction';
+import { License } from '#common/entities/License';
+import { LicenseData } from '#common/types/marketplace';
 
 export type SlackBlock = (KnownBlock | Block);
 
@@ -18,12 +20,23 @@ export interface SlackTransactionData {
     hosting: string;
     tier: string;
 
-    company: string;
+    company: string|undefined;
 
     maintenanceStartDate: string;
     maintenanceEndDate: string;
 
     vendorAmount: number;
+}
+
+export interface SlackLicenseData {
+    lastUpdated: string;
+    addonName: string;
+    hosting: string;
+    company: string;
+    maintenanceStartDate: string;
+    maintenanceEndDate: string|undefined;
+    oldMaintenanceEndDate: string|undefined;
+    extended: boolean;
 }
 
 @injectable()
@@ -117,6 +130,30 @@ export class SlackService {
         }
     }
 
+    public mapLicenseForSlack(opts: { license: License; oldLicenseData: LicenseData|undefined; extended: boolean; }): SlackLicenseData|undefined {
+        const { license, oldLicenseData, extended } = opts;
+        const { addonName, lastUpdated } = license.data;
+        const { licenseType } = license.data;
+        const { hosting } = license.data;
+        const { company } = license.data.contactDetails;
+        const { maintenanceStartDate, maintenanceEndDate, status } = license.data;
+
+        if (licenseType !== 'EVALUATION') {
+            return undefined;
+        }
+
+        return {
+            lastUpdated,
+            addonName,
+            hosting,
+            company: company ?? 'Unknown',
+            maintenanceStartDate,
+            maintenanceEndDate: maintenanceEndDate ?? 'Unknown',
+            oldMaintenanceEndDate: oldLicenseData?.maintenanceEndDate,
+            extended
+        };
+    }
+
     public mapTransactionForSlack(transaction: Transaction): SlackTransactionData {
         const { addonName } = transaction.data;
         const { saleDate, vendorAmount, tier } = transaction.data.purchaseDetails;
@@ -204,5 +241,74 @@ export class SlackService {
         }
 
         await this.postMessage(SlackChannelType.Sales, message, blocks);
+    }
+
+    public async postNewLicensesToSlack(licenses: SlackLicenseData[]): Promise<void> {
+        const message = encodeSlackText(`🔍 ${licenses.length} New Evaluation${licenses.length > 1 ? 's' : ''}`);
+
+        const blocks: SlackBlock[] = [
+            {
+                type: 'header',
+                text: {
+                    type: 'plain_text',
+                    text: message,
+                    emoji: true
+                }
+            },
+            {
+                type: 'divider'
+            }
+        ];
+
+        // Add a block for each license
+        for (const l of licenses) {
+            const maintenanceDays = l.maintenanceEndDate ? dateDiff(l.maintenanceStartDate, l.maintenanceEndDate) : 'Unknown';
+            let extensionText = '';
+
+            if (l.extended && l.oldMaintenanceEndDate && l.maintenanceEndDate) {
+                const extensionDays = dateDiff(l.oldMaintenanceEndDate, l.maintenanceEndDate);
+                const extensionDaysText = extensionDays > 30 ?
+                    `*${extensionDays} days*` :
+                    `${extensionDays} days`;
+                extensionText = `\nExtended by ${extensionDaysText} (${l.oldMaintenanceEndDate} to ${l.maintenanceEndDate})`;
+            }
+
+            const maintenanceDaysText = typeof maintenanceDays === 'number' && maintenanceDays > 30 ?
+                `*${maintenanceDays} days*` :
+                `${maintenanceDays} days`;
+
+            blocks.push(
+                {
+                    type: 'section',
+                    text: {
+                        type: 'mrkdwn',
+                        text: encodeSlackText(`${l.addonName} - *${l.company}*`)
+                    }
+                },
+                {
+                    type: 'section',
+                    fields: [
+                        {
+                            type: 'mrkdwn',
+                            text: encodeSlackText(`*Hosting:*\n${l.hosting}`)
+                        },
+                        {
+                            type: 'mrkdwn',
+                            text: encodeSlackText(`*Last Updated:*\n${l.lastUpdated}`)
+                        },
+                        {
+                            type: 'mrkdwn',
+                            text: encodeSlackText(`*Evaluation Period*\n${maintenanceDaysText} (${l.maintenanceStartDate} to ${l.maintenanceEndDate})${extensionText}`)
+                        }
+
+                    ]
+                },
+                {
+                    type: 'divider'
+                }
+            );
+        }
+
+        await this.postMessage(SlackChannelType.Evaluations, message, blocks);
     }
 }

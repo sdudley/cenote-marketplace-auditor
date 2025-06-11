@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { LicenseDao } from '../database/LicenseDao';
 import { isProperSubsetOfFields } from '#common/utils/fieldUtils';
 import { LicenseVersionDao } from '#server/database/LicenseVersionDao';
+import { SlackLicenseData, SlackService } from '#server/services/SlackService';
 
 const ignoreLicenseFieldsForDiffDisplay = [
     'lastUpdated',
@@ -27,7 +28,8 @@ export class LicenseJob {
     constructor(
         @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
         @inject(TYPES.LicenseDao) private licenseDao: LicenseDao,
-        @inject(TYPES.LicenseVersionDao) private licenseVersionDao: LicenseVersionDao
+        @inject(TYPES.LicenseVersionDao) private licenseVersionDao: LicenseVersionDao,
+        @inject(TYPES.SlackService) private slackService: SlackService
     ) {
     }
 
@@ -56,6 +58,8 @@ export class LicenseJob {
         let modifiedCount = 0;
         let skippedCount = 0;
         let newCount = 0;
+
+        const newLicenses: SlackLicenseData[] = [];
 
         // Initialize ignored fields list
         await this.getIgnoredFields();
@@ -87,7 +91,6 @@ export class LicenseJob {
 
                     console.log('Changed paths:', changedPathsString);
 
-
                     if (!this.isProperSubsetOfFields(changedPaths, ignoreLicenseFieldsForDiffDisplay)) {
                         printJsonDiff(existingLicense.data, normalizedData);
                     }
@@ -111,6 +114,20 @@ export class LicenseJob {
                     existingLicense.data = normalizedData;
                     existingLicense.currentVersion = currentVersion;
                     await this.licenseDao.saveLicense(existingLicense);
+
+                    // If this is an extension of an existing license, post it to Slack
+
+                    if (normalizedData.maintenanceEndDate &&
+                        existingLicense.data.maintenanceEndDate &&
+                        normalizedData.maintenanceEndDate > existingLicense.data.maintenanceEndDate) {
+
+                        const sld = this.slackService.mapLicenseForSlack({ license: existingLicense, oldLicenseData: existingLicense.data, extended: true });
+
+                        if (sld) {
+                            newLicenses.push(sld);
+                        }
+                    }
+
                     modifiedCount++;
                 }
             } else {
@@ -133,6 +150,13 @@ export class LicenseJob {
                 const customerName = normalizedData.contactDetails.company;
 
                 console.log(`Created new license ${entitlementId}: ${maintenanceStartDate}-${maintenanceEndDate} for ${customerName} at tier ${tier}`);
+
+                const sld = this.slackService.mapLicenseForSlack({ license, oldLicenseData: undefined, extended: false });
+
+                if (sld) {
+                    newLicenses.push(sld);
+                }
+
                 newCount++;
             }
 
@@ -140,5 +164,9 @@ export class LicenseJob {
         }
 
         console.log(`Completed processing ${totalCount} licenses; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
+
+        if (newLicenses.length > 0) {
+            await this.slackService.postNewLicensesToSlack(newLicenses);
+        }
     }
 }
