@@ -3,7 +3,6 @@ import { Box, ListItemButton, Typography, Link } from '@mui/material';
 
 export const PageContainer = muiStyled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
-    //minHeight: '100vh',
     margin: 0,
     padding: 0
 }));
@@ -29,15 +28,22 @@ export const ConfigPageTitle = muiStyled(Typography)(({ theme }) => ({
 })) as typeof Typography;
 
 export const ConfigFormContainer = muiStyled(Box)(({ theme }) => ({
-    maxWidth: 600,
+    maxWidth: 900,
     margin: '0 auto',
     padding: theme.spacing(3),
 }));
 
 export const ConfigFormFields = muiStyled(Box)(({ theme }) => ({
     display: 'flex',
+    gap: theme.spacing(4),
+}));
+
+export const ConfigColumn = muiStyled(Box)(({ theme }) => ({
+    flex: 1,
+    display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(3),
+    maxWidth: 400,
 }));
 
 export const ConfigSaveButtonContainer = muiStyled(Box)(({ theme }) => ({
@@ -54,8 +60,9 @@ export const LoadingContainer = muiStyled(Box)(({ theme }) => ({
 }));
 
 export const SchedulerContainer = muiStyled(Box)(({ theme }) => ({
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
+    marginTop: 0,
+    paddingTop: 0,
+    marginBottom: theme.spacing(2)
 }));
 
 export const StyledLink = muiStyled(Link)(({ theme }) => ({

@@ -6,11 +6,12 @@ import {
     Alert,
     CircularProgress,
     FormControlLabel,
-    Checkbox
+    Checkbox,
+    Typography
 } from '@mui/material';
-import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer } from './styles';
+import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer, ConfigColumn, SchedulerContainer } from './styles';
 import { ConfigKey } from '#common/types/configItem';
-import { StyledLink, SchedulerContainer } from './styles';
+import { StyledLink } from './styles';
 
 export const ConfigPage: React.FC = () => {
     const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number>>({
@@ -182,80 +183,86 @@ export const ConfigPage: React.FC = () => {
 
             <ConfigFormContainer>
                 <ConfigFormFields>
-                    <TextField
-                        label="Atlassian Account User"
-                        value={configValues[ConfigKey.AtlassianAccountUser]}
-                        onChange={handleChange(ConfigKey.AtlassianAccountUser)}
-                        fullWidth
-                        helperText="Email address for your account (you@example.com)"
-                    />
-                    <TextField
-                        label="Atlassian Account API Token"
-                        value={configValues[ConfigKey.AtlassianAccountApiToken]}
-                        onChange={handleChange(ConfigKey.AtlassianAccountApiToken)}
-                        fullWidth
-                        type="password"
-                        helperText={
-                            <React.Fragment>
-                                To create an API token, follow the{' '}
-                                <StyledLink
-                                    href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
+                    <ConfigColumn>
+                        <TextField
+                            label="Atlassian Account User"
+                            value={configValues[ConfigKey.AtlassianAccountUser]}
+                            onChange={handleChange(ConfigKey.AtlassianAccountUser)}
+                            fullWidth
+                            helperText="Email address for your account (you@example.com)"
+                        />
+                        <TextField
+                            label="Atlassian Account API Token"
+                            value={configValues[ConfigKey.AtlassianAccountApiToken]}
+                            onChange={handleChange(ConfigKey.AtlassianAccountApiToken)}
+                            fullWidth
+                            type="password"
+                            helperText={
+                                <React.Fragment>
+                                    To create an API token, follow the{' '}
+                                    <StyledLink
+                                        href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Atlassian instructions for creating an API token
+                                    </StyledLink>
+                                    . The account must be <a
+                                    href="https://developer.atlassian.com/platform/marketplace/managing-permissions-on-your-vendor-account/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                >
-                                    Atlassian instructions for creating an API token
-                                </StyledLink>
-                                . The account must be <a
-                                href="https://developer.atlassian.com/platform/marketplace/managing-permissions-on-your-vendor-account/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ color: 'inherit', textDecoration: 'underline' }}
-                                >granted access to the Atlassian Marketplace</a>{' '}
-                                with at least "View sales reports" and "View all other reports" permissions.
-                            </React.Fragment>
-                        }
-                    />
-                    <TextField
-                        label="Atlassian Vendor ID"
-                        value={configValues[ConfigKey.AtlassianVendorId]}
-                        onChange={handleChange(ConfigKey.AtlassianVendorId)}
-                        fullWidth
-                        helperText="Vendor ID for your developer account. This is visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
-                    />
-                    <SchedulerContainer>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={schedulerEnabled}
-                                    onChange={handleSchedulerToggle}
-                                />
+                                    style={{ color: 'inherit', textDecoration: 'underline' }}
+                                    >granted access to the Atlassian Marketplace</a>{' '}
+                                    with at least "View sales reports" and "View all other reports" permissions.
+                                </React.Fragment>
                             }
-                            label="Enable Scheduled Data Retrieval"
                         />
-                        {schedulerEnabled && (
-                            <TextField
-                                label="Data Retrieval Frequency (hours)"
-                                type="number"
-                                value={configValues[ConfigKey.SchedulerFrequency]}
-                                onChange={handleFrequencyChange}
-                                fullWidth
-                                sx={{ mt: 1 }}
-                                inputProps={{ min: 1 }}
-                                helperText="How often to run tasks to fetch new transactions and licenses"
+                        <TextField
+                            label="Atlassian Vendor ID"
+                            value={configValues[ConfigKey.AtlassianVendorId]}
+                            onChange={handleChange(ConfigKey.AtlassianVendorId)}
+                            fullWidth
+                            helperText="Vendor ID for your developer account. This is visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
+                        />
+                    </ConfigColumn>
+
+                    <ConfigColumn>
+                        <SchedulerContainer>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={schedulerEnabled}
+                                        onChange={handleSchedulerToggle}
+                                    />
+                                }
+                                label="Enable Scheduled Data Retrieval"
                             />
-                        )}
-                    </SchedulerContainer>
-                    <ConfigSaveButtonContainer>
-                        <Button
-                            variant="contained"
-                            onClick={handleSave}
-                            disabled={saving}
-                            sx={{ textTransform: 'none' }}
-                        >
-                            {saving ? <CircularProgress size={24} /> : 'Save'}
-                        </Button>
-                    </ConfigSaveButtonContainer>
+                            {schedulerEnabled && (
+                                <TextField
+                                    label="Data Retrieval Frequency (hours)"
+                                    type="number"
+                                    value={configValues[ConfigKey.SchedulerFrequency]}
+                                    onChange={handleFrequencyChange}
+                                    fullWidth
+                                    sx={{ mt: 1 }}
+                                    inputProps={{ min: 1 }}
+                                    helperText="How often to run tasks to fetch new transactions and licenses"
+                                />
+                            )}
+                        </SchedulerContainer>
+                    </ConfigColumn>
                 </ConfigFormFields>
+
+                <ConfigSaveButtonContainer>
+                    <Button
+                        variant="contained"
+                        onClick={handleSave}
+                        disabled={saving}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        {saving ? <CircularProgress size={24} /> : 'Save'}
+                    </Button>
+                </ConfigSaveButtonContainer>
             </ConfigFormContainer>
 
             <Snackbar
