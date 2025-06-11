@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { TransactionDao } from '../database/TransactionDao';
 import { isProperSubsetOfFields } from '#common/utils/fieldUtils';
 import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
+import { SlackService, SlackTransactionData } from '#server/services/SlackService';
 
 const ignoreTransactionFieldsForDiffDisplay = [
     'lastUpdated',
@@ -24,7 +25,8 @@ export class TransactionJob {
     constructor(
         @inject(TYPES.IgnoredFieldService) private ignoredFieldService: IgnoredFieldService,
         @inject(TYPES.TransactionDao) private transactionDao: TransactionDao,
-        @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao
+        @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao,
+        @inject(TYPES.SlackService) private slackService: SlackService
     ) {
     }
 
@@ -45,6 +47,7 @@ export class TransactionJob {
         let modifiedCount = 0;
         let newCount = 0;
         let skippedCount = 0;
+        const newTransactions: SlackTransactionData[] = [];
 
         // Initialize ignored fields list
         await this.getIgnoredFields();
@@ -122,11 +125,17 @@ export class TransactionJob {
 
                 console.log(`Created new transaction: ${saleDate} $${vendorAmount} for ${entitlementId} (${customerName}) at tier ${tier}, with maintenance from ${maintenanceStartDate} to ${maintenanceEndDate}`);
                 newCount++;
+
+                newTransactions.push(this.slackService.mapTransactionForSlack(transaction));
             }
 
             processedCount++;
         }
 
         console.log(`Completed processing ${totalCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
+
+        if (newTransactions.length > 0) {
+            await this.slackService.postNewTransactionsToSlack(newTransactions);
+        }
     }
 }
