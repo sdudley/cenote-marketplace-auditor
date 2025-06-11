@@ -6,5 +6,6 @@ export const EXPRESS_TYPES = {
     JobRoute: Symbol.for('JobRoute'),
     ApiRouter: Symbol.for('ApiRouter'),
     LicenseRoute: Symbol.for('LicenseRoute'),
-    LicenseVersionRoute: Symbol.for('LicenseVersionRoute')
+    LicenseVersionRoute: Symbol.for('LicenseVersionRoute'),
+    SchedulerRoute: Symbol.for('SchedulerRoute')
 };

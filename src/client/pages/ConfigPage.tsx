@@ -5,15 +5,19 @@ import {
     Snackbar,
     Alert,
     CircularProgress,
+    FormControlLabel,
+    Checkbox
 } from '@mui/material';
 import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer } from './styles';
 import { ConfigKey } from '#common/types/configItem';
+import { StyledLink, SchedulerContainer } from './styles';
 
 export const ConfigPage: React.FC = () => {
-    const [configValues, setConfigValues] = useState<Record<ConfigKey, string>>({
+    const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number>>({
         [ConfigKey.AtlassianAccountUser]: '',
         [ConfigKey.AtlassianAccountApiToken]: '',
         [ConfigKey.AtlassianVendorId]: '',
+        [ConfigKey.SchedulerFrequency]: 0,
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -26,6 +30,7 @@ export const ConfigPage: React.FC = () => {
         message: '',
         severity: 'success',
     });
+    const [schedulerEnabled, setSchedulerEnabled] = useState(false);
 
     useEffect(() => {
         loadConfigValues();
@@ -34,17 +39,29 @@ export const ConfigPage: React.FC = () => {
     const loadConfigValues = async () => {
         try {
             setLoading(true);
-            const values = await Promise.all(
-                Object.values(ConfigKey).map(async (key) => {
-                    const response = await fetch(`/api/config/${key}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        return [key, data.value];
-                    }
-                    return [key, ''];
-                })
+            // Load regular config values
+            const configValues = await Promise.all(
+                Object.values(ConfigKey)
+                    .filter(key => key !== ConfigKey.SchedulerFrequency)
+                    .map(async (key) => {
+                        const response = await fetch(`/api/config/${key}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            return [key, data.value];
+                        }
+                        return [key, ''];
+                    })
             );
-            setConfigValues(Object.fromEntries(values));
+
+            // Load scheduler frequency separately
+            const schedulerResponse = await fetch('/api/scheduler');
+            if (schedulerResponse.ok) {
+                const schedulerData = await schedulerResponse.json();
+                configValues.push([ConfigKey.SchedulerFrequency, schedulerData.frequency]);
+                setSchedulerEnabled(schedulerData.frequency > 0);
+            }
+
+            setConfigValues(Object.fromEntries(configValues));
         } catch (error) {
             console.error('Error loading config values:', error);
             setSnackbar({
@@ -60,20 +77,42 @@ export const ConfigPage: React.FC = () => {
     const handleSave = async () => {
         try {
             setSaving(true);
+            // Save regular config values
             await Promise.all(
-                Object.entries(configValues).map(async ([key, value]) => {
-                    const response = await fetch(`/api/config/${key}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ value }),
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Failed to save ${key}`);
-                    }
-                })
+                Object.entries(configValues)
+                    .filter(([key]) => key !== ConfigKey.SchedulerFrequency)
+                    .map(async ([key, value]) => {
+                        const response = await fetch(`/api/config/${key}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ value }),
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Failed to save ${key}`);
+                        }
+                    })
             );
+
+            // Validate scheduler frequency before saving
+            const frequency = configValues[ConfigKey.SchedulerFrequency];
+            if (schedulerEnabled && (typeof frequency !== 'number' || frequency <= 0)) {
+                throw new Error('Frequency must be a positive number when scheduler is enabled');
+            }
+
+            // Save scheduler frequency separately
+            const schedulerResponse = await fetch('/api/scheduler', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ frequency: schedulerEnabled ? frequency : 0 }),
+            });
+            if (!schedulerResponse.ok) {
+                throw new Error('Failed to save scheduler frequency');
+            }
+
             setSnackbar({
                 open: true,
                 message: 'Configuration saved successfully',
@@ -83,7 +122,7 @@ export const ConfigPage: React.FC = () => {
             console.error('Error saving config values:', error);
             setSnackbar({
                 open: true,
-                message: 'Failed to save configuration values',
+                message: error instanceof Error ? error.message : 'Failed to save configuration values',
                 severity: 'error',
             });
         } finally {
@@ -96,6 +135,31 @@ export const ConfigPage: React.FC = () => {
             ...prev,
             [key]: event.target.value,
         }));
+    };
+
+    const handleSchedulerToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSchedulerEnabled(event.target.checked);
+        if (!event.target.checked) {
+            setConfigValues((prev) => ({
+                ...prev,
+                [ConfigKey.SchedulerFrequency]: 0,
+            }));
+        } else if (configValues[ConfigKey.SchedulerFrequency] === 0) {
+            setConfigValues((prev) => ({
+                ...prev,
+                [ConfigKey.SchedulerFrequency]: 2,
+            }));
+        }
+    };
+
+    const handleFrequencyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value === '' ? '' : parseInt(event.target.value, 10);
+        if (value === '' || !isNaN(value)) {
+            setConfigValues((prev) => ({
+                ...prev,
+                [ConfigKey.SchedulerFrequency]: value,
+            }));
+        }
     };
 
     if (loading) {
@@ -134,14 +198,13 @@ export const ConfigPage: React.FC = () => {
                         helperText={
                             <React.Fragment>
                                 To create an API token, follow the{' '}
-                                <a
+                                <StyledLink
                                     href="https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    style={{ color: 'inherit', textDecoration: 'underline' }}
                                 >
                                     Atlassian instructions for creating an API token
-                                </a>
+                                </StyledLink>
                                 . The account must be <a
                                 href="https://developer.atlassian.com/platform/marketplace/managing-permissions-on-your-vendor-account/"
                                 target="_blank"
@@ -159,6 +222,29 @@ export const ConfigPage: React.FC = () => {
                         fullWidth
                         helperText="Vendor ID for your developer account. This is visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
                     />
+                    <SchedulerContainer>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={schedulerEnabled}
+                                    onChange={handleSchedulerToggle}
+                                />
+                            }
+                            label="Enable Scheduled Data Retrieval"
+                        />
+                        {schedulerEnabled && (
+                            <TextField
+                                label="Data Retrieval Frequency (hours)"
+                                type="number"
+                                value={configValues[ConfigKey.SchedulerFrequency]}
+                                onChange={handleFrequencyChange}
+                                fullWidth
+                                sx={{ mt: 1 }}
+                                inputProps={{ min: 1 }}
+                                helperText="How often to run tasks to fetch new transactions and licenses"
+                            />
+                        )}
+                    </SchedulerContainer>
                     <ConfigSaveButtonContainer>
                         <Button
                             variant="contained"

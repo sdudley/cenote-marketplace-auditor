@@ -6,13 +6,15 @@ export interface ConfigKeyType {
     [ConfigKey.AtlassianAccountUser]: string;
     [ConfigKey.AtlassianAccountApiToken]: string;
     [ConfigKey.AtlassianVendorId]: string;
+    [ConfigKey.SchedulerFrequency]: number;
 }
 
 // Define the enum with type information
 export enum ConfigKey {
     AtlassianAccountUser = 'ATLASSIAN_ACCOUNT_USER',
     AtlassianAccountApiToken = 'ATLASSIAN_ACCOUNT_API_TOKEN',
-    AtlassianVendorId = 'ATLASSIAN_VENDOR_ID'
+    AtlassianVendorId = 'ATLASSIAN_VENDOR_ID',
+    SchedulerFrequency = 'SCHEDULER_FREQUENCY'
 }
 
 // Helper type to get the value type for a config key
@@ -28,6 +30,8 @@ export function getConfigKeyType(key: ConfigKey): ConfigValueType {
         case ConfigKey.AtlassianAccountApiToken:
         case ConfigKey.AtlassianVendorId:
             return 'string';
+        case ConfigKey.SchedulerFrequency:
+            return 'number';
         default:
             throw new Error(`Unknown config key type for key: ${key}`);
     }

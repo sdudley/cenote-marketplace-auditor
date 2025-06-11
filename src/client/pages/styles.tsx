@@ -1,5 +1,5 @@
 import { styled as muiStyled } from '@mui/material/styles';
-import { Box, ListItemButton, Typography } from '@mui/material';
+import { Box, ListItemButton, Typography, Link } from '@mui/material';
 
 export const PageContainer = muiStyled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
@@ -51,4 +51,14 @@ export const LoadingContainer = muiStyled(Box)(({ theme }) => ({
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
+}));
+
+export const SchedulerContainer = muiStyled(Box)(({ theme }) => ({
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+}));
+
+export const StyledLink = muiStyled(Link)(({ theme }) => ({
+    color: 'inherit',
+    textDecoration: 'underline',
 }));

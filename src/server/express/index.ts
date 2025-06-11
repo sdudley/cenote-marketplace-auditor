@@ -12,6 +12,7 @@ import { resolveModulePath } from './ModuleResolver';
 import { EXPRESS_TYPES } from './config/expressTypes';
 import { JobDao } from '#server/database/JobDao';
 import { TYPES } from '#server/config/types';
+import { SchedulerService } from '../services/SchedulerService';
 
 // Optionally, patch require to use the resolver for #common
 const Module = require('module');
@@ -47,6 +48,10 @@ async function startServer() {
 
         const jobDao = container.get<JobDao>(TYPES.JobDao);
         await jobDao.recordApplicationStart();
+
+        // Initialize scheduler
+        const schedulerService = container.get<SchedulerService>(TYPES.SchedulerService);
+        await schedulerService.initialize();
 
         // Set up API routes
         const apiRouter = container.get<ApiRouter>(EXPRESS_TYPES.ApiRouter);

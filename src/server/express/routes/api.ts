@@ -8,6 +8,7 @@ import { ConfigRoute } from './ConfigRoute';
 import { JobRoute } from './JobRoute';
 import { LicenseRoute } from './LicenseRoute';
 import { LicenseVersionRoute } from './LicenseVersionRoute';
+import { SchedulerRoute } from './SchedulerRoute';
 
 @injectable()
 export class ApiRouter {
@@ -20,7 +21,8 @@ export class ApiRouter {
         @inject(EXPRESS_TYPES.ConfigRoute) private configRoute: ConfigRoute,
         @inject(EXPRESS_TYPES.JobRoute) private jobRoute: JobRoute,
         @inject(EXPRESS_TYPES.LicenseRoute) private licenseRoute: LicenseRoute,
-        @inject(EXPRESS_TYPES.LicenseVersionRoute) private licenseVersionRoute: LicenseVersionRoute
+        @inject(EXPRESS_TYPES.LicenseVersionRoute) private licenseVersionRoute: LicenseVersionRoute,
+        @inject(EXPRESS_TYPES.SchedulerRoute) private schedulerRoute: SchedulerRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -58,6 +60,9 @@ export class ApiRouter {
 
         // Job routes
         this.router.use('/jobs', this.jobRoute.getRouter());
+
+        // Scheduler routes
+        this.router.use('/scheduler', this.schedulerRoute.getRouter());
 
         // 404 handler for non-existent API endpoints
         this.router.use('*', (req: Request, res: Response) => {
