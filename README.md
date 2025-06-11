@@ -1,66 +1,161 @@
 # Cenote Marketplace Auditor
 
-An application that audits transactions and licenses from the Atlassian Marketplace API.
+An application that displays and audits transactions and licenses from the Atlassian Marketplace API.
 
-## Features
+This application is ©️ 2025 by Cenote Labs, Inc. All rights reserved. The application is licensed for your use under the standard terms of the Gnu Affero GPL (see LICENSE.txt).
 
-- Downloads transactions and licenses from the Atlassian Marketplace API
+PRs are welcome.
+
+# Features
+
+- Automatically configures itself: given Atlassian API credentials, it automatically
+downloads a list of your apps, your apps' pricing, all transactions and all licenses
+- Validates expected versus actual pricing for all transactions (since 2024)
+- Provides a facility for marking transactions as reconciled or unreconciled,
+including the automatic reconciliation of transactions that have expected pricing
 - Tracks version history of all transactions and licenses
-- Validates transactions and licenses to ensure that sales are correctly priced and
-license transitions are supported by related transactions.
-- Runs in a Docker container for easy deployment
-- Manages a list of addons for tracking
-- Manages historical pricing data to allow auditing of transactions for apps where
-prior price changes occurred.
+- Provides easy visualization of changes made to historical versions of transactions and licenses
+- Optional automatic polling of the Marketplace API every 'x' hours to automatically capture new data
+- Optional communication to Slack to post messages when new sales and evaluations are
+received
 
-## Prerequisites
+# Caveats
+
+- **This application does not include any authentication**. However, the default Docker configuration
+runs the container with local-only ports. This means that users on other machines cannot access it and
+it should be relatively safe. If you change the configuration yourself to open these ports, do not run it on the open Internet without putting it behind some other server with protection.
+- The pricing calculations are designed for Cloud and Data Center licenses. Pricing
+for Server licenses is not supported.
+- If you have previously changed the pricing for your app, pricing for those transactions cannot be correctly computed until the prior period pricing is imported. Data entry for
+prior period pricings is not currently supported in the UI, although the functionality exists via scripts (see below). Note that prior period pricing must be imported even in
+order to correctly price certain *current* sales: if a current license is being upgraded
+with a maintenance period that overlaps a license that was sold during the previous
+pricing period, the previous pricing is still required to calculate the upgrade value.
+- Support for pricing apps which use the automatic reseller discount option has not been tested
+- Support for expected promo codes is implemented on a reseller-by-reseller basis, but only via scripts (see below)
+- The transaction reconciliation feature is somewhat a work-in-progress.
+- The pricing calculated by this app is not guaranteed. Even though the app attempts to highlight pricing
+discrepancies, it remains your responsibility to validate the app's calculations and to determine how
+to correctly calculate the price for your sales.
+- Additional transaction validation is planned.
+- Validation of licenses and license changes is also a high-value future feature.
+- Pricing is known to work correctly for Confluence apps. Your
+mileage may vary for other host application types.
+
+# Prerequisites
+
+To use this app, you need:
 
 - Docker and Docker Compose
 - Atlassian API token for an Atlassian account that has access to the Marketplace API. This user's permissions
 (configured on the Marketplace "Team" tab) must include at least: "View sales reports" and "View all other reports".
-Authentication requires a new or existing API token created via: https://id.atlassian.com/manage-profile/security/api-tokens
+- Authentication requires a new or existing API token created via: https://id.atlassian.com/manage-profile/security/api-tokens
 - Atlassian vendor ID. If you are not sure of your vendor ID, visit the Marketplace dashboard for your
-vendor account, and find it in the URL as: "https://marketplace.atlassian.com/manage/vendors/<vendorId>/addons"
-- At least one Paid-by-Atlassian app that has Cloud or DC hosting. Pricing calculations for Server licenses
-are not implemented.
+vendor account, and find it in the URL as: "https://marketplace.atlassian.com/manage/vendors/#####/addons"
+- At least one Paid-by-Atlassian app that has Cloud or Data Center hosting.
 
-## Setup
+# Setup
 
 1. Clone the repository
-2. Create a new `.env` file. Update the first three environment variables as indicated:
-   ```
-   ATLASSIAN_ACCOUNT_USER=<email of Atlassian user account used for accessing Marketplace reports>
-   ATLASSIAN_ACCOUNT_API_TOKEN=<API token for associated Atlassian user account>
-   ATLASSIAN_VENDOR_ID=<numeric vendor ID>
-   DB_HOST=db
-   DB_PORT=5432
-   DB_USERNAME=postgres
-   DB_PASSWORD=postgres
-   DB_DATABASE=marketplace_auditor
-   ```
 
-3. Start the containers:
+2. Start the containers:
    ```bash
-   docker-compose up -d
+   docker-compose up -d --build
    ```
 
-## Usage notes
+3. Access the application at http://localhost:3000/
 
-When the app is first run, it will:
+4. Visit the Configuration tab to enter your Atlassian account credentials
 
-# Download a list of all paid apps keys that are owned by the Atlassian user account.
-# Fetch current pricing for all of these apps.
-# Download a list of all transactions and licenses for the account
-# Validate the pricing of all transactions.
+5. Optionally, also use the Configuration tab to enable automatic polling of
+new Marketplace data every 'x' hours to fetch new transactions and licenses.
 
-Running the app subsequently will download any new updates to licenses or transactions (storing
-old versions of transactions/licenses in historical table for later analysis), and also validate
-recent transactions.
+6. Visit the Tasks tab and click "Start All Tasks" to perform the initial
+fetch of apps, pricing, transactions and licenses.
 
-## Managing Addons
+7. When the tasks have finished running, visit the Transactions and Licenses
+tabs to visualize transaction and license data.
 
-Although the app should automatically add a list of all apps to be tracked, to manually add a new
-addon to be tracked, the following can be run from the command line:
+8. To configure the Slack integration, see below.
+
+# Usage
+
+## Transaction View
+
+To find transactions, you can enter text into the search field, use certain column
+headers to sort, or use the reconciliation filter dropdown.
+
+To view a transaction in detail, click on the transaction row to display a dialog
+with the detailed JSON transaction data. If more than one version of the transaction
+exists, after clicking on the transaction row, click "Show All Versions" in the header to see a list of prior versions, as well as the
+fields that were mutated and the date of the change. To view the complete historical version of the transaction,
+click on the row in the version list. This view will show a delta of the specific field values modified.
+
+To reconcile or unreconcile a transaction, from the main transaction list,
+click the grey/green dot in the right hand column. The "i" icon
+shows reconciliation information, including expected pricing and any potential discrepancies.
+
+## License View
+
+The license view is similar to the transaction view, including the visibility into
+versioning of licenses. There is currently no reconciliation feature for licenses.
+
+## Configuring the Slack Integration
+
+To configure the Slack integration, visit the Slack API page to create a new app at:
+
+https://api.slack.com/apps
+
+Next:
+
+- Click "Create New App"
+- Select "From scratch"
+  -  App Name: Marketplace Auditor
+  -  Workspace: choose your site
+- In the sidebar, select “OAuth & Permissions”
+  - Scroll down to “Scopes” and “Bot Token Scopes”
+  - Click “Add an OAuth scope”
+  - Add the following scopes:
+```
+channels:read
+chat:write
+chat:write.customize
+chat:write.public
+groups:read
+im:read
+mpim:read
+incoming-webhook
+```
+- In the sidebar, click “Install app”
+- Install to your site
+- Copy the "Bot User OAuth Token"
+- Next, go to the Marketplace Auditor app, visit the Configuration tab, and enable "Post Messages to Slack"
+- Paste the OAuth Token into the "Slack Bot Token" field
+- Enter the channel names where you would like to post notifications of new sales, new evaluations, or exceptions.
+- Leaving a channel name blank means that those types of events will not be posted to Slack.
+- The exceptions channel is not currently implemented.
+
+## Command Line Tools
+
+Certain tasks can only be performed via command-line tools. While the eventual goal is to
+migrate everything to the UI, this is not complete.
+
+To use the command line scripts, you must first populate a file called `.env` in the current directory that looks like this:
+
+```
+DB_HOST=localhost
+DB_PORT=5431
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=marketplace_auditor
+```
+
+You may also need to install various npm modules locally (`npm install`) before you can use the scripts.
+
+### Script for Managing Apps
+
+Although the app will automatically add a list of all known apps to be tracked, to manually add a new app to be tracked, the following can be run from the
+command line:
 
 ```bash
 npm run add-addon -- <addon-key>
@@ -71,7 +166,7 @@ For example:
 npm run add-addon -- com.atlassian.confluence.plugins.confluence-questions
 ```
 
-### Managing Ignored Fields
+### Script for Managing Ignored Fields
 
 The application tracks changes to transactions and licenses, but some fields may change on a frequent
 basis due to Atlassian processing errors, despite no substantive transaction or license data actually changing.
@@ -87,10 +182,11 @@ Licenses:
 Transactions:
 - `lastUpdated`
 - `purchaseDetails.parentProductEdition`
+- `purchaseDetauls.parentProductName`
 - `purchaseDetails.changeInParentProductEdition`
 - `purchaseDetails.oldParentProductEdition`
 
-To add a field to the ignored list:
+To add a new field to the ignored list, add its JSONPath as follows:
 
 ```bash
 npm run add-ignored-field -- <record-type> <field-name>
@@ -106,21 +202,16 @@ npm run add-ignored-field -- license lastUpdated
 npm run add-ignored-field -- transaction purchaseDetails.parentProductEdition
 ```
 
-## Managing Pricing Data
+### Scripts for Managing Pricing Data
 
 If you have previously updated the pricing for your app, you must provide the prior pricing
 details so that it can calculate the correct pricing for app sales in that period, as well
 as any current-time upgrades to apps that were originally licensed during the prior pricing period.
 
-Before adding prior-period pricing data, you need to fetch the current pricing from the Marketplace
-API, which will populate the pricing tables with the potential tiers. This will be done automatically
-when the app is run, but you can request only a download of pricing information as follows:
+Before adding prior-period pricing data, you need to be sure to have run the app and run the
+"Fetch App Pricing" task from the UI.
 
-```bash
-npm start -- --with-pricing
-```
-
-### Prepare For Prior Pricing Periods by Exporting Pricing Template
+#### Prepare For Prior Pricing Periods by Exporting Pricing Template
 
 To be able to set new pricing for an app, we first need to know the possible pricing tiers. This
 is extrapolated from the current pricing that was previously downloaded, which can be used to
@@ -141,11 +232,12 @@ npm run export-pricing-template -- com.atlassian.confluence.plugins.confluence-q
 
 This will create a CSV file with the current pricing tiers that you can use as a template for importing new pricing.
 
-### Importing Prior-Period Pricing Data
+#### Importing Prior-Period Pricing Data
 
 After editing the .CSV file to set the prior period pricing, run the following command to import it. You must
 provide the start date and end date for when this pricing was effective. This will export a CSV template using
-the tiers defined for the current pricing, as well as copies of the current actual pricing.
+the tiers defined for the current pricing, as well as copies of the current actual pricing. Once you import the pricing data, you will need to rerun the validation task
+in order to see its impact.
 
 This feature does not (currently) provide any editing capability for existing periods. If you make a mistake, you
 will either need to edit the data in the database manually, or else delete all of the pricing tables and start again.
@@ -165,7 +257,7 @@ to use a defined start date instead of NONE.
 
 For example:
 ```bash
-npm run import-pricing -- com.atlassian.confluence.plugins.confluence-questions server NONE 2024-12-31 pricing_for_20240331_to_20241231.csv
+npm run import-pricing -- com.atlassian.confluence.plugins.confluence-questions cloud NONE 2024-12-31 pricing_for_20240331_to_20241231.csv
 ```
 
 Parameters:
@@ -183,18 +275,19 @@ value. (This number can be easily calculated for current pricing by visiting the
 for your app, selecting the "Annual" billing period, and then filling in the user tier value.)
 
 
-## Reseller Discount Management
+### Scripts for Reseller Discount Management
 
-The system supports managing resellers with different expected discount amounts. When a
-reseller is added, the system will be able to automatically accept the transaction
-if the sale price matches the expected discount amount.
+The system supports managing resellers with different expected discount amounts,
+which typically correspond to promo codes handed out for regular use by that
+reseller. When a reseller is added, the system will be able to automatically
+accept the transaction if the sale price matches the expected discount amount.
 
 Each reseller has:
 - A name
 - A match mode (exact or substring)
 - A discount amount
 
-### Adding a Reseller
+#### Adding a Reseller
 
 To add a new reseller, use the `add-reseller` script:
 
@@ -214,11 +307,12 @@ reseller name, while "substring" will match any portion of the reseller name
 - `discountAmountAsFraction`: The discount amount as a fraction (for example, 0.10 is
 a 10% discount)
 
-## Transaction Adjustment Management
+### Scripts for Transaction Adjustment Management
 
-The system allows for manual adjustments to transactions, such as applying a discount or adding notes.
+The system allows for manual adjustments to transactions, such as applying a discount or adding notes, which will allow that transaction to be automatically
+reconciled.
 
-### Adding a Transaction Adjustment
+#### Adding a Transaction Adjustment
 
 To add or update an adjustment for a specific transaction, use the `add-transaction-adjustment` script:
 
@@ -232,60 +326,9 @@ npm run add-transaction-adjustment 74f075cb-7afc-445d-ba3b-cc5d874341fc 100.00 "
 ```
 
 Parameters:
-- `transactionId`: The database ID (UUID) of the transaction to adjust.
+- `transactionId`: The database ID (UUID) of the transaction to adjust. This is
+currently only available from the database, but it may eventually be exposed in the UI.
 - `discountAmount`: The dollar amount to apply as a discount. Positive numbers represent a discount off list price (and should still be positive for refund transactions). Negative numbers correspond to an Atlassian overpayment on a sale.
 - `notes` (optional): Any notes to associate with this adjustment.
 
 The script will find the specified transaction and create a new adjustment record.
-
-## General Usage: Command Line Parameters
-
-When run to pull new data, the application supports the following command line parameters.
-By default, everything is performed:
-
-```bash
-# Fetch and validate everything (default)
-npm start
-
-# Only perform certain actions
-npm start -- <flags>
-```
-
-Possible flags include:
-
-* `--with-fetch-apps` - download a list of appkeys associated with Atlassian user account
-* `--with-pricing` - fetch current pricing information for all apps
-* `--with-transactions` - fetch transactions
-* `--with-licenses` - fetch licenses
-* `--validate-transactions` - audit list of transactions
-
-If no parameters are specified, all actions will be performed. If any parameters are specified, only the explicitly
-requested actions will be performed.
-
-## Database Schema
-
-The application uses the following database schema:
-
-- `Transaction`: Stores current transaction data
-- `TransactionVersion`: Stores historical versions of transactions. This is maintained as a linked list of
-prior transactions, with the fields changed in this version indicated by the JsonPaths in the "diff" column.
-- `License`: Stores current license data
-- `LicenseVersion`: Stores historical versions of licenses. The encoding is the same as for transactions.
-- `Addon`: Stores a list of addon keys to track
-- `Pricing`: Stores pricing records with date ranges
-- `PricingInfo`: Stores pricing tiers for each pricing record
-- `IgnoredField`: Stores a list of fields that should be ignored when tracking changes to transactions and licenses
-
-Data downloaded from transactions and licenses is stored as JSON blobs in the `data` column of the
-`Transaction`/`TransactionVersion` and `License`/`LicenseVersion` tables. This data can be viewed in
-Postgres using queries such as the following, as an example for viewing current transaction data:
-
-```
-SELECT entitlement_id,
-data->'purchaseDetails'->>'saleDate' AS sale_date,
-data->'purchaseDetails'->>'vendorAmount' AS vendor_price,
-jsonb_pretty(data) as data
-FROM transaction
-ORDER BY data->'purchaseDetails'->>'saleDate' DESC, created_at
-LIMIT 5;
-```
