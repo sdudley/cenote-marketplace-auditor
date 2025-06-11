@@ -4,6 +4,7 @@ import { TYPES } from '../../config/types';
 import { TransactionDao } from '../../database/TransactionDao';
 import { TransactionQueryParams, TransactionQuerySortType } from '#common/types/apiTypes';
 import { TransactionQueryResult } from '#common/types/apiTypes';
+import { pseudonymizeTransaction } from '#common/utils/pseudonymizeTransaction';
 
 @injectable()
 export class TransactionRoute {
@@ -51,6 +52,11 @@ export class TransactionRoute {
             }
 
             const result : TransactionQueryResult = await this.transactionDao.getTransactions(params);
+
+            if (process.env.RANDOMIZE_TRANSACTIONS === 'true') {
+                result.transactions = result.transactions.map(tr => ({...tr, transaction: pseudonymizeTransaction(tr.transaction)}));
+            }
+
             res.json(result);
         } catch (error) {
             console.error('Error fetching transactions:', error);

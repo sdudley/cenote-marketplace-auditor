@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { TransactionVersionDao } from '../../database/TransactionVersionDao';
+import { pseudonymizeTransactionData } from '#common/utils/pseudonymizeTransaction';
 
 @injectable()
 export class TransactionVersionRoute {
@@ -27,7 +28,12 @@ export class TransactionVersionRoute {
                 return;
             }
 
-            const versions = await this.transactionVersionDao.getTransactionVersions(transactionId);
+            let versions = await this.transactionVersionDao.getTransactionVersions(transactionId);
+
+            if (process.env.RANDOMIZE_TRANSACTIONS === 'true') {
+                versions = versions.map(tv => ({...tv, data: pseudonymizeTransactionData(tv.data)}));
+            }
+
             res.json(versions);
         } catch (error) {
             console.error('Error fetching transaction versions:', error);
