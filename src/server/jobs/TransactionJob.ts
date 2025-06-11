@@ -134,7 +134,7 @@ export class TransactionJob {
 
         console.log(`Completed processing ${totalCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
 
-        if (newTransactions.length > 0) {
+        if (newTransactions.length > 0 && processedCount !== newCount) {
             await this.slackService.postNewTransactionsToSlack(newTransactions);
         }
     }

@@ -30,6 +30,7 @@ export interface SlackTransactionData {
 
 export interface SlackLicenseData {
     lastUpdated: string;
+    entitlementId: string;
     addonName: string;
     hosting: string;
     company: string;
@@ -136,7 +137,7 @@ export class SlackService {
         const { licenseType } = license.data;
         const { hosting } = license.data;
         const { company } = license.data.contactDetails;
-        const { maintenanceStartDate, maintenanceEndDate, status } = license.data;
+        const { maintenanceStartDate, maintenanceEndDate } = license.data;
 
         if (licenseType !== 'EVALUATION') {
             return undefined;
@@ -150,6 +151,7 @@ export class SlackService {
             maintenanceStartDate,
             maintenanceEndDate: maintenanceEndDate ?? 'Unknown',
             oldMaintenanceEndDate: oldLicenseData?.maintenanceEndDate,
+            entitlementId: license.entitlementId,
             extended
         };
     }
@@ -291,6 +293,10 @@ export class SlackService {
                         {
                             type: 'mrkdwn',
                             text: encodeSlackText(`*Hosting:*\n${l.hosting}`)
+                        },
+                        {
+                            type: 'mrkdwn',
+                            text: encodeSlackText(`*Entitlement ID:*\n${l.entitlementId}`)
                         },
                         {
                             type: 'mrkdwn',

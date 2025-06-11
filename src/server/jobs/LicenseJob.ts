@@ -165,7 +165,7 @@ export class LicenseJob {
 
         console.log(`Completed processing ${totalCount} licenses; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
 
-        if (newLicenses.length > 0) {
+        if (newLicenses.length > 0 && processedCount !== newCount) {
             await this.slackService.postNewLicensesToSlack(newLicenses);
         }
     }
