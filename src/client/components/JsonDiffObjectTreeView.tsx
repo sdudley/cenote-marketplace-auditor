@@ -55,6 +55,8 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
                                         <TreeValueNew component="span">{renderValue(delta.newValue)}</TreeValueNew>
                                     )}
                                 </>
+                                : delta.changeType==='added' ? <TreeValueNew component="span">{renderValue(delta.newValue)}</TreeValueNew>
+                                : delta.changeType==='removed' ? <TreeValueOld component="span">{renderValue(delta.oldValue)}</TreeValueOld>
                                 : renderValue(delta.newValue)
                                 }
                             </>
