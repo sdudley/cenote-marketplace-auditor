@@ -28,6 +28,7 @@ import { JobDao } from '../database/JobDao';
 import { JobStarter } from '../jobs/JobStarter';
 import { LicenseVersionDao } from '../database/LicenseVersionDao';
 import { SchedulerService } from '../services/SchedulerService';
+import { SlackService } from '../services/SlackService';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
@@ -63,6 +64,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<JobStarter>(TYPES.JobStarter).to(JobStarter).inSingletonScope();
     container.bind<LicenseVersionDao>(TYPES.LicenseVersionDao).to(LicenseVersionDao).inSingletonScope();
     container.bind<SchedulerService>(TYPES.SchedulerService).to(SchedulerService).inSingletonScope();
+    container.bind<SlackService>(TYPES.SlackService).to(SlackService).inSingletonScope();
 
     return container;
 }

@@ -26,5 +26,6 @@ export const TYPES = {
     ConfigDao: Symbol.for('ConfigDao'),
     JobDao: Symbol.for('JobDao'),
     JobStarter: Symbol.for('JobStarter'),
-    SchedulerService: Symbol.for('SchedulerService')
+    SchedulerService: Symbol.for('SchedulerService'),
+    SlackService: Symbol.for('SlackService')
 };

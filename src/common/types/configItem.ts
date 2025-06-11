@@ -7,14 +7,22 @@ export interface ConfigKeyType {
     [ConfigKey.AtlassianAccountApiToken]: string;
     [ConfigKey.AtlassianVendorId]: string;
     [ConfigKey.SchedulerFrequency]: number;
+    [ConfigKey.SlackBotToken]: string;
+    [ConfigKey.SlackChannelSales]: string;
+    [ConfigKey.SlackChannelEvaluations]: string;
+    [ConfigKey.SlackChannelExceptions]: string;
 }
 
 // Define the enum with type information
 export enum ConfigKey {
-    AtlassianAccountUser = 'ATLASSIAN_ACCOUNT_USER',
-    AtlassianAccountApiToken = 'ATLASSIAN_ACCOUNT_API_TOKEN',
-    AtlassianVendorId = 'ATLASSIAN_VENDOR_ID',
-    SchedulerFrequency = 'SCHEDULER_FREQUENCY'
+    AtlassianAccountUser = 'AtlassianAccountUser',
+    AtlassianAccountApiToken = 'AtlassianAccountApiToken',
+    AtlassianVendorId = 'AtlassianVendorId',
+    SchedulerFrequency = 'SchedulerFrequency',
+    SlackBotToken = 'SlackBotToken',
+    SlackChannelSales = 'SlackChannelSales',
+    SlackChannelEvaluations = 'SlackChannelEvaluations',
+    SlackChannelExceptions = 'SlackChannelExceptions'
 }
 
 // Helper type to get the value type for a config key
@@ -29,6 +37,10 @@ export function getConfigKeyType(key: ConfigKey): ConfigValueType {
         case ConfigKey.AtlassianAccountUser:
         case ConfigKey.AtlassianAccountApiToken:
         case ConfigKey.AtlassianVendorId:
+        case ConfigKey.SlackBotToken:
+        case ConfigKey.SlackChannelSales:
+        case ConfigKey.SlackChannelEvaluations:
+        case ConfigKey.SlackChannelExceptions:
             return 'string';
         case ConfigKey.SchedulerFrequency:
             return 'number';

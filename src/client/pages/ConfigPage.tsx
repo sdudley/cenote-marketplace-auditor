@@ -6,12 +6,12 @@ import {
     Alert,
     CircularProgress,
     FormControlLabel,
-    Checkbox,
-    Typography
+    Checkbox
 } from '@mui/material';
 import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer, ConfigColumn, SchedulerContainer } from './styles';
 import { ConfigKey } from '#common/types/configItem';
 import { StyledLink } from './styles';
+import { SlackContainer } from './styles';
 
 export const ConfigPage: React.FC = () => {
     const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number>>({
@@ -19,6 +19,10 @@ export const ConfigPage: React.FC = () => {
         [ConfigKey.AtlassianAccountApiToken]: '',
         [ConfigKey.AtlassianVendorId]: '',
         [ConfigKey.SchedulerFrequency]: 0,
+        [ConfigKey.SlackBotToken]: '',
+        [ConfigKey.SlackChannelSales]: '',
+        [ConfigKey.SlackChannelEvaluations]: '',
+        [ConfigKey.SlackChannelExceptions]: '',
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -32,6 +36,7 @@ export const ConfigPage: React.FC = () => {
         severity: 'success',
     });
     const [schedulerEnabled, setSchedulerEnabled] = useState(false);
+    const [slackEnabled, setSlackEnabled] = useState(false);
 
     useEffect(() => {
         loadConfigValues();
@@ -62,7 +67,9 @@ export const ConfigPage: React.FC = () => {
                 setSchedulerEnabled(schedulerData.frequency > 0);
             }
 
-            setConfigValues(Object.fromEntries(configValues));
+            const configValuesObj = Object.fromEntries(configValues);
+            setConfigValues(configValuesObj);
+            setSlackEnabled(Boolean(configValuesObj[ConfigKey.SlackBotToken]));
         } catch (error) {
             console.error('Error loading config values:', error);
             setSnackbar({
@@ -153,6 +160,19 @@ export const ConfigPage: React.FC = () => {
         }
     };
 
+    const handleSlackToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSlackEnabled(event.target.checked);
+        if (!event.target.checked) {
+            setConfigValues((prev) => ({
+                ...prev,
+                [ConfigKey.SlackBotToken]: '',
+                [ConfigKey.SlackChannelSales]: '',
+                [ConfigKey.SlackChannelEvaluations]: '',
+                [ConfigKey.SlackChannelExceptions]: '',
+            }));
+        }
+    };
+
     const handleFrequencyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value === '' ? '' : parseInt(event.target.value, 10);
         if (value === '' || !isNaN(value)) {
@@ -224,9 +244,6 @@ export const ConfigPage: React.FC = () => {
                             fullWidth
                             helperText="Vendor ID for your developer account. This is visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
                         />
-                    </ConfigColumn>
-
-                    <ConfigColumn>
                         <SchedulerContainer>
                             <FormControlLabel
                                 control={
@@ -250,6 +267,65 @@ export const ConfigPage: React.FC = () => {
                                 />
                             )}
                         </SchedulerContainer>
+                    </ConfigColumn>
+
+                    <ConfigColumn>
+                        <SlackContainer>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={slackEnabled}
+                                        onChange={handleSlackToggle}
+                                    />
+                                }
+                                label="Post Messages to Slack"
+                            />
+                            {slackEnabled && (
+                                <>
+                                    <TextField
+                                        label="Slack Bot Token"
+                                        value={configValues[ConfigKey.SlackBotToken]}
+                                        onChange={handleChange(ConfigKey.SlackBotToken)}
+                                        fullWidth
+                                        sx={{ mt: 2 }}
+                                        helperText="Bot token for your Slack app (starts with xoxb-)"
+                                    />
+                                    <TextField
+                                        label="Channel for Sales"
+                                        value={configValues[ConfigKey.SlackChannelSales]}
+                                        onChange={handleChange(ConfigKey.SlackChannelSales)}
+                                        fullWidth
+                                        sx={{ mt: 2 }}
+                                        InputProps={{
+                                            startAdornment: <span>#</span>,
+                                        }}
+                                        helperText="Channel to post sales notifications. Leave blank to disable."
+                                    />
+                                    <TextField
+                                        label="Channel for New Evaluations"
+                                        value={configValues[ConfigKey.SlackChannelEvaluations]}
+                                        onChange={handleChange(ConfigKey.SlackChannelEvaluations)}
+                                        fullWidth
+                                        sx={{ mt: 2 }}
+                                        InputProps={{
+                                            startAdornment: <span>#</span>,
+                                        }}
+                                        helperText="Channel to post new evaluation notifications. Leave blank to disable."
+                                    />
+                                    <TextField
+                                        label="Channel for Exceptions"
+                                        value={configValues[ConfigKey.SlackChannelExceptions]}
+                                        onChange={handleChange(ConfigKey.SlackChannelExceptions)}
+                                        fullWidth
+                                        sx={{ mt: 2 }}
+                                        InputProps={{
+                                            startAdornment: <span>#</span>,
+                                        }}
+                                        helperText="Channel to post exception notifications. Leave blank to disable."
+                                    />
+                                </>
+                            )}
+                        </SlackContainer>
                     </ConfigColumn>
                 </ConfigFormFields>
 

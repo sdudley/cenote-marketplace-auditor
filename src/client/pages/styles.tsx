@@ -62,7 +62,15 @@ export const LoadingContainer = muiStyled(Box)(({ theme }) => ({
 export const SchedulerContainer = muiStyled(Box)(({ theme }) => ({
     marginTop: 0,
     paddingTop: 0,
-    marginBottom: theme.spacing(2)
+    marginBottom: 0,
+    paddingBottom: 0
+}));
+
+export const SlackContainer = muiStyled(Box)(({ theme }) => ({
+    marginTop: 0,
+    paddingTop: 0,
+    marginBottom: 0,
+    paddingBottom: 0
 }));
 
 export const StyledLink = muiStyled(Link)(({ theme }) => ({
