@@ -27,7 +27,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(25);
-    const [sortBy, setSortBy] = useState<LicenseQuerySortType>(LicenseQuerySortType.MaintenanceEndDate);
+    const [sortBy, setSortBy] = useState<LicenseQuerySortType>(LicenseQuerySortType.AtlassianLastUpdated);
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
