@@ -25,6 +25,7 @@ export interface SlackTransactionData {
     maintenanceStartDate: string;
     maintenanceEndDate: string;
 
+    entitlementId: string;
     vendorAmount: number;
 }
 
@@ -171,7 +172,8 @@ export class SlackService {
             tier,
             company: company ?? 'Unknown',
             maintenanceStartDate: maintenanceStartDate,
-            maintenanceEndDate: maintenanceEndDate
+            maintenanceEndDate: maintenanceEndDate,
+            entitlementId: transaction.entitlementId
         };
     }
 
@@ -212,6 +214,10 @@ export class SlackService {
                         {
                             type: 'mrkdwn',
                             text: encodeSlackText(`*Customer:*\n${t.company}`)
+                        },
+                        {
+                            type: 'mrkdwn',
+                            text: encodeSlackText(`*Entitlement ID:*\n${t.entitlementId}`)
                         },
                         {
                             type: 'mrkdwn',
@@ -284,7 +290,7 @@ export class SlackService {
                     type: 'section',
                     text: {
                         type: 'mrkdwn',
-                        text: encodeSlackText(`${l.addonName} - *${l.company}*`)
+                        text: encodeSlackText(`*${l.company}* - ${l.addonName}`)
                     }
                 },
                 {
