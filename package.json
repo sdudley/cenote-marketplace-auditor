@@ -22,7 +22,7 @@
     "jobs": "NODE_ENV=production node --enable-source-maps dist/jobs/src/server/jobs/index.js",
     "jobs:dev": "NODE_ENV=development ts-node src/server/jobs/index.ts",
     "test": "jest",
-    "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.404 --output src/types/marketplace-api.ts",
+    "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.434 --output src/common/types/marketplace-api.ts",
     "add-addon": "ts-node src/server/scripts/addAddon.ts",
     "add-ignored-field": "ts-node src/server/scripts/addIgnoredField.ts",
     "backfill-version-numbers": "ts-node src/server/scripts/backfillVersionNumbers.ts",

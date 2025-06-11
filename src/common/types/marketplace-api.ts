@@ -5320,6 +5320,8 @@ export interface paths {
                 query?: {
                     /** @description The time aggregation */
                     aggregation?: "month" | "week";
+                    /** @description Group the results by the specified metric */
+                    groupBy?: "evaluationType"[];
                     /** @description Starting date for the query */
                     startDate?: string;
                     /** @description Ending date for the query */
@@ -5387,6 +5389,8 @@ export interface paths {
                     addon?: string[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description Starting date for the query */
                     startDate?: string;
                     /** @description Ending date for the query */
@@ -5467,6 +5471,8 @@ export interface paths {
                     addon?: string[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: string[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description Starting date for the query */
                     startDate?: string;
                     /** @description Ending date for the query */
@@ -5584,11 +5590,13 @@ export interface paths {
                     /** @description The date field against which filters will be applied */
                     dateType?: "end" | "start";
                     /** @description If specified, restricts the query to values with the provided license type. */
-                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free")[];
+                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "net_new_evaluation" | "upgrade_evaluation" | "open_source" | "classroom" | "free")[];
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values with the provided status */
                     status?: ("active" | "cancelled" | "inactive")[];
                     /** @description This field is deprecated. Please use withDataInsights to obtain additional data insights. If specified, retrieve marketing funnel attribution data */
@@ -5673,11 +5681,13 @@ export interface paths {
                     /** @description The date field against which filters will be applied */
                     dateType?: "end" | "start";
                     /** @description If specified, restricts the query to values with the provided license type; 'inactive' queries for expired licenses. Queries for 'starter' are deprecated; results may not be as expected */
-                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free")[];
+                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "net_new_evaluation" | "upgrade_evaluation" | "open_source" | "classroom" | "free")[];
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values with the provided status */
                     status?: ("active" | "cancelled" | "inactive")[];
                     /** @description This field is deprecated. Please use withDataInsights to obtain additional data insights. If specified, retrieve marketing funnel attribution data */
@@ -5759,11 +5769,13 @@ export interface paths {
                     /** @description The date field against which filters will be applied */
                     dateType?: "end" | "start";
                     /** @description If specified, restricts the query to values with the provided license type; 'inactive' queries for expired licenses. Queries for 'starter' are deprecated; results may not be as expected */
-                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free")[];
+                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "net_new_evaluation" | "upgrade_evaluation" | "open_source" | "classroom" | "free")[];
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values with the provided status */
                     status?: ("active" | "cancelled" | "inactive")[];
                     /** @description This field is deprecated. Please use withDataInsights to obtain additional data insights. If specified, retrieve marketing funnel attribution data */
@@ -6181,6 +6193,8 @@ export interface paths {
                 query?: {
                     /** @description The time aggregation */
                     aggregation?: "month" | "week";
+                    /** @description Group the results by specific metrics */
+                    groupBy?: "conversionType"[];
                     /** @description Starting date for the query */
                     startDate?: string;
                     /** @description Ending date for the query */
@@ -6299,6 +6313,8 @@ export interface paths {
                     addon?: string[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
@@ -6369,6 +6385,8 @@ export interface paths {
                     addon?: string[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
@@ -6451,6 +6469,8 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description If set to true, exclude $0 transactions from reports */
@@ -6548,6 +6568,8 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description If set to true, exclude $0 transactions from reports */
@@ -6642,6 +6664,8 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to these app edition types */
+                    appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description If set to true, exclude $0 transactions from reports */
@@ -8850,6 +8874,8 @@ export interface components {
             lastUpdated: string;
             /** @description The unique identifier representing the cloud site that the app is installed in. This will be present for all active cloud licenses. */
             cloudId?: string;
+            /** @description The edition of the app (either "Standard" or "Advanced") */
+            appEdition?: string;
             /**
              * @description The status of payment for the transaction.
              * @enum {string}
@@ -9319,6 +9345,16 @@ export interface components {
             addonName: string;
             /** @description The platform on which the app runs (either 'Server', 'Data Center' or 'Cloud') */
             hosting: string;
+            /** @description The edition of the app (either "Standard" or "Advanced") */
+            appEdition?: string;
+            /** @description The start date of the first upgrade evaluation */
+            upgradeEvaluationStartDate?: string;
+            /** @description The edition of the app that is being evaluated for upgrade */
+            upgradeEvaluatingEdition?: string;
+            /** @description The start date of the latest evaluation */
+            latestEvaluationStartDate?: string;
+            /** @description The start date of the latest period */
+            latestMaintenanceStartDate?: string;
             /** @description Indicates whether the license is on the new billing system for paid apps (either 'Yes' or 'No') */
             isNewBillingSystem?: string;
             /**
@@ -9372,6 +9408,8 @@ export interface components {
             installedOnSandbox?: string;
             /** @description A "transactionAccountId" is a unique identifier for a transaction account in Atlassian's ecosystem, linking billing details, payment methods, and optional shipping addresses to a user or company for cloud subscriptions in ccp. */
             transactionAccountId?: string;
+            /** @description This indicator shows whether the license is currently in a grace period. "Yes" means the license is in an active grace period. "No" means the license was previously in a grace period but is no longer. If the license becomes inactive right after the grace period ends or during the grace period due to expiration, unsubscription, etc. the isGracePeriod field may still retain its previous value. So, always check this indicator along with whether the associated date is still active. */
+            inGracePeriod?: string;
         };
         InitiateAsyncLicense: {
             /** @description Unique export id for licenses export, for example "12345678-ab12-12ab-1234-123a4b5678ab" */
@@ -9591,6 +9629,8 @@ export interface components {
             readonly applicationVersion?: string;
             /** @description The platform on which the app runs (either 'Server' or 'Data Center' or 'Cloud') */
             readonly hosting?: string;
+            /** @description The edition of the app (either 'Standard' or 'Advanced') */
+            readonly appEdition?: string;
             /**
              * Format: date
              * @description The date when the feedback was received
@@ -10158,6 +10198,8 @@ export interface components {
         AggregatedSeriesItem: {
             /** @description The display name of the current series */
             name: string;
+            /** @description The type of evaluation for the series */
+            evaluationType?: string;
             /** @description Time-specific elements for a given series */
             elements: components["schemas"]["AggregatedElement"][];
         };
@@ -11271,6 +11313,8 @@ export interface components {
             addonName: string;
             /** @description The platform on which the app runs (either 'Server' or 'Cloud') */
             hosting: string;
+            /** @description The edition of the app (either "Standard" or "Advanced") */
+            appEdition?: string;
             /**
              * Format: date
              * @description The date on which the data was last updated. This can be used to identify when historical sale/license data is updated for any reason.
@@ -11283,6 +11327,8 @@ export interface components {
             eventDate: string;
             /** @description The unique identifier for this transaction, for example "AT-12345" */
             transactionId?: string;
+            /** @description Indicates whether the license event in a grace period or not. */
+            inGracePeriod?: string;
             licenseDetails: components["schemas"]["LicenseDetail"];
         };
         AddonVersionAdminProperties: {
@@ -11829,6 +11875,8 @@ export interface components {
         CalculatedConversionsSeriesItem: {
             /** @description The display name of the current series */
             name: string;
+            /** @description The type of conversion metric, for example "Net New" or "Upgrade" */
+            conversionType?: string;
             /** @description Time-specific elements for a given series */
             elements: components["schemas"]["CalculatedMetricElement"][];
         };
