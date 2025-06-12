@@ -1,42 +1,50 @@
 # Cenote Marketplace Auditor
 
-An application that displays and audits transactions and licenses from the Atlassian Marketplace API.
+Display and audit transactions/licenses with ease, based on data from the Atlassian Marketplace API.
 
-This application is ©️ 2025 by Cenote Labs, Inc. All rights reserved. The application is licensed for your use under the standard terms of the Gnu Affero GPL (see LICENSE.txt).
+<img src="./doc-assets/transactions/overview.gif" width="634">
 
 PRs are welcome.
 
+Copyright © 2025 by Cenote Labs, Inc. All rights reserved. The application is licensed for your use under the standard terms of the Gnu Affero GPL (see LICENSE.txt).
+
 # Features
 
-- Automatically configures itself: given Atlassian API credentials, it automatically
-downloads a list of your apps, your apps' pricing, all transactions and all licenses
-- Validates expected versus actual pricing for all transactions (since 2024)
-- Provides a facility for marking transactions as reconciled or unreconciled,
-including the automatic reconciliation of transactions that have expected pricing
+- Automatic configuration: given Atlassian API credentials, it automatically
+downloads a list of your apps, your apps' pricing, all transactions, and all licenses
+- Validates expected versus actual pricing for all transactions since 2024
+- Permits marking transactions as reconciled or unreconciled, including automatic 
+reconciliation of transactions that have expected pricing
 - Tracks version history of all transactions and licenses
-- Provides easy visualization of changes made to historical versions of transactions and licenses
-- Enhances the Marketplace view of current licenses and transactions: sandbox licenses are clearly,
-identified, evaluation licenses shows seat size whenever possible, grace period is visible, maintenance duration
-is surfaced, etc.)
+- Easy visualization of changes made by Atlassian to historical versions of transactions/licenses
+- Enhances the Marketplace view of current licenses and transactions, including:
+  - sandbox licenses are clearly identified
+  - evaluation licenses shows license size whenever possible
+  - grace period is visible at top level
+  - maintenance duration is surfaced
 - Optional automatic polling of the Marketplace API every 'x' hours to automatically capture new data
-- Optional communication to Slack to post messages when new sales and evaluations are
+- Optional communication to Slack to post alerts when new sales and evaluations are
 received
 
 # Caveats
 
+This is beta software:
+
 - **This application does not include any authentication. DO NOT RUN THIS CONTAINER ON THE OPEN INTERNET.**
-However, the default Docker configuration runs the container with local-only ports. This means that users
-on other machines cannot access it and it should be relatively safe. If you change the configuration
-yourself to open these ports, it must be placed behind some other server with protection.
+- However, the default Docker configuration runs the container with local-only ports. This means that users
+on other machines cannot access it, and it should be relatively safe to run on your local machine. If you
+change the configuration yourself to open these ports, it must be placed behind some other server with protection.
 - The pricing calculations are designed for Cloud and Data Center licenses. Pricing
 for Server licenses is not supported.
-- If you have previously changed the pricing for your app, pricing for those transactions cannot be correctly computed until you import prior period pricing into the app. Data entry for
-prior period pricing is not currently supported in the UI, although the functionality exists via scripts (see below). Prior period pricing must be imported even in order to correctly price certain
-*current* sales: if a current license is being upgraded with a maintenance period that overlaps a license that
-was sold during the previous pricing period, the previous pricing is still required to  calculate the upgrade value.
-- Support for pricing apps which use Atlassian's automatic reseller discount option is implemented, but it has not been tested
-- Support for regular-use promo codes is implemented on a reseller-by-reseller basis, but only via scripts (see below)
-- The transaction reconciliation feature is a work-in-progress.
+- If you have previously modified the pricing for your app, pricing for those transactions cannot be correctly
+computed until you import prior period pricing into the app. Data entry for prior period pricing is not
+currently supported in the UI, although the functionality exists via scripts (see below). Prior period pricing
+must be imported even in order to correctly price certain *current* sales: if a current license is being upgraded
+with a maintenance period that overlaps a license that was sold during the previous pricing period, the previous
+pricing is still required to  calculate the upgrade value.
+- Support for pricing apps which use Atlassian's automatic reseller discount option is implemented, but it has not been tested.
+- Support for promo codes that are used regularly is implemented on a reseller-by-reseller basis, but only via scripts (see below).
+- The transaction reconciliation feature is still a work-in-progress.
 - The pricing calculated by this app is not guaranteed. Even though the app attempts to highlight pricing
 discrepancies, it remains your responsibility to validate the app's calculations and to determine how
 to correctly calculate the price for your sales.
@@ -49,7 +57,7 @@ To use this app, you need:
 - Docker and Docker Compose
 - Atlassian API token for an Atlassian account that has access to the Marketplace API. This user's permissions
 (configured on the Marketplace "Team" tab) must include at least: "View sales reports" and "View all other reports".
-- Authentication requires a new or existing API token created via: https://id.atlassian.com/manage-profile/security/api-tokens
+- Authentication to the Marketplace API requires a new or existing API token created via: https://id.atlassian.com/manage-profile/security/api-tokens
 - Atlassian vendor ID. If you are not sure of your vendor ID, visit the Marketplace dashboard for your
 vendor account, and find it in the URL as: "https://marketplace.atlassian.com/manage/vendors/#####/addons"
 - At least one Paid-by-Atlassian app that has Cloud or Data Center hosting.
@@ -65,13 +73,18 @@ vendor account, and find it in the URL as: "https://marketplace.atlassian.com/ma
 
 3. Access the application at http://localhost:3000/
 
-4. Visit the Configuration tab to enter your Atlassian account credentials
+4. Visit the Configuration tab to enter your Atlassian account credentials:
+
+<img src="doc-assets/configuration.gif" alt="Configuration" width="368">
 
 5. Optionally, also use the Configuration tab to enable automatic polling of
 new Marketplace data every 'x' hours to fetch new transactions and licenses.
 
 6. Visit the Tasks tab and click "Start All Tasks" to perform the initial
 fetch of apps, pricing, transactions and licenses.
+
+<img src="doc-assets/task-status.gif" alt="Configuration" width="368">
+
 
 7. When the tasks have finished running, visit the Transactions and Licenses
 tabs to visualize transaction and license data.
@@ -82,25 +95,54 @@ tabs to visualize transaction and license data.
 
 ## Transaction View
 
-To find transactions, you can enter text into the search field, use certain column
+To find transactions, you can enter text into the search field, use selected column
 headers to sort, or use the reconciliation filter dropdown.
 
+![Transactions Overview](doc-assets/transactions/overview.gif)
+
 To view a transaction in detail, click on the transaction row to display a dialog
-with the detailed JSON transaction data. If more than one version of the transaction
-exists, after clicking on the transaction row, click "Show All Versions" in the header to see a list of prior versions, as well as the
-fields that were mutated and the date of the change. To view the complete historical version of the transaction,
-click on the row in the version list. This view will show a delta of the specific field values modified.
+with the detailed JSON transaction data.
+
+![Transaction Detail](doc-assets/transactions/details.gif)
+
+If more than one version of the transaction
+exists, after clicking on the transaction row, click "Show All Versions" in the header
+to see a list of prior versions, as well as the fields that were mutated and the
+date of the change.
+
+![Transaction Version History](doc-assets/transactions/version-history.gif)
+
+To view the complete details for a historical version of a transaction, click on the row
+in the version list. This view will show a delta of the specific field values modified.
+
+![Transaction Version Diff](doc-assets/transactions/version-diff.gif)
 
 To reconcile or unreconcile a transaction, from the main transaction list,
-click the grey/green dot in the right hand column. The "i" icon
-shows reconciliation information, including expected pricing and any potential discrepancies.
+click the grey/green dot in the right-hand column:
+
+![Transaction Reconcile Controls](doc-assets/transactions/reconcile-controls.gif)
+
+The "i" icon opens the reconciliation details dialog, including expected pricing and any potential discrepancies.
+
+![Transaction Reconcile Details](doc-assets/transactions/reconcile-details.gif)
 
 ## License View
 
 The license view is similar to the transaction view, including the visibility into
-versioning of licenses. There is currently no reconciliation feature for licenses.
+license detail and historic versioning of licenses. There is currently no reconciliation
+feature for licenses.
+
+![License View](doc-assets/licenses-overview.gif)
+
 
 ## Configuring the Slack Integration
+
+The optional Slack integration causes messages to be posted to specified Slack channels
+when new sales, evaluations, or data exceptions occur. Each type of message can be
+enabled or disabled independently. Data exceptions are not yet implemented.
+
+One single Slack message is posted per batch of new transactions or licenses, with a list
+of individual transaction or license details in the body of the message.
 
 To configure the Slack integration, visit the Slack API page to create a new app at:
 
@@ -127,7 +169,7 @@ mpim:read
 incoming-webhook
 ```
 - In the sidebar, click “Install app”
-- Install to your site
+- Install the app to your site
 - Copy the "Bot User OAuth Token"
 - Next, go to the Marketplace Auditor app, visit the Configuration tab, and enable "Post Messages to Slack"
 - Paste the OAuth Token into the "Slack Bot Token" field
