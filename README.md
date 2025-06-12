@@ -60,7 +60,7 @@ vendor account, and find it in the URL as: "https://marketplace.atlassian.com/ma
 
 2. Start the containers:
    ```bash
-   docker-compose up -d --build
+   docker-compose up -d
    ```
 
 3. Access the application at http://localhost:3000/
