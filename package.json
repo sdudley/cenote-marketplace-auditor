@@ -1,6 +1,6 @@
 {
   "name": "marketplace-auditor",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Atlassian Marketplace transaction and license auditor",
   "engines": {
     "node": ">=22.0.0"
