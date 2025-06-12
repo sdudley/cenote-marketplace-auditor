@@ -10,7 +10,7 @@
     "#*": "./src/*"
   },
   "scripts": {
-    "build": "npm run build:jobs && npm run build:express && npm run build:scripts && npm run build:client",
+    "build": "npm run build:express && npm run build:client",
     "build:jobs": "tsc -p src/server/jobs/tsconfig.json",
     "build:express": "tsc -p src/server/express/tsconfig.json",
     "build:scripts": "tsc -p src/server/scripts/tsconfig.json",
