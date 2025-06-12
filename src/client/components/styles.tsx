@@ -327,7 +327,8 @@ export const TreeBorder = styled(Box)({
 
 export const StyledListPaper = styled(Paper)({
     width: '100%',
-    position: 'relative'  // Removed overflowX
+    position: 'relative',
+    boxShadow: 'none'
 });
 
 export const TableCellNoWrap = styled(StyledTableCell)({
