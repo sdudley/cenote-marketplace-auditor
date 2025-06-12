@@ -3,6 +3,7 @@ import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { LicenseDao } from '../../database/LicenseDao';
 import { LicenseQueryParams, LicenseQuerySortType, LicenseQueryResult } from '#common/types/apiTypes';
+import { pseudonymizeLicense } from '#common/utils/pseudonymizeLicense';
 
 @injectable()
 export class LicenseRoute {
@@ -49,6 +50,11 @@ export class LicenseRoute {
             }
 
             const result: LicenseQueryResult = await this.licenseDao.getLicenses(params);
+
+            if (process.env.RANDOMIZE_LICENSES === 'true') {
+                result.licenses = result.licenses.map(l => ({...l, license: pseudonymizeLicense(l.license)}));
+            }
+
             res.json(result);
         } catch (error) {
             console.error('Error fetching licenses:', error);

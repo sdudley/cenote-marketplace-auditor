@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { LicenseVersionDao } from '../../database/LicenseVersionDao';
+import { pseudonymizeLicenseData } from '#common/utils/pseudonymizeLicense';
 
 @injectable()
 export class LicenseVersionRoute {
@@ -27,7 +28,12 @@ export class LicenseVersionRoute {
                 return;
             }
 
-            const versions = await this.licenseVersionDao.getLicenseVersions(licenseId);
+            let versions = await this.licenseVersionDao.getLicenseVersions(licenseId);
+
+            if (process.env.RANDOMIZE_LICENSES === 'true') {
+                versions = versions.map(tv => ({...tv, data: pseudonymizeLicenseData(tv.data)}));
+            }
+
             res.json(versions);
         } catch (error) {
             console.error('Error fetching license versions:', error);
