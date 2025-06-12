@@ -166,6 +166,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        tooltip="The first time the license was downloaded to this app"
                                     />
                                     <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.UpdatedAt}
@@ -174,6 +175,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        tooltip="The last time a new version of this license was detected by this app"
                                     />
                                     <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.AtlassianLastUpdated}
@@ -182,6 +184,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        tooltip="The last time Atlassian claims the license was updated"
                                     />
                                     <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.VersionCount}
@@ -190,6 +193,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        tooltip="The number of historical versions of this license that have been stored"
                                     />
                                 </TableRow>
                             </StyledTableHead>

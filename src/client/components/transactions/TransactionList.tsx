@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Table,
-    TableBody,
-    TableHead,
     TableRow,
     TablePagination,
     TextField,
     CircularProgress,
-    Box,
     Select,
     MenuItem,
     FormControl,
@@ -43,7 +39,6 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
-    const [selectedTransactionResultForVersions, setSelectedTransactionResultForVersions] = useState<TransactionResult | null>(null);
     const [selectedTransactionForReconcile, setSelectedTransactionForReconcile] = useState<TransactionResult | null>(null);
     const [reconciledFilter, setReconciledFilter] = useState<string>('');
 
@@ -218,6 +213,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        tooltip="The first time the transaction was downloaded to this app"
                                     />
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.UpdatedAt}
@@ -226,6 +222,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        tooltip="The last time a new version of this transaction was detected by this app"
                                     />
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.VersionCount}
@@ -234,6 +231,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
                                         whiteSpace
+                                        tooltip="The number of historical versions of this transaction that have been stored"
                                     />
                                     <ReconciliationHeaderCell></ReconciliationHeaderCell>
                                 </TableRow>
