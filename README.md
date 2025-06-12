@@ -15,9 +15,9 @@ downloads a list of your apps, your apps' pricing, all transactions and all lice
 including the automatic reconciliation of transactions that have expected pricing
 - Tracks version history of all transactions and licenses
 - Provides easy visualization of changes made to historical versions of transactions and licenses
-- Enhances the view of current licenses and transactions (sandbox licenses identified
-in transaction list, evaluation licenses shows seat size where possible, grace period
-is readily visible, etc.)
+- Enhances the Marketplace view of current licenses and transactions (sandbox licenses easily identified
+evaluation licenses shows seat size where possible, grace period is readily visible, maintenance duration
+is surfaced, etc.)
 - Optional automatic polling of the Marketplace API every 'x' hours to automatically capture new data
 - Optional communication to Slack to post messages when new sales and evaluations are
 received

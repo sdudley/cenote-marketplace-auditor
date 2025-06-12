@@ -215,7 +215,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         >
                                             <TableCellNoWrap>{license.license.entitlementId}</TableCellNoWrap>
                                             <StyledTableCell>{license.license.data.addonName}</StyledTableCell>
-                                            <StyledTableCell>{toMixedCase(license.license.data.licenseType)}</StyledTableCell>
+                                            <StyledTableCell>{toMixedCase(license.license.data.licenseType) + (license.license.data.installedOnSandbox==='Yes' ? ' (Sandbox)' : '')}</StyledTableCell>
                                             <StyledTableCell>{toMixedCase(license.license.data.status)}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.hosting}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.tier + (license.license.data.tier==='Evaluation' && license.license.data.evaluationOpportunitySize && license.license.data.evaluationOpportunitySize !== 'Evaluation' ? ` (${license.license.data.evaluationOpportunitySize})` : '')}</StyledTableCell>
