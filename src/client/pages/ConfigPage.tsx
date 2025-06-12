@@ -155,7 +155,7 @@ export const ConfigPage: React.FC = () => {
         } else if (configValues[ConfigKey.SchedulerFrequency] === 0) {
             setConfigValues((prev) => ({
                 ...prev,
-                [ConfigKey.SchedulerFrequency]: 2,
+                [ConfigKey.SchedulerFrequency]: 4,
             }));
         }
     };
