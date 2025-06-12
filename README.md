@@ -15,8 +15,8 @@ downloads a list of your apps, your apps' pricing, all transactions and all lice
 including the automatic reconciliation of transactions that have expected pricing
 - Tracks version history of all transactions and licenses
 - Provides easy visualization of changes made to historical versions of transactions and licenses
-- Enhances the Marketplace view of current licenses and transactions (sandbox licenses easily identified
-evaluation licenses shows seat size where possible, grace period is readily visible, maintenance duration
+- Enhances the Marketplace view of current licenses and transactions: sandbox licenses are clearly,
+identified, evaluation licenses shows seat size whenever possible, grace period is visible, maintenance duration
 is surfaced, etc.)
 - Optional automatic polling of the Marketplace API every 'x' hours to automatically capture new data
 - Optional communication to Slack to post messages when new sales and evaluations are
@@ -24,26 +24,23 @@ received
 
 # Caveats
 
-- **This application does not include any authentication**. However, the default Docker configuration
-runs the container with local-only ports. This means that users on other machines cannot access it and
-it should be relatively safe. If you change the configuration yourself to open these ports, do not run it on the open Internet without putting it behind some other server with protection.
+- **This application does not include any authentication. DO NOT RUN THIS CONTAINER ON THE OPEN INTERNET.**
+However, the default Docker configuration runs the container with local-only ports. This means that users
+on other machines cannot access it and it should be relatively safe. If you change the configuration
+yourself to open these ports, it must be placed behind some other server with protection.
 - The pricing calculations are designed for Cloud and Data Center licenses. Pricing
 for Server licenses is not supported.
-- If you have previously changed the pricing for your app, pricing for those transactions cannot be correctly computed until the prior period pricing is imported. Data entry for
-prior period pricings is not currently supported in the UI, although the functionality exists via scripts (see below). Note that prior period pricing must be imported even in
-order to correctly price certain *current* sales: if a current license is being upgraded
-with a maintenance period that overlaps a license that was sold during the previous
-pricing period, the previous pricing is still required to calculate the upgrade value.
-- Support for pricing apps which use the automatic reseller discount option has not been tested
-- Support for expected promo codes is implemented on a reseller-by-reseller basis, but only via scripts (see below)
-- The transaction reconciliation feature is somewhat a work-in-progress.
+- If you have previously changed the pricing for your app, pricing for those transactions cannot be correctly computed until you import prior period pricing into the app. Data entry for
+prior period pricing is not currently supported in the UI, although the functionality exists via scripts (see below). Prior period pricing must be imported even in order to correctly price certain
+*current* sales: if a current license is being upgraded with a maintenance period that overlaps a license that
+was sold during the previous pricing period, the previous pricing is still required to  calculate the upgrade value.
+- Support for pricing apps which use Atlassian's automatic reseller discount option is implemented, but it has not been tested
+- Support for regular-use promo codes is implemented on a reseller-by-reseller basis, but only via scripts (see below)
+- The transaction reconciliation feature is a work-in-progress.
 - The pricing calculated by this app is not guaranteed. Even though the app attempts to highlight pricing
 discrepancies, it remains your responsibility to validate the app's calculations and to determine how
 to correctly calculate the price for your sales.
-- Additional transaction validation is planned.
-- Validation of licenses and license changes is also a high-value future feature.
-- Pricing is known to work correctly for Confluence apps. Your
-mileage may vary for other host application types.
+- Pricing is known to work correctly for Confluence apps. Your mileage may vary for other host application types.
 
 # Prerequisites
 
