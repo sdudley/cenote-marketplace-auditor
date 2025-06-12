@@ -18,7 +18,8 @@ class TransactionDao {
         [TransactionQuerySortType.UpdatedAt]: [ 'transaction.updatedAt' ],
         [TransactionQuerySortType.SaleDate]: [ "transaction.data ->'purchaseDetails'->>'saleDate'", 'transaction.createdAt' ],
         [TransactionQuerySortType.VersionCount]: [ 'version_count.version_count', 'transaction.createdAt' ],
-        [TransactionQuerySortType.VendorAmount]: [ '(transaction.data ->\'purchaseDetails\'->>\'vendorAmount\')::numeric(14,3)', 'transaction.createdAt' ]
+        [TransactionQuerySortType.VendorAmount]: [ '(transaction.data ->\'purchaseDetails\'->>\'vendorAmount\')::numeric(14,3)', 'transaction.createdAt' ],
+        [TransactionQuerySortType.MaintenanceDays]: [ "(to_date(transaction.data->'purchaseDetails'->>'maintenanceEndDate','YYYY-mm-dd') - to_date(transaction.data->'purchaseDetails'->>'maintenanceStartDate','YYYY-mm-dd'))", 'transaction.createdAt' ]
     };
 
     constructor(@inject(TYPES.DataSource) private dataSource: DataSource) {

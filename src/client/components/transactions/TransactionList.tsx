@@ -205,7 +205,14 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         whiteSpace
                                         align="right"
                                     />
-                                    <TableHeaderCell align="right">Maintenance</TableHeaderCell>
+                                    <SortableHeader<TransactionQuerySortType>
+                                        field={TransactionQuerySortType.MaintenanceDays}
+                                        label="Maintenance"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"
