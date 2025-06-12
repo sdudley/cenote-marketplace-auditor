@@ -52,6 +52,16 @@ export class LicenseJob {
         return changedPaths.every(path => fieldsToIgnore?.some(field => path.includes(field)));
     }
 
+    // Atlassian constantly updates sandbox instances with the exact user count of the sandbox,
+    // for which we don't need to create tons of new database records.
+
+    private ignoreSandboxTierChanges(changedPaths: string[], normalizedData: LicenseData): boolean {
+        return normalizedData.installedOnSandbox==='Yes' &&
+                changedPaths.length===2 &&
+                changedPaths.some(path => path.includes('tier')) &&
+                changedPaths.some(path => path.includes('lastUpdated'));
+    }
+
     async processLicenses(licenses: LicenseData[]): Promise<void> {
         let processedCount = 0;
         let totalCount = licenses.length;
@@ -81,7 +91,8 @@ export class LicenseJob {
                     const changedPathsString = changedPaths.join(' | ');
 
                     // Check if changes are only in ignored fields
-                    if (this.isProperSubsetOfIgnoredFields(changedPaths)) {
+                    if (this.isProperSubsetOfIgnoredFields(changedPaths) ||
+                        this.ignoreSandboxTierChanges(changedPaths, normalizedData)) {
                         // console.log(`Skipping license version creation for license ${entitlementId} - changes only in ignored fields: ${changedPathsString}`);
                         skippedCount++;
                         continue;
