@@ -2,12 +2,13 @@ import { TableSortLabel, Box } from "@mui/material";
 import { UnsortedArrows } from "./UnsortedArrows";
 import { TableCell } from "@mui/material";
 import { TableHeaderCell } from "./styles";
+import { ReactNode } from "react";
 
 export type SortOrder = 'ASC' | 'DESC';
 
 interface SortableHeaderProps<T> {
     field: T;
-    label: string;
+    label: string|ReactNode;
     currentSort: T;
     currentOrder: SortOrder;
     onSort: (field: T) => void;

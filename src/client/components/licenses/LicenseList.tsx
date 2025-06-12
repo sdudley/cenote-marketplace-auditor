@@ -16,11 +16,15 @@ import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../styles';
 import { LicenseDetailsDialog } from './LicenseDetailsDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
-import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableHeaderCell } from '../styles';
+import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableHeaderCell, WrappedLabel } from '../styles';
 
 interface LicenseListProps {
     // Add props if needed
 }
+
+const toMixedCase = (str: string) => {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+};
 
 export const LicenseList: React.FC<LicenseListProps> = () => {
     const [licenses, setLicenses] = useState<LicenseResult[]>([]);
@@ -133,7 +137,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                     <TableHeaderCell>Company</TableHeaderCell>
                                     <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.MaintenanceStartDate}
-                                        label="Maintenance Start"
+                                        label={<WrappedLabel>Maintenance<br/>Start</WrappedLabel>}
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
@@ -141,7 +145,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                     />
                                     <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.MaintenanceEndDate}
-                                        label="Maintenance End"
+                                        label={<WrappedLabel>Maintenance<br/>End</WrappedLabel>}
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
@@ -149,7 +153,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                     />
                                     <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.GracePeriod}
-                                        label="Grace Period"
+                                        label={<WrappedLabel>Grace<br/>Period</WrappedLabel>}
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
@@ -173,7 +177,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                     />
                                     <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.AtlassianLastUpdated}
-                                        label="Atlassian Last Updated"
+                                        label={<WrappedLabel>Atlassian<br/>Last Updated</WrappedLabel>}
                                         currentSort={sortBy}
                                         currentOrder={sortOrder}
                                         onSort={handleSort}
@@ -198,10 +202,10 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         >
                                             <TableCellNoWrap>{license.license.entitlementId}</TableCellNoWrap>
                                             <StyledTableCell>{license.license.data.addonName}</StyledTableCell>
-                                            <StyledTableCell>{license.license.data.licenseType}</StyledTableCell>
-                                            <StyledTableCell>{license.license.data.status ? license.license.data.status.charAt(0).toUpperCase() + license.license.data.status.slice(1) : ''}</StyledTableCell>
+                                            <StyledTableCell>{toMixedCase(license.license.data.licenseType)}</StyledTableCell>
+                                            <StyledTableCell>{toMixedCase(license.license.data.status)}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.hosting}</StyledTableCell>
-                                            <StyledTableCell>{license.license.data.tier}</StyledTableCell>
+                                            <StyledTableCell>{license.license.data.tier + (license.license.data.tier==='Evaluation' && license.license.data.evaluationOpportunitySize && license.license.data.evaluationOpportunitySize !== 'Evaluation' ? ` (${license.license.data.evaluationOpportunitySize})` : '')}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.contactDetails.company}</StyledTableCell>
                                             <TableCellNoWrap>{license.license.data.maintenanceStartDate}</TableCellNoWrap>
                                             <TableCellNoWrap>{license.license.data.maintenanceEndDate}</TableCellNoWrap>

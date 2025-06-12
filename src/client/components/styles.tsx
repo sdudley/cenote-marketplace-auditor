@@ -546,3 +546,6 @@ export const StyledTableBody = styled(TableBody)({
     }
 });
 
+export const WrappedLabel = styled('span')({
+    lineHeight: '18px'
+});
