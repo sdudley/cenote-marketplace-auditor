@@ -41,7 +41,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
     const [selectedTransactionResultForVersions, setSelectedTransactionResultForVersions] = useState<TransactionResult | null>(null);
     const [selectedTransactionForReconcile, setSelectedTransactionForReconcile] = useState<TransactionResult | null>(null);
@@ -274,7 +274,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             </StatusCell>
                                         </StyledTableRow>
                                     ))
-                                ) : (
+                                ) : ( !loading &&
                                     <StyledTableRow>
                                         <StyledTableCell colSpan={14} align="center" sx={{ py: 4 }}>
                                             No transactions. Please configure the application through the Configuration page, then start all tasks on the Tasks page.

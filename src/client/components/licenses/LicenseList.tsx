@@ -35,7 +35,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedLicense, setSelectedLicense] = useState<LicenseResult | null>(null);
 
     useEffect(() => {
@@ -216,7 +216,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                             <TableCellNoWrap>{license.versionCount}</TableCellNoWrap>
                                         </StyledTableRow>
                                     ))
-                                ) : (
+                                ) : ( !loading &&
                                     <StyledTableRow>
                                         <StyledTableCell colSpan={13} align="center" sx={{ py: 4 }}>
                                             No licenses. Please configure the application through the Configuration page, then start all tasks on the Tasks page.
