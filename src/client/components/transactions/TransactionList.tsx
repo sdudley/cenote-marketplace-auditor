@@ -23,6 +23,7 @@ import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, Tabl
 import { TableHeaderCell } from '../styles';
 import { StyledSandboxAnnotation } from '../styles';
 import { dateDiff } from '#common/utils/dateUtils';
+import { HighlightIfSignificantlyDifferent } from '../HighlightIfSignificantlyDifferent';
 
 interface TransactionListProps {
     // Add props if needed
@@ -205,6 +206,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         whiteSpace
                                         align="right"
                                     />
+                                    <TableHeaderCell align="right">Expected Amount</TableHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.MaintenanceDays}
                                         label="Maintenance"
@@ -264,6 +266,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                                 {tr.isSandbox && tr.cloudSiteHostname &&<StyledSandboxAnnotation>({tr.cloudSiteHostname})</StyledSandboxAnnotation>}
                                             </StyledTableCell>
                                             <StyledTableCell align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
+                                            <StyledTableCell align="right"><HighlightIfSignificantlyDifferent value={tr.transaction.reconcile?.expectedVendorAmount} compareToValue={tr.transaction.data.purchaseDetails.vendorAmount}/></StyledTableCell>
                                             <StyledTableCell align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
                                             <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
                                             <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
