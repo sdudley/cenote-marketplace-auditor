@@ -213,23 +213,23 @@ export class SlackService {
                     fields: [
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Customer:*\n${t.company}`)
+                            text: encodeSlackText(`Customer:\n*${t.company}*`)
                         },
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Entitlement ID:*\n${t.entitlementId}`)
+                            text: encodeSlackText(`Entitlement ID:\n*${t.entitlementId}*`)
                         },
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Hosting:*\n${t.hosting}`)
+                            text: encodeSlackText(`Hosting:\n*${t.hosting}*`)
                         },
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Tier:*\n${t.tier}`)
+                            text: encodeSlackText(`Tier:\n*${t.tier}*`)
                         },
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Sale Date:*\n${t.saleDate}`)
+                            text: encodeSlackText(`Sale Date:\n*${t.saleDate}*`)
                         }
                     ]
                 },
@@ -298,19 +298,19 @@ export class SlackService {
                     fields: [
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Hosting:*\n${l.hosting}`)
+                            text: encodeSlackText(`Hosting:\n*${l.hosting}*`)
                         },
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Entitlement ID:*\n${l.entitlementId}`)
+                            text: encodeSlackText(`Entitlement ID:\n*${l.entitlementId}*`)
                         },
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Last Updated:*\n${l.lastUpdated}`)
+                            text: encodeSlackText(`Last Updated:\n*${l.lastUpdated}*`)
                         },
                         {
                             type: 'mrkdwn',
-                            text: encodeSlackText(`*Evaluation Period*\n${maintenanceDaysText} (${l.maintenanceStartDate} to ${l.maintenanceEndDate})${extensionText}`)
+                            text: encodeSlackText(`Evaluation Period:\n*${maintenanceDaysText}* (${l.maintenanceStartDate} to ${l.maintenanceEndDate})${extensionText}`)
                         }
 
                     ]
