@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { LicenseQuerySortType, LicenseResult } from '#common/types/apiTypes';
-import { isoStringWithOnlyDate } from '#common/utils/dateUtils';
+import { dateDiff, isoStringWithOnlyDate } from '#common/utils/dateUtils';
 import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../styles';
 import { LicenseDetailsDialog } from './LicenseDetailsDialog';
 import { SortOrder, SortableHeader } from '../SortableHeader';
@@ -136,6 +136,15 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                     <TableHeaderCell>Tier</TableHeaderCell>
                                     <TableHeaderCell>Company</TableHeaderCell>
                                     <SortableHeader<LicenseQuerySortType>
+                                        field={LicenseQuerySortType.MaintenanceDays}
+                                        label={<WrappedLabel>Maintenance<br/>Days</WrappedLabel>}
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                        align="right"
+                                    />
+                                    <SortableHeader<LicenseQuerySortType>
                                         field={LicenseQuerySortType.MaintenanceStartDate}
                                         label={<WrappedLabel>Maintenance<br/>Start</WrappedLabel>}
                                         currentSort={sortBy}
@@ -211,6 +220,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                             <StyledTableCell>{license.license.data.hosting}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.tier + (license.license.data.tier==='Evaluation' && license.license.data.evaluationOpportunitySize && license.license.data.evaluationOpportunitySize !== 'Evaluation' ? ` (${license.license.data.evaluationOpportunitySize})` : '')}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.contactDetails.company}</StyledTableCell>
+                                            <StyledTableCell align="right">{license.license.data.maintenanceEndDate ? dateDiff(license.license.data.maintenanceStartDate, license.license.data.maintenanceEndDate) : '?'} days</StyledTableCell>
                                             <TableCellNoWrap>{license.license.data.maintenanceStartDate}</TableCellNoWrap>
                                             <TableCellNoWrap>{license.license.data.maintenanceEndDate}</TableCellNoWrap>
                                             <TableCellNoWrap>{license.license.data.inGracePeriod ?? 'No'}</TableCellNoWrap>

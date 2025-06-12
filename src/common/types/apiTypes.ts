@@ -30,7 +30,8 @@ export enum LicenseQuerySortType {
     MaintenanceEndDate = 'maintenanceEndDate',
     VersionCount = 'versionCount',
     AtlassianLastUpdated = 'atlassianLastUpdated',
-    GracePeriod = 'gracePeriod'
+    GracePeriod = 'gracePeriod',
+    MaintenanceDays = 'maintenanceDays'
 }
 
 export interface TransactionQueryParams {

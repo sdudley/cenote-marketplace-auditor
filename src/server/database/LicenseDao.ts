@@ -15,11 +15,12 @@ export class LicenseDao {
     private readonly sortFieldMap: Record<LicenseQuerySortType, string[]> = {
         [LicenseQuerySortType.CreatedAt]: ['license.createdAt'],
         [LicenseQuerySortType.UpdatedAt]: ['license.updatedAt'],
-        [LicenseQuerySortType.MaintenanceStartDate]: ["license.data->'maintenanceStartDate'", 'license.createdAt'],
-        [LicenseQuerySortType.MaintenanceEndDate]: ["license.data->'maintenanceEndDate'", 'license.createdAt'],
+        [LicenseQuerySortType.MaintenanceStartDate]: ["license.data->>'maintenanceStartDate'", 'license.createdAt'],
+        [LicenseQuerySortType.MaintenanceEndDate]: ["license.data->>'maintenanceEndDate'", 'license.createdAt'],
         [LicenseQuerySortType.VersionCount]: [ 'version_count.version_count', 'license.createdAt' ],
         [LicenseQuerySortType.AtlassianLastUpdated]: ["license.data->>'lastUpdated'", 'license.createdAt'],
-        [LicenseQuerySortType.GracePeriod]: ["coalesce(license.data->>'inGracePeriod', 'No')", 'license.createdAt']
+        [LicenseQuerySortType.GracePeriod]: ["coalesce(license.data->>'inGracePeriod', 'No')", 'license.createdAt'],
+        [LicenseQuerySortType.MaintenanceDays]: ["(to_date(license.data->>'maintenanceEndDate','YYYY-mm-dd') - to_date(license.data->>'maintenanceStartDate','YYYY-mm-dd'))", 'license.createdAt']
     };
 
     constructor(@inject(TYPES.DataSource) dataSource: DataSource) {
