@@ -31,7 +31,7 @@
                 "DB_USERNAME": "postgres",
                 "DB_PASSWORD": "postgres",
                 "DB_DATABASE": "marketplace_auditor",
-                "RANDOMIZE_TRANSACTIONS": "true"
+                //"RANDOMIZE_TRANSACTIONS": "true"
                 //"DB_LOGGING": "true",
                 //"NODE_OPTIONS": "--enable-source-maps"
             }
