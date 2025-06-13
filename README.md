@@ -12,8 +12,10 @@ Copyright © 2025 by Cenote Labs, Inc. All rights reserved. The application is l
 
 - Automatic configuration: given Atlassian API credentials, it automatically
 downloads a list of your apps, your apps' pricing, all transactions, and all licenses
+- All data is stored in a local database. The only egress is to fetch your transactions
+from the Atlassian servers, and if enabled, posting to the Slack integration.
 - Validates expected versus actual pricing for all transactions since 2024
-- Permits marking transactions as reconciled or unreconciled, including automatic 
+- Permits marking transactions as reconciled or unreconciled, including automatic
 reconciliation of transactions that have expected pricing
 - Tracks version history of all transactions and licenses
 - Easy visualization of changes made by Atlassian to historical versions of transactions/licenses
