@@ -15,7 +15,7 @@
     "build:client": "vite build",
     "build:client:dev": "vite build --mode development",
     "build:client:prod": "vite build --mode production",
-    "start": "NODE_ENV=production node -r ./dist/express/src/server/util/ModuleResolver.js dist/server/src/server/index.js",
+    "start": "NODE_ENV=production node -r ./dist/server/src/server/util/ModuleResolver.js dist/server/src/server/index.js",
     "start:dev": "NODE_ENV=development ts-node src/server/index.ts",
     "test": "jest",
     "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.434 --output src/common/types/marketplace-api.ts",
