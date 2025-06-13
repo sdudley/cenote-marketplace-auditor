@@ -6,6 +6,10 @@ import { LicenseVersion } from '#common/entities/LicenseVersion';
 import { initializeDatabase } from '../config/database';
 import { computeJsonPaths } from '#common/util/objectUtils';
 
+/**
+ * WARNING: this script will mutate the updated_at field for all licenses and transactions.
+ *
+ */
 async function backfillVersionNumbers() {
     const dataSource = await initializeDatabase();
     const transactionRepo = dataSource.getRepository(Transaction);
