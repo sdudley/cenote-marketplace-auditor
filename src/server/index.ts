@@ -10,8 +10,8 @@ import { createServer, ViteDevServer } from 'vite';
 import fs from 'fs';
 import { resolveModulePath } from './util/ModuleResolver';
 import { EXPRESS_TYPES } from './express/config/expressTypes';
-import { JobDao } from '#server/database/dao/JobDao';
-import { TYPES } from '#server/config/types';
+import { JobDao } from './database/dao/JobDao';
+import { TYPES } from './config/types';
 import { SchedulerService } from './services/SchedulerService';
 
 // Optionally, patch require to use the resolver for #common
