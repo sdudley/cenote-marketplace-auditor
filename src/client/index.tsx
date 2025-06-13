@@ -4,7 +4,6 @@ import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
 
-
 const theme = createTheme({
   palette: {
     mode: 'light',

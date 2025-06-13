@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { ConfigDao } from '../../database/ConfigDao';
-import { ConfigKey, getConfigKeyType, ConfigValueForKey } from '#common/types/configItem';
+import { ConfigDao } from '../../database/dao/ConfigDao';
+import { ConfigKey, ConfigValueForKey } from '#common/types/configItem';
+import { getConfigKeyType } from '#common/util/configItemUtil';
 
 @injectable()
 export class ConfigRoute {

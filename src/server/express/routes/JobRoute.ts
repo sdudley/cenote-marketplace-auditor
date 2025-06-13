@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { JobDao } from '../../database/JobDao';
+import { JobDao } from '../../database/dao/JobDao';
 import { JobStatus, JobType } from '#common/entities/JobStatus';
-import { JobStarter } from '../../jobs/JobStarter';
+import { JobRunner } from '../../jobs/JobRunner';
 
 interface JobStatusResponse {
     jobType: JobType;
@@ -19,7 +19,7 @@ export class JobRoute {
 
     constructor(
         @inject(TYPES.JobDao) private jobDao: JobDao,
-        @inject(TYPES.JobStarter) private jobStarter: JobStarter
+        @inject(TYPES.JobStarter) private jobStarter: JobRunner
     ) {
         this.router = Router();
         this.initializeRoutes();

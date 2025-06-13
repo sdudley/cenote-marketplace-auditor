@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { TransactionVersionDao } from '../../database/TransactionVersionDao';
-import { pseudonymizeTransactionData } from '#common/utils/pseudonymizeTransaction';
+import { TransactionVersionDao } from '../../database/dao/TransactionVersionDao';
+import { pseudonymizeTransactionData } from '#common/pseudonymize/pseudonymizeTransaction';
 
 @injectable()
 export class TransactionVersionRoute {

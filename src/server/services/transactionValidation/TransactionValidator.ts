@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { ValidationOptions } from "./types";
 import { TransactionValidationResult } from "./types";
-import { deploymentTypeFromHosting } from "#common/utils/validationUtils";
+import { deploymentTypeFromHosting } from "#common/util/validationUtils";
 import { Transaction } from "#common/entities/Transaction";
 import { PricingTierResult } from "#common/types/pricingTierResult";
 import { PricingService } from "#server/services/PricingService";
@@ -9,8 +9,9 @@ import { PriceCalculatorService } from "#server/services/PriceCalculatorService"
 import { PriceWithPricingOpts } from "./types";
 import { MAX_JPY_DRIFT } from "./constants";
 import { TYPES } from "#server/config/types";
-import { getLicenseDurationInDays } from "#common/utils/licenseDurationCalculator";
-import { PriceResult, PriceCalcOpts } from "../PriceCalculatorService";
+import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator";
+
+import { PriceCalcOpts, PriceResult } from '#server/services/types';
 
 @injectable()
 export class TransactionValidator {

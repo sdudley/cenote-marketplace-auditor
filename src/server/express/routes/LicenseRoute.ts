@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { LicenseDao } from '../../database/LicenseDao';
+import { LicenseDao } from '../../database/dao/LicenseDao';
 import { LicenseQueryParams, LicenseQuerySortType, LicenseQueryResult } from '#common/types/apiTypes';
-import { pseudonymizeLicense } from '#common/utils/pseudonymizeLicense';
+import { pseudonymizeLicense } from '#common/pseudonymize/pseudonymizeLicense';
 
 @injectable()
 export class LicenseRoute {

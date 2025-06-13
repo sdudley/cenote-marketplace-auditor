@@ -1,0 +1,128 @@
+import { DataSource, Repository } from "typeorm";
+import { License } from "#common/entities/License";
+import { Transaction } from "#common/entities/Transaction";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../config/types";
+import { LicenseData } from "#common/types/marketplace";
+import { LicenseQueryParams, LicenseQueryResult, LicenseQuerySortType } from "#common/types/apiTypes";
+import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
+
+@injectable()
+export class LicenseDao {
+    private licenseRepo: Repository<License>;
+    private dataSource: DataSource;
+
+    private readonly sortFieldMap: Record<LicenseQuerySortType, string[]> = {
+        [LicenseQuerySortType.CreatedAt]: ['license.createdAt'],
+        [LicenseQuerySortType.UpdatedAt]: ['license.updatedAt'],
+        [LicenseQuerySortType.MaintenanceStartDate]: ["license.data->>'maintenanceStartDate'", 'license.createdAt'],
+        [LicenseQuerySortType.MaintenanceEndDate]: ["license.data->>'maintenanceEndDate'", 'license.createdAt'],
+        [LicenseQuerySortType.VersionCount]: [ 'version_count.version_count', 'license.createdAt' ],
+        [LicenseQuerySortType.AtlassianLastUpdated]: ["license.data->>'lastUpdated'", 'license.createdAt'],
+        [LicenseQuerySortType.GracePeriod]: ["coalesce(license.data->>'inGracePeriod', 'No')", 'license.createdAt'],
+        [LicenseQuerySortType.MaintenanceDays]: ["(to_date(license.data->>'maintenanceEndDate','YYYY-mm-dd') - to_date(license.data->>'maintenanceStartDate','YYYY-mm-dd'))", 'license.createdAt']
+    };
+
+    constructor(@inject(TYPES.DataSource) dataSource: DataSource) {
+        this.licenseRepo = dataSource.getRepository(License);
+        this.dataSource = dataSource;
+    }
+
+    public getEntitlementIdForLicense(licenseData: LicenseData): string {
+        return licenseData.appEntitlementNumber || licenseData.licenseId;
+    }
+
+    public async getLicenseForEntitlementId(entitlementId: string): Promise<License | null> {
+        return await this.licenseRepo.findOne({ where: { entitlementId } });
+    }
+
+    public async loadLicenseForTransaction(transaction: Transaction): Promise<License | null> {
+        return await this.licenseRepo
+            .findOne({
+                where: { entitlementId: transaction.entitlementId }
+            });
+    }
+
+    public async saveLicense(license: License) : Promise<void> {
+        await this.licenseRepo.save(license);
+    }
+
+    private escapeDoubleQuotes(str: string): string {
+        return str.replace(/"/g, '\\"');
+    }
+
+    async getLicenses(params: LicenseQueryParams): Promise<LicenseQueryResult> {
+        const {
+            start = 0,
+            limit = 25,
+            sortBy = 'createdAt',
+            sortOrder = 'DESC',
+            search
+        } = params;
+
+        try {
+            const queryBuilder = this.licenseRepo.createQueryBuilder('license');
+
+            // Add CTE for version counts
+            queryBuilder.addCommonTableExpression(`
+                SELECT license_version.license_id as lid, count(id) as version_count
+                FROM license_version
+                GROUP BY license_version.license_id`,
+                'version_count'
+            );
+
+            // Select all license fields and the version count
+            queryBuilder.addSelect('COALESCE(version_count.version_count, 0)', 'license_versionCount');
+
+            // Join with the version count CTE
+            queryBuilder.leftJoin('version_count', 'version_count', 'version_count.lid = license.id');
+
+            if (search) {
+                // Inspiration: https://stackoverflow.com/a/45849743/2220556
+                queryBuilder.where(
+                    'jsonb_path_exists(license.data, format(\'$.** ? (@.type() == "string" && @ like_regex %s flag "qi")\', :search::text)::jsonpath)',
+                    { search: `"${this.escapeDoubleQuotes(search)}"` }
+                );
+            }
+
+            // Apply sorting using the sort field map
+            const orderByField = this.sortFieldMap[sortBy as LicenseQuerySortType];
+            if (!orderByField) {
+                throw new Error(`Invalid sortBy: ${sortBy}`);
+            }
+
+            orderByField.forEach(field => queryBuilder.addOrderBy(field, sortOrder));
+
+            const total = await queryBuilder.getCount();
+
+            queryBuilder.offset(start).limit(limit);
+
+            const rawResults = await queryBuilder.getRawMany();
+
+            const transformer = new RawSqlResultsToEntityTransformer(
+                queryBuilder.expressionMap,
+                this.dataSource.driver,
+                [],
+                []
+            );
+            const licenses = transformer.transform(rawResults, queryBuilder.expressionMap.mainAlias!);
+
+            const licenseResults = licenses.map((license, index) => {
+                const versionCount = parseInt(rawResults[index].license_versionCount) || 0;
+
+                return {
+                    license,
+                    versionCount
+                };
+            });
+
+            return {
+                licenses: licenseResults,
+                total,
+                count: licenseResults.length
+            };
+        } catch (error: any) {
+            throw error;
+        }
+    }
+}

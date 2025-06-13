@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { formatCurrency } from '#common/utils/formatCurrency';
+import { formatCurrency } from '#common/util/formatCurrency';
 
 const SIGNIFICANT_DIFFERENCE_THRESHOLD = 5.00; // Highlight differences greater than this amount
 

@@ -1,7 +1,7 @@
 import { Transaction } from "#common/entities/Transaction";
 import { components } from "#common/types/marketplace-api";
-import { PreviousTransactionResult } from "../PreviousTransactionService";
-import { PriceCalcOpts, PriceResult } from "../PriceCalculatorService";
+
+import { PreviousTransactionResult, PriceCalcOpts, PriceResult } from '#server/services/types';
 
 export interface ValidationOptions {
     transaction: Transaction;

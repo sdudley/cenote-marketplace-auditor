@@ -1,3 +1,9 @@
+/*
+ * Injection tokens for the DI container (general use)
+ *
+ * See also: src/server/express/config/expressTypes.ts
+ */
+
 export const TYPES = {
     DataSource: Symbol.for('DataSource'),
     MarketplaceService: Symbol.for('MarketplaceService'),

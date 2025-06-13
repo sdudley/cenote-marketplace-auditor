@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { SchedulerService } from '../../services/SchedulerService';
-import { ConfigDao } from '../../database/ConfigDao';
+import { ConfigDao } from '../../database/dao/ConfigDao';
 import { ConfigKey } from '#common/types/configItem';
 
 @injectable()

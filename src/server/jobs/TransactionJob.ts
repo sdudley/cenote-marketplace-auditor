@@ -1,14 +1,14 @@
 import { Transaction } from '#common/entities/Transaction';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
-import { deepEqual, normalizeObject, computeJsonPaths } from '#common/utils/objectUtils';
-import { printJsonDiff } from '#common/utils/diffUtils';
+import { deepEqual, normalizeObject, computeJsonPaths } from '#common/util/objectUtils';
+import { printJsonDiff } from '#common/util/jsonDiff';
 import { TransactionData } from '#common/types/marketplace';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
-import { TransactionDao } from '../database/TransactionDao';
-import { isProperSubsetOfFields } from '#common/utils/fieldUtils';
-import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
+import { TransactionDao } from '../database/dao/TransactionDao';
+import { isProperSubsetOfFields } from '#common/util/fieldUtils';
+import { TransactionVersionDao } from '#server/database/dao/TransactionVersionDao';
 import { SlackService, SlackTransactionData } from '#server/services/SlackService';
 
 const ignoreTransactionFieldsForDiffDisplay = [

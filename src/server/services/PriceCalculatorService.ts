@@ -1,42 +1,19 @@
-import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "../../common/utils/licenseDurationCalculator";
-import { PricingTierResult } from '../../common/types/pricingTierResult';
-import { UserTierPricing } from '../../common/types/userTiers';
-import { deploymentTypeFromHosting, userCountFromTier } from "../../common/utils/validationUtils";
+import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "#common/util/licenseDurationCalculator";
+import { UserTierPricing } from '#common/types/userTiers';
+import { deploymentTypeFromHosting, userCountFromTier } from "#common/util/validationUtils";
 import {
     ACADEMIC_CLOUD_PRICE_RATIO,
-    ACADEMIC_DC_PRICE_RATIO_LEGACY,
     ACADEMIC_DC_PRICE_RATIO_CURRENT_10K,
     ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE,
+    ACADEMIC_DC_PRICE_RATIO_LEGACY,
     CLOUD_DISCOUNT_RATIO,
     DC_DISCOUNT_RATIO
-} from "../../common/utils/validationConstants";
+} from "#server/util/validationConstants";
 import { injectable } from "inversify";
-import { BillingPeriod, DeploymentType, HostingType, LicenseType, SaleType } from "../../common/types/marketplace";
+import { DeploymentType, HostingType } from "#common/types/marketplace";
+import { PriceCalcOpts, PriceResult } from '#server/services/types';
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
-
-export interface PriceCalcOpts {
-    pricingTierResult: PricingTierResult;
-    saleDate: string;
-    saleType: SaleType;
-    isSandbox: boolean;
-    hosting: HostingType;
-    licenseType: LicenseType;
-    tier: string;
-    maintenanceStartDate: string;
-    maintenanceEndDate: string;
-    billingPeriod: BillingPeriod;
-    previousPurchaseMaintenanceEndDate?: string|undefined;
-    previousPricing?: PriceResult|undefined;
-    expectedDiscount?: number; // always positive, even for refunds
-    partnerDiscountFraction: number;
-}
-
-export interface PriceResult {
-    vendorPrice: number;
-    purchasePrice: number;
-    dailyNominalPrice: number;
-}
 
 @injectable()
 export class PriceCalculatorService {

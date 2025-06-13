@@ -1,10 +1,10 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import { TransactionsPage } from './pages/TransactionsPage';
-import { PageLayout } from './pages/PageLayout';
-import { ConfigPage } from './pages/ConfigPage';
-import { JobsPage } from './pages/JobsPage/JobsPage';
-import { LicensesPage } from './pages/LicensesPage';
+import { PageLayout } from './PageLayout';
+import { TransactionsPage } from './pages/transactions';
+import { LicensesPage } from './pages/licenses';
+import { ConfigPage } from './pages/config';
+import { JobsPage } from './pages/jobs';
 
 export const router = createBrowserRouter([
     {

@@ -1,7 +1,7 @@
 import { Container } from 'inversify';
 import { DataSource } from 'typeorm';
 import { configureContainer as configureCommonContainer } from '../../config/container';
-import { ApiRouter } from '../routes/api';
+import { ApiRouter } from '../routes';
 import { TransactionRoute } from '../routes/TransactionRoute';
 import { TransactionVersionRoute } from '../routes/TransactionVersionRoute';
 import { EXPRESS_TYPES } from './expressTypes';

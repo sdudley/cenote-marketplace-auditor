@@ -1,12 +1,8 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import { Transaction } from '../../common/entities/Transaction';
-import { TransactionDao } from '../database/TransactionDao';
-
-export interface PreviousTransactionResult {
-    transaction: Transaction;
-    effectiveMaintenanceEndDate: string;
-}
+import { Transaction } from '#common/entities/Transaction';
+import { TransactionDao } from '../database/dao/TransactionDao';
+import { PreviousTransactionResult } from '#server/services/types';
 
 @injectable()
 export class PreviousTransactionService {

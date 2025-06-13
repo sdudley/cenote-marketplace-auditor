@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { TransactionDao } from '../../database/TransactionDao';
+import { TransactionDao } from '../../database/dao/TransactionDao';
 import { TransactionQueryParams, TransactionQuerySortType } from '#common/types/apiTypes';
 import { TransactionQueryResult } from '#common/types/apiTypes';
-import { pseudonymizeTransaction } from '#common/utils/pseudonymizeTransaction';
+import { pseudonymizeTransaction } from '#common/pseudonymize/pseudonymizeTransaction';
 
 @injectable()
 export class TransactionRoute {

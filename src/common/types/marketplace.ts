@@ -1,5 +1,8 @@
 import { components } from './marketplace-api';
 
+// Simplified type names to represent individual components imported from the
+// Atlassian Marketplace OpenAPI spec
+
 export type InitiateAsyncLicenseCollection = components["schemas"]["InitiateAsyncLicenseCollection"];
 export type InitiateAsyncLicense = components["schemas"]["InitiateAsyncLicense"];
 export type InitiateAsyncTransactionCollection = components["schemas"]["InitiateAsyncTransactionCollection"];

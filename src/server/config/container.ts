@@ -8,28 +8,33 @@ import { PricingJob } from '../jobs/PricingJob';
 import { ValidationJob } from '../jobs/ValidationJob';
 import { PriceCalculatorService } from '../services/PriceCalculatorService';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
-import { TransactionDao } from '../database/TransactionDao';
-import { LicenseDao } from '../database/LicenseDao';
-import { TransactionReconcileDao } from '../database/TransactionReconcileDao';
+import { TransactionDao } from '../database/dao/TransactionDao';
+import { LicenseDao } from '../database/dao/LicenseDao';
+import { TransactionReconcileDao } from '../database/dao/TransactionReconcileDao';
 import { TYPES } from './types';
-import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
-import { ResellerDao } from '../database/ResellerDao';
+import { TransactionAdjustmentDao } from '../database/dao/TransactionAdjustmentDao';
+import { ResellerDao } from '../database/dao/ResellerDao';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
 import { AddonService } from '../services/AddonService';
 import { PricingService } from '../services/PricingService';
-import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
+import { TransactionVersionDao } from '#server/database/dao/TransactionVersionDao';
 import { TransactionValidationService } from '#server/services/transactionValidation/TransactionValidationService';
 import { TransactionSandboxService } from '#server/services/transactionValidation/TransactionSandboxService';
 import { TransactionValidator } from '#server/services/transactionValidation/TransactionValidator';
 import { TransactionAdjustmentValidationService } from '#server/services/transactionValidation/TransactionAdjustmentValidationService';
 import { TransactionDiffValidationService } from '#server/services/transactionValidation/TransactionDiffValidationService';
-import { ConfigDao } from '../database/ConfigDao';
-import { JobDao } from '../database/JobDao';
-import { JobStarter } from '../jobs/JobStarter';
-import { LicenseVersionDao } from '../database/LicenseVersionDao';
+import { ConfigDao } from '../database/dao/ConfigDao';
+import { JobDao } from '../database/dao/JobDao';
+import { JobRunner } from '../jobs/JobRunner';
+import { LicenseVersionDao } from '../database/dao/LicenseVersionDao';
 import { SchedulerService } from '../services/SchedulerService';
 import { SlackService } from '../services/SlackService';
 
+/**
+ * Build the DI container for the app. This is used when building the container for jobs, but when
+ * we are running the Express server, we also use src/server/express/config/container.ts which has
+ * additional components.
+ */
 export function configureContainer(dataSource: DataSource): Container {
     const container = new Container();
 
@@ -61,7 +66,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionDiffValidationService>(TYPES.TransactionDiffValidationService).to(TransactionDiffValidationService).inSingletonScope();
     container.bind<ConfigDao>(TYPES.ConfigDao).to(ConfigDao).inSingletonScope();
     container.bind<JobDao>(TYPES.JobDao).to(JobDao).inSingletonScope();
-    container.bind<JobStarter>(TYPES.JobStarter).to(JobStarter).inSingletonScope();
+    container.bind<JobRunner>(TYPES.JobStarter).to(JobRunner).inSingletonScope();
     container.bind<LicenseVersionDao>(TYPES.LicenseVersionDao).to(LicenseVersionDao).inSingletonScope();
     container.bind<SchedulerService>(TYPES.SchedulerService).to(SchedulerService).inSingletonScope();
     container.bind<SlackService>(TYPES.SlackService).to(SlackService).inSingletonScope();

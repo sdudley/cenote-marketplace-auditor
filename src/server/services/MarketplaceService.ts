@@ -1,33 +1,19 @@
-import { injectable, inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import axios from 'axios';
 import {
-    InitiateAsyncLicenseCollection,
     InitiateAsyncLicense,
+    InitiateAsyncLicenseCollection,
     InitiateAsyncTransactionCollection,
-    StatusAsyncTransactionCollection,
     LicenseData,
-    TransactionData,
-    PricingData
+    PricingData,
+    StatusAsyncTransactionCollection,
+    TransactionData
 } from '#common/types/marketplace';
 import { components } from '#common/types/marketplace-api';
 import { TYPES } from '../config/types';
-import { ConfigDao } from '../database/ConfigDao';
+import { ConfigDao } from '../database/dao/ConfigDao';
 import { ConfigKey } from '#common/types/configItem';
-
-export type CloudOrServer = 'cloud' | 'datacenter' | 'server';
-export type LiveOrPending = 'live' | 'pending';
-
-interface TransactionQueryParams {
-    excludeZeroTransactions?: boolean;
-    includeManualInvoice?: boolean;
-}
-
-interface LicenseQueryParams {
-    startDate?: string;
-    endDate?: string;
-    withDataInsights?: boolean;
-    includeAtlassianLicenses?: boolean;
-}
+import { CloudOrServer, LicenseQueryParams, LiveOrPending, TransactionQueryParams } from '#server/services/types';
 
 const licenseKey = (license : LicenseData) : string => license.appEntitlementNumber || license.licenseId;
 

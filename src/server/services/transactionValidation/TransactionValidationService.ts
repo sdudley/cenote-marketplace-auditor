@@ -1,8 +1,8 @@
 import { Transaction } from '#common/entities/Transaction';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../config/types';
-import { formatCurrency } from '#common/utils/formatCurrency';
-import { dateDiff } from '#common/utils/dateUtils';
+import { formatCurrency } from '#common/util/formatCurrency';
+import { dateDiff } from '#common/util/dateUtils';
 import { Pricing } from '#common/entities/Pricing';
 import { TransactionValidationResult, DiscountResult, ValidationOptions, PriceWithPricingOpts } from './types';
 import { EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS, EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS, LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE, LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE, PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD, PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER, PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT } from './pricingPermutations';
@@ -10,7 +10,8 @@ import { TransactionSandboxService } from './TransactionSandboxService';
 import { TransactionAdjustmentValidationService } from './TransactionAdjustmentValidationService';
 import { TransactionValidator } from './TransactionValidator';
 import { ALERT_DAYS_AFTER_PRICING_CHANGE } from './constants';
-import { PreviousTransactionService, PreviousTransactionResult } from '../PreviousTransactionService';
+import { PreviousTransactionService } from '../PreviousTransactionService';
+import { PreviousTransactionResult } from '#server/services/types';
 
 @injectable()
 export class TransactionValidationService {

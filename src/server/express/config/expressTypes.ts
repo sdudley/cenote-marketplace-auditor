@@ -1,3 +1,9 @@
+/*
+ * Injection tokens for the DI container (Express-specific)
+ *
+ * See also: src/server/config/types.ts
+ */
+
 export const EXPRESS_TYPES = {
     TransactionRoute: Symbol.for('TransactionRoute'),
     TransactionVersionRoute: Symbol.for('TransactionVersionRoute'),

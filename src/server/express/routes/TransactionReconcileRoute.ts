@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { TransactionDao } from '../../database/TransactionDao';
-import { TransactionReconcileDao } from '../../database/TransactionReconcileDao';
+import { TransactionDao } from '../../database/dao/TransactionDao';
+import { TransactionReconcileDao } from '../../database/dao/TransactionReconcileDao';
 import { isUUID } from 'validator';
 
 interface ReconcileRequestBody {

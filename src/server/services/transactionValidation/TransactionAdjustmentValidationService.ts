@@ -2,11 +2,11 @@ import { inject, injectable } from "inversify";
 
 import { Transaction } from "#common/entities/Transaction";
 import { TransactionAdjustment } from "#common/entities/TransactionAdjustment";
-import { formatCurrency } from "#common/utils/formatCurrency";
+import { formatCurrency } from "#common/util/formatCurrency";
 import { DiscountResult } from "./types";
 import { TYPES } from "#server/config/types";
-import { ResellerDao } from "#server/database/ResellerDao";
-import { TransactionAdjustmentDao } from "#server/database/TransactionAdjustmentDao";
+import { ResellerDao } from "#server/database/dao/ResellerDao";
+import { TransactionAdjustmentDao } from "#server/database/dao/TransactionAdjustmentDao";
 
 @injectable()
 export class TransactionAdjustmentValidationService {

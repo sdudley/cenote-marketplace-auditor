@@ -1,14 +1,14 @@
 import { License } from '#common/entities/License';
 import { LicenseVersion } from '#common/entities/LicenseVersion';
-import { deepEqual, normalizeObject, computeJsonPaths } from '#common/utils/objectUtils';
-import { printJsonDiff } from '#common/utils/diffUtils';
+import { deepEqual, normalizeObject, computeJsonPaths } from '#common/util/objectUtils';
+import { printJsonDiff } from '#common/util/jsonDiff';
 import { LicenseData } from '#common/types/marketplace';
 import { IgnoredFieldService } from '../services/IgnoredFieldService';
 import { TYPES } from '../config/types';
 import { inject, injectable } from 'inversify';
-import { LicenseDao } from '../database/LicenseDao';
-import { isProperSubsetOfFields } from '#common/utils/fieldUtils';
-import { LicenseVersionDao } from '#server/database/LicenseVersionDao';
+import { LicenseDao } from '../database/dao/LicenseDao';
+import { isProperSubsetOfFields } from '#common/util/fieldUtils';
+import { LicenseVersionDao } from '#server/database/dao/LicenseVersionDao';
 import { SlackLicenseData, SlackService } from '#server/services/SlackService';
 
 const ignoreLicenseFieldsForDiffDisplay = [

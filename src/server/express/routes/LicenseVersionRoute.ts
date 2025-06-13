@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
-import { LicenseVersionDao } from '../../database/LicenseVersionDao';
-import { pseudonymizeLicenseData } from '#common/utils/pseudonymizeLicense';
+import { LicenseVersionDao } from '../../database/dao/LicenseVersionDao';
+import { pseudonymizeLicenseData } from '#common/pseudonymize/pseudonymizeLicense';
 
 @injectable()
 export class LicenseVersionRoute {

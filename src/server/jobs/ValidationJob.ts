@@ -1,12 +1,12 @@
 import { Transaction } from '#common/entities/Transaction';
 import { components } from '#common/types/marketplace-api';
-import { formatCurrency } from '#common/utils/formatCurrency';
+import { formatCurrency } from '#common/util/formatCurrency';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
-import { TransactionDao } from '../database/TransactionDao';
-import { TransactionReconcileDao } from '../database/TransactionReconcileDao';
-import { TransactionAdjustmentDao } from '../database/TransactionAdjustmentDao';
-import { TransactionVersionDao } from '#server/database/TransactionVersionDao';
+import { TransactionDao } from '../database/dao/TransactionDao';
+import { TransactionReconcileDao } from '../database/dao/TransactionReconcileDao';
+import { TransactionAdjustmentDao } from '../database/dao/TransactionAdjustmentDao';
+import { TransactionVersionDao } from '#server/database/dao/TransactionVersionDao';
 import { TransactionValidationService } from '../services/transactionValidation/TransactionValidationService';
 import { TransactionValidationResult } from '../services/transactionValidation/types';
 import { TransactionVersion } from '#common/entities/TransactionVersion';

@@ -1,12 +1,12 @@
 import { inject, injectable } from 'inversify';
 import { WebClient, KnownBlock, Block } from '@slack/web-api';
-import { ConfigDao } from '#server/database/ConfigDao';
+import { ConfigDao } from '#server/database/dao/ConfigDao';
 import { ConfigKey } from '#common/types/configItem';
 import { SlackChannelType } from '#common/types/slackChannel';
 import { TYPES } from '#server/config/types';
-import { encodeSlackText } from '../utils/SlackUtils';
-import { formatCurrency } from '#common/utils/formatCurrency';
-import { dateDiff } from '#common/utils/dateUtils';
+import { encodeSlackText } from '#server/util/SlackUtils';
+import { formatCurrency } from '#common/util/formatCurrency';
+import { dateDiff } from '#common/util/dateUtils';
 import { Transaction } from '#common/entities/Transaction';
 import { License } from '#common/entities/License';
 import { LicenseData } from '#common/types/marketplace';
