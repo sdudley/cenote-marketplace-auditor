@@ -29,7 +29,13 @@ export class LicenseDao {
     }
 
     public getEntitlementIdForLicense(licenseData: LicenseData): string {
-        return licenseData.appEntitlementNumber || licenseData.licenseId;
+        const { appEntitlementNumber, licenseId, addonLicenseId } = licenseData;
+
+        if (appEntitlementNumber || licenseId || addonLicenseId) {
+            return appEntitlementNumber || licenseId || `SEN-${addonLicenseId}`;
+        }
+
+        throw new Error(`No entitlement ID found for license for app ${licenseData.addonName} with start date ${licenseData.maintenanceStartDate} for company ${licenseData.contactDetails?.company}`);
     }
 
     public async getLicenseForEntitlementId(entitlementId: string): Promise<License | null> {

@@ -39,7 +39,13 @@ class TransactionDao {
     }
 
     public getEntitlementIdForTransaction(t: TransactionData) {
-        return t.appEntitlementNumber || t.licenseId;
+        const { appEntitlementNumber, licenseId, addonLicenseId } = t;
+
+        if (appEntitlementNumber || licenseId || addonLicenseId) {
+            return appEntitlementNumber || licenseId || `SEN-${addonLicenseId}`;
+        }
+
+        throw new Error(`No entitlement ID found for transaction: ${t.transactionId} for app ${t.addonName} with line item id ${t.transactionLineItemId}`);
     }
 
     public getKeyForTransaction(t: TransactionData) {
