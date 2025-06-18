@@ -13,7 +13,7 @@
             ],
             "program": "${workspaceFolder}/node_modules/.bin/ts-node",
             "args": [
-                "${workspaceFolder}/src/server/express/index.ts"
+                "${workspaceFolder}/src/server/index.ts"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
@@ -26,7 +26,7 @@
             ],
             "env": {
                 "NODE_ENV": "development",
-                "DB_HOST": "localhost",
+                "DB_HOST": "127.0.0.1",
                 "DB_PORT": "5431",
                 "DB_USERNAME": "postgres",
                 "DB_PASSWORD": "postgres",
@@ -46,8 +46,8 @@
             "runtimeExecutable": "node",
             "args": [
                 "-r",
-                "${workspaceFolder}/dist/express/src/server/express/ModuleResolver.js",
-                "${workspaceFolder}/dist/express/src/server/express/index.js"
+                "${workspaceFolder}/dist/express/src/server/util/ModuleResolver.js",
+                "${workspaceFolder}/dist/express/src/server/index.js"
             ],
             "sourceMaps": true,
             "smartStep": true,
@@ -64,7 +64,7 @@
             ],
             "program": "${workspaceFolder}/node_modules/.bin/ts-node",
             "args": [
-                "${workspaceFolder}/src/server/jobs/index.ts"
+                "${workspaceFolder}/src/server/cli/runJobs.ts"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
@@ -90,7 +90,7 @@
             ],
             "program": "${workspaceFolder}/node_modules/.bin/ts-node",
             "args": [
-                "${workspaceFolder}/src/server/jobs/index.ts",
+                "${workspaceFolder}/src/server/cli/runJobs.ts",
                 "--validate-transactions"
             ],
             "outFiles": [
