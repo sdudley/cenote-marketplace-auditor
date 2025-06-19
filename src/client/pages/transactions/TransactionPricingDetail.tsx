@@ -1,14 +1,12 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { TransactionPricingResponse } from '#common/types/transactionPricing';
 import { formatCurrency } from '#common/util/formatCurrency';
 import {
-    PricingDetailHeader,
     PricingDetailList,
     PricingDetailItem,
     PricingDetailDescription,
     PricingDetailSubtotal,
-    PricingDetailSummary
 } from '../styles';
 import { NotesHeadingBox } from '#client/components/styles.js';
 
