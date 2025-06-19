@@ -223,4 +223,88 @@ describe('objectDiff', () => {
             }
         });
     });
+
+    it('should handle new object key with nested key/value pairs', () => {
+        const oldObj = {
+            user: {
+                name: 'John',
+                age: 30
+            }
+        };
+        const newObj = {
+            user: {
+                name: 'John',
+                age: 30
+            },
+            settings: {
+                theme: 'dark',
+                notifications: {
+                    email: true,
+                    push: false,
+                    frequency: 'daily'
+                },
+                preferences: {
+                    language: 'en',
+                    timezone: 'UTC'
+                }
+            }
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.user).toEqual({
+            changeType: 'unchanged',
+            children: {
+                name: {
+                    changeType: 'unchanged',
+                    oldValue: 'John',
+                    newValue: 'John'
+                },
+                age: {
+                    changeType: 'unchanged',
+                    oldValue: 30,
+                    newValue: 30
+                }
+            }
+        });
+        expect(diff.settings).toEqual({
+            changeType: 'added',
+            children: {
+                theme: {
+                    changeType: 'added',
+                    newValue: 'dark'
+                },
+                notifications: {
+                    changeType: 'added',
+                    children: {
+                        email: {
+                            changeType: 'added',
+                            newValue: true
+                        },
+                        push: {
+                            changeType: 'added',
+                            newValue: false
+                        },
+                        frequency: {
+                            changeType: 'added',
+                            newValue: 'daily'
+                        }
+                    }
+                },
+                preferences: {
+                    changeType: 'added',
+                    children: {
+                        language: {
+                            changeType: 'added',
+                            newValue: 'en'
+                        },
+                        timezone: {
+                            changeType: 'added',
+                            newValue: 'UTC'
+                        }
+                    }
+                }
+            }
+        });
+    });
 });

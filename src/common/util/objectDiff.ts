@@ -98,10 +98,14 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
             const newValue = newObj[key];
 
             if (!(key in oldObj)) {
-                children[key] = {
-                    changeType: 'added',
-                    newValue: newValue
-                };
+                if (isObject(newValue)) {
+                    children[key] = processNewObject(newValue);
+                } else {
+                    children[key] = {
+                        changeType: 'added',
+                        newValue: newValue
+                    };
+                }
             } else if (!(key in newObj)) {
                 children[key] = {
                     changeType: 'removed',
