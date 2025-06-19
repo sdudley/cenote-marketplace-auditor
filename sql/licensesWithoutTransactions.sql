@@ -1,11 +1,12 @@
 WITH latest_transaction AS (
-    SELECT DISTINCT ON (entitlement_id) *, data->'purchaseDetails'->>'maintenanceEndDate' tx_end
+    SELECT DISTINCT ON (entitlement_id) *, data->'purchaseDetails'->>'maintenanceEndDate' as tx_end
     FROM transaction
-    ORDER BY entitlement_id, data->'purchaseDetails'->>'saleDate' DESC, created_at DESC
+    ORDER BY entitlement_id, data->'purchaseDetails'->>'maintenanceEndDate' DESC, created_at DESC
 )
 select l.entitlement_id,
 l.data->>'tier' as tier,
 l.data->>'licenseType' as license_type,
+coalesce(l.data->>'inGracePeriod', 'No') as grace_period,
 l.data->>'evaluationStartDate' as eval_start,
 l.data->>'latestEvaluationStartDate' as ltst_eval_st,
 l.data->>'maintenanceStartDate' as lic_start,
