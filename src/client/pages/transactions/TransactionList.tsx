@@ -261,6 +261,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             <StyledTableCell>
                                                 {tr.transaction.data.purchaseDetails.tier}
                                                 {tr.isSandbox && <StyledSandboxAnnotation>Sandbox</StyledSandboxAnnotation>}
+                                                {tr.transaction.data.purchaseDetails.discounts?.some(d => d.type==='MANUAL' && d.reason==='DUAL_LICENSING') && <StyledSandboxAnnotation>Dual Licensing</StyledSandboxAnnotation>}
                                             </StyledTableCell>
                                             <StyledTableCell>
                                                 {tr.transaction.data.customerDetails.company}
