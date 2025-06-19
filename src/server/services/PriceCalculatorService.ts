@@ -167,8 +167,9 @@ export class PriceCalculatorService {
         }
 
         if (partnerDiscountFraction !== 0) {
+            const solutionsPartnerDiscount = basePrice * partnerDiscountFraction;
             basePrice *= (1-partnerDiscountFraction);
-            descriptors.push({ subtotal: basePrice, description: `Apply automatic Solutions Partner discount of ${partnerDiscountFraction*100}%`});
+            descriptors.push({ subtotal: basePrice, description: `Apply automatic Solutions Partner discount of ${partnerDiscountFraction*100}% (${formatCurrency(solutionsPartnerDiscount)})`});
         }
 
         if (billingPeriod === 'Annual') {
