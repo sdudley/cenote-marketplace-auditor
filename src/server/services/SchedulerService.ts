@@ -40,7 +40,7 @@ export class SchedulerService {
         // Start new job
         this.cronJob = cron.schedule(cronExpression, async () => {
             try {
-                console.log('[SchedulerService] Starting scheduled jobs');
+                console.log(`[SchedulerService] Starting scheduled jobs at ${new Date().toISOString()}`);
                 await this.jobStarter.startAllJobs();
             } catch (error) {
                 console.error('[SchedulerService] Error in scheduled jobs:', error);
