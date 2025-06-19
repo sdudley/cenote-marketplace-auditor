@@ -1,4 +1,4 @@
-import { TransactionData } from '#common/types/marketplace';
+import { TransactionData, TransactionDiscount } from '#common/types/marketplace';
 
 export const handleExportTransaction = (opts: { transactionData: TransactionData; suffix?: string }): void => {
     const { transactionData, suffix } = opts;
@@ -22,4 +22,22 @@ export const handleExportTransaction = (opts: { transactionData: TransactionData
     // Clean up
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+};
+
+
+export const mapDiscountTypeToDescription = (d: TransactionDiscount) : string => {
+    const { type, reason } = d;
+
+    switch (type) {
+        case 'MANUAL':
+            return (reason==='DUAL_LICENSING') ? 'Dual Licensing' : 'Manual';
+        case 'MARKETPLACE_PROMOTION':
+            return 'PromoCode';
+        case 'LOYALTY_DISCOUNT':
+            return 'Loyalty';
+        case 'EXPERT':
+            return 'SolPartnr';
+        default:
+            return 'Unknown';
+    }
 };

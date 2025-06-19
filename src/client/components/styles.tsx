@@ -353,8 +353,8 @@ export const TableHeaderCell = styled(TableCell)({
     fontWeight: 'bold'
 });
 
-export const StyledSandboxAnnotation = styled('p')({
-    color: 'purple',
+export const EmphasizedAnnotation = styled('p')({
+    color: '#f58623',
     fontStyle: 'italic',
     fontWeight: 'bold',
     fontSize: '10px'

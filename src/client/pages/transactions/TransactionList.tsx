@@ -21,10 +21,12 @@ import { ReconciliationControls } from './ReconciliationControls';
 import { SortOrder, SortableHeader } from '../../components/SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox, StatusCell, StatusDot, StatusControlsBox, StatusIconButton, ReconcileButton, UnreconcileButton, ReconciliationHeaderCell, HoverActions } from '../../components/styles';
 import { TableHeaderCell } from '../../components/styles';
-import { StyledSandboxAnnotation } from '../../components/styles';
+import { EmphasizedAnnotation } from '../../components/styles';
 import { dateDiff } from '#common/util/dateUtils';
 import { HighlightIfSignificantlyDifferent } from '../../components/HighlightIfSignificantlyDifferent';
-import { calculateDiscountForTransaction } from '#common/util/transactionDiscounts.js';
+import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts.js';
+import { TransactionDiscount,  } from '#common/types/marketplace';
+import { mapDiscountTypeToDescription } from './util';
 
 interface TransactionListProps {
     // Add props if needed
@@ -269,16 +271,19 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             <StyledTableCell>{tr.transaction.data.purchaseDetails.hosting}</StyledTableCell>
                                             <StyledTableCell>
                                                 {tr.transaction.data.purchaseDetails.tier}
-                                                {tr.isSandbox && <StyledSandboxAnnotation>Sandbox</StyledSandboxAnnotation>}
-                                                {tr.transaction.data.purchaseDetails.discounts?.some(d => d.type==='MANUAL' && d.reason==='DUAL_LICENSING') && <StyledSandboxAnnotation>Dual Licensing</StyledSandboxAnnotation>}
+                                                {tr.isSandbox && <EmphasizedAnnotation>Sandbox</EmphasizedAnnotation>}
+                                                {tr.transaction.data.purchaseDetails.discounts?.some(d => d.type==='MANUAL' && d.reason==='DUAL_LICENSING') && <EmphasizedAnnotation>Dual Licensing</EmphasizedAnnotation>}
                                             </StyledTableCell>
                                             <StyledTableCell>
                                                 {tr.transaction.data.customerDetails.company}
-                                                {tr.isSandbox && tr.cloudSiteHostname &&<StyledSandboxAnnotation>({tr.cloudSiteHostname})</StyledSandboxAnnotation>}
+                                                {tr.isSandbox && tr.cloudSiteHostname &&<EmphasizedAnnotation>({tr.cloudSiteHostname})</EmphasizedAnnotation>}
                                             </StyledTableCell>
                                             <StyledTableCell align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
                                             <StyledTableCell align="right"><HighlightIfSignificantlyDifferent value={tr.transaction.reconcile?.expectedVendorAmount} compareToValue={tr.transaction.data.purchaseDetails.vendorAmount}/></StyledTableCell>
-                                            <StyledTableCell align="right">{formatCurrency(calculateDiscountForTransaction({ data: tr.transaction.data }))}</StyledTableCell>
+                                            <StyledTableCell align="right">
+                                                {formatCurrency(sumDiscountArrayForTransaction({ data: tr.transaction.data }))}
+                                                {discountsToDescriptions(tr.transaction.data.purchaseDetails.discounts)}
+                                            </StyledTableCell>
                                             <StyledTableCell align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
                                             <StyledTableCell>{isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceStartDate) + ' - ' + isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceEndDate)}</StyledTableCell>
                                             <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
@@ -334,4 +339,14 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
             />
         </TableContainer>
     );
+};
+
+const discountsToDescriptions = (discounts: TransactionDiscount[]|undefined) => {
+    if (!discounts) return undefined;
+
+    return (<>
+        <EmphasizedAnnotation>
+            {discounts.map(d => mapDiscountTypeToDescription(d)).join(', ')}
+        </EmphasizedAnnotation>
+    </>);
 };
