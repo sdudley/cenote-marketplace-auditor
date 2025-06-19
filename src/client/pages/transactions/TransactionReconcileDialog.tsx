@@ -51,9 +51,7 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
     const [isLoadingPricing, setIsLoadingPricing] = useState(false);
 
     useEffect(() => {
-        if (transaction?.transaction.reconcile?.notes) {
-            setExistingNotes(transaction.transaction.reconcile.notes);
-        }
+        setExistingNotes(transaction?.transaction.reconcile?.notes ?? []);
     }, [transaction]);
 
     useEffect(() => {
