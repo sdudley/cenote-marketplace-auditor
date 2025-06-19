@@ -70,3 +70,28 @@ export const StyledLink = muiStyled(Link)(({ theme }) => ({
     color: 'inherit',
     textDecoration: 'underline',
 }));
+
+export const PricingDetailList = muiStyled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(1),
+    marginBottom: theme.spacing(2)
+}));
+
+export const PricingDetailItem = muiStyled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: theme.spacing(2)
+}));
+
+export const PricingDetailDescription = muiStyled(Typography)(({ theme }) => ({
+    flex: 1,
+    lineHeight: 1.4
+})) as typeof Typography;
+
+export const PricingDetailSubtotal = muiStyled(Typography)(({ theme }) => ({
+    minWidth: '80px',
+    textAlign: 'right',
+    color: theme.palette.primary.main
+})) as typeof Typography;

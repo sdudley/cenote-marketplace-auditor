@@ -23,6 +23,7 @@ export interface PriceResult {
     vendorPrice: number;
     purchasePrice: number;
     dailyNominalPrice: number;
+    descriptors: PriceCalcDescriptor[];
 }
 
 export interface PreviousTransactionResult {
@@ -43,4 +44,9 @@ export interface LicenseQueryParams {
     endDate?: string;
     withDataInsights?: boolean;
     includeAtlassianLicenses?: boolean;
+}
+
+export interface PriceCalcDescriptor {
+    description: string;
+    subtotal?: number;
 }

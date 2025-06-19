@@ -437,7 +437,7 @@ export const DialogTitleSubtitle = styled(Typography)(({ theme }) => ({
 
 export const NotesHeadingBox = styled(Box)(({ theme }) => ({
     borderBottom: `1px solid ${theme.palette.divider}`,
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(1)
 }));
 
 export const NotesSectionBox = styled(Box)(({ theme }) => ({

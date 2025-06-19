@@ -11,7 +11,8 @@ import {
 } from "#server/util/validationConstants";
 import { injectable } from "inversify";
 import { DeploymentType, HostingType } from "#common/types/marketplace";
-import { PriceCalcOpts, PriceResult } from '#server/services/types';
+import { PriceCalcDescriptor, PriceCalcOpts, PriceResult } from '#server/services/types';
+import { formatCurrency } from "#common/util/formatCurrency";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
 
@@ -39,8 +40,12 @@ export class PriceCalculatorService {
             partnerDiscountFraction
         } = opts;
 
+        const descriptors : PriceCalcDescriptor[] = [];
+
         if (isSandbox) {
-            return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0 };
+            descriptors.push({ subtotal: 0, description: 'Sandbox licenses are free'});
+
+            return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0, descriptors };
         }
 
         const deploymentType = deploymentTypeFromHosting(hosting);
@@ -59,40 +64,65 @@ export class PriceCalculatorService {
             const pricingTier : UserTierPricing = pricingTiers[tierIndex];
 
             basePrice = pricingTier.cost;
-            basePrice = basePrice * licenseDurationDays / 365;
+            descriptors.push({ subtotal: basePrice, description: `Annual base price is ${formatCurrency(pricingTier.cost)}/year`});
+
+            if (licenseDurationDays !== 365) {
+                basePrice = basePrice * licenseDurationDays / 365;
+                descriptors.push({ subtotal: basePrice, description: `Prorating ${formatCurrency(pricingTier.cost)} by license duration (${licenseDurationDays}/365 days)`});
+            }
         } else {
             if (userCount <= pricingTiers[0].userTier) {
                 // Fixed pricing for first tier (up to 10 users)
                 basePrice = pricingTiers[0].cost;
+                descriptors.push({ subtotal: basePrice, description: `Base monthly price for first tier is ${formatCurrency(basePrice)}`});
             } else {
                 // Variable, per-user pricing for all other tiers
                 basePrice = this.computeTierPrice({ userCount, perUserTiers: pricingTiers });
+                descriptors.push({ subtotal: basePrice, description: `Base monthly price for tier with ${userCount} users is ${formatCurrency(basePrice)}`});
             }
 
             if (billingPeriod === 'Annual') {
                 basePrice = basePrice * ANNUAL_DISCOUNT_MULTIPLIER * licenseDurationDays / 365;
+
+                if (licenseDurationDays !== 365) {
+                    descriptors.push({ subtotal: basePrice, description: `Annual discount: 12 months for the price of ${ANNUAL_DISCOUNT_MULTIPLIER} and prorate for ${licenseDurationDays} days: price * ${ANNUAL_DISCOUNT_MULTIPLIER} * ${licenseDurationDays} / 365`});
+                } else {
+                    descriptors.push({ subtotal: basePrice, description: `Annual discount: 12 months for the price of ${ANNUAL_DISCOUNT_MULTIPLIER}`});
+                }
             } else {
                 // Should be monthly, but handle short months based on Atassian's magic formula
                 // (Not entirely sure this is correct and it may need to be updated)
 
                 if (licenseDurationDays < 29) {
                     basePrice = basePrice * (licenseDurationDays+2) / 31;
+                    descriptors.push({ subtotal: basePrice, description: `Short month: prorate by (${licenseDurationDays}+2)/31 days`});
                 }
             }
         }
 
         if (saleType==='Refund') {
             basePrice = -basePrice;
+            descriptors.push({ subtotal: basePrice, description: `Refund: negate base price`});
         }
 
         // Apply academic discount if applicable
         if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
-            basePrice = this.applyLicenseTypeDiscounts({ basePrice, saleDate, hosting, userCount });
+            const licenseTypeDiscountFraction = this.getLicenseTypeDiscountFraction({ saleDate, hosting, userCount });
+            basePrice *= licenseTypeDiscountFraction;
+            descriptors.push({ subtotal: basePrice, description: `Apply ${licenseType.toLowerCase()} discount of ${(1-licenseTypeDiscountFraction)*100}%`});
         }
 
         // Now we start to calculate the final value paid to Atlassian
+
+        if (billingPeriod==='Annual' && basePrice != Math.ceil(basePrice)) {
+            descriptors.push({ subtotal: Math.ceil(basePrice), description: `Round to integer for annual billing`});
+        }
+
         let purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
+
         const dailyNominalPrice = purchasePrice / licenseDurationDays;
+
+        descriptors.push({ description: `Daily nominal price = purchase price / days in license = ${formatCurrency(purchasePrice)} / ${licenseDurationDays} = ${formatCurrency(dailyNominalPrice)}`});
 
         // If this is an upgrade, then we need to calculate the price differential for the
         // overlap in subscription length.
@@ -107,32 +137,45 @@ export class PriceCalculatorService {
             }
 
             if (overlapDays > 0 && previousPricing && previousPricing.purchasePrice > 0) {
+
                 const newDays = licenseDurationDays - overlapDays;
 
                 // Calculate the payment for the days that aren't included in the old license
                 const newPeriodPrice = dailyNominalPrice * newDays;
+                descriptors.push({ description: `Subscription has ${newDays} non-overlapping days at new license price (${formatCurrency(dailyNominalPrice)} * ${newDays}) = ${formatCurrency(newPeriodPrice)}`});
 
                 // For the days already partially paid, subtract the old daily price
-                const oldPeriodPrice = (dailyNominalPrice - previousPricing.dailyNominalPrice) * overlapDays;
+                const oldPeriodPricePerDay = dailyNominalPrice - previousPricing.dailyNominalPrice;
+                const oldPeriodPrice = oldPeriodPricePerDay * overlapDays;
+
+                descriptors.push({ description: `Subscription overlaps ${overlapDays} days with old license, which are billed at ${formatCurrency(dailyNominalPrice)} - ${formatCurrency(previousPricing.dailyNominalPrice)} = ${formatCurrency(oldPeriodPricePerDay)} per day, or ${formatCurrency(oldPeriodPrice)} total`});
 
                 // Now update the base price and purchase price
                 basePrice = oldPeriodPrice + newPeriodPrice;
                 purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
+
+                descriptors.push({ subtotal: basePrice, description: `Final upgrade price = ${formatCurrency(oldPeriodPrice)} + ${formatCurrency(newPeriodPrice)}`});
             }
         }
 
         // If partner or other manual discount
 
         if (expectedDiscount) {
+            const discountPercent = (expectedDiscount / basePrice) * 100;
             basePrice -= expectedDiscount * (saleType==='Refund' ? -1 : 1);
+            descriptors.push({ subtotal: basePrice, description: `Apply expected manual/promo discount of: ${formatCurrency(expectedDiscount)} (${discountPercent.toFixed(2)}%)`});
         }
 
         if (partnerDiscountFraction !== 0) {
             basePrice *= (1-partnerDiscountFraction);
+            descriptors.push({ subtotal: basePrice, description: `Apply automatic Solutions Partner discount of ${partnerDiscountFraction*100}%`});
         }
 
         if (billingPeriod === 'Annual') {
-            basePrice = Math.ceil(basePrice);
+            if (basePrice != Math.ceil(basePrice)) {
+                basePrice = Math.ceil(basePrice);
+                descriptors.push({ subtotal: basePrice, description: `Round to integer for annual billing`});
+            }
         }
 
         // Adjust the purchase price after any discounts
@@ -142,16 +185,20 @@ export class PriceCalculatorService {
         // TODO FIXME need to adjust purchasePrice here too?
         // dailyNominalPrice = purchasePrice / licenseDurationDays;
 
-        if (billingPeriod==='Annual' && hosting !== 'Cloud') {
+        if (billingPeriod==='Annual' && hosting !== 'Cloud' && basePrice != Math.ceil(basePrice)) {
             basePrice = Math.ceil(basePrice);
+            descriptors.push({ subtotal: basePrice, description: `Round again to integer for DC`});
         }
 
-        basePrice *= this.getDiscountAmount(saleDate, deploymentType);
+        const discountAmount = this.getDiscountAmount(saleDate, deploymentType);
+        basePrice *= discountAmount;
+        descriptors.push({ subtotal: basePrice, description: `Apply Atlassian discount rate of ${discountAmount*100}%`});
 
         return {
             purchasePrice: Math.round(purchasePrice * 100)/100,
             vendorPrice: Math.round(basePrice * 100)/100,
-            dailyNominalPrice
+            dailyNominalPrice,
+            descriptors
         };
     }
 
@@ -204,15 +251,17 @@ export class PriceCalculatorService {
         return cost;
     }
 
-    private applyLicenseTypeDiscounts(opts: { basePrice: number; saleDate: string; hosting: HostingType; userCount: number; }): number {
-        const { basePrice, saleDate, hosting, userCount } = opts;
+    // Apply expecteddiscounts for academic and community licenses
+
+    private getLicenseTypeDiscountFraction(opts: { saleDate: string; hosting: HostingType; userCount: number; }): number {
+        const { saleDate, hosting, userCount } = opts;
 
         if (hosting==='Cloud') {
-            return basePrice * ACADEMIC_CLOUD_PRICE_RATIO;
+            return ACADEMIC_CLOUD_PRICE_RATIO;
         }
 
         if (saleDate < ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE) {
-            return basePrice * ACADEMIC_DC_PRICE_RATIO_LEGACY;
+            return ACADEMIC_DC_PRICE_RATIO_LEGACY;
         }
 
         // Somewhere in 2024, Atlassian changed the pricing for academic data center licenses to apply a
@@ -220,9 +269,9 @@ export class PriceCalculatorService {
 
         if (userCount !== -1 && userCount < 10000) {
             // If under 10k (and not unlimited), continue with the 50% discount
-            return basePrice * ACADEMIC_DC_PRICE_RATIO_LEGACY;
+            return ACADEMIC_DC_PRICE_RATIO_LEGACY;
         }
 
-        return basePrice * ACADEMIC_DC_PRICE_RATIO_CURRENT_10K;
+        return ACADEMIC_DC_PRICE_RATIO_CURRENT_10K;
     }
 }

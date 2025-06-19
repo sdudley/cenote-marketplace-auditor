@@ -9,6 +9,7 @@ import { JobRoute } from './JobRoute';
 import { LicenseRoute } from './LicenseRoute';
 import { LicenseVersionRoute } from './LicenseVersionRoute';
 import { SchedulerRoute } from './SchedulerRoute';
+import { TransactionPricingRoute } from './TransactionPricingRoute';
 
 @injectable()
 export class ApiRouter {
@@ -22,7 +23,8 @@ export class ApiRouter {
         @inject(EXPRESS_TYPES.JobRoute) private jobRoute: JobRoute,
         @inject(EXPRESS_TYPES.LicenseRoute) private licenseRoute: LicenseRoute,
         @inject(EXPRESS_TYPES.LicenseVersionRoute) private licenseVersionRoute: LicenseVersionRoute,
-        @inject(EXPRESS_TYPES.SchedulerRoute) private schedulerRoute: SchedulerRoute
+        @inject(EXPRESS_TYPES.SchedulerRoute) private schedulerRoute: SchedulerRoute,
+        @inject(EXPRESS_TYPES.TransactionPricingRoute) private transactionPricingRoute: TransactionPricingRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -50,6 +52,7 @@ export class ApiRouter {
         this.router.use('/transactions', this.transactionRoute.router);
         this.router.use('/transactions', this.transactionVersionRoute.router);
         this.router.use('/transactions', this.transactionReconcileRoute.router);
+        this.router.use('/transactions', this.transactionPricingRoute.router);
 
         // License routes
         this.router.use('/licenses', this.licenseRoute.router);

@@ -11,6 +11,7 @@ import { JobRoute } from '../routes/JobRoute';
 import { LicenseRoute } from '../routes/LicenseRoute';
 import { LicenseVersionRoute } from '../routes/LicenseVersionRoute';
 import { SchedulerRoute } from '../routes/SchedulerRoute';
+import { TransactionPricingRoute } from '../routes/TransactionPricingRoute';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = configureCommonContainer(dataSource);
@@ -25,6 +26,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<LicenseRoute>(EXPRESS_TYPES.LicenseRoute).to(LicenseRoute).inSingletonScope();
     container.bind<LicenseVersionRoute>(EXPRESS_TYPES.LicenseVersionRoute).to(LicenseVersionRoute).inSingletonScope();
     container.bind<SchedulerRoute>(EXPRESS_TYPES.SchedulerRoute).to(SchedulerRoute).inSingletonScope();
+    container.bind<TransactionPricingRoute>(EXPRESS_TYPES.TransactionPricingRoute).to(TransactionPricingRoute).inSingletonScope();
 
     return container;
 }

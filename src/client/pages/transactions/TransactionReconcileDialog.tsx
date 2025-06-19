@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { TransactionReconcileNote } from '#common/entities/TransactionReconcileNote';
+import { TransactionPricingResponse } from '#common/types/transactionPricing';
 import { formatCurrency } from '#common/util/formatCurrency';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import {
@@ -28,6 +29,7 @@ import {
     NotesSectionBox
 } from '../../components/styles';
 import { CloseButton } from '../../components/CloseButton';
+import { TransactionPricingDetail } from './TransactionPricingDetail';
 
 interface TransactionReconcileDialogProps {
     transaction: TransactionResult | null;
@@ -45,12 +47,47 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
     const [notes, setNotes] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [existingNotes, setExistingNotes] = useState<TransactionReconcileNote[]>([]);
+    const [pricing, setPricing] = useState<TransactionPricingResponse | null>(null);
+    const [isLoadingPricing, setIsLoadingPricing] = useState(false);
 
     useEffect(() => {
         if (transaction?.transaction.reconcile?.notes) {
             setExistingNotes(transaction.transaction.reconcile.notes);
         }
     }, [transaction]);
+
+    useEffect(() => {
+        if (transaction && open) {
+            fetchPricingData();
+        }
+    }, [transaction, open]);
+
+    const fetchPricingData = async () => {
+        if (!transaction) return;
+
+        setIsLoadingPricing(true);
+        try {
+            const response = await fetch(`/api/transactions/${transaction.transaction.id}/pricing`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const pricingData = await response.json();
+                setPricing(pricingData);
+            } else {
+                console.error('Failed to fetch pricing data');
+                setPricing(null);
+            }
+        } catch (error) {
+            console.error('Error fetching pricing data:', error);
+            setPricing(null);
+        } finally {
+            setIsLoadingPricing(false);
+        }
+    };
 
     if (!transaction) return null;
 
@@ -137,10 +174,12 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
                             </>
                         )}
 
+                        <TransactionPricingDetail pricing={pricing} />
+
                         {existingNotes.length > 0 && (
                             <NotesSectionBox>
                                 <NotesHeadingBox>
-                                    <Typography variant="subtitle1" fontWeight="bold" color="text.secondary" gutterBottom>
+                                    <Typography variant="subtitle1" fontWeight="bold" color="text.secondary">
                                         Notes
                                     </Typography>
                                 </NotesHeadingBox>
