@@ -96,7 +96,7 @@ export class TransactionValidator {
         if ((saleType==='Upgrade' || saleType==='Renewal') && licenseDurationInDays !== 0  && licenseType !== 'COMMUNITY') {
 
             if (!previousPurchase) {
-                notes.push('Could not find previous purchase');
+                notes.push('This is an upgrade/renewal, but we could not find related transaction for previous purchase');
                 valid = false;
             } else {
                 const { maintenanceEndDate: priorMaintenanceEndDate } = previousPurchase?.data.purchaseDetails;
