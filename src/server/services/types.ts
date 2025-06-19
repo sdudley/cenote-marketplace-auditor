@@ -1,6 +1,7 @@
 import { PricingTierResult } from '#common/types/pricingTierResult';
 import { BillingPeriod, HostingType, LicenseType, SaleType } from '#common/types/marketplace';
 import { Transaction } from '#common/entities/Transaction';
+import { TransactionDiscount } from '#common/types/marketplace';
 
 export interface PriceCalcOpts {
     pricingTierResult: PricingTierResult;
@@ -17,6 +18,7 @@ export interface PriceCalcOpts {
     previousPricing?: PriceResult | undefined;
     expectedDiscount?: number; // always positive, even for refunds
     partnerDiscountFraction: number;
+    discounts?: TransactionDiscount[];
 }
 
 export interface PriceResult {

@@ -28,7 +28,6 @@ export class PriceCalculatorService {
             pricingTierResult,
             saleDate,
             saleType,
-            isSandbox,
             hosting,
             licenseType,
             tier,
@@ -37,16 +36,17 @@ export class PriceCalculatorService {
             billingPeriod,
             previousPurchaseMaintenanceEndDate,
             expectedDiscount,
-            partnerDiscountFraction
+            partnerDiscountFraction,
+            discounts
         } = opts;
 
-        const descriptors : PriceCalcDescriptor[] = [];
+        const { isFreeLicense, freeDescriptors } = this.isFreeLicense(opts);
 
-        if (isSandbox) {
-            descriptors.push({ subtotal: 0, description: 'Sandbox licenses are free'});
-
-            return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0, descriptors };
+        if (isFreeLicense) {
+            return { vendorPrice: 0, purchasePrice: 0, dailyNominalPrice: 0, descriptors: freeDescriptors };
         }
+
+        const descriptors : PriceCalcDescriptor[] = [];
 
         const deploymentType = deploymentTypeFromHosting(hosting);
         const userCount = userCountFromTier(tier);
@@ -105,7 +105,7 @@ export class PriceCalculatorService {
             descriptors.push({ subtotal: basePrice, description: `Refund: negate base price`});
         }
 
-        // Apply academic discount if applicable
+        // Apply academic/community discount if applicable
         if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
             const licenseTypeDiscountFraction = this.getLicenseTypeDiscountFraction({ saleDate, hosting, userCount });
             basePrice *= licenseTypeDiscountFraction;
@@ -274,5 +274,27 @@ export class PriceCalculatorService {
         }
 
         return ACADEMIC_DC_PRICE_RATIO_CURRENT_10K;
+    }
+
+    private isFreeLicense(opts: PriceCalcOpts): { isFreeLicense: boolean; freeDescriptors: PriceCalcDescriptor[] } {
+        const { isSandbox, licenseType, hosting, discounts } = opts;
+
+        if (isSandbox && hosting==='Cloud') {
+            return { isFreeLicense: true, freeDescriptors: [{ subtotal: 0, description: 'Cloud sandbox licenses are free' }] };
+        }
+
+        if (licenseType==='OPEN_SOURCE') {
+            return { isFreeLicense: true, freeDescriptors: [{ subtotal: 0, description: 'Open source licenses are free' }] };
+        }
+
+        if (licenseType==='COMMUNITY' && hosting==='Data Center') {
+            return { isFreeLicense: true, freeDescriptors: [{ subtotal: 0, description: 'Community DC licenses are free' }] };
+        }
+
+        if (discounts && discounts.some(d => d.type==='MANUAL' && d.reason==='DUAL_LICENSING')) {
+            return { isFreeLicense: true, freeDescriptors: [{ subtotal: 0, description: 'Free license under dual-licensing' }] };
+        }
+
+        return { isFreeLicense: false, freeDescriptors: [] };
     }
 }

@@ -165,7 +165,8 @@ export class TransactionValidator {
             previousPurchaseMaintenanceEndDate: previousPurchaseEffectiveMaintenanceEndDate,
             previousPricing,
             expectedDiscount,
-            partnerDiscountFraction
+            partnerDiscountFraction,
+            discounts: purchaseDetails.discounts
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator
