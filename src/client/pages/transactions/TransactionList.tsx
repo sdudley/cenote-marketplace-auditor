@@ -24,6 +24,7 @@ import { TableHeaderCell } from '../../components/styles';
 import { StyledSandboxAnnotation } from '../../components/styles';
 import { dateDiff } from '#common/util/dateUtils';
 import { HighlightIfSignificantlyDifferent } from '../../components/HighlightIfSignificantlyDifferent';
+import { calculateDiscountForTransaction } from '#common/util/transactionDiscounts.js';
 
 interface TransactionListProps {
     // Add props if needed
@@ -208,6 +209,14 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                     />
                                     <TableHeaderCell align="right">Expected Amount</TableHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
+                                        field={TransactionQuerySortType.Discounts}
+                                        label="Discounts"
+                                        currentSort={sortBy}
+                                        currentOrder={sortOrder}
+                                        onSort={handleSort}
+                                        whiteSpace
+                                    />
+                                    <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.MaintenanceDays}
                                         label="Maintenance"
                                         currentSort={sortBy}
@@ -269,6 +278,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             </StyledTableCell>
                                             <StyledTableCell align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
                                             <StyledTableCell align="right"><HighlightIfSignificantlyDifferent value={tr.transaction.reconcile?.expectedVendorAmount} compareToValue={tr.transaction.data.purchaseDetails.vendorAmount}/></StyledTableCell>
+                                            <StyledTableCell align="right">{formatCurrency(calculateDiscountForTransaction({ data: tr.transaction.data }))}</StyledTableCell>
                                             <StyledTableCell align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
                                             <StyledTableCell>{isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceStartDate) + ' - ' + isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceEndDate)}</StyledTableCell>
                                             <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>

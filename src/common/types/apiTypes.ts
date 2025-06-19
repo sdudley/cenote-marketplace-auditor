@@ -20,7 +20,8 @@ export enum TransactionQuerySortType {
     UpdatedAt = 'updatedAt',
     VersionCount = 'versionCount',
     VendorAmount = 'vendorAmount',
-    MaintenanceDays = 'maintenanceDays'
+    MaintenanceDays = 'maintenanceDays',
+    Discounts = 'discounts'
 }
 
 export enum LicenseQuerySortType {

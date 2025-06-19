@@ -19,7 +19,8 @@ class TransactionDao {
         [TransactionQuerySortType.SaleDate]: [ "transaction.data ->'purchaseDetails'->>'saleDate'", 'transaction.createdAt' ],
         [TransactionQuerySortType.VersionCount]: [ 'version_count.version_count', 'transaction.createdAt' ],
         [TransactionQuerySortType.VendorAmount]: [ '(transaction.data ->\'purchaseDetails\'->>\'vendorAmount\')::numeric(14,3)', 'transaction.createdAt' ],
-        [TransactionQuerySortType.MaintenanceDays]: [ "(to_date(transaction.data->'purchaseDetails'->>'maintenanceEndDate','YYYY-mm-dd') - to_date(transaction.data->'purchaseDetails'->>'maintenanceStartDate','YYYY-mm-dd'))", 'transaction.createdAt' ]
+        [TransactionQuerySortType.MaintenanceDays]: [ "(to_date(transaction.data->'purchaseDetails'->>'maintenanceEndDate','YYYY-mm-dd') - to_date(transaction.data->'purchaseDetails'->>'maintenanceStartDate','YYYY-mm-dd'))", 'transaction.createdAt' ],
+        [TransactionQuerySortType.Discounts]: [ "COALESCE((SELECT SUM((elem->>'amount')::numeric) FROM jsonb_array_elements(transaction.data->'purchaseDetails'->'discounts') AS elem), 0)", 'transaction.createdAt' ]
     };
 
     constructor(@inject(TYPES.DataSource) private dataSource: DataSource) {
