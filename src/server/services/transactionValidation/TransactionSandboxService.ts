@@ -22,6 +22,6 @@ export class TransactionSandboxService {
             return false;
         }
 
-        return license.data.installedOnSandbox ? true : false;
+        return license.data.installedOnSandbox==='Yes'; // Also 'No', 'NA', undefined
     }
 }
