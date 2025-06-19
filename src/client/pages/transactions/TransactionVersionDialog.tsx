@@ -6,7 +6,8 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableRow
+    TableRow,
+    Button
 } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
@@ -14,7 +15,8 @@ import { TransactionVersion } from '#common/entities/TransactionVersion';
 import {
     VersionDataBox,
     InfoTableBox,
-    InfoTableHeader
+    InfoTableHeader,
+    VersionButton
 } from '../../components/styles';
 import { JsonDiffObjectTreeView } from '../../components/JsonDiffObjectTreeView';
 import { getObjectDiff } from '#common/util/objectDiff';
@@ -22,6 +24,7 @@ import { CloseButton } from '../../components/CloseButton';
 import { collectIdsForDiffObject } from '#client/util/collectIds';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import { formatTransactionData } from './transactionUtils';
+import { handleExportTransaction } from './util';
 
 interface TransactionVersionDialogProps {
     version: TransactionVersion | null;
@@ -48,6 +51,16 @@ export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> =
         >
             <DialogTitle>
                 Transaction Version Details
+                <VersionButton>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleExportTransaction( { transactionData: version.data, suffix: `v${version.version}` })}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Export as JSON
+                    </Button>
+                </VersionButton>
                 <CloseButton onClose={onClose} />
             </DialogTitle>
             <DialogContent dividers>

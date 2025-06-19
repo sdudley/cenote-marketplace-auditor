@@ -24,6 +24,7 @@ import { CloseButton } from '../../components/CloseButton';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import { formatTransactionData } from './transactionUtils';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
+import { handleExportTransaction } from './util';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;
@@ -51,6 +52,14 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                 <DialogTitle>
                     Transaction Details
                     <VersionButton>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => handleExportTransaction({ transactionData: transaction.transaction.data })}
+                            sx={{ textTransform: 'none', marginRight: 1 }}
+                        >
+                            Export as JSON
+                        </Button>
                         <Button
                             variant="outlined"
                             size="small"
