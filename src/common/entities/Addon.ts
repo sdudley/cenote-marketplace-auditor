@@ -5,6 +5,9 @@ export class Addon {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
+    @Column({ default: 'unknown' })
+    parentProduct!: string;
+
     @Column()
     @Index({ unique: true })
     addonKey!: string;

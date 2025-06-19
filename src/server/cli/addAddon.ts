@@ -11,6 +11,12 @@ async function main() {
         process.exit(1);
     }
 
+    const parentProduct = process.argv[3];
+    if (!parentProduct) {
+        console.error('Please provide a parentProduct as a command line argument');
+        process.exit(1);
+    }
+
     let dataSource;
     try {
         dataSource = await initializeDatabase();
@@ -21,8 +27,8 @@ async function main() {
 
         // Get AddonService instance from container
         const addonService = container.get<AddonService>(TYPES.AddonService);
-        await addonService.addAddon(addonKey);
-        console.log(`Successfully added addon: ${addonKey}`);
+        await addonService.addAddon({ addonKey, parentProduct });
+        console.log(`Successfully added addon: ${addonKey} with parent product: ${parentProduct}`);
     } catch (error) {
         console.error('Error:', error);
         process.exit(1);

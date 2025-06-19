@@ -13,9 +13,20 @@ export class AddonService {
         this.addonRepository = this.dataSource.getRepository(Addon);
     }
 
-    async addAddon(addonKey: string): Promise<void> {
+    async addAddon(opts: { addonKey: string; parentProduct: string }): Promise<void> {
+        const { addonKey, parentProduct } = opts;
+
         const addon = new Addon();
         addon.addonKey = addonKey;
+        addon.parentProduct = parentProduct;
+        await this.addonRepository.save(addon);
+    }
+
+    public async getAddons(): Promise<Addon[]> {
+        return this.addonRepository.find();
+    }
+
+    public async updateAddon(addon: Addon): Promise<void> {
         await this.addonRepository.save(addon);
     }
 

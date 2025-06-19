@@ -232,4 +232,18 @@ export class MarketplaceService {
 
         return response.data._embedded.addons.map(addon => addon.key);
     }
+
+    async getParentProductForAddon(addonKey: string): Promise<string|undefined> {
+        await this.initializeConfig();
+        const url = `${this.baseUrl}/rest/2/addons/${addonKey}/versions/latest`;
+        console.log(`Calling Marketplace API: ${url}`);
+
+        const response = await axios.get<components["schemas"]["AddonVersion"]>(url, {
+            headers: {
+                'Authorization': await this.getAuthHeader()
+            }
+        });
+
+        return response.data.compatibilities ? response.data.compatibilities[0].application : undefined;
+    }
 }

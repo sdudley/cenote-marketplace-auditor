@@ -202,12 +202,12 @@ Although the app will automatically add a list of all known apps to be tracked, 
 command line:
 
 ```bash
-npm run add-addon -- <addon-key>
+npm run add-addon -- <addon-key> <parent-product>
 ```
 
 For example:
 ```bash
-npm run add-addon -- com.atlassian.confluence.plugins.confluence-questions
+npm run add-addon -- com.atlassian.confluence.plugins.confluence-questions confluence
 ```
 
 ### Script for Managing Ignored Fields
