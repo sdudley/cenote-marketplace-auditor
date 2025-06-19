@@ -23,6 +23,7 @@ import { collectIds } from '#client/util/collectIds';
 import { CloseButton } from '../../components/CloseButton';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import { LicenseVersionListDialog } from './LicenseVersionListDialog';
+import { handleExportLicense } from './util';
 
 interface LicenseDetailsProps {
     license: LicenseResult | null;
@@ -50,6 +51,14 @@ export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, o
                 <DialogTitle>
                     License Details
                     <VersionButton>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => handleExportLicense({ licenseData: license.license.data })}
+                            sx={{ textTransform: 'none', marginRight: 1 }}
+                        >
+                            Export as JSON
+                        </Button>
                         <Button
                             variant="outlined"
                             size="small"
