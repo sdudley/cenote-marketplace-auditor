@@ -215,6 +215,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                         onSort={handleSort}
                                         whiteSpace
                                     />
+                                    <TableHeaderCell>Maintenance</TableHeaderCell>
                                     <SortableHeader<TransactionQuerySortType>
                                         field={TransactionQuerySortType.CreatedAt}
                                         label="Created"
@@ -268,6 +269,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             <StyledTableCell align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>
                                             <StyledTableCell align="right"><HighlightIfSignificantlyDifferent value={tr.transaction.reconcile?.expectedVendorAmount} compareToValue={tr.transaction.data.purchaseDetails.vendorAmount}/></StyledTableCell>
                                             <StyledTableCell align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>
+                                            <StyledTableCell>{isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceStartDate) + ' - ' + isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceEndDate)}</StyledTableCell>
                                             <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>
                                             <TableCellNoWrap>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>
                                             <StyledTableCell>
