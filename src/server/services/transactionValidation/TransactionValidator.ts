@@ -10,7 +10,7 @@ import { PriceWithPricingOpts } from "./types";
 import { MAX_JPY_DRIFT } from "./constants";
 import { TYPES } from "#server/config/types";
 import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator";
-
+import { isSignificantlyDifferent } from "#common/util/significantDifferenceTester";
 import { PriceCalcOpts, PriceResult } from '#server/services/types';
 
 @injectable()
@@ -196,9 +196,9 @@ export class TransactionValidator {
             return { valid, notes: [`Japan sales priced in JPY are allowed drift of up to ${MAX_JPY_DRIFT*100}%`] };
         }
 
-        const valid = (vendorAmount >= expectedVendorAmount-10 &&
-                vendorAmount <= expectedVendorAmount+10 &&
-                !(vendorAmount===0 && expectedVendorAmount > 0));
+        const valid =
+            !isSignificantlyDifferent(vendorAmount, expectedVendorAmount) &&
+            !(vendorAmount===0 && expectedVendorAmount > 0);
 
         return { valid, notes: [] };
     }
