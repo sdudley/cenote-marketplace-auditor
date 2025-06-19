@@ -30,6 +30,7 @@ export const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS : boolean
 
 // Are these right?!
 export const PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD : number[] = [
+    0.20,
     0.10,
     0.05,
     0.00
