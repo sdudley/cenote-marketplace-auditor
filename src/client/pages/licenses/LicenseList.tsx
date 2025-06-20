@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Table,
-    TableBody,
-    TableHead,
     TableRow,
     TablePagination,
     TextField,
     CircularProgress,
-    Box,
     InputAdornment,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
@@ -17,6 +13,7 @@ import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, Ta
 import { LicenseDetailsDialog } from './LicenseDetailsDialog';
 import { SortOrder, SortableHeader } from '../../components/SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableHeaderCell, WrappedLabel } from '../../components/styles';
+import { EmphasizedAnnotation } from '../../components/styles';
 
 interface LicenseListProps {
     // Add props if needed
@@ -215,7 +212,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                         >
                                             <TableCellNoWrap>{license.license.entitlementId}</TableCellNoWrap>
                                             <StyledTableCell>{license.license.data.addonName}</StyledTableCell>
-                                            <StyledTableCell>{toMixedCase(license.license.data.licenseType) + (license.license.data.installedOnSandbox==='Yes' ? ' (Sandbox)' : '')}</StyledTableCell>
+                                            <StyledTableCell>{toMixedCase(license.license.data.licenseType)}{license.license.data.installedOnSandbox==='Yes' && <EmphasizedAnnotation>(Sandbox)</EmphasizedAnnotation>}</StyledTableCell>
                                             <StyledTableCell>{toMixedCase(license.license.data.status)}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.hosting}</StyledTableCell>
                                             <StyledTableCell>{license.license.data.tier + (license.license.data.tier==='Evaluation' && license.license.data.evaluationOpportunitySize && license.license.data.evaluationOpportunitySize !== 'Evaluation' ? ` (${license.license.data.evaluationOpportunitySize})` : '')}</StyledTableCell>
