@@ -28,6 +28,11 @@ import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscount
 import { TransactionDiscount,  } from '#common/types/marketplace';
 import { mapDiscountTypeToDescription } from './util';
 
+interface AppInfo {
+    addonKey: string;
+    name: string;
+}
+
 interface TransactionListProps {
     // Add props if needed
 }
@@ -47,6 +52,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [reconciledFilter, setReconciledFilter] = useState<string>('');
     const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
     const [hostingFilter, setHostingFilter] = useState<string>('');
+    const [appFilter, setAppFilter] = useState<string>('');
+    const [apps, setApps] = useState<AppInfo[]>([]);
+    const [loadingApps, setLoadingApps] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -56,14 +64,36 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         return () => clearTimeout(timer);
     }, [search]);
 
+    const fetchApps = async () => {
+        setLoadingApps(true);
+        try {
+            const response = await fetch('/api/apps');
+            if (response.ok) {
+                const appsData = await response.json();
+                setApps(appsData);
+            } else {
+                console.error('Failed to fetch apps');
+            }
+        } catch (error) {
+            console.error('Error fetching apps:', error);
+        } finally {
+            setLoadingApps(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchApps();
+    }, []);
+
     const fetchTransactions = async () => {
         setLoading(true);
         try {
             const reconciledParam = reconciledFilter ? `&reconciled=${reconciledFilter}` : '';
             const saleTypeParam = saleTypeFilter ? `&saleType=${encodeURIComponent(saleTypeFilter)}` : '';
             const hostingParam = hostingFilter ? `&hosting=${encodeURIComponent(hostingFilter)}` : '';
+            const appParam = appFilter ? `&addonKey=${encodeURIComponent(appFilter)}` : '';
             const response = await fetch(
-                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${reconciledParam}${saleTypeParam}${hostingParam}`
+                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${reconciledParam}${saleTypeParam}${hostingParam}${appParam}`
             );
             const data = await response.json();
             setTransactions(data.transactions);
@@ -77,7 +107,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, reconciledFilter, saleTypeFilter, hostingFilter]);
+    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, reconciledFilter, saleTypeFilter, hostingFilter, appFilter]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -155,6 +185,11 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         setPage(0); // Reset to first page when filter changes
     };
 
+    const handleAppFilterChange = (event: any) => {
+        setAppFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
     return (
         <TableContainer>
             <SearchContainer>
@@ -213,6 +248,21 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <MenuItem value="Cloud">Cloud</MenuItem>
                         <MenuItem value="Data Center">Data Center</MenuItem>
                         <MenuItem value="Server">Server</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>App</InputLabel>
+                    <Select
+                        value={appFilter}
+                        label="App"
+                        onChange={handleAppFilterChange}
+                    >
+                        <MenuItem value="">All Apps</MenuItem>
+                        {apps.map((app) => (
+                            <MenuItem key={app.addonKey} value={app.addonKey}>
+                                {app.name}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </FormControl>
             </SearchContainer>

@@ -10,6 +10,7 @@ import { LicenseRoute } from './LicenseRoute';
 import { LicenseVersionRoute } from './LicenseVersionRoute';
 import { SchedulerRoute } from './SchedulerRoute';
 import { TransactionPricingRoute } from './TransactionPricingRoute';
+import { AppRoute } from './AppRoutes';
 
 @injectable()
 export class ApiRouter {
@@ -24,7 +25,8 @@ export class ApiRouter {
         @inject(EXPRESS_TYPES.LicenseRoute) private licenseRoute: LicenseRoute,
         @inject(EXPRESS_TYPES.LicenseVersionRoute) private licenseVersionRoute: LicenseVersionRoute,
         @inject(EXPRESS_TYPES.SchedulerRoute) private schedulerRoute: SchedulerRoute,
-        @inject(EXPRESS_TYPES.TransactionPricingRoute) private transactionPricingRoute: TransactionPricingRoute
+        @inject(EXPRESS_TYPES.TransactionPricingRoute) private transactionPricingRoute: TransactionPricingRoute,
+        @inject(EXPRESS_TYPES.AppRoute) private appRoute: AppRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -66,6 +68,9 @@ export class ApiRouter {
 
         // Scheduler routes
         this.router.use('/scheduler', this.schedulerRoute.getRouter());
+
+        // App routes
+        this.router.use('/apps', this.appRoute.router);
 
         // 404 handler for non-existent API endpoints
         this.router.use('*', (req: Request, res: Response) => {

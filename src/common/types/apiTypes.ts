@@ -44,6 +44,7 @@ export interface TransactionQueryParams {
     search?: string;
     saleType?: string;
     hosting?: string;
+    addonKey?: string;
 }
 
 export interface LicenseQueryParams {

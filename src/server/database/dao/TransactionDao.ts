@@ -154,7 +154,8 @@ class TransactionDao {
             search,
             reconciled,
             saleType,
-            hosting
+            hosting,
+            addonKey
         } = params;
 
         try {
@@ -204,6 +205,10 @@ class TransactionDao {
 
             if (hosting) {
                 queryBuilder.andWhere('transaction.data->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting });
+            }
+
+            if (addonKey) {
+                queryBuilder.andWhere('transaction.data->>\'addonKey\' = :addonKey', { addonKey });
             }
 
             // Apply sorting using the sort field map

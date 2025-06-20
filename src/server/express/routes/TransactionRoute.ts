@@ -31,7 +31,8 @@ export class TransactionRoute {
                 search: req.query.search as string,
                 reconciled: req.query.reconciled === 'Y' ? true : req.query.reconciled==='N' ? false : undefined,
                 saleType: req.query.saleType as string,
-                hosting: req.query.hosting as string
+                hosting: req.query.hosting as string,
+                addonKey: req.query.addonKey as string
             };
 
             // Validate parameters
