@@ -13,6 +13,7 @@ import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator
 import { isSignificantlyDifferent } from "#common/util/significantDifferenceTester";
 import { PriceCalcOpts, PriceResult } from '#server/services/types';
 import { AddonService } from "../AddonService";
+import { sumDiscountArrayForTransaction } from "#common/util/transactionDiscounts";
 
 @injectable()
 export class TransactionValidator {
@@ -32,7 +33,6 @@ export class TransactionValidator {
             useLegacyPricingTierForPrevious,
             expectedDiscount,
             hasActualAdjustments,
-            partnerDiscountFraction,
             isSandbox,
             previousPurchaseFindResult,
             expectedDiscountForPreviousPurchase
@@ -76,12 +76,12 @@ export class TransactionValidator {
 
         const previousPurchasePricing =
                     saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
-                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, partnerDiscountFraction, parentProduct })
+                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, parentProduct })
                         : undefined;
 
         // Calculate the expected price for the current transaction.
 
-        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPurchasePricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate, partnerDiscountFraction, parentProduct });
+        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPurchasePricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate, parentProduct });
 
         let expectedVendorAmount = price.vendorPrice;
 
@@ -140,7 +140,6 @@ export class TransactionValidator {
         useLegacyPricingTier: boolean;
         previousPurchaseEffectiveMaintenanceEndDate: string|undefined;
         expectedDiscount: number;
-        partnerDiscountFraction: number;
         parentProduct: string;
     }) : PriceWithPricingOpts {
         const {
@@ -151,10 +150,12 @@ export class TransactionValidator {
             useLegacyPricingTier,
             expectedDiscount,
             previousPurchaseEffectiveMaintenanceEndDate,
-            partnerDiscountFraction,
             parentProduct
         } = opts;
         const { purchaseDetails } = transaction.data;
+
+        // Sum the partner discount from the discounts array
+        const declaredPartnerDiscount = sumDiscountArrayForTransaction( { data: transaction.data, type: 'EXPERT' });
 
         const pricingOpts: PriceCalcOpts = {
             pricingTierResult: pricingTierResult,
@@ -170,7 +171,7 @@ export class TransactionValidator {
             previousPurchaseMaintenanceEndDate: previousPurchaseEffectiveMaintenanceEndDate,
             previousPricing,
             expectedDiscount,
-            partnerDiscountFraction,
+            declaredPartnerDiscount,
             discounts: purchaseDetails.discounts,
             parentProduct
         };

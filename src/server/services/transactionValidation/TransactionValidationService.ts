@@ -4,14 +4,15 @@ import { TYPES } from '../../config/types';
 import { formatCurrency } from '#common/util/formatCurrency';
 import { dateDiff } from '#common/util/dateUtils';
 import { Pricing } from '#common/entities/Pricing';
-import { TransactionValidationResult, DiscountResult, ValidationOptions, PriceWithPricingOpts } from './types';
-import { EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS, EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS, LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE, LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE, PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD, PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER, PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT } from './pricingPermutations';
+import { TransactionValidationResult, DiscountResult } from './types';
+import { EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS, EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS, LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE, LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE, PARTNER_DISCOUNT_PERMUTATIONS } from './pricingPermutations';
 import { TransactionSandboxService } from './TransactionSandboxService';
 import { TransactionAdjustmentValidationService } from './TransactionAdjustmentValidationService';
 import { TransactionValidator } from './TransactionValidator';
 import { ALERT_DAYS_AFTER_PRICING_CHANGE } from './constants';
 import { PreviousTransactionService } from '../PreviousTransactionService';
 import { PreviousTransactionResult } from '#server/services/types';
+import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts';
 
 @injectable()
 export class TransactionValidationService {
@@ -50,10 +51,6 @@ export class TransactionValidationService {
                                             ? LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE
                                             : LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE;
 
-        const partnerDiscountFractionPermutations = pricing.expertDiscountOptOut                           ? PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT
-                                            : transaction.data.purchaseDetails.hosting === 'Cloud' ? PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD
-                                                                                                   : PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER;
-
         // But first, load details about the previous purchase (if any). We do this at the top level so we only need to do
         // it once (which is somewhat expensive), rather than for each permutation.
 
@@ -88,59 +85,67 @@ export class TransactionValidationService {
                 const { useLegacyPricingTierForCurrent, useLegacyPricingTierForPrevious } = legacyPricePermutation;
                 const { hasActualAdjustments } = discountResult;
 
-                for (const partnerDiscountFraction of partnerDiscountFractionPermutations) {
+                // Try to see if the price matches with this permutation of legacy pricing (or not)
 
-                    // Try to see if the price matches with this permutation of legacy pricing (or not)
+                validationResult = await this.transactionValidator.validateOneTransaction({
+                    transaction,
+                    useLegacyPricingTierForCurrent,
+                    useLegacyPricingTierForPrevious,
+                    expectedDiscount: useExpectedDiscount ? discountToUse : 0,
+                    hasActualAdjustments,
+                    isSandbox,
+                    previousPurchaseFindResult,
+                    expectedDiscountForPreviousPurchase
+                });
 
-                    validationResult = await this.transactionValidator.validateOneTransaction({
-                        transaction,
-                        useLegacyPricingTierForCurrent,
-                        useLegacyPricingTierForPrevious,
-                        expectedDiscount: useExpectedDiscount ? discountToUse : 0,
-                        hasActualAdjustments,
-                        partnerDiscountFraction,
-                        isSandbox,
-                        previousPurchaseFindResult,
-                        expectedDiscountForPreviousPurchase
-                    });
+                const { isExpectedPrice, notes } = validationResult;
 
-                    const { isExpectedPrice, notes } = validationResult;
+                if (isExpectedPrice) {
+                    if (useLegacyPricingTierForCurrent) {
+                        const { saleDate } = transaction.data.purchaseDetails;
+                        const { legacyPricingEndDate } = validationResult;
 
-                    if (isExpectedPrice) {
-                        if (useLegacyPricingTierForCurrent) {
-                            const { saleDate } = transaction.data.purchaseDetails;
-                            const { legacyPricingEndDate } = validationResult;
+                        notes.push(`Price is correct but uses legacy pricing for current transaction (sold on ${saleDate}, but prior pricing ended on ${legacyPricingEndDate})`);
+                    }
 
-                            notes.push(`Price is correct but uses legacy pricing for current transaction (sold on ${saleDate}, but prior pricing ended on ${legacyPricingEndDate})`);
-                        }
+                    if (useLegacyPricingTierForPrevious) {
+                        notes.push(`Price is correct but uses legacy pricing for previous transaction`);
+                    }
 
-                        if (useLegacyPricingTierForPrevious) {
-                            notes.push(`Price is correct but uses legacy pricing for previous transaction`);
-                        }
+                    const declaredPartnerDiscount = sumDiscountArrayForTransaction( { data: transaction.data, type: 'EXPERT' })
 
-                        if (partnerDiscountFraction > 0) {
-                            notes.push(`Price is correct but assumes Solutions Partner discount of ${partnerDiscountFraction*100}%`);
-                        }
-
-                        if (useExpectedDiscount) {
-                            discountResult.adjustmentNotes.forEach(n => {
-                                if (discountResult.hasActualAdjustments) {
-                                    notes.push(`Reconciled using manual adjustment: ${n}`);
-                                } else {
-                                    // Otherwise, these are expected discounts, so just add the message directly.
-                                    notes.push(n);
-                                }
-                            });
+                    if (declaredPartnerDiscount > 0) {
+                        if (pricing.expertDiscountOptOut) {
+                            notes.push(`App opted out of Solutions Partner discounts, but a discount of ${declaredPartnerDiscount} was applied anyway`);
+                            validationResult.valid = false;
                         } else {
-                            notes.push(`Price is correct but expected discount of ${formatCurrency(discountToUse)} was not applied`);
+                            const partnerDiscountFraction = declaredPartnerDiscount / validationResult.price.purchasePrice;
+
+                            if (!this.isAcceptablePartnerDiscountFraction(partnerDiscountFraction)) {
+                                notes.push(`Solutions Partner discount of ${partnerDiscountFraction*100}% is not an expected discount amount`);
+                                validationResult.valid = false;
+                            }
                         }
                     }
 
-                    // Now return early if we find the expected price
-
-                    if (isExpectedPrice) {
-                        return validationResult;
+                    if (useExpectedDiscount) {
+                        discountResult.adjustmentNotes.forEach(n => {
+                            if (discountResult.hasActualAdjustments) {
+                                notes.push(`Reconciled using manual adjustment: ${n}`);
+                            } else {
+                                // Otherwise, these are expected discounts, so just add the message directly.
+                                notes.push(n);
+                            }
+                        });
+                    } else {
+                        notes.push(`Price is correct but expected discount of ${formatCurrency(discountToUse)} was not applied`);
                     }
+                }
+
+                // Now return early if we find the expected price
+
+                if (isExpectedPrice) {
+                    return validationResult;
                 }
             }
         }
@@ -175,5 +180,11 @@ export class TransactionValidationService {
         }
 
         return validationResult;
+    }
+
+    // Test to see if the fraction is within 0.005 (half a percent) of one of the expected fractions in PARTNER_DISCOUNT_PERMUTATIONS
+
+    private isAcceptablePartnerDiscountFraction(partnerDiscountFraction: number) : boolean {
+        return PARTNER_DISCOUNT_PERMUTATIONS.some(fraction => Math.abs(fraction - partnerDiscountFraction) <= 0.005);
     }
 }

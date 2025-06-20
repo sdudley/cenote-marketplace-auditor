@@ -35,7 +35,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-05-01',
             maintenanceEndDate: '2025-06-01',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -54,7 +54,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-01',
             maintenanceEndDate: '2025-05-01',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -73,7 +73,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-05',
             maintenanceEndDate: '2025-05-05',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -92,7 +92,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-03-27',
             maintenanceEndDate: '2028-03-27',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -111,7 +111,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-03-02',
             maintenanceEndDate: '2026-03-02',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -131,7 +131,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-03-02',
             maintenanceEndDate: '2026-03-02',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -150,7 +150,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2026-03-15',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -169,7 +169,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-05-03',
             maintenanceEndDate: '2026-06-16',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -188,7 +188,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-05-11',
             maintenanceEndDate: '2025-06-11',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -207,7 +207,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-18',
             maintenanceEndDate: '2025-05-18',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -226,7 +226,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2025-05-15',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -245,7 +245,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2026-04-15',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -264,7 +264,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2026-04-15',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0.1,
+            declaredPartnerDiscount: 340,
             parentProduct: 'confluence'
         }));
 
@@ -283,7 +283,7 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-02-28',
             maintenanceEndDate: '2026-02-28',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -304,7 +304,7 @@ describe('PriceCalculatorService', () => {
             billingPeriod: 'Annual',
             previousPricing: undefined,
             expectedDiscount: 585,
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
         }));
 
@@ -325,7 +325,7 @@ describe('PriceCalculatorService', () => {
             billingPeriod: 'Annual',
             previousPricing: undefined,
             expectedDiscount: 170,
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
           }));
           expect(result).toEqual({ purchasePrice: -3230, vendorPrice: -2422.50 });
@@ -351,7 +351,7 @@ describe('PriceCalculatorService', () => {
               descriptors: []
             },
             expectedDiscount: 0,
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
           }));
 
@@ -373,7 +373,7 @@ describe('PriceCalculatorService', () => {
             previousPurchaseMaintenanceEndDate: undefined,
             previousPricing: undefined,
             expectedDiscount: 0,
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
           }));
 
@@ -399,7 +399,7 @@ describe('PriceCalculatorService', () => {
             previousPurchaseMaintenanceEndDate: undefined,
             previousPricing: undefined,
             expectedDiscount: 0,
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
           }));
 
@@ -427,7 +427,7 @@ describe('PriceCalculatorService', () => {
             previousPurchaseMaintenanceEndDate: undefined,
             previousPricing: undefined,
             expectedDiscount: 0,
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'confluence'
           }));
 
@@ -455,7 +455,7 @@ describe('PriceCalculatorService', () => {
             previousPurchaseMaintenanceEndDate: undefined,
             previousPricing: undefined,
             expectedDiscount: 0,
-            partnerDiscountFraction: 0,
+            declaredPartnerDiscount: 0,
             parentProduct: 'jira'
           }));
 

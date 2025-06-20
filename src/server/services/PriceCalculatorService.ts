@@ -37,7 +37,7 @@ export class PriceCalculatorService {
             billingPeriod,
             previousPurchaseMaintenanceEndDate,
             expectedDiscount,
-            partnerDiscountFraction,
+            declaredPartnerDiscount,
             parentProduct
         } = opts;
 
@@ -167,10 +167,10 @@ export class PriceCalculatorService {
             descriptors.push({ subtotal: basePrice, description: `Apply expected manual/promo discount of: ${formatCurrency(expectedDiscount)} (${discountPercent.toFixed(2)}%)`});
         }
 
-        if (partnerDiscountFraction !== 0) {
-            const solutionsPartnerDiscount = basePrice * partnerDiscountFraction;
-            basePrice *= (1-partnerDiscountFraction);
-            descriptors.push({ subtotal: basePrice, description: `Apply automatic Solutions Partner discount of ${partnerDiscountFraction*100}% (${formatCurrency(solutionsPartnerDiscount)})`});
+        if (declaredPartnerDiscount !== 0) {
+            const partnerDiscountFraction = declaredPartnerDiscount / basePrice;
+            basePrice -= declaredPartnerDiscount;
+            descriptors.push({ subtotal: basePrice, description: `Apply automatic Solutions Partner discount of ${formatCurrency(declaredPartnerDiscount)} (${(partnerDiscountFraction*100).toFixed(2)}%)`});
         }
 
         if (billingPeriod === 'Annual') {

@@ -18,7 +18,7 @@ export interface PriceCalcOpts {
     previousPurchaseMaintenanceEndDate?: string | undefined;
     previousPricing?: PriceResult | undefined;
     expectedDiscount?: number; // always positive, even for refunds
-    partnerDiscountFraction: number;
+    declaredPartnerDiscount: number;
     discounts?: TransactionDiscount[];
 }
 

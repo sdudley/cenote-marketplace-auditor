@@ -9,7 +9,6 @@ export interface ValidationOptions {
     useLegacyPricingTierForPrevious: boolean;
     expectedDiscount: number;
     hasActualAdjustments: boolean;
-    partnerDiscountFraction: number;
     isSandbox: boolean;
     previousPurchaseFindResult: PreviousTransactionResult|undefined;
     expectedDiscountForPreviousPurchase : DiscountResult | undefined;

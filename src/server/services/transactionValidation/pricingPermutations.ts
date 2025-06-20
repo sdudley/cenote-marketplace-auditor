@@ -28,22 +28,13 @@ export const EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS : boolean
     false // Ends with no discounts applied on failure, so that our summary does not show the impact of potentially-incorrect estimated discounts
 ];
 
-// Are these right?!
-export const PARTNER_DISCOUNT_PERMUTATIONS_FOR_CLOUD : number[] = [
+// The entire set of possible discounts (as a fraction) available to Solutions Partners,
+// depending on their tier.
+export const PARTNER_DISCOUNT_PERMUTATIONS : number[] = [
+    0.25,
     0.20,
     0.10,
     0.05,
     0.00
 ];
 
-// Are these right?!
-export const PARTNER_DISCOUNT_PERMUTATIONS_FOR_DATACENTER : number[] = [
-    0.25,
-    0.20,
-    0.10,
-    0.00
-];
-
-export const PARTNER_DISCOUNT_PERMUTATIONS_FOR_OPT_OUT : number[] = [
-    0.00
-];
