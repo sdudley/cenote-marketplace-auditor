@@ -8,6 +8,7 @@ import {
     LabelContainer,
     KeyColumn,
     JsonKey,
+    JsonKeyNew,
     JsonValue,
     ValueColumn,
     TreeBorder
@@ -18,11 +19,13 @@ import { humanizeKey } from './util';
 interface JsonDiffObjectTreeViewProps {
     data: JsonDiffObject;
     humanizeKeys?: boolean;
+    highlightNew?: boolean;
 }
 
 export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
     data,
-    humanizeKeys = true
+    humanizeKeys = true,
+    highlightNew = true
 }) => {
     const renderValue = (value: any): string => {
         if (value === null) return 'null';
@@ -32,18 +35,22 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
         return String(value);
     };
 
-    const renderDelta = (key: string, delta: JsonDelta, parentKey: string = '') => {
+    const renderDelta = (key: string, delta: JsonDelta, parentKey: string = '', isParentNew: boolean = false) => {
         const hasChildren = delta.children && Object.keys(delta.children).length > 0;
+        const isNew = delta.changeType === 'added' || isParentNew;
 
         const fullKey = parentKey ? `${parentKey}.${key}` : key;
         const displayKey = humanizeKeys ? humanizeKey(key) : key;
 
+        // Use JsonKeyNew if this object is newly added (either directly or through a parent) and highlighting is enabled
+        const KeyComponent = (isNew && highlightNew) ? JsonKeyNew : JsonKey;
+
         const label = (
             <LabelContainer>
                 <KeyColumn>
-                    <JsonKey component="span">
+                    <KeyComponent component="span">
                         {displayKey}:
-                    </JsonKey>
+                    </KeyComponent>
                 </KeyColumn>
                 <ValueColumn>
                     {typeof delta.newValue !== 'object' && (
@@ -59,7 +66,11 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
                                         <TreeValueNew component="span">{renderValue(delta.newValue)}</TreeValueNew>
                                     )}
                                 </>
-                                : delta.changeType==='added' ? <TreeValueNew component="span">{renderValue(delta.newValue)}</TreeValueNew>
+                                : delta.changeType==='added' ? (
+                                    highlightNew ?
+                                        <TreeValueNew component="span">{renderValue(delta.newValue)}</TreeValueNew>
+                                        : <span>{renderValue(delta.newValue)}</span>
+                                )
                                 : delta.changeType==='removed' ? <TreeValueOld component="span">{renderValue(delta.oldValue)}</TreeValueOld>
                                 : renderValue(delta.newValue)
                                 }
@@ -78,7 +89,7 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
                 <TreeItem label={label} itemId={fullKey}>
                     {hasChildren && (
                         Object.entries(delta.children!).map(([childKey, childDelta]) =>
-                            renderDelta(childKey, childDelta, fullKey)
+                            renderDelta(childKey, childDelta, fullKey, isNew)
                         )
                     )}
                 </TreeItem>

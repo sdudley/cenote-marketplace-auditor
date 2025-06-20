@@ -87,7 +87,11 @@ export const LicenseVersionDialog: React.FC<LicenseVersionDialogProps> = ({ vers
                         }}
                         defaultExpandedItems={allIds}
                     >
-                        <JsonDiffObjectTreeView data={jsonDiffObject} humanizeKeys={true} />
+                        <JsonDiffObjectTreeView
+                            data={jsonDiffObject}
+                            humanizeKeys={true}
+                            highlightNew={version.version !== 1}
+                        />
                     </SimpleTreeView>
                 </VersionDataBox>
             </DialogContent>

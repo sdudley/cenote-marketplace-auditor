@@ -46,6 +46,13 @@ export const JsonKey = styled(Typography)({
     userSelect: 'none'
 }) as typeof Typography;
 
+export const JsonKeyNew = styled(Typography)({
+    fontWeight: 'bold',
+    color: '#1AA61A',
+    marginRight: '8px',
+    userSelect: 'none'
+}) as typeof Typography;
+
 export const DialogContentBox = styled(Box)({
     maxHeight: '50vh',
     overflow: 'auto',

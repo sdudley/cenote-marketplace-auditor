@@ -91,7 +91,11 @@ export const TransactionVersionDialog: React.FC<TransactionVersionDialogProps> =
                         }}
                         defaultExpandedItems={allIds}
                     >
-                        <JsonDiffObjectTreeView data={jsonDiffObject} humanizeKeys={true} />
+                        <JsonDiffObjectTreeView
+                            data={jsonDiffObject}
+                            humanizeKeys={true}
+                            highlightNew={version.version !== 1}
+                        />
                     </SimpleTreeView>
                 </VersionDataBox>
             </DialogContent>
