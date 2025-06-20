@@ -56,6 +56,7 @@ export interface LicenseQueryParams {
     hosting?: string;
     status?: string;
     addonKey?: string;
+    licenseType?: string;
 }
 
 export interface LicenseResult {

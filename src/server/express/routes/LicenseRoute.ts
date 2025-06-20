@@ -30,7 +30,8 @@ export class LicenseRoute {
                 search: req.query.search as string,
                 hosting: req.query.hosting as string,
                 status: req.query.status as string,
-                addonKey: req.query.addonKey as string
+                addonKey: req.query.addonKey as string,
+                licenseType: req.query.licenseType as string
             };
 
             // Validate parameters

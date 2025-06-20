@@ -66,7 +66,8 @@ export class LicenseDao {
             search,
             hosting,
             status,
-            addonKey
+            addonKey,
+            licenseType
         } = params;
 
         try {
@@ -104,6 +105,10 @@ export class LicenseDao {
 
             if (addonKey) {
                 queryBuilder.andWhere('license.data->>\'addonKey\' = :addonKey', { addonKey });
+            }
+
+            if (licenseType) {
+                queryBuilder.andWhere('license.data->>\'licenseType\' = :licenseType', { licenseType });
             }
 
             // Apply sorting using the sort field map

@@ -41,6 +41,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
     const [hostingFilter, setHostingFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('');
     const [appFilter, setAppFilter] = useState<string>('');
+    const [licenseTypeFilter, setLicenseTypeFilter] = useState<string>('');
     const [apps, setApps] = useState<AppInfo[]>([]);
     const [loadingApps, setLoadingApps] = useState(false);
 
@@ -79,8 +80,9 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
             const hostingParam = hostingFilter ? `&hosting=${encodeURIComponent(hostingFilter)}` : '';
             const statusParam = statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : '';
             const appParam = appFilter ? `&addonKey=${encodeURIComponent(appFilter)}` : '';
+            const licenseTypeParam = licenseTypeFilter ? `&licenseType=${encodeURIComponent(licenseTypeFilter)}` : '';
             const response = await fetch(
-                `/api/licenses?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${hostingParam}${statusParam}${appParam}`
+                `/api/licenses?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${hostingParam}${statusParam}${appParam}${licenseTypeParam}`
             );
             const data = await response.json();
             setLicenses(data.licenses);
@@ -94,7 +96,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
 
     useEffect(() => {
         fetchLicenses();
-    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, hostingFilter, statusFilter, appFilter]);
+    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, hostingFilter, statusFilter, appFilter, licenseTypeFilter]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -141,6 +143,11 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
         setPage(0); // Reset to first page when filter changes
     };
 
+    const handleLicenseTypeFilterChange = (event: any) => {
+        setLicenseTypeFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
     return (
         <TableContainer>
             <SearchContainer>
@@ -161,6 +168,24 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                     }}
                 />
                 <FilterLabel>Filters:</FilterLabel>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>License Type</InputLabel>
+                    <Select
+                        value={licenseTypeFilter}
+                        label="License Type"
+                        onChange={handleLicenseTypeFilterChange}
+                    >
+                        <MenuItem value="">All License Types</MenuItem>
+                        <MenuItem value="ACADEMIC">Academic</MenuItem>
+                        <MenuItem value="COMMERCIAL">Commercial</MenuItem>
+                        <MenuItem value="COMMUNITY">Community</MenuItem>
+                        <MenuItem value="EVALUATION">Evaluation</MenuItem>
+                        <MenuItem value="OPEN_SOURCE">Open Source</MenuItem>
+                        <MenuItem value="DEMONSTRATION">Demonstration</MenuItem>
+                        <MenuItem value="FREE">Free</MenuItem>
+                        <MenuItem value="CLASSROOM">Classroom</MenuItem>
+                    </Select>
+                </FormControl>
                 <FormControl size="small" sx={{ minWidth: 200 }}>
                     <InputLabel>Hosting</InputLabel>
                     <Select
