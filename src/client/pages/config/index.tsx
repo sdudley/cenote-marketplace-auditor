@@ -6,12 +6,15 @@ import {
     Alert,
     CircularProgress,
     FormControlLabel,
-    Checkbox
+    Checkbox,
+    Typography,
+    Box
 } from '@mui/material';
 import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer, ConfigColumn, SchedulerContainer } from '../styles';
 import { ConfigKey } from '#common/types/configItem';
 import { StyledLink } from '../styles';
 import { SlackContainer } from './styles';
+import { APP_VERSION } from '#common/config/versions';
 
 export const ConfigPage: React.FC = () => {
     const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number>>({
@@ -199,6 +202,11 @@ export const ConfigPage: React.FC = () => {
                 <ConfigPageTitle variant="h4" component="h1">
                     Configuration
                 </ConfigPageTitle>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                        Cenote Marketplace Auditor Version {APP_VERSION}
+                    </Typography>
+                </Box>
             </PageTitle>
 
             <ConfigFormContainer>
