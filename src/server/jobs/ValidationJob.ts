@@ -12,6 +12,7 @@ import { TransactionValidationResult } from '../services/transactionValidation/t
 import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { TransactionDiffValidationService } from '#server/services/transactionValidation/TransactionDiffValidationService';
 import { PricingService } from '#server/services/PricingService';
+import { CURRENT_RECONCILER_VERSION } from "#common/config/versions";
 
 const DEFAULT_START_DATE = '2024-01-01';
 
@@ -84,11 +85,22 @@ export class ValidationJob {
         // Check if a reconcile record already exists for this transaction and version
 
         const existingReconcile = await this.transactionReconcileDao.getTransactionReconcileForTransaction(transaction);
+        let usingDifferentReconcileEngine = false;
 
-        // Don't re-reconcile if no new version has been created
+        if (existingReconcile) {
+            // If the transaction was previously reconciled automatically, but our assessment of the reconciliation
+            // has changed, unreconcile it now.
 
-        if (existingReconcile && existingReconcile.transactionVersion===transaction.currentVersion) {
-            return;
+            if (existingReconcile.automatic &&
+                validationResult.valid !== existingReconcile.reconciled&&
+                existingReconcile.reconcilerVersion < CURRENT_RECONCILER_VERSION) {
+
+                notes.push(`Re-evaluating transaction as ${validationResult.valid ? 'reconciled' : 'unreconciled'} with new reconciler logic (v.${CURRENT_RECONCILER_VERSION})`);
+                usingDifferentReconcileEngine = true;
+            }
+            else if (existingReconcile.transactionVersion===transaction.currentVersion) {
+                return;
+            }
         }
 
         // Now fetch the prior version of the transaction, if it exists
@@ -107,7 +119,10 @@ export class ValidationJob {
         }
 
         if (existingReconcile) {
-            if (reconciled && !existingReconcile.reconciled) {
+            if (reconciled && !existingReconcile.reconciled && !usingDifferentReconcileEngine) {
+                // In case where we have a different result, but we have a new version of the transaction
+                // (ie. not using a newer version of the reconciler), we do not want to approve automatically.
+
                 notes.push('Price now matches, but prior version of transaction was not reconciled, so requiring manual approval.');
                 reconciled = false;
             }
@@ -140,6 +155,7 @@ export class ValidationJob {
         }
 
         await this.transactionReconcileDao.recordReconcile({
+            reconcilerVersion: CURRENT_RECONCILER_VERSION,
             transaction,
             existingReconcile,
             reconciled,

@@ -4,6 +4,7 @@ import { TYPES } from '../../config/types';
 import { TransactionDao } from '../../database/dao/TransactionDao';
 import { TransactionReconcileDao } from '../../database/dao/TransactionReconcileDao';
 import { isUUID } from 'validator';
+import { CURRENT_RECONCILER_VERSION } from "#common/config/versions";
 
 interface ReconcileRequestBody {
     reconciled: boolean;
@@ -66,7 +67,8 @@ export class TransactionReconcileRoute {
                 notes,
                 actualVendorAmount: transaction.data.purchaseDetails.vendorAmount,
                 expectedVendorAmount: existingReconcile?.expectedVendorAmount ?? 0, // TODO FIXME populate this if there is no existing reconcile
-                automatic: false
+                automatic: false,
+                reconcilerVersion: CURRENT_RECONCILER_VERSION
             });
 
             res.json({ success: true });

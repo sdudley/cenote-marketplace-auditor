@@ -399,14 +399,14 @@ export const AmountMismatch = styled(Typography)(({ theme }) => ({
 
 export const ReconciliationGrid = styled(Box)({
     display: 'grid',
-    gridTemplateColumns: '150px 1fr 150px 1fr',
+    gridTemplateColumns: '190px 1fr 190px 1fr',
     gap: 8,
     marginBottom: 16
 });
 
 export const AmountsBox = styled(Box)({
     display: 'grid',
-    gridTemplateColumns: '150px 1fr 150px 1fr',
+    gridTemplateColumns: '190px 1fr 190px 1fr',
     gap: 8,
     marginBottom: 16
 });

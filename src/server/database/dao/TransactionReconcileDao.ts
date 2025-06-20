@@ -13,6 +13,7 @@ export interface RecordReconcileOpts {
     actualVendorAmount: number;
     expectedVendorAmount: number;
     automatic: boolean;
+    reconcilerVersion: number;
 }
 
 @injectable()
@@ -38,7 +39,7 @@ export class TransactionReconcileDao {
     // Save a new reconcile record for a transaction, or update an existing reconcile record.
 
     public async recordReconcile(opts: RecordReconcileOpts): Promise<void> {
-        const { transaction, notes, actualVendorAmount: vendorAmount, expectedVendorAmount, existingReconcile, automatic } = opts;
+        const { transaction, notes, actualVendorAmount: vendorAmount, expectedVendorAmount, existingReconcile, automatic, reconcilerVersion } = opts;
         let { reconciled } = opts;
 
         // Create new reconcile record
@@ -50,6 +51,7 @@ export class TransactionReconcileDao {
         reconcile.automatic = automatic;
         reconcile.actualVendorAmount = vendorAmount;
         reconcile.expectedVendorAmount = expectedVendorAmount;
+        reconcile.reconcilerVersion = reconcilerVersion;
         await this.transactionReconcileRepo.save(reconcile);
 
         if (notes && notes.length > 0) {

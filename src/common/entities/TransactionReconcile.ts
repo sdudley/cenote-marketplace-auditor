@@ -46,6 +46,9 @@ export class TransactionReconcile {
         } })
     expectedVendorAmount?: number;
 
+    @Column({ default: 1 })
+    reconcilerVersion!: number;
+
     @OneToMany(() => TransactionReconcileNote, (note: TransactionReconcileNote) => note.transactionReconcile)
     notes!: TransactionReconcileNote[];
 }

@@ -150,6 +150,9 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
                                     <Typography variant="body2">
                                         {isoStringWithDateAndTime(reconcile.updatedAt.toString())}
                                     </Typography>
+
+                                    <Typography variant="body2" fontWeight="bold" color="text.secondary">Reconciler Engine Version:</Typography>
+                                    <Typography variant="body2">{reconcile.reconcilerVersion}</Typography>
                                 </ReconciliationGrid>
 
                                 <AmountsBox>
