@@ -52,7 +52,12 @@
             "sourceMaps": true,
             "smartStep": true,
             "env": {
-                "NODE_ENV": "development"
+                "NODE_ENV": "development",
+                "DB_HOST": "127.0.0.1",
+                "DB_PORT": "5431",
+                "DB_USERNAME": "postgres",
+                "DB_PASSWORD": "postgres",
+                "DB_DATABASE": "marketplace_auditor",
             }
         },
         {
@@ -77,6 +82,11 @@
             ],
             "env": {
                 "NODE_ENV": "development",
+                "DB_HOST": "127.0.0.1",
+                "DB_PORT": "5431",
+                "DB_USERNAME": "postgres",
+                "DB_PASSWORD": "postgres",
+                "DB_DATABASE": "marketplace_auditor",
                 // "DB_LOGGING": "true",
                 //"NODE_OPTIONS": "--enable-source-maps"
             }
@@ -105,6 +115,11 @@
             "env": {
                 "NODE_ENV": "development",
                 "NODE_OPTIONS": "--enable-source-maps",
+                "DB_HOST": "127.0.0.1",
+                "DB_PORT": "5431",
+                "DB_USERNAME": "postgres",
+                "DB_PASSWORD": "postgres",
+                "DB_DATABASE": "marketplace_auditor",
                 // "DB_LOGGING": "true"
             }
         },
