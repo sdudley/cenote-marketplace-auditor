@@ -27,7 +27,7 @@ export class Transaction {
     currentVersion!: number;
 
     @ManyToOne(() => License, license => license.transactions)
-    @JoinColumn({ name: 'entitlementId', referencedColumnName: 'entitlementId' })
+    // @JoinColumn({ name: 'entitlement_id', referencedColumnName: 'entitlementId' })
     license!: License;
 
     @Column('jsonb')

@@ -29,6 +29,6 @@ export class License {
     versions!: LicenseVersion[];
 
     @OneToMany(() => Transaction, transaction => transaction.license)
-    @JoinColumn({ name: 'entitlementId', referencedColumnName: 'entitlementId' })
+    // @JoinColumn({ name: 'entitlementId', referencedColumnName: 'entitlementId' })
     transactions!: Transaction[];
 }
