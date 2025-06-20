@@ -42,6 +42,7 @@ export interface TransactionQueryParams {
     sortOrder?: 'ASC' | 'DESC';
     reconciled: boolean|undefined;
     search?: string;
+    saleType?: string;
 }
 
 export interface LicenseQueryParams {

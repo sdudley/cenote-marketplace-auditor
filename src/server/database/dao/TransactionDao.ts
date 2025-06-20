@@ -152,7 +152,8 @@ class TransactionDao {
             sortBy = 'createdAt',
             sortOrder = 'DESC',
             search,
-            reconciled
+            reconciled,
+            saleType
         } = params;
 
         try {
@@ -194,6 +195,10 @@ class TransactionDao {
                 } else {
                     queryBuilder.andWhere('(reconcile.reconciled = :reconciled or reconcile.reconciled is null)', { reconciled });
                 }
+            }
+
+            if (saleType) {
+                queryBuilder.andWhere('transaction.data->\'purchaseDetails\'->>\'saleType\' = :saleType', { saleType });
             }
 
             // Apply sorting using the sort field map

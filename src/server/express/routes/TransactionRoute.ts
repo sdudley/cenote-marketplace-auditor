@@ -29,7 +29,8 @@ export class TransactionRoute {
                 sortBy: (req.query.sortBy as TransactionQuerySortType) || TransactionQuerySortType.CreatedAt,
                 sortOrder: (req.query.sortOrder as 'ASC' | 'DESC') || 'DESC',
                 search: req.query.search as string,
-                reconciled: req.query.reconciled === 'Y' ? true : req.query.reconciled==='N' ? false : undefined
+                reconciled: req.query.reconciled === 'Y' ? true : req.query.reconciled==='N' ? false : undefined,
+                saleType: req.query.saleType as string
             };
 
             // Validate parameters

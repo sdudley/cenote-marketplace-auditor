@@ -45,6 +45,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);
     const [selectedTransactionForReconcile, setSelectedTransactionForReconcile] = useState<TransactionResult | null>(null);
     const [reconciledFilter, setReconciledFilter] = useState<string>('');
+    const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -58,8 +59,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         setLoading(true);
         try {
             const reconciledParam = reconciledFilter ? `&reconciled=${reconciledFilter}` : '';
+            const saleTypeParam = saleTypeFilter ? `&saleType=${encodeURIComponent(saleTypeFilter)}` : '';
             const response = await fetch(
-                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${reconciledParam}`
+                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${reconciledParam}${saleTypeParam}`
             );
             const data = await response.json();
             setTransactions(data.transactions);
@@ -73,7 +75,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, reconciledFilter]);
+    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, reconciledFilter, saleTypeFilter]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -136,8 +138,13 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         await handleQuickReconcile(selectedTransactionForReconcile, reconciled);
     };
 
-    const handleReconciledFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleReconciledFilterChange = (event: any) => {
         setReconciledFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
+    const handleSaleTypeFilterChange = (event: any) => {
+        setSaleTypeFilter(event.target.value as string);
         setPage(0); // Reset to first page when filter changes
     };
 
@@ -171,6 +178,21 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <MenuItem value="">All Transactions</MenuItem>
                         <MenuItem value="Y">Reconciled</MenuItem>
                         <MenuItem value="N">Unreconciled</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Sale Type</InputLabel>
+                    <Select
+                        value={saleTypeFilter}
+                        label="Sale Type"
+                        onChange={handleSaleTypeFilterChange}
+                    >
+                        <MenuItem value="">All Sale Types</MenuItem>
+                        <MenuItem value="New">New</MenuItem>
+                        <MenuItem value="Refund">Refund</MenuItem>
+                        <MenuItem value="Renewal">Renewal</MenuItem>
+                        <MenuItem value="Upgrade">Upgrade</MenuItem>
+                        <MenuItem value="Downgrade">Downgrade</MenuItem>
                     </Select>
                 </FormControl>
             </SearchContainer>
