@@ -9,6 +9,11 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
+    OutlinedInput,
+    Chip,
+    Box,
+    Checkbox,
+    ListItemText,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
 import { LicenseQuerySortType, LicenseResult, AppInfo } from '#common/types/apiTypes';
@@ -41,7 +46,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
     const [hostingFilter, setHostingFilter] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('');
     const [appFilter, setAppFilter] = useState<string>('');
-    const [licenseTypeFilter, setLicenseTypeFilter] = useState<string>('');
+    const [licenseTypeFilter, setLicenseTypeFilter] = useState<string[]>([]);
     const [apps, setApps] = useState<AppInfo[]>([]);
     const [loadingApps, setLoadingApps] = useState(false);
 
@@ -80,7 +85,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
             const hostingParam = hostingFilter ? `&hosting=${encodeURIComponent(hostingFilter)}` : '';
             const statusParam = statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : '';
             const appParam = appFilter ? `&addonKey=${encodeURIComponent(appFilter)}` : '';
-            const licenseTypeParam = licenseTypeFilter ? `&licenseType=${encodeURIComponent(licenseTypeFilter)}` : '';
+            const licenseTypeParam = licenseTypeFilter.length > 0 ? licenseTypeFilter.map(type => `&licenseType=${encodeURIComponent(type)}`).join('') : '';
             const response = await fetch(
                 `/api/licenses?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${hostingParam}${statusParam}${appParam}${licenseTypeParam}`
             );
@@ -144,7 +149,8 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
     };
 
     const handleLicenseTypeFilterChange = (event: any) => {
-        setLicenseTypeFilter(event.target.value as string);
+        const selected = event.target.value as string[];
+        setLicenseTypeFilter(selected);
         setPage(0); // Reset to first page when filter changes
     };
 
@@ -171,19 +177,58 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                 <FormControl size="small" sx={{ minWidth: 200 }}>
                     <InputLabel>License Type</InputLabel>
                     <Select
+                        multiple
                         value={licenseTypeFilter}
                         label="License Type"
                         onChange={handleLicenseTypeFilterChange}
+                        input={<OutlinedInput label="License Type" />}
+                        renderValue={(selected) => {
+                            if ((selected as string[]).length === 0) {
+                                return 'All License Types';
+                            }
+                            return `${(selected as string[]).length} selected`;
+                        }}
                     >
-                        <MenuItem value="">All License Types</MenuItem>
-                        <MenuItem value="ACADEMIC">Academic</MenuItem>
-                        <MenuItem value="COMMERCIAL">Commercial</MenuItem>
-                        <MenuItem value="COMMUNITY">Community</MenuItem>
-                        <MenuItem value="EVALUATION">Evaluation</MenuItem>
-                        <MenuItem value="OPEN_SOURCE">Open Source</MenuItem>
-                        <MenuItem value="DEMONSTRATION">Demonstration</MenuItem>
-                        <MenuItem value="FREE">Free</MenuItem>
-                        <MenuItem value="CLASSROOM">Classroom</MenuItem>
+                        <MenuItem value="ACADEMIC">
+                            <Checkbox checked={licenseTypeFilter.indexOf('ACADEMIC') > -1} />
+                            <ListItemText primary="Academic" />
+                        </MenuItem>
+                        <MenuItem value="COMMERCIAL">
+                            <Checkbox checked={licenseTypeFilter.indexOf('COMMERCIAL') > -1} />
+                            <ListItemText primary="Commercial" />
+                        </MenuItem>
+                        <MenuItem value="COMMUNITY">
+                            <Checkbox checked={licenseTypeFilter.indexOf('COMMUNITY') > -1} />
+                            <ListItemText primary="Community" />
+                        </MenuItem>
+                        <MenuItem value="DEMONSTRATION">
+                            <Checkbox checked={licenseTypeFilter.indexOf('DEMONSTRATION') > -1} />
+                            <ListItemText primary="Demonstration" />
+                        </MenuItem>
+                        <MenuItem value="EVALUATION">
+                            <Checkbox checked={licenseTypeFilter.indexOf('EVALUATION') > -1} />
+                            <ListItemText primary="Evaluation" />
+                        </MenuItem>
+                        <MenuItem value="FREE">
+                            <Checkbox checked={licenseTypeFilter.indexOf('FREE') > -1} />
+                            <ListItemText primary="Free" />
+                        </MenuItem>
+                        <MenuItem value="NON_COMMERCIAL">
+                            <Checkbox checked={licenseTypeFilter.indexOf('NON_COMMERCIAL') > -1} />
+                            <ListItemText primary="Non-Commercial" />
+                        </MenuItem>
+                        <MenuItem value="OPEN_SOURCE">
+                            <Checkbox checked={licenseTypeFilter.indexOf('OPEN_SOURCE') > -1} />
+                            <ListItemText primary="Open Source" />
+                        </MenuItem>
+                        <MenuItem value="PERSONAL">
+                            <Checkbox checked={licenseTypeFilter.indexOf('PERSONAL') > -1} />
+                            <ListItemText primary="Personal" />
+                        </MenuItem>
+                        <MenuItem value="CLASSROOM">
+                            <Checkbox checked={licenseTypeFilter.indexOf('CLASSROOM') > -1} />
+                            <ListItemText primary="Classroom" />
+                        </MenuItem>
                     </Select>
                 </FormControl>
                 <FormControl size="small" sx={{ minWidth: 200 }}>

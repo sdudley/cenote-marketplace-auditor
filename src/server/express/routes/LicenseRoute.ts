@@ -31,7 +31,7 @@ export class LicenseRoute {
                 hosting: req.query.hosting as string,
                 status: req.query.status as string,
                 addonKey: req.query.addonKey as string,
-                licenseType: req.query.licenseType as string
+                licenseType: Array.isArray(req.query.licenseType) ? req.query.licenseType as string[] : req.query.licenseType ? [req.query.licenseType as string] : undefined
             };
 
             // Validate parameters

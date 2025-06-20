@@ -108,7 +108,7 @@ export class LicenseDao {
             }
 
             if (licenseType) {
-                queryBuilder.andWhere('license.data->>\'licenseType\' = :licenseType', { licenseType });
+                queryBuilder.andWhere('license.data->>\'licenseType\' IN (:...licenseType)', { licenseType });
             }
 
             // Apply sorting using the sort field map
