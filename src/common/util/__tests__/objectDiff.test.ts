@@ -307,4 +307,46 @@ describe('objectDiff', () => {
             }
         });
     });
+
+    it('should sort children alphabetically by key', () => {
+        const oldObj = {
+            user: {
+                name: 'John',
+                age: 30
+            }
+        };
+        const newObj = {
+            user: {
+                name: 'John',
+                age: 30
+            },
+            settings: {
+                theme: 'dark',
+                notifications: {
+                    email: true,
+                    push: false,
+                    frequency: 'daily'
+                },
+                preferences: {
+                    language: 'en',
+                    timezone: 'UTC'
+                }
+            }
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        // Get the keys from the settings children
+        const settingsChildrenKeys = Object.keys(diff.settings.children!);
+
+        // Verify they are sorted alphabetically
+        expect(settingsChildrenKeys).toEqual(['notifications', 'preferences', 'theme']);
+
+        // Verify nested children are also sorted
+        const notificationsKeys = Object.keys(diff.settings.children!.notifications.children!);
+        expect(notificationsKeys).toEqual(['email', 'frequency', 'push']);
+
+        const preferencesKeys = Object.keys(diff.settings.children!.preferences.children!);
+        expect(preferencesKeys).toEqual(['language', 'timezone']);
+    });
 });

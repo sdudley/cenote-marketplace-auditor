@@ -93,7 +93,10 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
         const allKeys = new Set([...oldKeys, ...newKeys]);
         const children: { [key: string]: JsonDelta } = {};
 
-        for (const key of allKeys) {
+        // Sort keys alphabetically
+        const sortedKeys = Array.from(allKeys).sort();
+
+        for (const key of sortedKeys) {
             const oldValue = oldObj[key];
             const newValue = newObj[key];
 
@@ -133,7 +136,11 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
 const processNewObject = (obj: JsonObject): JsonDelta => {
     const children: { [key: string]: JsonDelta } = {};
 
-    Object.entries(obj).forEach(([key, value]) => {
+    // Sort keys alphabetically
+    const sortedKeys = Object.keys(obj).sort();
+
+    sortedKeys.forEach((key) => {
+        const value = obj[key];
         if (isObject(value)) {
             children[key] = processNewObject(value);
         } else {
