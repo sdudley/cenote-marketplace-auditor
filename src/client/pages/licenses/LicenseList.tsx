@@ -232,19 +232,6 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                     </Select>
                 </FormControl>
                 <FormControl size="small" sx={{ minWidth: 200 }}>
-                    <InputLabel>Hosting</InputLabel>
-                    <Select
-                        value={hostingFilter}
-                        label="Hosting"
-                        onChange={handleHostingFilterChange}
-                    >
-                        <MenuItem value="">All Hosting</MenuItem>
-                        <MenuItem value="Cloud">Cloud</MenuItem>
-                        <MenuItem value="Data Center">Data Center</MenuItem>
-                        <MenuItem value="Server">Server</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
                     <InputLabel>Status</InputLabel>
                     <Select
                         value={statusFilter}
@@ -255,6 +242,19 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         <MenuItem value="active">Active</MenuItem>
                         <MenuItem value="inactive">Inactive</MenuItem>
                         <MenuItem value="cancelled">Cancelled</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Hosting</InputLabel>
+                    <Select
+                        value={hostingFilter}
+                        label="Hosting"
+                        onChange={handleHostingFilterChange}
+                    >
+                        <MenuItem value="">All Hosting</MenuItem>
+                        <MenuItem value="Cloud">Cloud</MenuItem>
+                        <MenuItem value="Data Center">Data Center</MenuItem>
+                        <MenuItem value="Server">Server</MenuItem>
                     </Select>
                 </FormControl>
                 <FormControl size="small" sx={{ minWidth: 200 }}>
