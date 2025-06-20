@@ -95,8 +95,12 @@ export class PriceCalculatorService {
                 // (Not entirely sure this is correct and it may need to be updated)
 
                 if (licenseDurationDays < 29) {
-                    basePrice = basePrice * (licenseDurationDays+2) / 31;
-                    descriptors.push({ subtotal: basePrice, description: `Short month: prorate by (${licenseDurationDays}+2)/31 days`});
+                    if (licenseDurationDays===0) {
+                        basePrice = 0;
+                    } else {
+                        basePrice = basePrice * (licenseDurationDays+2) / 31;
+                        descriptors.push({ subtotal: basePrice, description: `Short month: prorate by (${licenseDurationDays}+2)/31 days`});
+                    }
                 }
             }
         }
@@ -121,7 +125,7 @@ export class PriceCalculatorService {
 
         let purchasePrice = billingPeriod==='Annual' ? Math.ceil(basePrice) : basePrice;
 
-        const dailyNominalPrice = purchasePrice / licenseDurationDays;
+        const dailyNominalPrice = licenseDurationDays===0 ? 0 : purchasePrice / licenseDurationDays;
 
         descriptors.push({ description: `Daily nominal price = purchase price / days in license = ${formatCurrency(purchasePrice)} / ${licenseDurationDays} = ${formatCurrency(dailyNominalPrice)}`});
 
@@ -170,7 +174,7 @@ export class PriceCalculatorService {
         if (declaredPartnerDiscount !== 0) {
             const partnerDiscountFraction = declaredPartnerDiscount / basePrice;
             basePrice -= declaredPartnerDiscount;
-            descriptors.push({ subtotal: basePrice, description: `Apply automatic Solutions Partner discount of ${formatCurrency(declaredPartnerDiscount)} (${(partnerDiscountFraction*100).toFixed(2)}%)`});
+            descriptors.push({ subtotal: basePrice, description: `Apply Solutions Partner discount of ${formatCurrency(declaredPartnerDiscount)} (${(partnerDiscountFraction*100).toFixed(2)}%)`});
         }
 
         if (billingPeriod === 'Annual') {
