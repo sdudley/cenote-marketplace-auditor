@@ -168,6 +168,23 @@ export const dataCenterLegacyPricing : UserTierPricing[] = [
     { userTier: 40000, cost: 16200 },
 ];
 
+export const dataCenterExtraLegacyPricing : UserTierPricing[] = [
+    { userTier: -1, cost: 16625 },
+    { userTier: 500, cost: 2800 },
+    { userTier: 1000, cost: 4200 },
+    { userTier: 2000, cost: 5600 },
+    { userTier: 3000, cost: 6300 },
+    { userTier: 4000, cost: 7000 },
+    { userTier: 5000, cost: 7700 },
+    { userTier: 10000, cost: 9000 },
+    { userTier: 15000, cost: 9750 },
+    { userTier: 20000, cost: 10500 },
+    { userTier: 25000, cost: 11250 },
+    { userTier: 30000, cost: 12000 },
+    { userTier: 35000, cost: 12750 },
+    { userTier: 40000, cost: 13500 },
+];
+
 export const serverPricing : UserTierPricing[] = [
     { userTier: -1, cost: 10500 },
     { userTier: 10, cost: 10 },

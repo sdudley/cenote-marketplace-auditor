@@ -1,5 +1,5 @@
 import { PriceCalculatorService } from '../PriceCalculatorService';
-import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult, dataCenterLegacyPricing } from './pricingTable';
+import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult, dataCenterLegacyPricing, dataCenterExtraLegacyPricing } from './pricingTable';
 import { PriceResult } from '#server/services/types';
 
 const stripDailyPrice = (data: PriceResult) => ({ purchasePrice: data.purchasePrice, vendorPrice: data.vendorPrice });
@@ -35,7 +35,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-05-01',
             maintenanceEndDate: '2025-06-01',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 221.21, vendorPrice: 188.03 });
@@ -53,7 +54,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-01',
             maintenanceEndDate: '2025-05-01',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 0, vendorPrice: 0 });
@@ -71,7 +73,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-05',
             maintenanceEndDate: '2025-05-05',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 115.50, vendorPrice: 98.18 }); // actual is 98.17 per Atlssian
@@ -89,7 +92,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-03-27',
             maintenanceEndDate: '2028-03-27',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 43290, vendorPrice: 36796.50 });
@@ -107,7 +111,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-03-02',
             maintenanceEndDate: '2026-03-02',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 3005, vendorPrice: 2554.25 });
@@ -126,7 +131,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-03-02',
             maintenanceEndDate: '2026-03-02',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 2805, vendorPrice: 2384.25 });
@@ -144,7 +150,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2026-03-15',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 2750, vendorPrice: 2337.50 });
@@ -162,7 +169,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-05-03',
             maintenanceEndDate: '2026-06-16',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 0, vendorPrice: 0 });
@@ -180,7 +188,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-05-11',
             maintenanceEndDate: '2025-06-11',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 26.40, vendorPrice: 22.44 });
@@ -198,7 +207,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-18',
             maintenanceEndDate: '2025-05-18',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 75.90, vendorPrice: 64.51 });
@@ -216,7 +226,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2025-05-15',
             billingPeriod: 'Monthly',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 47.99, vendorPrice: 40.79 }); // we estimate 40.79, actual is 40.52
@@ -234,7 +245,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2026-04-15',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 3400, vendorPrice: 2550 });
@@ -252,7 +264,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-04-15',
             maintenanceEndDate: '2026-04-15',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0.1
+            partnerDiscountFraction: 0.1,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 3060, vendorPrice: 2295 });
@@ -270,7 +283,8 @@ describe('PriceCalculatorService', () => {
             maintenanceStartDate: '2025-02-28',
             maintenanceEndDate: '2026-02-28',
             billingPeriod: 'Annual',
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 1252, vendorPrice: 1064.20 }); // Actual is 1063.56 per Atlassian
@@ -290,7 +304,8 @@ describe('PriceCalculatorService', () => {
             billingPeriod: 'Annual',
             previousPricing: undefined,
             expectedDiscount: 585,
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
         }));
 
         expect(result).toEqual({ purchasePrice: 11115, vendorPrice: 8336.25 });
@@ -310,7 +325,8 @@ describe('PriceCalculatorService', () => {
             billingPeriod: 'Annual',
             previousPricing: undefined,
             expectedDiscount: 170,
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
           }));
           expect(result).toEqual({ purchasePrice: -3230, vendorPrice: -2422.50 });
     });
@@ -331,10 +347,12 @@ describe('PriceCalculatorService', () => {
             previousPricing: {
               purchasePrice: 4200,
               vendorPrice: 3150,
-              dailyNominalPrice: 11.506849315068493
+              dailyNominalPrice: 11.506849315068493,
+              descriptors: []
             },
             expectedDiscount: 0,
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
           }));
 
           expect(result).toEqual({ purchasePrice: 1988, vendorPrice: 1491 });
@@ -355,7 +373,8 @@ describe('PriceCalculatorService', () => {
             previousPurchaseMaintenanceEndDate: undefined,
             previousPricing: undefined,
             expectedDiscount: 0,
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
           }));
 
           expect(result).toEqual({ purchasePrice: 27.78, vendorPrice: 23.62 }); // Atlassian actual is 27.76, 23.60
@@ -380,9 +399,66 @@ describe('PriceCalculatorService', () => {
             previousPurchaseMaintenanceEndDate: undefined,
             previousPricing: undefined,
             expectedDiscount: 0,
-            partnerDiscountFraction: 0
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
           }));
 
           expect(result).toEqual({ purchasePrice: 19900, vendorPrice: 14925 });
+    });
+
+    it('calculates Confluence DC 10k+ academic pricing correctly', () => {
+        const pricingTierResult = {
+            tiers: dataCenterExtraLegacyPricing,
+            priorTiers: undefined,
+            priorPricingEndDate: undefined
+        };
+
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult,
+            saleType: 'Renewal',
+            saleDate: '2024-11-29',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'ACADEMIC',
+            tier: '15000 Users',
+            maintenanceStartDate: '2024-11-25',
+            maintenanceEndDate: '2025-11-25',
+            billingPeriod: 'Annual',
+            previousPurchaseMaintenanceEndDate: undefined,
+            previousPricing: undefined,
+            expectedDiscount: 0,
+            partnerDiscountFraction: 0,
+            parentProduct: 'confluence'
+          }));
+
+          expect(result).toEqual({ purchasePrice: 2438, vendorPrice: 1828.50 });
+    });
+
+    it('calculates non-Confluence DC 10k+ academic pricing correctly', () => {
+        const pricingTierResult = {
+            tiers: dataCenterExtraLegacyPricing,
+            priorTiers: undefined,
+            priorPricingEndDate: undefined
+        };
+
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult,
+            saleType: 'Renewal',
+            saleDate: '2024-11-29',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'ACADEMIC',
+            tier: '15000 Users',
+            maintenanceStartDate: '2024-11-25',
+            maintenanceEndDate: '2025-11-25',
+            billingPeriod: 'Annual',
+            previousPurchaseMaintenanceEndDate: undefined,
+            previousPricing: undefined,
+            expectedDiscount: 0,
+            partnerDiscountFraction: 0,
+            parentProduct: 'jira'
+          }));
+
+          expect(result).toEqual({ purchasePrice: 4875, vendorPrice: 3656.25 });
     });
 });

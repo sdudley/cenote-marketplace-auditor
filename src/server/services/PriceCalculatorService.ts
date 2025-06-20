@@ -3,7 +3,8 @@ import { UserTierPricing } from '#common/types/userTiers';
 import { deploymentTypeFromHosting, userCountFromTier } from "#common/util/validationUtils";
 import {
     ACADEMIC_CLOUD_PRICE_RATIO,
-    ACADEMIC_DC_PRICE_RATIO_CURRENT_10K,
+    ACADEMIC_DC_PRICE_RATIO_CURRENT_CONF_10K,
+    ACADEMIC_DC_PRICE_RATIO_CURRENT_OTHER,
     ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE,
     ACADEMIC_DC_PRICE_RATIO_LEGACY,
     CLOUD_DISCOUNT_RATIO,
@@ -37,7 +38,7 @@ export class PriceCalculatorService {
             previousPurchaseMaintenanceEndDate,
             expectedDiscount,
             partnerDiscountFraction,
-            discounts
+            parentProduct
         } = opts;
 
         const { isFreeLicense, freeDescriptors } = this.isFreeLicense(opts);
@@ -107,7 +108,7 @@ export class PriceCalculatorService {
 
         // Apply academic/community discount if applicable
         if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
-            const licenseTypeDiscountFraction = this.getLicenseTypeDiscountFraction({ saleDate, hosting, userCount });
+            const licenseTypeDiscountFraction = this.getLicenseTypeDiscountFraction({ saleDate, hosting, userCount, parentProduct });
             basePrice *= licenseTypeDiscountFraction;
             descriptors.push({ subtotal: basePrice, description: `Apply ${licenseType.toLowerCase()} discount of ${(1-licenseTypeDiscountFraction)*100}%`});
         }
@@ -254,26 +255,25 @@ export class PriceCalculatorService {
 
     // Apply expecteddiscounts for academic and community licenses
 
-    private getLicenseTypeDiscountFraction(opts: { saleDate: string; hosting: HostingType; userCount: number; }): number {
-        const { saleDate, hosting, userCount } = opts;
+    private getLicenseTypeDiscountFraction(opts: { saleDate: string; hosting: HostingType; userCount: number; parentProduct: string; }): number {
+        const { saleDate, hosting, userCount, parentProduct } = opts;
 
         if (hosting==='Cloud') {
             return ACADEMIC_CLOUD_PRICE_RATIO;
         }
 
+        // Somewhere in 2024, Atlassian changed the pricing for academic data center licenses to apply a
+        // 75% discount for user tiers of 10k+ for Confluence licenses.
+
         if (saleDate < ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE) {
             return ACADEMIC_DC_PRICE_RATIO_LEGACY;
         }
 
-        // Somewhere in 2024, Atlassian changed the pricing for academic data center licenses to apply a
-        // 75% discount for user tiers of 10k+ for Confluence licenses.
-
-        if (userCount !== -1 && userCount < 10000) {
-            // If under 10k (and not unlimited), continue with the 50% discount
-            return ACADEMIC_DC_PRICE_RATIO_LEGACY;
+        if (parentProduct==='confluence' && (userCount === -1 || userCount >= 10000)) {
+            return ACADEMIC_DC_PRICE_RATIO_CURRENT_CONF_10K;
         }
 
-        return ACADEMIC_DC_PRICE_RATIO_CURRENT_10K;
+        return ACADEMIC_DC_PRICE_RATIO_CURRENT_OTHER;
     }
 
     private isFreeLicense(opts: PriceCalcOpts): { isFreeLicense: boolean; freeDescriptors: PriceCalcDescriptor[] } {

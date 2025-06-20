@@ -5,5 +5,7 @@ export const DC_DISCOUNT_RATIO = 0.75;
 export const ACADEMIC_CLOUD_PRICE_RATIO = 0.25;
 
 export const ACADEMIC_DC_PRICE_RATIO_LEGACY = 0.5;
+
 export const ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE = '2024-09-01'; // Not sure of exactly where the cutoff is?
-export const ACADEMIC_DC_PRICE_RATIO_CURRENT_10K = 0.25;
+export const ACADEMIC_DC_PRICE_RATIO_CURRENT_CONF_10K = 0.25;
+export const ACADEMIC_DC_PRICE_RATIO_CURRENT_OTHER = 0.5;

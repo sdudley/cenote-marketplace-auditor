@@ -6,6 +6,7 @@ import { TYPES } from '../config/types';
 @injectable()
 export class AddonService {
     private readonly addonRepository;
+    private parentProductCache: Map<string, string> = new Map();
 
     constructor(
         @inject(TYPES.DataSource) private dataSource: DataSource
@@ -20,6 +21,9 @@ export class AddonService {
         addon.addonKey = addonKey;
         addon.parentProduct = parentProduct;
         await this.addonRepository.save(addon);
+
+        // Invalidate cache for this addon key
+        this.parentProductCache.delete(addonKey);
     }
 
     public async getAddons(): Promise<Addon[]> {
@@ -28,10 +32,37 @@ export class AddonService {
 
     public async updateAddon(addon: Addon): Promise<void> {
         await this.addonRepository.save(addon);
+
+        // Invalidate cache for this addon key
+        this.parentProductCache.delete(addon.addonKey);
     }
 
     public async getAddonKeys(): Promise<string[]> {
         const addons = await this.addonRepository.find();
         return addons.map(addon => addon.addonKey);
+    }
+
+    public async getParentProductForApp(addonKey: string): Promise<string> {
+        // Check cache first
+        if (this.parentProductCache.has(addonKey)) {
+            return this.parentProductCache.get(addonKey)!;
+        }
+
+        // Query database if not in cache
+        const addon = await this.addonRepository.findOne({
+            where: { addonKey }
+        });
+
+        if (!addon) {
+            throw new Error(`Addon with key '${addonKey}' not found`);
+        }
+
+        // Cache the result
+        this.parentProductCache.set(addonKey, addon.parentProduct);
+        return addon.parentProduct;
+    }
+
+    private invalidateCache(): void {
+        this.parentProductCache.clear();
     }
 }

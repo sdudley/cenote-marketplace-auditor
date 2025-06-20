@@ -9,6 +9,7 @@ export interface PriceCalcOpts {
     saleType: SaleType;
     isSandbox: boolean;
     hosting: HostingType;
+    parentProduct: string;
     licenseType: LicenseType;
     tier: string;
     maintenanceStartDate: string;

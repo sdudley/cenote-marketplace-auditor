@@ -12,12 +12,14 @@ import { TYPES } from "#server/config/types";
 import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator";
 import { isSignificantlyDifferent } from "#common/util/significantDifferenceTester";
 import { PriceCalcOpts, PriceResult } from '#server/services/types';
+import { AddonService } from "../AddonService";
 
 @injectable()
 export class TransactionValidator {
     constructor(
         @inject(TYPES.PricingService) private pricingService: PricingService,
         @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
+        @inject(TYPES.AddonService) private addonService: AddonService
     ) {}
 
     /**
@@ -47,6 +49,7 @@ export class TransactionValidator {
 
         const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
         const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
+        const parentProduct = await this.addonService.getParentProductForApp(addonKey);
 
         // If it is an upgrade, we need to also load details about the previous purchase and potentially-different
         // pricing tiers for that transaction.
@@ -73,12 +76,12 @@ export class TransactionValidator {
 
         const previousPurchasePricing =
                     saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
-                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, partnerDiscountFraction })
+                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, partnerDiscountFraction, parentProduct })
                         : undefined;
 
         // Calculate the expected price for the current transaction.
 
-        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPurchasePricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate, partnerDiscountFraction });
+        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPurchasePricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate, partnerDiscountFraction, parentProduct });
 
         let expectedVendorAmount = price.vendorPrice;
 
@@ -138,6 +141,7 @@ export class TransactionValidator {
         previousPurchaseEffectiveMaintenanceEndDate: string|undefined;
         expectedDiscount: number;
         partnerDiscountFraction: number;
+        parentProduct: string;
     }) : PriceWithPricingOpts {
         const {
             transaction,
@@ -147,7 +151,8 @@ export class TransactionValidator {
             useLegacyPricingTier,
             expectedDiscount,
             previousPurchaseEffectiveMaintenanceEndDate,
-            partnerDiscountFraction
+            partnerDiscountFraction,
+            parentProduct
         } = opts;
         const { purchaseDetails } = transaction.data;
 
@@ -166,7 +171,8 @@ export class TransactionValidator {
             previousPricing,
             expectedDiscount,
             partnerDiscountFraction,
-            discounts: purchaseDetails.discounts
+            discounts: purchaseDetails.discounts,
+            parentProduct
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator
