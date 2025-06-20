@@ -2,11 +2,7 @@ import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { AddonDao } from '../../database/dao/AddonDao';
-
-export interface AppInfo {
-    addonKey: string;
-    name: string;
-}
+import { AppInfo } from '#common/types/apiTypes';
 
 @injectable()
 export class AppRoute {

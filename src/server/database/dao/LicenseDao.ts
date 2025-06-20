@@ -63,7 +63,10 @@ export class LicenseDao {
             limit = 25,
             sortBy = 'createdAt',
             sortOrder = 'DESC',
-            search
+            search,
+            hosting,
+            status,
+            addonKey
         } = params;
 
         try {
@@ -89,6 +92,18 @@ export class LicenseDao {
                     'jsonb_path_exists(license.data, format(\'$.** ? (@.type() == "string" && @ like_regex %s flag "qi")\', :search::text)::jsonpath)',
                     { search: `"${this.escapeDoubleQuotes(search)}"` }
                 );
+            }
+
+            if (hosting) {
+                queryBuilder.andWhere('license.data->>\'hosting\' = :hosting', { hosting });
+            }
+
+            if (status) {
+                queryBuilder.andWhere('license.data->>\'status\' = :status', { status });
+            }
+
+            if (addonKey) {
+                queryBuilder.andWhere('license.data->>\'addonKey\' = :addonKey', { addonKey });
             }
 
             // Apply sorting using the sort field map

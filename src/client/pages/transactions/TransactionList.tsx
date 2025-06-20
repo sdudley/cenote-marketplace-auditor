@@ -11,7 +11,7 @@ import {
     InputAdornment,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
-import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
+import { TransactionQuerySortType, TransactionResult, AppInfo } from '#common/types/apiTypes';
 import { isoStringWithOnlyDate } from '#common/util/dateUtils';
 import { formatCurrency } from '#common/util/formatCurrency';
 import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
@@ -27,11 +27,6 @@ import { HighlightIfSignificantlyDifferent } from '../../components/HighlightIfS
 import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts.js';
 import { TransactionDiscount,  } from '#common/types/marketplace';
 import { mapDiscountTypeToDescription } from './util';
-
-interface AppInfo {
-    addonKey: string;
-    name: string;
-}
 
 interface TransactionListProps {
     // Add props if needed

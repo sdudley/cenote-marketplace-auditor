@@ -5,11 +5,15 @@ import {
     TextField,
     CircularProgress,
     InputAdornment,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
-import { LicenseQuerySortType, LicenseResult } from '#common/types/apiTypes';
+import { LicenseQuerySortType, LicenseResult, AppInfo } from '#common/types/apiTypes';
 import { dateDiff, isoStringWithOnlyDate } from '#common/util/dateUtils';
-import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
+import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper, FilterLabel } from '../../components/styles';
 import { LicenseDetailsDialog } from './LicenseDetailsDialog';
 import { SortOrder, SortableHeader } from '../../components/SortableHeader';
 import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableHeaderCell, WrappedLabel } from '../../components/styles';
@@ -34,6 +38,11 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [selectedLicense, setSelectedLicense] = useState<LicenseResult | null>(null);
+    const [hostingFilter, setHostingFilter] = useState<string>('');
+    const [statusFilter, setStatusFilter] = useState<string>('');
+    const [appFilter, setAppFilter] = useState<string>('');
+    const [apps, setApps] = useState<AppInfo[]>([]);
+    const [loadingApps, setLoadingApps] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -43,11 +52,35 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
         return () => clearTimeout(timer);
     }, [search]);
 
+    const fetchApps = async () => {
+        setLoadingApps(true);
+        try {
+            const response = await fetch('/api/apps');
+            if (response.ok) {
+                const appsData = await response.json();
+                setApps(appsData);
+            } else {
+                console.error('Failed to fetch apps');
+            }
+        } catch (error) {
+            console.error('Error fetching apps:', error);
+        } finally {
+            setLoadingApps(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchApps();
+    }, []);
+
     const fetchLicenses = async () => {
         setLoading(true);
         try {
+            const hostingParam = hostingFilter ? `&hosting=${encodeURIComponent(hostingFilter)}` : '';
+            const statusParam = statusFilter ? `&status=${encodeURIComponent(statusFilter)}` : '';
+            const appParam = appFilter ? `&addonKey=${encodeURIComponent(appFilter)}` : '';
             const response = await fetch(
-                `/api/licenses?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}`
+                `/api/licenses?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${hostingParam}${statusParam}${appParam}`
             );
             const data = await response.json();
             setLicenses(data.licenses);
@@ -61,7 +94,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
 
     useEffect(() => {
         fetchLicenses();
-    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch]);
+    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, hostingFilter, statusFilter, appFilter]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -93,6 +126,21 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
         }
     };
 
+    const handleHostingFilterChange = (event: any) => {
+        setHostingFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
+    const handleStatusFilterChange = (event: any) => {
+        setStatusFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
+    const handleAppFilterChange = (event: any) => {
+        setAppFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
     return (
         <TableContainer>
             <SearchContainer>
@@ -112,6 +160,48 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         ),
                     }}
                 />
+                <FilterLabel>Filters:</FilterLabel>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Hosting</InputLabel>
+                    <Select
+                        value={hostingFilter}
+                        label="Hosting"
+                        onChange={handleHostingFilterChange}
+                    >
+                        <MenuItem value="">All Hosting</MenuItem>
+                        <MenuItem value="Cloud">Cloud</MenuItem>
+                        <MenuItem value="Data Center">Data Center</MenuItem>
+                        <MenuItem value="Server">Server</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                        value={statusFilter}
+                        label="Status"
+                        onChange={handleStatusFilterChange}
+                    >
+                        <MenuItem value="">All Statuses</MenuItem>
+                        <MenuItem value="active">Active</MenuItem>
+                        <MenuItem value="inactive">Inactive</MenuItem>
+                        <MenuItem value="cancelled">Cancelled</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>App</InputLabel>
+                    <Select
+                        value={appFilter}
+                        label="App"
+                        onChange={handleAppFilterChange}
+                    >
+                        <MenuItem value="">All Apps</MenuItem>
+                        {apps.map((app) => (
+                            <MenuItem key={app.addonKey} value={app.addonKey}>
+                                {app.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
             </SearchContainer>
 
             <TableWrapper>

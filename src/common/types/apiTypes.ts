@@ -53,6 +53,9 @@ export interface LicenseQueryParams {
     sortBy?: LicenseQuerySortType;
     sortOrder?: 'ASC' | 'DESC';
     search?: string;
+    hosting?: string;
+    status?: string;
+    addonKey?: string;
 }
 
 export interface LicenseResult {
@@ -64,4 +67,9 @@ export interface LicenseQueryResult {
     licenses: LicenseResult[];
     total: number;
     count: number;
+}
+
+export interface AppInfo {
+    addonKey: string;
+    name: string;
 }

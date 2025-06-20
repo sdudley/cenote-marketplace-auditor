@@ -27,7 +27,10 @@ export class LicenseRoute {
                 limit: parseInt(req.query.limit as string) || 25,
                 sortBy: (req.query.sortBy as LicenseQuerySortType) || LicenseQuerySortType.CreatedAt,
                 sortOrder: (req.query.sortOrder as 'ASC' | 'DESC') || 'DESC',
-                search: req.query.search as string
+                search: req.query.search as string,
+                hosting: req.query.hosting as string,
+                status: req.query.status as string,
+                addonKey: req.query.addonKey as string
             };
 
             // Validate parameters
