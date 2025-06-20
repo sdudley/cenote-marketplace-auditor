@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { initializeDatabase } from '../config/database';
 import { configureContainer } from '../config/container';
 import { TYPES } from '../config/types';
-import { AddonService } from '../services/AddonService';
+import { AddonDao } from '../database/dao/AddonDao';
 
 async function main() {
     const addonKey = process.argv[2];
@@ -26,7 +26,7 @@ async function main() {
         const container = configureContainer(dataSource);
 
         // Get AddonService instance from container
-        const addonService = container.get<AddonService>(TYPES.AddonService);
+        const addonService = container.get<AddonDao>(TYPES.AddonDao);
         await addonService.addAddon({ addonKey, parentProduct });
         console.log(`Successfully added addon: ${addonKey} with parent product: ${parentProduct}`);
     } catch (error) {

@@ -12,7 +12,7 @@ import { TYPES } from "#server/config/types";
 import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator";
 import { isSignificantlyDifferent } from "#common/util/significantDifferenceTester";
 import { PriceCalcOpts, PriceResult } from '#server/services/types';
-import { AddonService } from "../AddonService";
+import { AddonDao } from "../../database/dao/AddonDao";
 import { sumDiscountArrayForTransaction } from "#common/util/transactionDiscounts";
 
 @injectable()
@@ -20,7 +20,7 @@ export class TransactionValidator {
     constructor(
         @inject(TYPES.PricingService) private pricingService: PricingService,
         @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
-        @inject(TYPES.AddonService) private addonService: AddonService
+        @inject(TYPES.AddonDao) private addonDao: AddonDao
     ) {}
 
     /**
@@ -49,7 +49,7 @@ export class TransactionValidator {
 
         const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
         const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
-        const parentProduct = await this.addonService.getParentProductForApp(addonKey);
+        const parentProduct = await this.addonDao.getParentProductForApp(addonKey);
 
         // If it is an upgrade, we need to also load details about the previous purchase and potentially-different
         // pricing tiers for that transaction.

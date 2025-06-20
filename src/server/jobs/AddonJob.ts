@@ -1,13 +1,13 @@
 import { injectable, inject } from 'inversify';
 import { MarketplaceService } from '../services/MarketplaceService';
 import { TYPES } from '../config/types';
-import { AddonService } from '../services/AddonService';
+import { AddonDao } from '../database/dao/AddonDao';
 
 @injectable()
 export class AddonJob {
     constructor(
         @inject(TYPES.MarketplaceService) private marketplaceService: MarketplaceService,
-        @inject(TYPES.AddonService) private addonService: AddonService
+        @inject(TYPES.AddonDao) private addonDao: AddonDao
     ) {
     }
 
@@ -17,7 +17,7 @@ export class AddonJob {
         console.log(`Found ${marketplaceAddons.length} addons in Marketplace`);
 
         // Get existing addons from database
-        const existingAddons = await this.addonService.getAddons();
+        const existingAddons = await this.addonDao.getAddons();
 
         // Upgrade task: try to update existing addons that don't have any parentProducts, and apply
         // name changes
@@ -31,7 +31,7 @@ export class AddonJob {
                 if (parentProduct) {
                     console.log(`  Updating parent product for addon ${addon.addonKey} to ${parentProduct}`);
                     addon.parentProduct = parentProduct;
-                    await this.addonService.updateAddon(addon);
+                    await this.addonDao.updateAddon(addon);
                 }
             }
 
@@ -41,7 +41,7 @@ export class AddonJob {
             if (marketplaceAddon && marketplaceAddon.name !== addon.name) {
                 console.log(`  Updating name for addon ${addon.addonKey} to ${marketplaceAddon.name}`);
                 addon.name = marketplaceAddon.name;
-                await this.addonService.updateAddon(addon);
+                await this.addonDao.updateAddon(addon);
             }
         }
 
@@ -53,7 +53,7 @@ export class AddonJob {
             for (const addon of newAddons) {
                 console.log(`  Adding addon: ${addon.key}`);
                 const parentProduct = await this.marketplaceService.getParentProductForAddon(addon.key);
-                await this.addonService.addAddon({ addonKey: addon.key, name: addon.name, parentProduct: parentProduct || 'unknown' });
+                await this.addonDao.addAddon({ addonKey: addon.key, name: addon.name, parentProduct: parentProduct || 'unknown' });
             }
 
             console.log('Successfully added new addons to database');

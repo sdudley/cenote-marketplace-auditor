@@ -3,14 +3,14 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../config/types';
 import { DeploymentType } from '#common/types/marketplace';
 import { PricingService } from '../services/PricingService';
-import { AddonService } from '../services/AddonService';
+import { AddonDao } from '../database/dao/AddonDao';
 
 @injectable()
 export class PricingJob {
     constructor(
         @inject(TYPES.MarketplaceService) private marketplaceService: MarketplaceService,
         @inject(TYPES.PricingService) private pricingService: PricingService,
-        @inject(TYPES.AddonService) private addonService: AddonService
+        @inject(TYPES.AddonDao) private addonDao: AddonDao
     ) {
 
     }
@@ -18,7 +18,7 @@ export class PricingJob {
     public async fetchPricing(): Promise<void> {
         console.log(`\n=== Fetching pricing for apps ===`);
 
-        const addons = await this.addonService.getAddonKeys();
+        const addons = await this.addonDao.getAddonKeys();
         console.log(`Found ${addons.length} addons to check pricing`);
 
         for (const addonKey of addons) {

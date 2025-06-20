@@ -1,10 +1,10 @@
 import { injectable, inject } from 'inversify';
 import { DataSource } from 'typeorm';
 import { Addon } from '#common/entities/Addon';
-import { TYPES } from '../config/types';
+import { TYPES } from '../../config/types';
 
 @injectable()
-export class AddonService {
+export class AddonDao {
     private readonly addonRepository;
     private parentProductCache: Map<string, string> = new Map();
 
@@ -27,15 +27,15 @@ export class AddonService {
         this.parentProductCache.delete(addonKey);
     }
 
-    public async getAddons(): Promise<Addon[]> {
-        return this.addonRepository.find();
-    }
-
     public async updateAddon(addon: Addon): Promise<void> {
         await this.addonRepository.save(addon);
 
         // Invalidate cache for this addon key
         this.parentProductCache.delete(addon.addonKey);
+    }
+
+    public async getAddons(): Promise<Addon[]> {
+        return await this.addonRepository.find();
     }
 
     public async getAddonKeys(): Promise<string[]> {
