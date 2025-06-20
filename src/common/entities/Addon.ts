@@ -8,6 +8,9 @@ export class Addon {
     @Column({ default: 'unknown' })
     parentProduct!: string;
 
+    @Column({ nullable: true })
+    name?: string;
+
     @Column()
     @Index({ unique: true })
     addonKey!: string;

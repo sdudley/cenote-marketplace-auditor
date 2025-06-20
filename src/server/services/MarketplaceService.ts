@@ -213,7 +213,7 @@ export class MarketplaceService {
         return response.data;
     }
 
-    async getVendorSpecificAddonKeys(): Promise<string[]> {
+    async getVendorSpecificAddons(): Promise<{ key: string; name: string; }[]> {
         await this.initializeConfig();
         const url = this.buildUrlWithParams(
             `${this.baseUrl}/rest/2/addons`,
@@ -230,7 +230,7 @@ export class MarketplaceService {
             }
         });
 
-        return response.data._embedded.addons.map(addon => addon.key);
+        return response.data._embedded.addons.map(addon => ({ key: addon.key, name: addon.name }));
     }
 
     async getParentProductForAddon(addonKey: string): Promise<string|undefined> {

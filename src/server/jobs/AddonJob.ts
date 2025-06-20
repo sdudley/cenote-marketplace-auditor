@@ -13,16 +13,17 @@ export class AddonJob {
 
     async syncAddonKeys(): Promise<void> {
         console.log('\nFetching addon keys from Marketplace API...');
-        const marketplaceAddonKeys = await this.marketplaceService.getVendorSpecificAddonKeys();
-        console.log(`Found ${marketplaceAddonKeys.length} addons in Marketplace`);
+        const marketplaceAddons = await this.marketplaceService.getVendorSpecificAddons();
+        console.log(`Found ${marketplaceAddons.length} addons in Marketplace`);
 
         // Get existing addons from database
         const existingAddons = await this.addonService.getAddons();
 
-        // Upgrade task: try to update existing addons that don't have any parentProducts
+        // Upgrade task: try to update existing addons that don't have any parentProducts, and apply
+        // name changes
 
         for (const addon of existingAddons) {
-            const { parentProduct } = addon;
+            const { parentProduct, name } = addon;
 
             if (!parentProduct || parentProduct==='unknown') {
                 const parentProduct = await this.marketplaceService.getParentProductForAddon(addon.addonKey);
@@ -33,17 +34,26 @@ export class AddonJob {
                     await this.addonService.updateAddon(addon);
                 }
             }
+
+            // Using marketplaceAddons, backfill the name
+            const marketplaceAddon = marketplaceAddons.find(a => a.key === addon.addonKey);
+
+            if (marketplaceAddon && marketplaceAddon.name !== addon.name) {
+                console.log(`  Updating name for addon ${addon.addonKey} to ${marketplaceAddon.name}`);
+                addon.name = marketplaceAddon.name;
+                await this.addonService.updateAddon(addon);
+            }
         }
 
-        const newAddonKeys = marketplaceAddonKeys.filter(key => !existingAddons.some(addon => addon.addonKey === key));
+        const newAddons = marketplaceAddons.filter(mpa => !existingAddons.some(addon => addon.addonKey === mpa.key));
 
-        if (newAddonKeys.length > 0) {
-            console.log(`Adding ${newAddonKeys.length} new addons to database...`);
+        if (newAddons.length > 0) {
+            console.log(`Adding ${newAddons.length} new addons to database...`);
 
-            for (const addonKey of newAddonKeys) {
-                console.log(`  Adding addon: ${addonKey}`);
-                const parentProduct = await this.marketplaceService.getParentProductForAddon(addonKey);
-                await this.addonService.addAddon({ addonKey, parentProduct: parentProduct || 'unknown' });
+            for (const addon of newAddons) {
+                console.log(`  Adding addon: ${addon.key}`);
+                const parentProduct = await this.marketplaceService.getParentProductForAddon(addon.key);
+                await this.addonService.addAddon({ addonKey: addon.key, name: addon.name, parentProduct: parentProduct || 'unknown' });
             }
 
             console.log('Successfully added new addons to database');

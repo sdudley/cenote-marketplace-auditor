@@ -14,12 +14,13 @@ export class AddonService {
         this.addonRepository = this.dataSource.getRepository(Addon);
     }
 
-    async addAddon(opts: { addonKey: string; parentProduct: string }): Promise<void> {
-        const { addonKey, parentProduct } = opts;
+    async addAddon(opts: { addonKey: string; parentProduct: string; name: string }): Promise<void> {
+        const { addonKey, parentProduct, name } = opts;
 
         const addon = new Addon();
         addon.addonKey = addonKey;
         addon.parentProduct = parentProduct;
+        addon.name = name;
         await this.addonRepository.save(addon);
 
         // Invalidate cache for this addon key
