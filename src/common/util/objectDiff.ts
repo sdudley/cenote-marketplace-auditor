@@ -53,6 +53,30 @@ const areArraysEqual = (arr1: JsonArray, arr2: JsonArray): boolean => {
     return true;
 };
 
+const processRemovedObject = (obj: JsonObject): JsonDelta => {
+    const children: { [key: string]: JsonDelta } = {};
+
+    // Sort keys alphabetically
+    const sortedKeys = Object.keys(obj).sort();
+
+    sortedKeys.forEach((key) => {
+        const value = obj[key];
+        if (isObject(value)) {
+            children[key] = processRemovedObject(value);
+        } else {
+            children[key] = {
+                changeType: 'removed',
+                oldValue: value
+            };
+        }
+    });
+
+    return {
+        changeType: 'removed',
+        children
+    };
+};
+
 const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
     // Handle primitive values
     if (isPrimitive(oldObj) || isPrimitive(newObj)) {
@@ -110,10 +134,14 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
                     };
                 }
             } else if (!(key in newObj)) {
-                children[key] = {
-                    changeType: 'removed',
-                    oldValue: oldValue
-                };
+                if (isObject(oldValue)) {
+                    children[key] = processRemovedObject(oldValue);
+                } else {
+                    children[key] = {
+                        changeType: 'removed',
+                        oldValue: oldValue
+                    };
+                }
             } else {
                 children[key] = compareObjects(oldValue, newValue);
             }

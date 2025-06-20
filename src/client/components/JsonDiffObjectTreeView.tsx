@@ -9,6 +9,7 @@ import {
     KeyColumn,
     JsonKey,
     JsonKeyNew,
+    JsonKeyRemoved,
     JsonValue,
     ValueColumn,
     TreeBorder
@@ -42,8 +43,13 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
         const fullKey = parentKey ? `${parentKey}.${key}` : key;
         const displayKey = humanizeKeys ? humanizeKey(key) : key;
 
-        // Use JsonKeyNew if this object is newly added (either directly or through a parent) and highlighting is enabled
-        const KeyComponent = (isNew && highlightNew) ? JsonKeyNew : JsonKey;
+        // Use appropriate key component based on the change type and highlighting settings
+        let KeyComponent = JsonKey;
+        if (delta.changeType === 'removed') {
+            KeyComponent = JsonKeyRemoved;
+        } else if (isNew && highlightNew) {
+            KeyComponent = JsonKeyNew;
+        }
 
         const label = (
             <LabelContainer>

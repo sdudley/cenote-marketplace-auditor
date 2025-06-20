@@ -349,4 +349,101 @@ describe('objectDiff', () => {
         const preferencesKeys = Object.keys(diff.settings.children!.preferences.children!);
         expect(preferencesKeys).toEqual(['language', 'timezone']);
     });
+
+    it('should handle removed keys that have children', () => {
+        const oldObj = {
+            user: {
+                name: 'John',
+                age: 30,
+                address: {
+                    city: 'Boston',
+                    zip: '02108',
+                    country: 'USA'
+                },
+                preferences: {
+                    theme: 'dark',
+                    language: 'en'
+                }
+            },
+            metadata: {
+                version: 1,
+                tags: ['important']
+            }
+        };
+        const newObj = {
+            user: {
+                name: 'John',
+                age: 30
+            },
+            metadata: {
+                version: 1,
+                tags: ['important']
+            }
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        // Verify the removed address object preserves its children
+        expect(diff.user.children!.address).toEqual({
+            changeType: 'removed',
+            children: {
+                city: {
+                    changeType: 'removed',
+                    oldValue: 'Boston'
+                },
+                zip: {
+                    changeType: 'removed',
+                    oldValue: '02108'
+                },
+                country: {
+                    changeType: 'removed',
+                    oldValue: 'USA'
+                }
+            }
+        });
+
+        // Verify the removed preferences object preserves its children
+        expect(diff.user.children!.preferences).toEqual({
+            changeType: 'removed',
+            children: {
+                theme: {
+                    changeType: 'removed',
+                    oldValue: 'dark'
+                },
+                language: {
+                    changeType: 'removed',
+                    oldValue: 'en'
+                }
+            }
+        });
+
+        // Verify unchanged keys remain unchanged
+        expect(diff.user.children!.name).toEqual({
+            changeType: 'unchanged',
+            oldValue: 'John',
+            newValue: 'John'
+        });
+        expect(diff.user.children!.age).toEqual({
+            changeType: 'unchanged',
+            oldValue: 30,
+            newValue: 30
+        });
+
+        // Verify metadata is unchanged
+        expect(diff.metadata).toEqual({
+            changeType: 'unchanged',
+            children: {
+                version: {
+                    changeType: 'unchanged',
+                    oldValue: 1,
+                    newValue: 1
+                },
+                tags: {
+                    changeType: 'unchanged',
+                    oldValue: ['important'],
+                    newValue: ['important']
+                }
+            }
+        });
+    });
 });
