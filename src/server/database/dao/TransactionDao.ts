@@ -153,7 +153,8 @@ class TransactionDao {
             sortOrder = 'DESC',
             search,
             reconciled,
-            saleType
+            saleType,
+            hosting
         } = params;
 
         try {
@@ -199,6 +200,10 @@ class TransactionDao {
 
             if (saleType) {
                 queryBuilder.andWhere('transaction.data->\'purchaseDetails\'->>\'saleType\' = :saleType', { saleType });
+            }
+
+            if (hosting) {
+                queryBuilder.andWhere('transaction.data->\'purchaseDetails\'->>\'hosting\' = :hosting', { hosting });
             }
 
             // Apply sorting using the sort field map

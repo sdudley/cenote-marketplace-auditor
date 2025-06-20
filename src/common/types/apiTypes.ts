@@ -43,6 +43,7 @@ export interface TransactionQueryParams {
     reconciled: boolean|undefined;
     search?: string;
     saleType?: string;
+    hosting?: string;
 }
 
 export interface LicenseQueryParams {

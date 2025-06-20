@@ -46,6 +46,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [selectedTransactionForReconcile, setSelectedTransactionForReconcile] = useState<TransactionResult | null>(null);
     const [reconciledFilter, setReconciledFilter] = useState<string>('');
     const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
+    const [hostingFilter, setHostingFilter] = useState<string>('');
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -60,8 +61,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         try {
             const reconciledParam = reconciledFilter ? `&reconciled=${reconciledFilter}` : '';
             const saleTypeParam = saleTypeFilter ? `&saleType=${encodeURIComponent(saleTypeFilter)}` : '';
+            const hostingParam = hostingFilter ? `&hosting=${encodeURIComponent(hostingFilter)}` : '';
             const response = await fetch(
-                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${reconciledParam}${saleTypeParam}`
+                `/api/transactions?start=${page * rowsPerPage}&limit=${rowsPerPage}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(debouncedSearch)}${reconciledParam}${saleTypeParam}${hostingParam}`
             );
             const data = await response.json();
             setTransactions(data.transactions);
@@ -75,7 +77,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     useEffect(() => {
         fetchTransactions();
-    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, reconciledFilter, saleTypeFilter]);
+    }, [page, rowsPerPage, sortBy, sortOrder, debouncedSearch, reconciledFilter, saleTypeFilter, hostingFilter]);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -148,6 +150,11 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         setPage(0); // Reset to first page when filter changes
     };
 
+    const handleHostingFilterChange = (event: any) => {
+        setHostingFilter(event.target.value as string);
+        setPage(0); // Reset to first page when filter changes
+    };
+
     return (
         <TableContainer>
             <SearchContainer>
@@ -193,6 +200,19 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <MenuItem value="Renewal">Renewal</MenuItem>
                         <MenuItem value="Upgrade">Upgrade</MenuItem>
                         <MenuItem value="Downgrade">Downgrade</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Hosting</InputLabel>
+                    <Select
+                        value={hostingFilter}
+                        label="Hosting"
+                        onChange={handleHostingFilterChange}
+                    >
+                        <MenuItem value="">All Hosting</MenuItem>
+                        <MenuItem value="Cloud">Cloud</MenuItem>
+                        <MenuItem value="Data Center">Data Center</MenuItem>
+                        <MenuItem value="Server">Server</MenuItem>
                     </Select>
                 </FormControl>
             </SearchContainer>
