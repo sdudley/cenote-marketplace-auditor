@@ -104,7 +104,7 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                         slots={{expandIcon: ExpandMore, collapseIcon: ExpandLess}}
                         defaultExpandedItems={allIds}
                     >
-                        <JsonTreeView data={formattedData} nodeId="root" />
+                        <JsonTreeView data={formattedData} nodeId="root" humanizeKeys={true} />
                     </SimpleTreeView>
                 </DialogContent>
             </Dialog>

@@ -103,7 +103,7 @@ export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, o
                         slots={{expandIcon: ExpandMore, collapseIcon: ExpandLess}}
                         defaultExpandedItems={allIds}
                     >
-                        <JsonTreeView data={formattedData} nodeId="root" />
+                        <JsonTreeView data={formattedData} nodeId="root" humanizeKeys={true} />
                     </SimpleTreeView>
                 </DialogContent>
             </Dialog>

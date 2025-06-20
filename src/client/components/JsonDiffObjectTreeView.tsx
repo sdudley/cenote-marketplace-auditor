@@ -13,13 +13,16 @@ import {
     TreeBorder
 } from './styles';
 import { Box } from '@mui/material';
+import { humanizeKey } from './util';
 
 interface JsonDiffObjectTreeViewProps {
     data: JsonDiffObject;
+    humanizeKeys?: boolean;
 }
 
 export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
-    data
+    data,
+    humanizeKeys = true
 }) => {
     const renderValue = (value: any): string => {
         if (value === null) return 'null';
@@ -33,12 +36,13 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
         const hasChildren = delta.children && Object.keys(delta.children).length > 0;
 
         const fullKey = parentKey ? `${parentKey}.${key}` : key;
+        const displayKey = humanizeKeys ? humanizeKey(key) : key;
 
         const label = (
             <LabelContainer>
                 <KeyColumn>
                     <JsonKey component="span">
-                        {key}:
+                        {displayKey}:
                     </JsonKey>
                 </KeyColumn>
                 <ValueColumn>
