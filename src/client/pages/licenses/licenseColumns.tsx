@@ -63,7 +63,19 @@ export const defaultLicenseColumns: ColumnConfig<LicenseResult, LicenseCellConte
         id: 'company',
         label: 'Company',
         visible: true,
-        renderSimpleCell: (lr) => lr.license.data.contactDetails.company
+        renderSimpleCell: (lr) => {
+            let result = lr.license.data.contactDetails.company;
+
+            if (lr.license.data.hosting==='Cloud') {
+                const email = lr.license.data.contactDetails.technicalContact?.email;
+                if (email && email.includes('@')) {
+                    // strip everything before the @
+                    result  += ` (@${email.split('@')[1]})`;
+                }
+            }
+
+            return result;
+        }
     },
     {
         id: 'maintenanceDays',
