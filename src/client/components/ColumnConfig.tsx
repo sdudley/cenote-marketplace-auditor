@@ -34,15 +34,19 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { TransactionResult } from '#common/types/apiTypes';
 
 export interface ColumnConfig {
     id: string;
     label: string | React.ReactNode;
     visible: boolean;
-    sortable?: boolean;
+    nowrap?: boolean;
     align?: 'left' | 'center' | 'right';
     tooltip?: string;
-    sortField?: any; // The enum value for sorting
+    sortField?: any; // The enum value for sorting - presence determines if sortable
+    renderSimpleCell?: (transaction: TransactionResult, context?: any) => React.ReactNode; // For simple content
+    renderFullCell?: (transaction: TransactionResult, context?: any) => React.ReactNode; // For complex custom rendering
+    renderFullHeader?: () => React.ReactNode; // For custom header rendering
 }
 
 interface ColumnConfigDialogProps {

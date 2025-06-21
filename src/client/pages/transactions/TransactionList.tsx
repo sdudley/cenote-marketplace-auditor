@@ -13,24 +13,15 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult, AppInfo } from '#common/types/apiTypes';
-import { isoStringWithOnlyDate } from '#common/util/dateUtils';
-import { formatCurrency } from '#common/util/formatCurrency';
 import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
-import { ReconciliationControls } from './ReconciliationControls';
-import { SortOrder, SortableHeader } from '../../components/SortableHeader';
-import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableCellCheckbox, StatusCell, StatusDot, StatusControlsBox, StatusIconButton, ReconcileButton, UnreconcileButton, ReconciliationHeaderCell, HoverActions } from '../../components/styles';
-import { TableHeaderCell } from '../../components/styles';
-import { EmphasizedAnnotation } from '../../components/styles';
-import { dateDiff } from '#common/util/dateUtils';
-import { HighlightIfSignificantlyDifferent } from '../../components/HighlightIfSignificantlyDifferent';
-import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts.js';
-import { TransactionDiscount,  } from '#common/types/marketplace';
-import { mapDiscountTypeToDescription } from './util';
+import { SortOrder } from '../../components/SortableHeader';
+import { StyledTableRow, StyledListPaper, StyledTableCell } from '../../components/styles';
 import { ColumnConfigDialog } from '../../components/ColumnConfig';
 import { useColumnConfig } from '../../components/useColumnConfig';
 import { defaultTransactionColumns } from './transactionColumns';
+import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 
 interface TransactionListProps {
     // Add props if needed
@@ -195,202 +186,10 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
         setPage(0); // Reset to first page when filter changes
     };
 
-    const renderTableHeader = (column: any) => {
-        if (column.id === 'saleDate') {
-            return (
-                <SortableHeader<TransactionQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                />
-            );
-        }
-        if (column.id === 'amount') {
-            return (
-                <SortableHeader<TransactionQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                    align="right"
-                />
-            );
-        }
-        if (column.id === 'discounts') {
-            return (
-                <SortableHeader<TransactionQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                />
-            );
-        }
-        if (column.id === 'maintenanceDays') {
-            return (
-                <SortableHeader<TransactionQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                />
-            );
-        }
-        if (column.id === 'createdAt') {
-            return (
-                <SortableHeader<TransactionQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                    tooltip={column.tooltip}
-                />
-            );
-        }
-        if (column.id === 'updatedAt') {
-            return (
-                <SortableHeader<TransactionQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                    tooltip={column.tooltip}
-                />
-            );
-        }
-        if (column.id === 'versionCount') {
-            return (
-                <SortableHeader<TransactionQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                    tooltip={column.tooltip}
-                />
-            );
-        }
-        if (column.id === 'entitlementId') {
-            return (
-                <TableHeaderCell key={column.id} sx={{ whiteSpace: 'nowrap' }}>
-                    {column.label}
-                </TableHeaderCell>
-            );
-        }
-        if (column.id === 'expectedAmount') {
-            return (
-                <TableHeaderCell key={column.id} align="right">
-                    {column.label}
-                </TableHeaderCell>
-            );
-        }
-        if (column.id === 'reconciliation') {
-            return (
-                <ReconciliationHeaderCell key={column.id}></ReconciliationHeaderCell>
-            );
-        }
-        return (
-            <TableHeaderCell key={column.id}>
-                {column.label}
-            </TableHeaderCell>
-        );
-    };
-
-    const renderTableCell = (column: any, tr: TransactionResult) => {
-        if (column.id === 'saleDate') {
-            return <TableCellNoWrap key={column.id}>{tr.transaction.data.purchaseDetails.saleDate}</TableCellNoWrap>;
-        }
-        if (column.id === 'entitlementId') {
-            return <TableCellNoWrap key={column.id}>{tr.transaction.entitlementId}</TableCellNoWrap>;
-        }
-        if (column.id === 'addonName') {
-            return <StyledTableCell key={column.id}>{tr.transaction.data.addonName}</StyledTableCell>;
-        }
-        if (column.id === 'saleType') {
-            return <StyledTableCell key={column.id}>{tr.transaction.data.purchaseDetails.saleType}</StyledTableCell>;
-        }
-        if (column.id === 'hosting') {
-            return <StyledTableCell key={column.id}>{tr.transaction.data.purchaseDetails.hosting}</StyledTableCell>;
-        }
-        if (column.id === 'tier') {
-            return (
-                <StyledTableCell key={column.id}>
-                    {tr.transaction.data.purchaseDetails.tier}
-                    {tr.isSandbox && <EmphasizedAnnotation>Sandbox</EmphasizedAnnotation>}
-                    {tr.transaction.data.purchaseDetails.discounts?.some(d => d.type==='MANUAL' && d.reason==='DUAL_LICENSING') && <EmphasizedAnnotation>Dual Licensing</EmphasizedAnnotation>}
-                </StyledTableCell>
-            );
-        }
-        if (column.id === 'company') {
-            return (
-                <StyledTableCell key={column.id}>
-                    {tr.transaction.data.customerDetails.company}
-                    {tr.isSandbox && tr.cloudSiteHostname &&<EmphasizedAnnotation>({tr.cloudSiteHostname})</EmphasizedAnnotation>}
-                </StyledTableCell>
-            );
-        }
-        if (column.id === 'amount') {
-            return <StyledTableCell key={column.id} align="right">{formatCurrency(tr.transaction.data.purchaseDetails.vendorAmount)}</StyledTableCell>;
-        }
-        if (column.id === 'expectedAmount') {
-            return <StyledTableCell key={column.id} align="right"><HighlightIfSignificantlyDifferent value={tr.transaction.reconcile?.expectedVendorAmount} compareToValue={tr.transaction.data.purchaseDetails.vendorAmount}/></StyledTableCell>;
-        }
-        if (column.id === 'discounts') {
-            return (
-                <StyledTableCell key={column.id} align="right">
-                    {formatCurrency(sumDiscountArrayForTransaction({ data: tr.transaction.data }))}
-                    {discountsToDescriptions(tr.transaction.data.purchaseDetails.discounts)}
-                </StyledTableCell>
-            );
-        }
-        if (column.id === 'maintenanceDays') {
-            return <StyledTableCell key={column.id} align="right">{dateDiff(tr.transaction.data.purchaseDetails.maintenanceStartDate, tr.transaction.data.purchaseDetails.maintenanceEndDate)} days</StyledTableCell>;
-        }
-        if (column.id === 'maintenancePeriod') {
-            return <StyledTableCell key={column.id}>{isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceStartDate) + ' - ' + isoStringWithOnlyDate(tr.transaction.data.purchaseDetails.maintenanceEndDate)}</StyledTableCell>;
-        }
-        if (column.id === 'createdAt') {
-            return <TableCellNoWrap key={column.id}>{isoStringWithOnlyDate(tr.transaction.createdAt.toString())}</TableCellNoWrap>;
-        }
-        if (column.id === 'updatedAt') {
-            return <TableCellNoWrap key={column.id}>{isoStringWithOnlyDate(tr.transaction.updatedAt.toString())}</TableCellNoWrap>;
-        }
-        if (column.id === 'versionCount') {
-            return <StyledTableCell key={column.id}>{tr.versionCount}</StyledTableCell>;
-        }
-        if (column.id === 'reconciliation') {
-            return (
-                <StatusCell key={column.id} onClick={(e) => e.stopPropagation()}>
-                    <ReconciliationControls
-                        transaction={tr}
-                        onQuickReconcile={handleQuickReconcile}
-                        onShowDetails={setSelectedTransactionForReconcile}
-                    />
-                </StatusCell>
-            );
-        }
-        return <StyledTableCell key={column.id}></StyledTableCell>;
+    // Handlers to pass to cell renderers
+    const cellContext = {
+        onQuickReconcile: handleQuickReconcile,
+        onShowDetails: setSelectedTransactionForReconcile,
     };
 
     return (
@@ -490,7 +289,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <StyledTable>
                             <StyledTableHead>
                                 <TableRow>
-                                    {visibleColumns.map((column) => renderTableHeader(column))}
+                                    {visibleColumns.map((column) =>
+                                        renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
+                                    )}
                                 </TableRow>
                             </StyledTableHead>
                             <StyledTableBody>
@@ -500,7 +301,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                                             key={`${tr.transaction.id}`}
                                             onClick={() => setSelectedTransaction(tr)}
                                         >
-                                            {visibleColumns.map((column) => renderTableCell(column, tr))}
+                                            {visibleColumns.map((column) =>
+                                                renderCell(column, tr, cellContext)
+                                            )}
                                         </StyledTableRow>
                                     ))
                                 ) : ( !loading &&
@@ -551,14 +354,4 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
             />
         </TableContainer>
     );
-};
-
-const discountsToDescriptions = (discounts: TransactionDiscount[]|undefined) => {
-    if (!discounts) return undefined;
-
-    return (<>
-        <EmphasizedAnnotation>
-            {discounts.map(d => mapDiscountTypeToDescription(d)).join(', ')}
-        </EmphasizedAnnotation>
-    </>);
 };
