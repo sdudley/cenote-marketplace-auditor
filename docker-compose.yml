@@ -1,7 +1,7 @@
 services:
   app:
     container_name: auditor-app
-    build: .
+    image: sjdudley/cenote-marketplace-auditor:0.2.0
     ports:
       - "127.0.0.1:3000:3000"
     environment:
