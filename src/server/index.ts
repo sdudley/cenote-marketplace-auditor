@@ -26,7 +26,7 @@ Module.prototype.require = function (importPath: any) {
 };
 
 async function startServer() {
-    console.log('Starting development server...');
+    console.log('Starting server...');
     console.log('Initializing database and configuring server...');
 
     // Create Express application
