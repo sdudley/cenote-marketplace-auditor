@@ -1,5 +1,5 @@
 import { ColumnConfig } from '../../components/ColumnConfig';
-import { TransactionQuerySortType } from '#common/types/apiTypes';
+import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { WrappedLabel } from '#client/components/styles';
 import { formatCurrency } from '#common/util/formatCurrency';
 import { isoStringWithOnlyDate } from '#common/util/dateUtils';
@@ -12,6 +12,12 @@ import { mapDiscountTypeToDescription } from './util';
 import { StatusCell, ReconciliationHeaderCell } from '../../components/styles';
 import { ReconciliationControls } from './ReconciliationControls';
 
+// Define the context type for transaction cell rendering
+export interface TransactionCellContext {
+    onQuickReconcile: (transaction: TransactionResult, reconciled: boolean) => Promise<void>;
+    onShowDetails: (transaction: TransactionResult) => void;
+}
+
 // Helper function for discounts
 const discountsToDescriptions = (discounts: TransactionDiscount[]|undefined) => {
     if (!discounts) return undefined;
@@ -23,7 +29,7 @@ const discountsToDescriptions = (discounts: TransactionDiscount[]|undefined) => 
     );
 };
 
-export const defaultTransactionColumns: ColumnConfig[] = [
+export const defaultTransactionColumns: ColumnConfig<TransactionResult, TransactionCellContext, TransactionQuerySortType>[] = [
     {
         id: 'saleDate',
         label: 'Sale Date',
@@ -156,8 +162,8 @@ export const defaultTransactionColumns: ColumnConfig[] = [
             <StatusCell key="reconciliation" onClick={(e) => e.stopPropagation()}>
                 <ReconciliationControls
                     transaction={tr}
-                    onQuickReconcile={context?.onQuickReconcile}
-                    onShowDetails={context?.onShowDetails}
+                    onQuickReconcile={context.onQuickReconcile}
+                    onShowDetails={context.onShowDetails}
                 />
             </StatusCell>
         )

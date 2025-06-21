@@ -34,36 +34,39 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { TransactionResult } from '#common/types/apiTypes';
 
-export interface ColumnConfig {
+// T = item type for row
+// C = context type for cell rendering
+// S = sort type for sorting
+
+export interface ColumnConfig<T extends any, C extends any, S extends any> {
     id: string;
     label: string | React.ReactNode;
     visible: boolean;
     nowrap?: boolean;
     align?: 'left' | 'center' | 'right';
     tooltip?: string;
-    sortField?: any; // The enum value for sorting - presence determines if sortable
-    renderSimpleCell?: (transaction: TransactionResult, context?: any) => React.ReactNode; // For simple content
-    renderFullCell?: (transaction: TransactionResult, context?: any) => React.ReactNode; // For complex custom rendering
+    sortField?: S; // The enum value for sorting - presence determines if sortable
+    renderSimpleCell?: (item: T, context: C) => React.ReactNode; // For simple content
+    renderFullCell?: (item: T, context: C) => React.ReactNode; // For complex custom rendering
     renderFullHeader?: () => React.ReactNode; // For custom header rendering
 }
 
-interface ColumnConfigDialogProps {
+interface ColumnConfigDialogProps<T = any, C = any> {
     open: boolean;
     onClose: () => void;
-    columns: ColumnConfig[];
-    onColumnsChange: (columns: ColumnConfig[]) => void;
+    columns: ColumnConfig<T, C>[];
+    onColumnsChange: (columns: ColumnConfig<T, C>[]) => void;
     title: string;
     isLoaded?: boolean;
 }
 
-interface SortableColumnItemProps {
-    column: ColumnConfig;
+interface SortableColumnItemProps<T = any, C = any> {
+    column: ColumnConfig<T, C>;
     onToggleVisibility: (columnId: string) => void;
 }
 
-const SortableColumnItem: React.FC<SortableColumnItemProps> = ({ column, onToggleVisibility }) => {
+const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisibility }: SortableColumnItemProps<T, C>) => {
     const {
         attributes,
         listeners,
@@ -84,24 +87,23 @@ const SortableColumnItem: React.FC<SortableColumnItemProps> = ({ column, onToggl
         if (typeof label === 'string') {
             return label;
         }
-        // For React nodes, extract text content and replace <br> with space
-        if (React.isValidElement(label)) {
-            const textContent = React.Children.toArray(label.props.children)
-                .map(child => {
-                    if (typeof child === 'string') {
-                        return child;
-                    }
-                    if (React.isValidElement(child) && child.type === 'br') {
-                        return ' ';
-                    }
-                    return '';
-                })
-                .join('')
-                .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-                .trim();
-            return textContent;
-        }
-        return '';
+
+        // Extract text content from ReactNode
+        const extractText = (node: React.ReactNode): string => {
+            if (typeof node === 'string') {
+                return node;
+            }
+            if (typeof node === 'number') {
+                return node.toString();
+            }
+            if (React.isValidElement(node)) {
+                const children = React.Children.toArray(node.props.children);
+                return children.map(extractText).join(' ');
+            }
+            return '';
+        };
+
+        return extractText(label).replace(/\s+/g, ' ').trim();
     };
 
     const displayLabel = getDisplayLabel(column.label);
@@ -159,15 +161,15 @@ const SortableColumnItem: React.FC<SortableColumnItemProps> = ({ column, onToggl
     );
 };
 
-export const ColumnConfigDialog: React.FC<ColumnConfigDialogProps> = ({
+export const ColumnConfigDialog = <T extends any, C extends any>({
     open,
     onClose,
     columns,
     onColumnsChange,
     title,
     isLoaded = true
-}) => {
-    const [localColumns, setLocalColumns] = useState<ColumnConfig[]>(columns);
+}: ColumnConfigDialogProps<T, C>) => {
+    const [localColumns, setLocalColumns] = useState<ColumnConfig<T, C>[]>(columns);
 
     // Update local columns when the prop changes (after loading)
     useEffect(() => {

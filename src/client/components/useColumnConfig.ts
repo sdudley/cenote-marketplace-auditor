@@ -6,11 +6,11 @@ interface ColumnPreferences {
     visibility: Record<string, boolean>; // Map of column ID to visibility
 }
 
-export const useColumnConfig = (
-    defaultColumns: ColumnConfig[],
+export const useColumnConfig = <T extends any, C extends any = any>(
+    defaultColumns: ColumnConfig<T, C>[],
     storageKey: string
 ) => {
-    const [columns, setColumns] = useState<ColumnConfig[]>([]);
+    const [columns, setColumns] = useState<ColumnConfig<T, C>[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
     // Load configuration from localStorage on mount
@@ -42,7 +42,7 @@ export const useColumnConfig = (
                         ...defaultCol,
                         visible: visibility.hasOwnProperty(id) ? visibility[id] : defaultCol.visible
                     };
-                }).filter(Boolean) as ColumnConfig[];
+                }).filter(Boolean) as ColumnConfig<T, C>[];
 
                 setColumns(mergedColumns);
             } catch (error) {
@@ -57,7 +57,7 @@ export const useColumnConfig = (
     }, [defaultColumns, storageKey]);
 
     // Save configuration to localStorage when it changes
-    const updateColumns = (newColumns: ColumnConfig[]) => {
+    const updateColumns = (newColumns: ColumnConfig<T, C>[]) => {
         setColumns(newColumns);
 
         // Only save the essential preferences

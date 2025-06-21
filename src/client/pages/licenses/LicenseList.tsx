@@ -16,15 +16,14 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { LicenseQuerySortType, LicenseResult, AppInfo } from '#common/types/apiTypes';
-import { dateDiff, isoStringWithOnlyDate } from '#common/util/dateUtils';
 import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper, FilterLabel } from '../../components/styles';
 import { LicenseDetailsDialog } from './LicenseDetailsDialog';
-import { SortOrder, SortableHeader } from '../../components/SortableHeader';
-import { StyledTableRow, StyledListPaper, TableCellNoWrap, StyledTableCell, TableHeaderCell, WrappedLabel } from '../../components/styles';
-import { EmphasizedAnnotation } from '../../components/styles';
+import { SortOrder } from '../../components/SortableHeader';
+import { StyledTableRow, StyledListPaper, StyledTableCell } from '../../components/styles';
 import { ColumnConfigDialog } from '../../components/ColumnConfig';
 import { useColumnConfig } from '../../components/useColumnConfig';
-import { defaultLicenseColumns } from './licenseColumns';
+import { defaultLicenseColumns, LicenseCellContext } from './licenseColumns';
+import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 
 interface LicenseListProps {
     // Add props if needed
@@ -162,90 +161,8 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
         setPage(0); // Reset to first page when filter changes
     };
 
-    const renderTableHeader = (column: any) => {
-        if (column.sortable && column.sortField) {
-            return (
-                <SortableHeader<LicenseQuerySortType>
-                    key={column.id}
-                    field={column.sortField}
-                    label={column.label}
-                    currentSort={sortBy}
-                    currentOrder={sortOrder}
-                    onSort={handleSort}
-                    whiteSpace
-                    align={column.align}
-                    tooltip={column.tooltip}
-                />
-            );
-        }
-        return (
-            <TableHeaderCell key={column.id} align={column.align}>
-                {column.label}
-            </TableHeaderCell>
-        );
-    };
-
-    const renderTableCell = (column: any, license: LicenseResult) => {
-        if (column.id === 'entitlementId') {
-            return <TableCellNoWrap key={column.id}>{license.license.entitlementId}</TableCellNoWrap>;
-        }
-        if (column.id === 'app') {
-            return <StyledTableCell key={column.id}>{license.license.data.addonName}</StyledTableCell>;
-        }
-        if (column.id === 'licenseType') {
-            return (
-                <StyledTableCell key={column.id}>
-                    {toMixedCase(license.license.data.licenseType)}
-                    {license.license.data.installedOnSandbox === 'Yes' && <EmphasizedAnnotation>(Sandbox)</EmphasizedAnnotation>}
-                </StyledTableCell>
-            );
-        }
-        if (column.id === 'status') {
-            return <StyledTableCell key={column.id}>{toMixedCase(license.license.data.status)}</StyledTableCell>;
-        }
-        if (column.id === 'hosting') {
-            return <StyledTableCell key={column.id}>{license.license.data.hosting}</StyledTableCell>;
-        }
-        if (column.id === 'tier') {
-            return (
-                <StyledTableCell key={column.id}>
-                    {license.license.data.tier + (license.license.data.tier === 'Evaluation' && license.license.data.evaluationOpportunitySize && license.license.data.evaluationOpportunitySize !== 'Evaluation' ? ` (${license.license.data.evaluationOpportunitySize})` : '')}
-                </StyledTableCell>
-            );
-        }
-        if (column.id === 'company') {
-            return <StyledTableCell key={column.id}>{license.license.data.contactDetails.company}</StyledTableCell>;
-        }
-        if (column.id === 'maintenanceDays') {
-            return (
-                <StyledTableCell key={column.id} align="right">
-                    {license.license.data.maintenanceEndDate ? dateDiff(license.license.data.maintenanceStartDate, license.license.data.maintenanceEndDate) : '?'} days
-                </StyledTableCell>
-            );
-        }
-        if (column.id === 'maintenanceStartDate') {
-            return <TableCellNoWrap key={column.id}>{license.license.data.maintenanceStartDate}</TableCellNoWrap>;
-        }
-        if (column.id === 'maintenanceEndDate') {
-            return <TableCellNoWrap key={column.id}>{license.license.data.maintenanceEndDate}</TableCellNoWrap>;
-        }
-        if (column.id === 'gracePeriod') {
-            return <TableCellNoWrap key={column.id}>{license.license.data.inGracePeriod ?? 'No'}</TableCellNoWrap>;
-        }
-        if (column.id === 'createdAt') {
-            return <TableCellNoWrap key={column.id}>{isoStringWithOnlyDate(license.license.createdAt.toString())}</TableCellNoWrap>;
-        }
-        if (column.id === 'updatedAt') {
-            return <TableCellNoWrap key={column.id}>{isoStringWithOnlyDate(license.license.updatedAt.toString())}</TableCellNoWrap>;
-        }
-        if (column.id === 'atlassianLastUpdated') {
-            return <TableCellNoWrap key={column.id}>{isoStringWithOnlyDate(license.license.data.lastUpdated)}</TableCellNoWrap>;
-        }
-        if (column.id === 'versionCount') {
-            return <StyledTableCell key={column.id}>{license.versionCount}</StyledTableCell>;
-        }
-        return <StyledTableCell key={column.id}></StyledTableCell>;
-    };
+    // Context for cell renderers (currently empty for licenses)
+    const cellContext: LicenseCellContext = {};
 
     return (
         <TableContainer>
@@ -387,7 +304,9 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         <StyledTable>
                             <StyledTableHead>
                                 <TableRow>
-                                    {visibleColumns.map((column) => renderTableHeader(column))}
+                                    {visibleColumns.map((column) =>
+                                        renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
+                                    )}
                                 </TableRow>
                             </StyledTableHead>
                             <StyledTableBody>
@@ -397,7 +316,9 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                             key={`${license.license.id}`}
                                             onClick={() => setSelectedLicense(license)}
                                         >
-                                            {visibleColumns.map((column) => renderTableCell(column, license))}
+                                            {visibleColumns.map((column) =>
+                                                renderCell(column, license, cellContext)
+                                            )}
                                         </StyledTableRow>
                                     ))
                                 ) : ( !loading &&

@@ -20,7 +20,7 @@ import { SortOrder } from '../../components/SortableHeader';
 import { StyledTableRow, StyledListPaper, StyledTableCell } from '../../components/styles';
 import { ColumnConfigDialog } from '../../components/ColumnConfig';
 import { useColumnConfig } from '../../components/useColumnConfig';
-import { defaultTransactionColumns } from './transactionColumns';
+import { defaultTransactionColumns, TransactionCellContext } from './transactionColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 
 interface TransactionListProps {
@@ -187,7 +187,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     };
 
     // Handlers to pass to cell renderers
-    const cellContext = {
+    const cellContext: TransactionCellContext = {
         onQuickReconcile: handleQuickReconcile,
         onShowDetails: setSelectedTransactionForReconcile,
     };

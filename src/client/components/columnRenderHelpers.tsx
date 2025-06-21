@@ -1,16 +1,19 @@
 import React from 'react';
-import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
 import { SortOrder, SortableHeader } from './SortableHeader';
 import { TableHeaderCell, StyledTableCell, TableCellNoWrap } from './styles';
 import { ColumnConfig } from './ColumnConfig';
 
 // Automatic header renderer based on column properties
-export const renderHeader = (
-    column: ColumnConfig,
+
+// T = item type for row
+// S = sort type for sorting
+
+export const renderHeader = <T extends any, S extends any>(
+    column: ColumnConfig<T>,
     props: {
-        sortBy: TransactionQuerySortType;
+        sortBy: S;
         sortOrder: SortOrder;
-        onSort: (field: TransactionQuerySortType) => void;
+        onSort: (field: S) => void;
     }
 ) => {
     // If column has renderFullHeader, use it for custom header rendering
@@ -21,7 +24,7 @@ export const renderHeader = (
     // If column has sortField, it's sortable
     if (column.sortField) {
         return (
-            <SortableHeader<TransactionQuerySortType>
+            <SortableHeader<S>
                 key={column.id}
                 field={column.sortField}
                 label={column.label}
@@ -44,15 +47,15 @@ export const renderHeader = (
 };
 
 // Automatic cell renderer based on column properties
-export const renderCell = (column: ColumnConfig, transaction: TransactionResult, context?: any) => {
+export const renderCell = <T extends any, C extends any>(column: ColumnConfig<T, C>, item: T, context: C) => {
     // If column has renderFullCell, use it for complex custom rendering
     if (column.renderFullCell) {
-        return column.renderFullCell(transaction, context);
+        return column.renderFullCell(item, context);
     }
 
     // If column has renderSimpleCell, wrap it in appropriate cell component
     if (column.renderSimpleCell) {
-        const content = column.renderSimpleCell(transaction, context);
+        const content = column.renderSimpleCell(item, context);
         const CellComponent = column.nowrap ? TableCellNoWrap : StyledTableCell;
 
         return (
