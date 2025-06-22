@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1] - 2025-06-21
+
+- docker-compose.yaml now defaults to latest version of container
+- Fix missing user-visible version number
+
 ## [0.2.0] - 2025-06-21
 
 ### ✨ Major New Features
