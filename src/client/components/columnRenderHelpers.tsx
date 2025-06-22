@@ -6,10 +6,11 @@ import { ColumnConfig } from './ColumnConfig';
 // Automatic header renderer based on column properties
 
 // T = item type for row
+// C = context type for cell rendering
 // S = sort type for sorting
 
-export const renderHeader = <T extends any, S extends any>(
-    column: ColumnConfig<T>,
+export const renderHeader = <T extends any, C extends any, S extends any>(
+    column: ColumnConfig<T, C, S>,
     props: {
         sortBy: S;
         sortOrder: SortOrder;
@@ -47,7 +48,7 @@ export const renderHeader = <T extends any, S extends any>(
 };
 
 // Automatic cell renderer based on column properties
-export const renderCell = <T extends any, C extends any>(column: ColumnConfig<T, C>, item: T, context: C) => {
+export const renderCell = <T extends any, C extends any, S extends any>(column: ColumnConfig<T, C, S>, item: T, context: C) => {
     // If column has renderFullCell, use it for complex custom rendering
     if (column.renderFullCell) {
         return column.renderFullCell(item, context);

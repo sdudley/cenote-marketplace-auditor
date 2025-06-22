@@ -52,17 +52,17 @@ export interface ColumnConfig<T extends any, C extends any, S extends any> {
     renderFullHeader?: () => React.ReactNode; // For custom header rendering
 }
 
-interface ColumnConfigDialogProps<T = any, C = any> {
+interface ColumnConfigDialogProps<T = any, C = any, S = any> {
     open: boolean;
     onClose: () => void;
-    columns: ColumnConfig<T, C>[];
-    onColumnsChange: (columns: ColumnConfig<T, C>[]) => void;
+    columns: ColumnConfig<T, C, S>[];
+    onColumnsChange: (columns: ColumnConfig<T, C, S>[]) => void;
     title: string;
     isLoaded?: boolean;
 }
 
-interface SortableColumnItemProps<T = any, C = any> {
-    column: ColumnConfig<T, C>;
+interface SortableColumnItemProps<T = any, C = any, S = any> {
+    column: ColumnConfig<T, C, S>;
     onToggleVisibility: (columnId: string) => void;
 }
 
@@ -161,15 +161,15 @@ const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisi
     );
 };
 
-export const ColumnConfigDialog = <T extends any, C extends any>({
+export const ColumnConfigDialog = <T extends any, C extends any, S extends any>({
     open,
     onClose,
     columns,
     onColumnsChange,
     title,
     isLoaded = true
-}: ColumnConfigDialogProps<T, C>) => {
-    const [localColumns, setLocalColumns] = useState<ColumnConfig<T, C>[]>(columns);
+}: ColumnConfigDialogProps<T, C, S>) => {
+    const [localColumns, setLocalColumns] = useState<ColumnConfig<T, C, S>[]>(columns);
 
     // Update local columns when the prop changes (after loading)
     useEffect(() => {
