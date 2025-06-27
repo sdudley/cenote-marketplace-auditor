@@ -388,12 +388,6 @@ export const FilterContainer = styled(Box)({
     alignItems: 'center'
 });
 
-export const FilterLabel = styled(Typography)({
-    fontWeight: 500,
-    marginRight: 8,
-    whiteSpace: 'nowrap'
-}) as typeof Typography;
-
 export const ReconciliationStatus = styled(Typography)(({ theme }) => ({
     fontWeight: 'bold',
     '&.automatic': {

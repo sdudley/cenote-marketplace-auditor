@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { LicenseQuerySortType, LicenseResult, AppInfo } from '#common/types/apiTypes';
-import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper, FilterLabel } from '../../components/styles';
+import { StyledTableContainer, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
 import { LicenseDetailsDialog } from './LicenseDetailsDialog';
 import { SortOrder } from '../../components/SortableHeader';
 import { StyledTableRow, StyledListPaper, StyledTableCell } from '../../components/styles';
@@ -24,6 +24,7 @@ import { ColumnConfigDialog } from '../../components/ColumnConfig';
 import { useColumnConfig } from '../../components/useColumnConfig';
 import { defaultLicenseColumns, LicenseCellContext } from './licenseColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
+import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
 
 interface LicenseListProps {
     // Add props if needed
@@ -166,8 +167,9 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
 
     return (
         <TableContainer>
-            <SearchContainer>
+            <ResponsiveSearchContainer>
                 <TextField
+                    className="search-field"
                     label=""
                     variant="outlined"
                     value={search}
@@ -183,8 +185,8 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         ),
                     }}
                 />
-                <FilterLabel>Filters:</FilterLabel>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <span className="filter-label">Filters:</span>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>License Type</InputLabel>
                     <Select
                         multiple
@@ -241,7 +243,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         </MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>Status</InputLabel>
                     <Select
                         value={statusFilter}
@@ -254,7 +256,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         <MenuItem value="cancelled">Cancelled</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>Hosting</InputLabel>
                     <Select
                         value={hostingFilter}
@@ -267,7 +269,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         <MenuItem value="Server">Server</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>App</InputLabel>
                     <Select
                         value={appFilter}
@@ -283,15 +285,16 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                     </Select>
                 </FormControl>
                 <Button
+                    className="columns-button"
                     variant="outlined"
                     size="small"
                     startIcon={<SettingsIcon />}
                     onClick={() => setShowColumnConfig(true)}
-                    sx={{ ml: 'auto', textTransform: 'none' }}
+                    sx={{ textTransform: 'none' }}
                 >
                     Columns
                 </Button>
-            </SearchContainer>
+            </ResponsiveSearchContainer>
 
             <TableWrapper>
                 <StyledTableContainer>

@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult, AppInfo } from '#common/types/apiTypes';
-import { StyledTableContainer, TableWrapper, SearchContainer, LoadingOverlay, TableContainer, FilterLabel, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
+import { StyledTableContainer, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder } from '../../components/SortableHeader';
@@ -22,6 +22,7 @@ import { ColumnConfigDialog } from '../../components/ColumnConfig';
 import { useColumnConfig } from '../../components/useColumnConfig';
 import { defaultTransactionColumns, TransactionCellContext } from './transactionColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
+import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
 
 interface TransactionListProps {
     // Add props if needed
@@ -194,8 +195,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     return (
         <TableContainer>
-            <SearchContainer>
+            <ResponsiveSearchContainer>
                 <TextField
+                    className="search-field"
                     label=""
                     variant="outlined"
                     value={search}
@@ -211,8 +213,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         ),
                     }}
                 />
-                <FilterLabel>Filters:</FilterLabel>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <span className="filter-label">Filters:</span>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>Reconciliation Status</InputLabel>
                     <Select
                         value={reconciledFilter}
@@ -224,7 +226,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <MenuItem value="N">Unreconciled</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>Sale Type</InputLabel>
                     <Select
                         value={saleTypeFilter}
@@ -239,7 +241,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <MenuItem value="Downgrade">Downgrade</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>Hosting</InputLabel>
                     <Select
                         value={hostingFilter}
@@ -252,7 +254,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         <MenuItem value="Server">Server</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl size="small" sx={{ minWidth: 200 }}>
+                <FormControl size="small" className="filter-dropdown">
                     <InputLabel>App</InputLabel>
                     <Select
                         value={appFilter}
@@ -268,15 +270,16 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     </Select>
                 </FormControl>
                 <Button
+                    className="columns-button"
                     variant="outlined"
                     size="small"
                     startIcon={<SettingsIcon />}
                     onClick={() => setShowColumnConfig(true)}
-                    sx={{ ml: 'auto', textTransform: 'none' }}
+                    sx={{ textTransform: 'none' }}
                 >
                     Columns
                 </Button>
-            </SearchContainer>
+            </ResponsiveSearchContainer>
 
             <TableWrapper>
                 <StyledTableContainer>
