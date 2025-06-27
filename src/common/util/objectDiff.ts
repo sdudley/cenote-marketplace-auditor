@@ -16,6 +16,7 @@ export interface JsonDelta {
     oldValue?: JsonValue;
     newValue?: JsonValue;
     children?: JsonDiffObject;
+    arrayElements?: JsonDelta[];
 }
 
 const isPrimitive = (value: any): boolean => {
@@ -53,6 +54,47 @@ const areArraysEqual = (arr1: JsonArray, arr2: JsonArray): boolean => {
     return true;
 };
 
+const compareArrays = (oldArr: JsonArray, newArr: JsonArray): JsonDelta => {
+    const maxLength = Math.max(oldArr.length, newArr.length);
+    const arrayElements: JsonDelta[] = [];
+
+    for (let i = 0; i < maxLength; i++) {
+        const oldItem = oldArr[i];
+        const newItem = newArr[i];
+
+        if (i >= oldArr.length) {
+            // New item added
+            if (isObject(newItem)) {
+                arrayElements.push(processNewObject(newItem));
+            } else {
+                arrayElements.push({
+                    changeType: 'added',
+                    newValue: newItem
+                });
+            }
+        } else if (i >= newArr.length) {
+            // Item removed
+            if (isObject(oldItem)) {
+                arrayElements.push(processRemovedObject(oldItem));
+            } else {
+                arrayElements.push({
+                    changeType: 'removed',
+                    oldValue: oldItem
+                });
+            }
+        } else {
+            // Item exists in both arrays
+            arrayElements.push(compareObjects(oldItem, newItem));
+        }
+    }
+
+    // Revert: always mark parent array as 'unchanged' if structure is the same
+    return {
+        changeType: 'unchanged',
+        arrayElements
+    };
+};
+
 const processRemovedObject = (obj: JsonObject): JsonDelta => {
     const children: { [key: string]: JsonDelta } = {};
 
@@ -61,7 +103,23 @@ const processRemovedObject = (obj: JsonObject): JsonDelta => {
 
     sortedKeys.forEach((key) => {
         const value = obj[key];
-        if (isObject(value)) {
+        if (isArray(value)) {
+            // Handle arrays by creating arrayElements
+            const arrayElements: JsonDelta[] = value.map((item) => {
+                if (isObject(item)) {
+                    return processRemovedObject(item);
+                } else {
+                    return {
+                        changeType: 'removed',
+                        oldValue: item
+                    };
+                }
+            });
+            children[key] = {
+                changeType: 'removed',
+                arrayElements
+            };
+        } else if (isObject(value)) {
             children[key] = processRemovedObject(value);
         } else {
             children[key] = {
@@ -96,18 +154,7 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
 
     // Handle arrays
     if (isArray(oldObj) && isArray(newObj)) {
-        if (areArraysEqual(oldObj, newObj)) {
-            return {
-                changeType: 'unchanged',
-                oldValue: oldObj,
-                newValue: newObj
-            };
-        }
-        return {
-            changeType: 'changed',
-            oldValue: oldObj,
-            newValue: newObj
-        };
+        return compareArrays(oldObj, newObj);
     }
 
     // Handle objects
@@ -125,7 +172,23 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
             const newValue = newObj[key];
 
             if (!(key in oldObj)) {
-                if (isObject(newValue)) {
+                if (isArray(newValue)) {
+                    // Handle new arrays by creating arrayElements
+                    const arrayElements: JsonDelta[] = newValue.map((item) => {
+                        if (isObject(item)) {
+                            return processNewObject(item);
+                        } else {
+                            return {
+                                changeType: 'added',
+                                newValue: item
+                            };
+                        }
+                    });
+                    children[key] = {
+                        changeType: 'added',
+                        arrayElements
+                    };
+                } else if (isObject(newValue)) {
                     children[key] = processNewObject(newValue);
                 } else {
                     children[key] = {
@@ -134,7 +197,23 @@ const compareObjects = (oldObj: JsonValue, newObj: JsonValue): JsonDelta => {
                     };
                 }
             } else if (!(key in newObj)) {
-                if (isObject(oldValue)) {
+                if (isArray(oldValue)) {
+                    // Handle removed arrays by creating arrayElements
+                    const arrayElements: JsonDelta[] = oldValue.map((item) => {
+                        if (isObject(item)) {
+                            return processRemovedObject(item);
+                        } else {
+                            return {
+                                changeType: 'removed',
+                                oldValue: item
+                            };
+                        }
+                    });
+                    children[key] = {
+                        changeType: 'removed',
+                        arrayElements
+                    };
+                } else if (isObject(oldValue)) {
                     children[key] = processRemovedObject(oldValue);
                 } else {
                     children[key] = {
@@ -169,7 +248,23 @@ const processNewObject = (obj: JsonObject): JsonDelta => {
 
     sortedKeys.forEach((key) => {
         const value = obj[key];
-        if (isObject(value)) {
+        if (isArray(value)) {
+            // Handle arrays by creating arrayElements
+            const arrayElements: JsonDelta[] = value.map((item) => {
+                if (isObject(item)) {
+                    return processNewObject(item);
+                } else {
+                    return {
+                        changeType: 'added',
+                        newValue: item
+                    };
+                }
+            });
+            children[key] = {
+                changeType: 'added',
+                arrayElements
+            };
+        } else if (isObject(value)) {
             children[key] = processNewObject(value);
         } else {
             children[key] = {

@@ -23,6 +23,17 @@ export const collectIdsForDiffObject = (obj: JsonDiffObject): string[] => {
             if (delta.children) {
                 processDiffObject(delta.children, fullKey);
             }
+
+            if (delta.arrayElements) {
+                delta.arrayElements.forEach((arrayDelta, index) => {
+                    const arrayKey = `${fullKey}.${index}`;
+                    ids.push(arrayKey);
+
+                    if (arrayDelta.children) {
+                        processDiffObject(arrayDelta.children, arrayKey);
+                    }
+                });
+            }
         });
     };
 

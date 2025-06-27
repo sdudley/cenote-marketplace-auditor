@@ -23,21 +23,66 @@ interface JsonDiffObjectTreeViewProps {
     highlightNew?: boolean;
 }
 
-export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
-    data,
-    humanizeKeys = true,
-    highlightNew = true
-}) => {
-    const renderValue = (value: any): string => {
-        if (value === null) return 'null';
-        if (value === undefined) return 'undefined';
-        if (typeof value === 'string') return `${value}`;
-        if (typeof value === 'object') return JSON.stringify(value);
-        return String(value);
+const renderValue = (value: any): string => {
+    if (value === null) return 'null';
+    if (value === undefined) return 'undefined';
+    if (typeof value === 'string') return `${value}`;
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
+};
+
+const createRenderFunctions = (
+    humanizeKeys: boolean,
+    highlightNew: boolean
+) => {
+    const renderArrayElements = (arrayElements: JsonDelta[], fullKey: string, isNew: boolean) => {
+        return arrayElements.map((arrayDelta, index) => {
+            const arrayKey = index.toString();
+            const arrayFullKey = `${fullKey}.${arrayKey}`;
+            const isArrayElementNew = arrayDelta.changeType === 'added' || isNew;
+
+            // For array elements, we need to handle them differently
+            // If it's a primitive value, render it directly
+            if (arrayDelta.changeType !== 'added' && arrayDelta.changeType !== 'removed' &&
+                !arrayDelta.children && arrayDelta.oldValue !== undefined && arrayDelta.newValue !== undefined) {
+                return (
+                    <Box key={arrayFullKey}>
+                        <TreeItem
+                            label={
+                                <LabelContainer>
+                                    <KeyColumn>
+                                        <JsonKey component="span">
+                                            {arrayKey}:
+                                        </JsonKey>
+                                    </KeyColumn>
+                                    <ValueColumn>
+                                        <JsonValue>
+                                            {arrayDelta.changeType === 'changed' ? (
+                                                <>
+                                                    <TreeValueOld component="span">{renderValue(arrayDelta.oldValue)}</TreeValueOld>
+                                                    <TreeValueNew component="span">{renderValue(arrayDelta.newValue)}</TreeValueNew>
+                                                </>
+                                            ) : (
+                                                renderValue(arrayDelta.newValue)
+                                            )}
+                                        </JsonValue>
+                                    </ValueColumn>
+                                </LabelContainer>
+                            }
+                            itemId={arrayFullKey}
+                        />
+                    </Box>
+                );
+            }
+
+            // For objects or added/removed elements, render with children
+            return renderDelta(arrayKey, arrayDelta, fullKey, isArrayElementNew);
+        });
     };
 
     const renderDelta = (key: string, delta: JsonDelta, parentKey: string = '', isParentNew: boolean = false) => {
         const hasChildren = delta.children && Object.keys(delta.children).length > 0;
+        const hasArrayElements = delta.arrayElements && delta.arrayElements.length > 0;
         const isNew = delta.changeType === 'added' || isParentNew;
 
         const fullKey = parentKey ? `${parentKey}.${key}` : key;
@@ -61,7 +106,7 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
                 <ValueColumn>
                     {typeof delta.newValue !== 'object' && (
                         <JsonValue>
-                            {!hasChildren && (
+                            {!hasChildren && !hasArrayElements && (
                             <>
                                 { delta.changeType==='changed'
                                 ? <>
@@ -88,7 +133,7 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
             </LabelContainer>
         );
 
-        const BorderObject = hasChildren ? TreeBorder : Box;
+        const BorderObject = (hasChildren || hasArrayElements) ? TreeBorder : Box;
 
         return (
             <BorderObject key={fullKey}>
@@ -98,10 +143,23 @@ export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
                             renderDelta(childKey, childDelta, fullKey, isNew)
                         )
                     )}
+                    {hasArrayElements && (
+                        renderArrayElements(delta.arrayElements!, fullKey, isNew)
+                    )}
                 </TreeItem>
             </BorderObject>
         );
     };
+
+    return { renderDelta };
+};
+
+export const JsonDiffObjectTreeView: React.FC<JsonDiffObjectTreeViewProps> = ({
+    data,
+    humanizeKeys = true,
+    highlightNew = true
+}) => {
+    const { renderDelta } = createRenderFunctions(humanizeKeys, highlightNew);
 
     return (
         <TreeContainer>

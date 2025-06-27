@@ -115,9 +115,34 @@ describe('objectDiff', () => {
         const diff = getObjectDiff(oldObj, newObj);
 
         expect(diff.items).toEqual({
-            changeType: 'changed',
-            oldValue: [1, 2, { id: 1, value: 'a' }],
-            newValue: [1, 3, { id: 1, value: 'b' }]
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    oldValue: 1,
+                    newValue: 1
+                },
+                {
+                    changeType: 'changed',
+                    oldValue: 2,
+                    newValue: 3
+                },
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'unchanged',
+                            oldValue: 1,
+                            newValue: 1
+                        },
+                        value: {
+                            changeType: 'changed',
+                            oldValue: 'a',
+                            newValue: 'b'
+                        }
+                    }
+                }
+            ]
         });
     });
 
@@ -132,9 +157,39 @@ describe('objectDiff', () => {
         const diff = getObjectDiff(oldObj, newObj);
 
         expect(diff.matrix).toEqual({
-            changeType: 'changed',
-            oldValue: [[1, 2], [3, 4]],
-            newValue: [[1, 2], [3, 5]]
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    arrayElements: [
+                        {
+                            changeType: 'unchanged',
+                            oldValue: 1,
+                            newValue: 1
+                        },
+                        {
+                            changeType: 'unchanged',
+                            oldValue: 2,
+                            newValue: 2
+                        }
+                    ]
+                },
+                {
+                    changeType: 'unchanged',
+                    arrayElements: [
+                        {
+                            changeType: 'unchanged',
+                            oldValue: 3,
+                            newValue: 3
+                        },
+                        {
+                            changeType: 'changed',
+                            oldValue: 4,
+                            newValue: 5
+                        }
+                    ]
+                }
+            ]
         });
     });
 
@@ -218,7 +273,16 @@ describe('objectDiff', () => {
                 },
                 tags: {
                     changeType: 'added',
-                    newValue: ['important', 'new']
+                    arrayElements: [
+                        {
+                            changeType: 'added',
+                            newValue: 'important'
+                        },
+                        {
+                            changeType: 'added',
+                            newValue: 'new'
+                        }
+                    ]
                 }
             }
         });
@@ -440,8 +504,615 @@ describe('objectDiff', () => {
                 },
                 tags: {
                     changeType: 'unchanged',
-                    oldValue: ['important'],
-                    newValue: ['important']
+                    arrayElements: [
+                        {
+                            changeType: 'unchanged',
+                            oldValue: 'important',
+                            newValue: 'important'
+                        }
+                    ]
+                }
+            }
+        });
+    });
+
+    it('should handle objects with array keys', () => {
+        const oldObj = {
+            discounts: [
+                { reason: 'DL', amount: 10 },
+                { reason: 'BULK', amount: 5 }
+            ],
+            items: [
+                { id: 1, name: 'Product A' },
+                { id: 2, name: 'Product B' }
+            ]
+        };
+        const newObj = {
+            discounts: [
+                { reason: 'DL', amount: 15 },
+                { reason: 'BULK', amount: 5 },
+                { reason: 'LOYALTY', amount: 3 }
+            ],
+            items: [
+                { id: 1, name: 'Product A' },
+                { id: 3, name: 'Product C' }
+            ]
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        // Verify discounts array is diffed element by element
+        expect(diff.discounts).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        amount: {
+                            changeType: 'changed',
+                            oldValue: 10,
+                            newValue: 15
+                        },
+                        reason: {
+                            changeType: 'unchanged',
+                            oldValue: 'DL',
+                            newValue: 'DL'
+                        }
+                    }
+                },
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        amount: {
+                            changeType: 'unchanged',
+                            oldValue: 5,
+                            newValue: 5
+                        },
+                        reason: {
+                            changeType: 'unchanged',
+                            oldValue: 'BULK',
+                            newValue: 'BULK'
+                        }
+                    }
+                },
+                {
+                    changeType: 'added',
+                    children: {
+                        amount: {
+                            changeType: 'added',
+                            newValue: 3
+                        },
+                        reason: {
+                            changeType: 'added',
+                            newValue: 'LOYALTY'
+                        }
+                    }
+                }
+            ]
+        });
+
+        // Verify items array is diffed element by element
+        expect(diff.items).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'unchanged',
+                            oldValue: 1,
+                            newValue: 1
+                        },
+                        name: {
+                            changeType: 'unchanged',
+                            oldValue: 'Product A',
+                            newValue: 'Product A'
+                        }
+                    }
+                },
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'changed',
+                            oldValue: 2,
+                            newValue: 3
+                        },
+                        name: {
+                            changeType: 'changed',
+                            oldValue: 'Product B',
+                            newValue: 'Product C'
+                        }
+                    }
+                }
+            ]
+        });
+    });
+
+    it('should handle adding and removing scalar array elements', () => {
+        const oldObj = {
+            numbers: [1, 2, 3]
+        };
+        const newObj = {
+            numbers: [2, 3, 4]
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.numbers).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'changed',
+                    oldValue: 1,
+                    newValue: 2
+                },
+                {
+                    changeType: 'changed',
+                    oldValue: 2,
+                    newValue: 3
+                },
+                {
+                    changeType: 'changed',
+                    oldValue: 3,
+                    newValue: 4
+                }
+            ]
+        });
+    });
+
+    it('should handle adding and removing object array elements', () => {
+        const oldObj = {
+            users: [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' }
+            ]
+        };
+        const newObj = {
+            users: [
+                { id: 2, name: 'Bob' },
+                { id: 3, name: 'Carol' }
+            ]
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.users).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'changed',
+                            oldValue: 1,
+                            newValue: 2
+                        },
+                        name: {
+                            changeType: 'changed',
+                            oldValue: 'Alice',
+                            newValue: 'Bob'
+                        }
+                    }
+                },
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'changed',
+                            oldValue: 2,
+                            newValue: 3
+                        },
+                        name: {
+                            changeType: 'changed',
+                            oldValue: 'Bob',
+                            newValue: 'Carol'
+                        }
+                    }
+                }
+            ]
+        });
+    });
+
+    it('should handle adding elements to the end of arrays', () => {
+        const oldObj = {
+            numbers: [1, 2]
+        };
+        const newObj = {
+            numbers: [1, 2, 3, 4]
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.numbers).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    oldValue: 1,
+                    newValue: 1
+                },
+                {
+                    changeType: 'unchanged',
+                    oldValue: 2,
+                    newValue: 2
+                },
+                {
+                    changeType: 'added',
+                    newValue: 3
+                },
+                {
+                    changeType: 'added',
+                    newValue: 4
+                }
+            ]
+        });
+    });
+
+    it('should handle removing elements from the end of arrays', () => {
+        const oldObj = {
+            numbers: [1, 2, 3, 4]
+        };
+        const newObj = {
+            numbers: [1, 2]
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.numbers).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    oldValue: 1,
+                    newValue: 1
+                },
+                {
+                    changeType: 'unchanged',
+                    oldValue: 2,
+                    newValue: 2
+                },
+                {
+                    changeType: 'removed',
+                    oldValue: 3
+                },
+                {
+                    changeType: 'removed',
+                    oldValue: 4
+                }
+            ]
+        });
+    });
+
+    it('should handle adding object elements to the end of arrays', () => {
+        const oldObj = {
+            users: [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' }
+            ]
+        };
+        const newObj = {
+            users: [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' },
+                { id: 3, name: 'Carol' },
+                { id: 4, name: 'David' }
+            ]
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.users).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'unchanged',
+                            oldValue: 1,
+                            newValue: 1
+                        },
+                        name: {
+                            changeType: 'unchanged',
+                            oldValue: 'Alice',
+                            newValue: 'Alice'
+                        }
+                    }
+                },
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'unchanged',
+                            oldValue: 2,
+                            newValue: 2
+                        },
+                        name: {
+                            changeType: 'unchanged',
+                            oldValue: 'Bob',
+                            newValue: 'Bob'
+                        }
+                    }
+                },
+                {
+                    changeType: 'added',
+                    children: {
+                        id: {
+                            changeType: 'added',
+                            newValue: 3
+                        },
+                        name: {
+                            changeType: 'added',
+                            newValue: 'Carol'
+                        }
+                    }
+                },
+                {
+                    changeType: 'added',
+                    children: {
+                        id: {
+                            changeType: 'added',
+                            newValue: 4
+                        },
+                        name: {
+                            changeType: 'added',
+                            newValue: 'David'
+                        }
+                    }
+                }
+            ]
+        });
+    });
+
+    it('should handle removing object elements from the end of arrays', () => {
+        const oldObj = {
+            users: [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' },
+                { id: 3, name: 'Carol' },
+                { id: 4, name: 'David' }
+            ]
+        };
+        const newObj = {
+            users: [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' }
+            ]
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.users).toEqual({
+            changeType: 'unchanged',
+            arrayElements: [
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'unchanged',
+                            oldValue: 1,
+                            newValue: 1
+                        },
+                        name: {
+                            changeType: 'unchanged',
+                            oldValue: 'Alice',
+                            newValue: 'Alice'
+                        }
+                    }
+                },
+                {
+                    changeType: 'unchanged',
+                    children: {
+                        id: {
+                            changeType: 'unchanged',
+                            oldValue: 2,
+                            newValue: 2
+                        },
+                        name: {
+                            changeType: 'unchanged',
+                            oldValue: 'Bob',
+                            newValue: 'Bob'
+                        }
+                    }
+                },
+                {
+                    changeType: 'removed',
+                    children: {
+                        id: {
+                            changeType: 'removed',
+                            oldValue: 3
+                        },
+                        name: {
+                            changeType: 'removed',
+                            oldValue: 'Carol'
+                        }
+                    }
+                },
+                {
+                    changeType: 'removed',
+                    children: {
+                        id: {
+                            changeType: 'removed',
+                            oldValue: 4
+                        },
+                        name: {
+                            changeType: 'removed',
+                            oldValue: 'David'
+                        }
+                    }
+                }
+            ]
+        });
+    });
+
+    it('should handle new objects with arrays', () => {
+        const oldObj = undefined;
+        const newObj = {
+            users: [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' }
+            ],
+            tags: ['important', 'new'],
+            settings: {
+                theme: 'dark',
+                notifications: ['email', 'push']
+            }
+        };
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.users).toEqual({
+            changeType: 'added',
+            arrayElements: [
+                {
+                    changeType: 'added',
+                    children: {
+                        id: {
+                            changeType: 'added',
+                            newValue: 1
+                        },
+                        name: {
+                            changeType: 'added',
+                            newValue: 'Alice'
+                        }
+                    }
+                },
+                {
+                    changeType: 'added',
+                    children: {
+                        id: {
+                            changeType: 'added',
+                            newValue: 2
+                        },
+                        name: {
+                            changeType: 'added',
+                            newValue: 'Bob'
+                        }
+                    }
+                }
+            ]
+        });
+
+        expect(diff.tags).toEqual({
+            changeType: 'added',
+            arrayElements: [
+                {
+                    changeType: 'added',
+                    newValue: 'important'
+                },
+                {
+                    changeType: 'added',
+                    newValue: 'new'
+                }
+            ]
+        });
+
+        expect(diff.settings).toEqual({
+            changeType: 'added',
+            children: {
+                theme: {
+                    changeType: 'added',
+                    newValue: 'dark'
+                },
+                notifications: {
+                    changeType: 'added',
+                    arrayElements: [
+                        {
+                            changeType: 'added',
+                            newValue: 'email'
+                        },
+                        {
+                            changeType: 'added',
+                            newValue: 'push'
+                        }
+                    ]
+                }
+            }
+        });
+    });
+
+    it('should handle removed objects with arrays', () => {
+        const oldObj = {
+            users: [
+                { id: 1, name: 'Alice' },
+                { id: 2, name: 'Bob' }
+            ],
+            tags: ['important', 'new'],
+            settings: {
+                theme: 'dark',
+                notifications: ['email', 'push']
+            }
+        };
+        const newObj = {};
+
+        const diff = getObjectDiff(oldObj, newObj);
+
+        expect(diff.users).toEqual({
+            changeType: 'removed',
+            arrayElements: [
+                {
+                    changeType: 'removed',
+                    children: {
+                        id: {
+                            changeType: 'removed',
+                            oldValue: 1
+                        },
+                        name: {
+                            changeType: 'removed',
+                            oldValue: 'Alice'
+                        }
+                    }
+                },
+                {
+                    changeType: 'removed',
+                    children: {
+                        id: {
+                            changeType: 'removed',
+                            oldValue: 2
+                        },
+                        name: {
+                            changeType: 'removed',
+                            oldValue: 'Bob'
+                        }
+                    }
+                }
+            ]
+        });
+
+        expect(diff.tags).toEqual({
+            changeType: 'removed',
+            arrayElements: [
+                {
+                    changeType: 'removed',
+                    oldValue: 'important'
+                },
+                {
+                    changeType: 'removed',
+                    oldValue: 'new'
+                }
+            ]
+        });
+
+        expect(diff.settings).toEqual({
+            changeType: 'removed',
+            children: {
+                theme: {
+                    changeType: 'removed',
+                    oldValue: 'dark'
+                },
+                notifications: {
+                    changeType: 'removed',
+                    arrayElements: [
+                        {
+                            changeType: 'removed',
+                            oldValue: 'email'
+                        },
+                        {
+                            changeType: 'removed',
+                            oldValue: 'push'
+                        }
+                    ]
                 }
             }
         });
