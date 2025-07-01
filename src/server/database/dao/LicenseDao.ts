@@ -6,6 +6,7 @@ import { TYPES } from "../../config/types";
 import { LicenseData } from "#common/types/marketplace";
 import { LicenseQueryParams, LicenseQueryResult, LicenseQuerySortType } from "#common/types/apiTypes";
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
+import { LicenseResult } from "#common/types/apiTypes";
 
 @injectable()
 export class LicenseDao {
@@ -83,9 +84,21 @@ export class LicenseDao {
 
             // Select all license fields and the version count
             queryBuilder.addSelect('COALESCE(version_count.version_count, 0)', 'license_versionCount');
+            queryBuilder.addSelect('dl.entitlement_id', 'license_dualLicensing');
 
             // Join with the version count CTE
             queryBuilder.leftJoin('version_count', 'version_count', 'version_count.lid = license.id');
+
+            // select distinct entitlement_id from transaction t where
+            // Add a left join with a subquery here:
+            queryBuilder.leftJoin(
+                (subQuery) => subQuery
+                    .select('transaction.entitlementId', 'entitlement_id')
+                    .from('transaction', 'transaction')
+                    .where('jsonb_path_exists(transaction.data, \'$.purchaseDetails.discounts[*].reason ? (@ == "DUAL_LICENSING")\')'),
+                'dl',
+                'dl.entitlement_id = license.entitlementId'
+            );
 
             if (search) {
                 // Inspiration: https://stackoverflow.com/a/45849743/2220556
@@ -138,8 +151,9 @@ export class LicenseDao {
 
                 return {
                     license,
-                    versionCount
-                };
+                    versionCount,
+                    dualLicensing: rawResults[index].license_dualLicensing ? true : false
+                } as LicenseResult;
             });
 
             return {

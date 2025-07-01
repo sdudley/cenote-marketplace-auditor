@@ -62,6 +62,7 @@ export interface LicenseQueryParams {
 export interface LicenseResult {
     license: License;
     versionCount: number;
+    dualLicensing: boolean;
 }
 
 export interface LicenseQueryResult {

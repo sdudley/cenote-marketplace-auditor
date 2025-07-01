@@ -37,6 +37,7 @@ export const defaultLicenseColumns: ColumnConfig<LicenseResult, LicenseCellConte
             <>
                 {toMixedCase(lr.license.data.licenseType)}
                 {lr.license.data.installedOnSandbox === 'Yes' && <EmphasizedAnnotation>(Sandbox)</EmphasizedAnnotation>}
+                {lr.dualLicensing && <EmphasizedAnnotation>(Dual Licensing)</EmphasizedAnnotation>}
             </>
         )
     },
