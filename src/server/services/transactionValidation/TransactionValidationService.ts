@@ -47,18 +47,18 @@ export class TransactionValidationService {
 
         let validationResult : TransactionValidationResult|undefined = undefined;
 
-        const legacyPricePermutations = transaction.data.purchaseDetails.saleType === 'Upgrade'
+        const { saleType } = transaction.data.purchaseDetails;
+        const legacyPricePermutations = (saleType === 'Upgrade' || saleType === 'Downgrade')
                                             ? LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE
                                             : LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE;
 
         // But first, load details about the previous purchase (if any). We do this at the top level so we only need to do
         // it once (which is somewhat expensive), rather than for each permutation.
 
-        const { saleType } = transaction.data.purchaseDetails;
         let previousPurchaseFindResult : PreviousTransactionResult|undefined = undefined;
         let expectedDiscountForPreviousPurchase : DiscountResult | undefined = undefined;
 
-        if (saleType==='Upgrade' || saleType==='Renewal') {
+        if (saleType==='Upgrade' || saleType==='Downgrade' || saleType==='Renewal') {
             previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(transaction);
 
             if (previousPurchaseFindResult) {

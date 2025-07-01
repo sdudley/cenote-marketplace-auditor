@@ -129,10 +129,10 @@ export class PriceCalculatorService {
 
         descriptors.push({ description: `Daily nominal price = purchase price / days in license = ${formatCurrency(purchasePrice)} / ${licenseDurationDays} = ${formatCurrency(dailyNominalPrice)}`});
 
-        // If this is an upgrade, then we need to calculate the price differential for the
+        // If this is an upgrade/downgrade, then we need to calculate the price differential for the
         // overlap in subscription length.
 
-        if (saleType==='Upgrade' && previousPurchaseMaintenanceEndDate) {
+        if ((saleType==='Upgrade' || saleType==='Downgrade') && previousPurchaseMaintenanceEndDate) {
             const { previousPricing } = opts;
 
             const overlapDays = getSubscriptionOverlapDays(maintenanceStartDate, previousPurchaseMaintenanceEndDate);

@@ -59,7 +59,7 @@ export class TransactionValidator {
         let previousPurchasePricingTierResult : PricingTierResult | undefined;
         let previousPurchaseEffectiveMaintenanceEndDate : string | undefined;
 
-        if ((saleType==='Upgrade' || saleType==='Renewal') && previousPurchaseFindResult) {
+        if ((saleType==='Upgrade' || saleType==='Downgrade' || saleType==='Renewal') && previousPurchaseFindResult) {
             previousPurchase = previousPurchaseFindResult.transaction;
             const { effectiveMaintenanceEndDate } = previousPurchaseFindResult;
 
@@ -76,7 +76,7 @@ export class TransactionValidator {
         // if there are overlapping maintenance periods.
 
         const previousPurchasePricing =
-                    saleType==='Upgrade' && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
+                    (saleType==='Upgrade' || saleType==='Downgrade') && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
                         ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, parentProduct })
                         : undefined;
 
