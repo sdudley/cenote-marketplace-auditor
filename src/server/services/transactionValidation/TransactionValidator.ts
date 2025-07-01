@@ -98,15 +98,24 @@ export class TransactionValidator {
         // Check for continuity for upgrade and renewal transactions. Community licenses are exempt because they are free anyway.
 
         if ((saleType==='Upgrade' || saleType==='Renewal' || saleType==='Downgrade') && licenseDurationInDays !== 0  && licenseType !== 'COMMUNITY') {
-
             if (!previousPurchase) {
-                notes.push('This is an upgrade/renewal, but we could not find related transaction for previous purchase');
+                notes.push('This is an upgrade/downgrade/renewal, but we could not find related transaction for previous purchase');
                 valid = false;
             } else {
                 const { maintenanceEndDate: priorMaintenanceEndDate } = previousPurchase?.data.purchaseDetails;
 
                 if (priorMaintenanceEndDate < maintenanceStartDate) {
-                    notes.push(`Gap in licensing: previous maintenance ended on ${priorMaintenanceEndDate} but this license starts on ${maintenanceStartDate}`);
+                    // Upgrades: must start at or before end of previous maintenance
+                    notes.push(`Maintenance gap: upgrade must start at or before end of previous maintenance: previous maintenance ended on ${priorMaintenanceEndDate} but this license starts on ${maintenanceStartDate}`);
+                    valid = false;
+                } else if (saleType==='Downgrade' && maintenanceStartDate < priorMaintenanceEndDate) {
+                    // Downgrades: must NOT start before end of previous maintenance
+                    notes.push(`Maintenance gap: downgrade must not start before end of previous maintenance: this license starts on ${maintenanceStartDate} but it downgrades a previous license ending on ${priorMaintenanceEndDate}`);
+                    valid = false;
+                }
+                else if (saleType==='Renewal' && maintenanceStartDate !== priorMaintenanceEndDate) {
+                    // Renewals: must start on the same day as the previous maintenance
+                    notes.push(`Maintenance gap: renewal must have same start date as previous maintenance: this license starts on ${maintenanceStartDate} but it renews a previous license ending on ${priorMaintenanceEndDate}`);
                     valid = false;
                 }
             }
