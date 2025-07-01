@@ -35,11 +35,9 @@ export class PreviousTransactionService {
                 const refundStart = otherTx.data.purchaseDetails.maintenanceStartDate;
                 const refundEnd = otherTx.data.purchaseDetails.maintenanceEndDate;
 
-                // Find any transaction being possibly refunded, with an overlapping maintenance period,
-                // and which was purchased before the refund (including on the same day, since we don't
-                // have time-based ordering).
-
-                const refundedTx = otherTransactions.find(t =>
+                // Find the transaction that this refund is actually refunding
+                // It should be the one with the most similar maintenance period
+                const refundedTxs = otherTransactions.filter(t =>
                     t.data.purchaseDetails.saleType !== 'Refund' &&
                     t.data.purchaseDetails.maintenanceStartDate <= refundEnd &&
                     t.data.purchaseDetails.maintenanceEndDate >= refundStart &&
@@ -47,21 +45,33 @@ export class PreviousTransactionService {
                     t.data.purchaseDetails.tier === otherTx.data.purchaseDetails.tier
                 );
 
-                if (refundedTx) {
+                // Find the transaction with the most overlap with the refund period
+                let bestMatch: Transaction | undefined;
+                let maxOverlap = 0;
+
+                for (const refundedTx of refundedTxs) {
+                    const overlapStart = Math.max(new Date(refundStart).getTime(), new Date(refundedTx.data.purchaseDetails.maintenanceStartDate).getTime());
+                    const overlapEnd = Math.min(new Date(refundEnd).getTime(), new Date(refundedTx.data.purchaseDetails.maintenanceEndDate).getTime());
+                    const overlap = overlapEnd - overlapStart;
+
+                    if (overlap > maxOverlap) {
+                        maxOverlap = overlap;
+                        bestMatch = refundedTx;
+                    }
+                }
+
+                if (bestMatch) {
+                    const refundedTx = bestMatch;
                     const currentEnd = effectiveEndDates.get(refundedTx.id) || refundedTx.data.purchaseDetails.maintenanceEndDate;
 
                     // If the refund covers the entire maintenance period, mark it as fully refunded
-
                     if (refundStart <= refundedTx.data.purchaseDetails.maintenanceStartDate &&
                         refundEnd >= currentEnd) {
-
                         effectiveEndDates.set(refundedTx.id, refundedTx.data.purchaseDetails.maintenanceStartDate);
                     } else {
                         // For partial refunds, adjust the effective end date
-
                         if (currentEnd > refundStart) {
                             const newEndDate = refundEnd < currentEnd ? refundEnd : refundStart;
-
                             effectiveEndDates.set(refundedTx.id, newEndDate);
                         }
                     }
@@ -80,7 +90,9 @@ export class PreviousTransactionService {
             const effectiveEnd = effectiveEndDates.get(otherTx.id) || otherTx.data.purchaseDetails.maintenanceEndDate;
 
             // Skip fully refunded transactions (where effective end date equals start date)
-            if (effectiveEnd === otherTx.data.purchaseDetails.maintenanceStartDate) continue;
+            if (effectiveEnd === otherTx.data.purchaseDetails.maintenanceStartDate) {
+                continue;
+            }
 
             // A transaction is "older" if its maintenance period ended before the current transaction's start
             if (effectiveEnd <= transaction.data.purchaseDetails.maintenanceStartDate ||

@@ -1,7 +1,7 @@
 import { PreviousTransactionService } from '../PreviousTransactionService';
 import { Transaction } from '../../../common/entities/Transaction';
 import { TransactionDao } from '../../database/dao/TransactionDao';
-import { SaleType } from '#common/types/marketplace';
+import { SaleType } from '../../../common/types/marketplace';
 
 let uniqueTransactionId = 0;
 
@@ -300,6 +300,34 @@ describe('PreviousTransactionService', () => {
             expect(result2).toEqual({
                 transaction: t4,
                 effectiveMaintenanceEndDate: '2025-12-12'
+            });
+        });
+
+        it('should handle interspersed refunds with $0 sales', async () => {
+            const t1 = createTransaction('2021-02-28', '2022-02-28', '2021-02-26', 'New', '500 Users');
+            const t2 = createTransaction('2022-01-14', '2023-02-28', '2022-02-23', 'Upgrade', '1000 Users');
+            const t3 = createTransaction('2023-02-28', '2024-02-28', '2023-02-15', 'Renewal', '1000 Users');
+            const t4 = createTransaction('2024-02-28', '2026-02-28', '2024-02-27', 'Upgrade', '2000 Users');
+            const t5 = createTransaction('2024-02-28', '2026-02-28', '2024-03-01', 'Refund', '2000 Users');
+            const t6 = createTransaction('2024-02-28', '2024-02-28', '2024-03-01', 'Renewal', '2000 Users'); // 0-day renewal
+            const t7 = createTransaction('2024-02-28', '2026-02-28', '2024-03-07', 'Renewal', '2000 Users');
+
+            transactionDao.loadRelatedTransactions.mockResolvedValue([
+                t7, t6, t5, t4, t3, t2, t1
+            ]);
+
+            const result = await service.findPreviousTransaction(t4);
+
+            expect(result).toEqual({
+                transaction: t3,
+                effectiveMaintenanceEndDate: '2024-02-28'
+            });
+
+            const result2 = await service.findPreviousTransaction(t7);
+
+            expect(result2).toEqual({
+                transaction: t3,
+                effectiveMaintenanceEndDate: '2024-02-28'
             });
         });
     });
