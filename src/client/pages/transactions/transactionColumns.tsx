@@ -45,6 +45,13 @@ export const defaultTransactionColumns: ColumnConfig<TransactionResult, Transact
         renderSimpleCell: (tr) => tr.transaction.entitlementId
     },
     {
+        id: 'invoiceNumber',
+        label: 'Invoice #',
+        visible: true,
+        nowrap: true,
+        renderSimpleCell: (tr) => tr.transaction.data.transactionId
+    },
+    {
         id: 'app',
         label: 'App',
         visible: true,
