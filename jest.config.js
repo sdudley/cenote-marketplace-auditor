@@ -13,7 +13,7 @@ module.exports = {
     testRegex: '(/__tests__/.*\\.test\\.(ts|js)x?)$',
     // Enable source maps
     moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/src/$1'
+        '^#(.*)$': '<rootDir>/src/$1'
     },
     // Ensure source maps are properly loaded
     setupFiles: ['<rootDir>/jest.setup.js'],
