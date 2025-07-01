@@ -1,6 +1,7 @@
 import { PreviousTransactionService } from '../PreviousTransactionService';
 import { Transaction } from '../../../common/entities/Transaction';
 import { TransactionDao } from '../../database/dao/TransactionDao';
+import { SaleType } from '#common/types/marketplace';
 
 let uniqueTransactionId = 0;
 
@@ -304,7 +305,7 @@ describe('PreviousTransactionService', () => {
     });
 });
 
-function createTransaction(startDate: string, endDate: string, saleDate: string, saleType: 'New'|'Refund'|'Renewal'|'Upgrade' = 'New', tier: string = 'Unknown Tier'): Transaction {
+function createTransaction(startDate: string, endDate: string, saleDate: string, saleType: SaleType = 'New', tier: string = 'Unknown Tier'): Transaction {
     const transaction = new Transaction();
     transaction.id = '' + uniqueTransactionId++;
     transaction.data = {

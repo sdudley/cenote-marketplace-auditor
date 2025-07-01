@@ -28,7 +28,8 @@ export class TransactionValidator {
      * transaction (or the one it is upgrading), validate if the price is correct.
      */
     public async validateOneTransaction(opts: ValidationOptions): Promise<TransactionValidationResult> {
-        const { transaction,
+        const {
+            transaction,
             useLegacyPricingTierForCurrent,
             useLegacyPricingTierForPrevious,
             expectedDiscount,
@@ -96,7 +97,7 @@ export class TransactionValidator {
 
         // Check for continuity for upgrade and renewal transactions. Community licenses are exempt because they are free anyway.
 
-        if ((saleType==='Upgrade' || saleType==='Renewal') && licenseDurationInDays !== 0  && licenseType !== 'COMMUNITY') {
+        if ((saleType==='Upgrade' || saleType==='Renewal' || saleType==='Downgrade') && licenseDurationInDays !== 0  && licenseType !== 'COMMUNITY') {
 
             if (!previousPurchase) {
                 notes.push('This is an upgrade/renewal, but we could not find related transaction for previous purchase');
