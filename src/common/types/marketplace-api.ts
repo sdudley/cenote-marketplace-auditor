@@ -12253,6 +12253,10 @@ export interface components {
              * @description Link to an End User License Agreement page for the app
              */
             eula?: string;
+            /** @description Weather app opted in for Bon Terms License Agreement */
+            bonTermsSupported?: boolean;
+            /** @description Partner specific terms, on top of Bon terms */
+            partnerSpecificTerms?: string;
             /**
              * Format: uri
              * @description Link to a page for purchasing the app, if it is not paid via Atlassian
