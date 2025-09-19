@@ -40,6 +40,7 @@ export interface SlackLicenseData {
     maintenanceEndDate: string|undefined;
     oldMaintenanceEndDate: string|undefined;
     extended: boolean;
+    evaluationOpportunitySize: string|undefined;
 }
 
 @injectable()
@@ -140,6 +141,7 @@ export class SlackService {
         const { hosting } = license.data;
         const { company } = license.data.contactDetails;
         const { maintenanceStartDate, maintenanceEndDate } = license.data;
+        const { evaluationOpportunitySize } = license.data;
 
         if (licenseType !== 'EVALUATION') {
             return undefined;
@@ -154,7 +156,8 @@ export class SlackService {
             maintenanceEndDate: maintenanceEndDate ?? 'Unknown',
             oldMaintenanceEndDate: oldLicenseData?.maintenanceEndDate,
             entitlementId: license.entitlementId,
-            extended
+            extended,
+            evaluationOpportunitySize
         };
     }
 
@@ -332,6 +335,7 @@ export class SlackService {
             for (const l of batch) {
                 const maintenanceDays = l.maintenanceEndDate ? dateDiff(l.maintenanceStartDate, l.maintenanceEndDate) : 'Unknown';
                 let extensionText = '';
+                let opportunityText = '';
 
                 if (l.extended && l.oldMaintenanceEndDate && l.maintenanceEndDate) {
                     const extensionDays = dateDiff(l.oldMaintenanceEndDate, l.maintenanceEndDate);
@@ -339,6 +343,10 @@ export class SlackService {
                         `*${extensionDays} days*` :
                         `${extensionDays} days`;
                     extensionText = `\nExtended by ${extensionDaysText} (${l.oldMaintenanceEndDate} to ${l.maintenanceEndDate})`;
+                }
+
+                if (l.evaluationOpportunitySize) {
+                    opportunityText = `\nOpportunity Size:\n*${l.evaluationOpportunitySize}*`;
                 }
 
                 const maintenanceDaysText = typeof maintenanceDays === 'number' && maintenanceDays > 30 ?
@@ -370,7 +378,7 @@ export class SlackService {
                             },
                             {
                                 type: 'mrkdwn',
-                                text: encodeSlackText(`Evaluation Period:\n*${maintenanceDaysText}* (${l.maintenanceStartDate} to ${l.maintenanceEndDate})${extensionText}`)
+                                text: encodeSlackText(`Evaluation Period:\n*${maintenanceDaysText}* (${l.maintenanceStartDate} to ${l.maintenanceEndDate})${opportunityText}${extensionText}`)
                             }
 
                         ]
