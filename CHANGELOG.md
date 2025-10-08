@@ -12,7 +12,8 @@ also prevented the transaction reconciler from finding previous linked versions 
 adds a new job that removes the duplicate licenses, and updates the transaction linking. It will take two
 cycles of clicking "Start All Tasks" on the Tasks page in order to fully correct the data: the first pass
 will scrub the duplicated data, and the second pass will re-download the current license data and associate
-it with the correct license. Alternatively, if you have scheduled data retrieval enabled,
+it with the correct license. Alternatively, if you have scheduled data retrieval enabled, you can just wait
+for it to run twice.
 - WARNING: this update will irretrievably remove intermediate license versions for DC licenses that
 were modified between the date Atlassian made the changes and the date you run this upgrade. The prior
 (pre-September) history of the license will be retained, as will the state going forward.
