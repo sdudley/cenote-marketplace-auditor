@@ -161,6 +161,12 @@ export const defaultTransactionColumns: ColumnConfig<TransactionResult, Transact
         renderSimpleCell: (tr) => tr.versionCount
     },
     {
+        id: 'paymentStatus',
+        label: 'Payment Status',
+        visible: true,
+        renderSimpleCell: (tr) => tr.transaction.data.paymentStatus
+    },
+    {
         id: 'reconciliation',
         label: 'Reconciliation',
         visible: true,
