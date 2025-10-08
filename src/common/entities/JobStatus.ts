@@ -5,7 +5,8 @@ export enum JobType {
     LicenseJob = 'license',
     PricingJob = 'pricing',
     TransactionJob = 'transaction',
-    ValidationJob = 'validation'
+    ValidationJob = 'validation',
+    SenUpgradeJob = 'senUpgrade'
 }
 
 @Entity()

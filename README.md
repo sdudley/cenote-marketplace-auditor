@@ -38,6 +38,7 @@ on other machines cannot access it, and it should be relatively safe to run on y
 change the configuration yourself to open these ports, it must be placed behind some other server with protection.
 - The pricing calculations are designed for Cloud and Data Center licenses. Pricing
 for Server licenses is not supported.
+- Discounted Forge pricing is not yet supported.
 - If you have previously modified the pricing for your app, pricing for those transactions cannot be correctly
 computed until you import prior period pricing into the app. Data entry for prior period pricing is not
 currently supported in the UI, although the functionality exists via scripts (see below). Prior period pricing

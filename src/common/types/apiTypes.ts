@@ -75,3 +75,17 @@ export interface AppInfo {
     addonKey: string;
     name: string;
 }
+
+export interface DuplicateLicense {
+    originalLicenseId: string;
+    duplicateLicenseId: string;
+    sen: string;
+    entitlementId: string;
+}
+
+export interface ObsoleteTransaction {
+    id: string;
+    entitlement_id: string;
+    data_entitlement_number: string;
+    data_license_id: string;
+}

@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.3.0] - 2025-10-08
+
+### ✨ Major New Features
+
+- **Add Support for Data Center Entitlement Numbers** - Atlassian upgraded its licenses in September 2025 to
+include entitlement numbers for Data Center licenses, instead of just SENs. Previously, we were selecting
+a primary key for records of the app entitlement number (if it existed), or if not, the SEN. The addition
+of the entitlement number to DC licenses resulted in their records being duplicated in the database, and it
+also prevented the transaction reconciler from finding previous linked versions of transactions. This update
+adds a new job that removes the duplicate licenses, and updates the transaction linking. It will take two
+cycles of clicking "Start All Tasks" on the Tasks page in order to fully correct the data: the first pass
+will scrub the duplicated data, and the second pass will re-download the current license data and associate
+it with the correct license. Alternatively, if you have scheduled data retrieval enabled,
+- WARNING: this update will irretrievably remove intermediate license versions for DC licenses that
+were modified between the date Atlassian made the changes and the date you run this upgrade. The prior
+(pre-September) history of the license will be retained, as will the state going forward.
+- Since this upgrade deletes from your database, we recommend making a database backup before
+installing the upgrade.
+
+#### Data Display Enhancements
+
+- Add "Payment Status" column to the transaction report
+- Call out dual licenses in license page with "(Dual License)" in the License Type column.
+
+### 🐛 Bug Fixes
+
+- Perform better maintenance date range checks to ensure consistency.
+- Fixed pricing logic for downgrades.
+- Transaction view now works on smaller screens and phones.
+- The diff view for transactrions now shows differences of arrays correctly.
+- The reconciler version is incremented in order to accommodate this change, which forces a
+re-reconcile of existing records.
+
 ## [0.2.1] - 2025-06-21
 
 - docker-compose.yaml now defaults to latest version of container

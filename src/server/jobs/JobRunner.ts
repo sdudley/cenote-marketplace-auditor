@@ -8,6 +8,7 @@ import { ValidationJob } from './ValidationJob';
 import { MarketplaceService } from '../services/MarketplaceService';
 import { JobType } from '#common/entities/JobStatus';
 import { JobDao } from '#server/database/dao/JobDao';
+import { SenUpgradeJob } from './SenUpgradeJob';
 
 @injectable()
 export class JobRunner {
@@ -16,6 +17,7 @@ export class JobRunner {
         @inject(TYPES.TransactionJob) private transactionJob: TransactionJob,
         @inject(TYPES.LicenseJob) private licenseJob: LicenseJob,
         @inject(TYPES.PricingJob) private pricingJob: PricingJob,
+        @inject(TYPES.SenUpgradeJob) private senUpgradeJob: SenUpgradeJob,
         @inject(TYPES.ValidationJob) private validationJob: ValidationJob,
         @inject(TYPES.MarketplaceService) private marketplaceService: MarketplaceService,
         @inject(TYPES.JobDao) private jobDao: JobDao
@@ -89,6 +91,13 @@ export class JobRunner {
         );
     }
 
+    public startSenUpgradeJob(runSync: boolean = false): Promise<void> {
+        const runner = this.getRunner(runSync);
+
+        return runner(JobType.SenUpgradeJob, async () =>
+            await this.senUpgradeJob.upgradeSens()
+        );
+    }
     async startAllJobs(): Promise<{ job: string, success: boolean, error?: string }[]> {
         const results: { job: string, success: boolean, error?: string }[] = [];
         try {
@@ -130,6 +139,14 @@ export class JobRunner {
                 results.push({ job: 'Validate Transactions', success: true });
             } catch (e: any) {
                 results.push({ job: 'Validate Transactions', success: false, error: e?.message || String(e) });
+                return results;
+            }
+            // 6. Upgrade SEN data
+            try {
+                await this.startSenUpgradeJob(true);
+                results.push({ job: 'SEN Upgrade', success: true });
+            } catch (e: any) {
+                results.push({ job: 'SEN Upgrade', success: false, error: e?.message || String(e) });
                 return results;
             }
             return results;

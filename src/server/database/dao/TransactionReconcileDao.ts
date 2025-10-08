@@ -66,4 +66,43 @@ export class TransactionReconcileDao {
             await this.transactionReconcileNoteRepo.save(noteEntities);
         }
     }
+
+    public async deleteReconcileForTransactions(transactionIds: string[]) {
+        for (const transactionId of transactionIds) {
+            await this.deleteReconcileForTransactionIfUnreconciled(transactionId);
+        }
+    }
+
+    /**
+     * For the given transaction ID, find a reconcile record showing if the
+     * transaction is unreconciled. If this record exists, delete it so that we
+     * can try to reconcile it again. This function does not touch records of
+     * already-reconciled transactions.
+     */
+    public async deleteReconcileForTransactionIfUnreconciled(transactionId: string) {
+        // First try to find it
+
+        const reconcile = await this.transactionReconcileRepo.findOne({
+            where: {
+                transaction: { id: transactionId },
+                reconciled: false
+            }
+        });
+
+        if (!reconcile) {
+            return;
+        }
+
+        const reconcileId = reconcile.id;
+
+        // Now delete any associated notes
+
+        const { affected } = await this.transactionReconcileNoteRepo.delete({ transactionReconcile: { id: reconcileId } })
+
+        // Next, delete the reconcile itself
+
+        const deleteResult = await this.transactionReconcileRepo.delete({ transaction: { id: transactionId } });
+
+        console.log(`Deleted ${deleteResult.affected} reconcile (and ${affected} reconcile notes) for transaction ${transactionId}`);
+    }
 }

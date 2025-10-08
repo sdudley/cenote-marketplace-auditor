@@ -2,7 +2,7 @@ import { LicenseVersion } from "#common/entities/LicenseVersion";
 import { License } from "#common/entities/License";
 import { TYPES } from "#server/config/types";
 import { inject, injectable } from "inversify";
-import { DataSource, Repository } from "typeorm";
+import { DataSource, Repository, In } from "typeorm";
 import { isUUID } from "validator";
 
 @injectable()
@@ -48,5 +48,10 @@ export class LicenseVersionDao {
 
     public async saveLicenseVersions(...versions: LicenseVersion[]): Promise<void> {
         await this.licenseVersionRepo.save(versions);
+    }
+
+    public async deleteLicenseVersionsForLicenseIds(licenseIds: string[]) : Promise<void> {
+        const { affected } = await this.licenseVersionRepo.delete({ license: In(licenseIds) });
+        console.log(`Deleted ${affected} license versions`);
     }
 }

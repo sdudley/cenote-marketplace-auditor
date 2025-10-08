@@ -8,6 +8,7 @@ import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortTyp
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
 import { In } from "typeorm";
 import { SelectQueryBuilder } from "typeorm";
+import { ObsoleteTransaction } from "#common/types/apiTypes";
 
 @injectable()
 class TransactionDao {
@@ -253,6 +254,48 @@ class TransactionDao {
 
     private escapeDoubleQuotes(str: string) {
         return str.replace(/"/g, '\\"');
+    }
+
+    /**
+     * Find licenses that have both an entitlementNUmber and a licenseId, but which are still using the
+     * licenseId as the 'entitlement_number' column in our table.
+     */
+    public async getTransactionsWithObsoleteEntitlementNumbers() : Promise<ObsoleteTransaction[]> {
+        /**
+         * SELECT id, entitlement_id, t.data->>'appEntitlementNumber' as data_entitlement_number, t.data->>'licenseId' as data_license_id
+         * FROM transaction t
+         * WHERE t.data->'purchaseDetails'->>'hosting'='Data Center'
+         * AND t.data->>'appEntitlementNumber' IS NOT NULL
+         * AND t.entitlement_id=t.data->>'licenseId';
+         */
+
+        const queryBuilder = this.transactionRepo.createQueryBuilder('t');
+        queryBuilder.select('t.id', 'id');
+        queryBuilder.addSelect('t.entitlement_id', 'entitlement_id');
+        queryBuilder.addSelect('t.data->>\'appEntitlementNumber\'', 'data_entitlement_number');
+        queryBuilder.addSelect('t.data->>\'licenseId\'', 'data_license_id');
+        queryBuilder.where('l1.data->>\'hosting\' = \'Data Center\' AND l1.data->>\'appEntitlementNumber\' IS NULL');
+        queryBuilder.where('t.data->\'purchaseDetails\'->>\'hosting\'=\'Data Center\' AND t.data->>\'appEntitlementNumber\' IS NOT NULL AND t.entitlement_id=t.data->>\'licenseId\'');
+
+        const data = await queryBuilder.getRawMany();
+
+        return data.map((row: any) => ({
+            id: row.id,
+            entitlement_id: row.entitlement_id,
+            data_entitlement_number: row.data_entitlement_number,
+            data_license_id: row.data_license_id
+        }));
+    }
+
+    public async updateTransactionsWithObsoleteEntitlementNumbers(obsoleteTransactions: ObsoleteTransaction[]) {
+        for (const tx of obsoleteTransactions) {
+            const { affected } = await this.transactionRepo.update(
+                { id: tx.id },
+                { entitlementId: tx.data_entitlement_number }
+            );
+
+            console.log(`Updated transaction ${tx.id}: ${affected} modified`);
+        }
     }
 }
 
