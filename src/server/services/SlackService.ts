@@ -15,6 +15,7 @@ export type SlackBlock = (KnownBlock | Block);
 
 export interface SlackTransactionData {
     saleDate: string;
+    saleType: string;
     addonName: string;
     licenseType: string;
     hosting: string;
@@ -159,7 +160,7 @@ export class SlackService {
 
     public mapTransactionForSlack(transaction: Transaction): SlackTransactionData {
         const { addonName } = transaction.data;
-        const { saleDate, vendorAmount, tier } = transaction.data.purchaseDetails;
+        const { saleDate, saleType, vendorAmount, tier } = transaction.data.purchaseDetails;
         const { company } = transaction.data.customerDetails;
         const { maintenanceStartDate, maintenanceEndDate, licenseType, hosting } = transaction.data.purchaseDetails;
 
@@ -170,6 +171,7 @@ export class SlackService {
             hosting,
             vendorAmount,
             tier,
+            saleType,
             company: company ?? 'Unknown',
             maintenanceStartDate: maintenanceStartDate,
             maintenanceEndDate: maintenanceEndDate,
@@ -180,7 +182,7 @@ export class SlackService {
     public async postNewTransactionsToSlack(transactions: SlackTransactionData[]): Promise<void> {
         const totalVendorAmount = transactions.reduce((acc, t) => acc + t.vendorAmount, 0);
 
-        const message = encodeSlackText(`🎉 ${transactions.length} New Sale${transactions.length > 1 ? 's' : ''} - ${formatCurrency(totalVendorAmount)}`);
+        const message = encodeSlackText(`🎉 ${transactions.length} New Transaction${transactions.length > 1 ? 's' : ''} - ${formatCurrency(totalVendorAmount)}`);
 
         const blocks : SlackBlock[] = [
             {
@@ -205,7 +207,7 @@ export class SlackService {
                     type: 'section',
                     text: {
                         type: 'mrkdwn',
-                        text: encodeSlackText(`*${t.addonName}* - ${formatCurrency(t.vendorAmount)}`)
+                        text: encodeSlackText(`*${t.addonName}* - *${t.saleType}* - ${formatCurrency(t.vendorAmount)}`)
                     }
                 },
                 {
@@ -226,6 +228,10 @@ export class SlackService {
                         {
                             type: 'mrkdwn',
                             text: encodeSlackText(`Tier:\n*${t.tier}*`)
+                        },
+                        {
+                            type: 'mrkdwn',
+                            text: encodeSlackText(`Sale Type:\n*${t.saleType}*`)
                         },
                         {
                             type: 'mrkdwn',
