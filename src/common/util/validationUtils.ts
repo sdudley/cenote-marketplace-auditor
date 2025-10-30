@@ -8,8 +8,12 @@ const userCountFromTier = (tier: string): number => {
         return -1;
     }
 
-    // Handle both 'XXXX Users' and 'Per Unit Pricing (XXXX Users)' formats
-    const match = tier.match(/(\d+)\s+Users/);
+    // Handle formats:
+    // 'XXXX Users' (annual)
+    // 'Per Unit Pricing (XXXX Users)' (monthly)
+    // 'XXX User' (MQB)
+
+    const match = tier.match(/(\d+)\s+User/);
     if (match) {
         return parseInt(match[1], 10);
     }
