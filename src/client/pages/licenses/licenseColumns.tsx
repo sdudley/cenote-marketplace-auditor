@@ -15,6 +15,15 @@ const toMixedCase = (str: string) => {
     return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
 };
 
+// Maintenance is considered active when maintenanceEndDate is today or later
+const isMaintenanceActive = (maintenanceEndDate?: string | null): boolean => {
+    if (!maintenanceEndDate) return false;
+    const end = new Date(maintenanceEndDate);
+    if (isNaN(end.getTime())) return false;
+    const now = new Date();
+    return end >= now;
+};
+
 export const defaultLicenseColumns: ColumnConfig<LicenseResult, LicenseCellContext, LicenseQuerySortType>[] = [
     {
         id: 'entitlementId',
@@ -93,7 +102,11 @@ export const defaultLicenseColumns: ColumnConfig<LicenseResult, LicenseCellConte
         visible: true,
         nowrap: true,
         sortField: LicenseQuerySortType.MaintenanceStartDate,
-        renderSimpleCell: (lr) => lr.license.data.maintenanceStartDate
+        renderSimpleCell: (lr) => {
+            const active = isMaintenanceActive(lr.license.data.maintenanceEndDate);
+            const value = lr.license.data.maintenanceStartDate ?? '';
+            return <span style={{ color: active ? 'green' : 'red' }}>{value}</span>;
+        }
     },
     {
         id: 'maintenanceEndDate',
@@ -101,7 +114,11 @@ export const defaultLicenseColumns: ColumnConfig<LicenseResult, LicenseCellConte
         visible: true,
         nowrap: true,
         sortField: LicenseQuerySortType.MaintenanceEndDate,
-        renderSimpleCell: (lr) => lr.license.data.maintenanceEndDate
+        renderSimpleCell: (lr) => {
+            const active = isMaintenanceActive(lr.license.data.maintenanceEndDate);
+            const value = lr.license.data.maintenanceEndDate ?? '';
+            return <span style={{ color: active ? 'green' : 'red' }}>{value}</span>;
+        }
     },
     {
         id: 'gracePeriod',
