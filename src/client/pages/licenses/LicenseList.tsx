@@ -60,7 +60,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setDebouncedSearch(search);
+            setDebouncedSearch(search.trim());
         }, 500);
 
         return () => clearTimeout(timer);
@@ -137,7 +137,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            setDebouncedSearch(search);
+            setDebouncedSearch(search.trim());
         }
     };
 

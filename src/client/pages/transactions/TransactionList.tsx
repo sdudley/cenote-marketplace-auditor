@@ -55,7 +55,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setDebouncedSearch(search);
+            setDebouncedSearch(search.trim());
         }, 500);
 
         return () => clearTimeout(timer);
@@ -132,7 +132,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            setDebouncedSearch(search);
+            setDebouncedSearch(search.trim());
         }
     };
 
