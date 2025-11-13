@@ -41,6 +41,39 @@ export class TransactionJob {
         return isProperSubsetOfFields(changedPaths, this.ignoredFields);
     }
 
+    // The proratedDetails array is not sorted by date and the server returns it in an
+    // inconsistent order, so we need to sort it to avoid creating new versions every time
+    // we are run.
+
+    private normalizeTransactionData(transactionData: TransactionData): TransactionData {
+        const normalizedData: TransactionData = normalizeObject(transactionData);
+        const proratedDetails = normalizedData.purchaseDetails?.proratedDetails;
+
+        if (Array.isArray(proratedDetails) && proratedDetails.length > 1) {
+            normalizedData.purchaseDetails.proratedDetails = [...proratedDetails].sort((a, b) => {
+                const dateA = a?.date ?? '';
+                const dateB = b?.date ?? '';
+
+                if (dateA !== dateB) {
+                    if (!dateA) {
+                        return 1;
+                    }
+                    if (!dateB) {
+                        return -1;
+                    }
+                    return dateA.localeCompare(dateB);
+                }
+
+                const addedUsersA = a?.addedUsers ?? Number.NEGATIVE_INFINITY;
+                const addedUsersB = b?.addedUsers ?? Number.NEGATIVE_INFINITY;
+
+                return addedUsersB - addedUsersA;
+            });
+        }
+
+        return normalizedData;
+    }
+
     async processTransactions(transactions: TransactionData[]): Promise<void> {
         let processedCount = 0;
         let totalCount = transactions.length;
@@ -58,7 +91,7 @@ export class TransactionJob {
             const entitlementId = this.transactionDao.getEntitlementIdForTransaction(transactionData);
 
             // Normalize the incoming data
-            const normalizedData : TransactionData = normalizeObject(transactionData);
+            const normalizedData: TransactionData = this.normalizeTransactionData(transactionData);
             let currentVersion = 1;
 
             if (existingTransaction) {
