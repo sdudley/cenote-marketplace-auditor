@@ -130,6 +130,8 @@ export interface paths {
                     forThisUser?: boolean;
                     /** @description Only returns apps with the specified hosting model */
                     hosting?: ("any" | "cloud" | "datacenter" | "server")[];
+                    /** @description Only returns apps with the specified cloud compliance boundaries, with "commercial" as the default value for cloud apps if not provided explicitly. This parameter must be left null for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Includes apps that are normally hidden in the site */
                     includeHidden?: "all" | "visibleInApp";
                     /** @description Includes private apps or versions if you are authorized to see them */
@@ -250,6 +252,8 @@ export interface paths {
                     text?: string;
                     /** @description Includes the latest compatible version in the response */
                     withVersion?: boolean;
+                    /** @description Only returns apps with the specified cloud compliance boundaries. This parameter will default to "commercial" for cloud apps and must be left null for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description If specified, skips ahead by this number of items */
                     offset?: number;
                     /** @description If specified, limits the result set to this number of items */
@@ -317,6 +321,8 @@ export interface paths {
                     text?: string;
                     /** @description Includes the latest compatible version in the response */
                     withVersion?: boolean;
+                    /** @description Only returns apps with the specified cloud compliance boundaries. This parameter will default to "commercial" for cloud apps and must be left null for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description If specified, skips ahead by this number of items */
                     offset?: number;
                     /** @description If specified, limits the result set to this number of items */
@@ -434,6 +440,8 @@ export interface paths {
                 query?: {
                     /** @description Text to search for */
                     q?: string;
+                    /** @description Search for apps within these cloud compliance boundaries, with "commercial" as the default value for cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                 };
                 header?: never;
                 path?: never;
@@ -487,6 +495,8 @@ export interface paths {
                     forThisUser?: boolean;
                     /** @description Only returns apps with the specified hosting model */
                     hosting?: ("any" | "cloud" | "datacenter" | "server")[];
+                    /** @description Only returns apps with the specified cloud compliance boundaries, with "commercial" as the default value for cloud apps if not provided explicitly. This parameter must be left null for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Includes apps that are normally hidden in the site */
                     includeHidden?: "all" | "visibleInApp";
                     /** @description Includes private apps or versions if you are authorized to see them */
@@ -567,6 +577,8 @@ export interface paths {
                     text?: string;
                     /** @description Includes the latest compatible version in the response */
                     withVersion?: boolean;
+                    /** @description Includes the latest compatible version in the response with this cloud compliance boundary, with "commercial" as the default for cloud app versions. This parameter will be ignored for non-cloud app versions. */
+                    cloudComplianceBoundary?: components["schemas"]["CloudComplianceBoundary"];
                 };
                 header?: never;
                 path: {
@@ -805,8 +817,8 @@ export interface paths {
         };
         /**
          * Get app active installations
-         * @description Get a specific app's active installation counts over time.
-         *
+         * @description Get a specific app's active installation counts over time.\
+         *     For cloud app versions, this will only include app versions within commercial compliance boundary.\
          *     This resource requires authentication.
          */
         get: {
@@ -864,8 +876,8 @@ export interface paths {
         };
         /**
          * Get app active installations (by application)
-         * @description Get a specific app's active installation counts over time, aggregated by application.
-         *
+         * @description Get a specific app's active installation counts over time, aggregated by application.\
+         *     For cloud app versions, this will only include app versions within commercial compliance boundary.\
          *     This resource requires authentication.
          */
         get: {
@@ -923,8 +935,8 @@ export interface paths {
         };
         /**
          * Get app active installations (by application version)
-         * @description Get a specific app's active installation counts over time, aggregated by application version.
-         *
+         * @description Get a specific app's active installation counts over time, aggregated by application version.\
+         *     For cloud app versions, this will only include app versions within commercial compliance boundary.\
          *     This resource requires authentication.
          */
         get: {
@@ -982,8 +994,8 @@ export interface paths {
         };
         /**
          * Get app active installations (by major application version)
-         * @description Get a specific app's active installation counts over time, aggregated by major application version.
-         *
+         * @description Get a specific app's active installation counts over time, aggregated by major application version.\
+         *     For cloud app versions, this will only include app versions within commercial compliance boundary.\
          *     This resource requires authentication.
          */
         get: {
@@ -1041,8 +1053,8 @@ export interface paths {
         };
         /**
          * Get app active installations (by minor application version)
-         * @description Get a specific app's active installation counts over time, aggregated by minor application version.
-         *
+         * @description Get a specific app's active installation counts over time, aggregated by minor application version.\
+         *     For cloud app versions, this will only include app versions within commercial compliance boundary.\
          *     This resource requires authentication.
          */
         get: {
@@ -1100,8 +1112,8 @@ export interface paths {
         };
         /**
          * Get app active installations (by app version)
-         * @description Get a specific app's active installation counts over time, aggregated by app version.
-         *
+         * @description Get a specific app's active installation counts over time, aggregated by app version.\
+         *     For cloud app versions, this will only include app versions within commercial compliance boundary.\
          *     This resource requires authentication.
          */
         get: {
@@ -1303,7 +1315,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description The cloud compliance boundary for which the pricing is to be fetched, with "commercial" as the default for cloud apps. Must be left null for non-cloud apps. */
+                    cloudComplianceBoundary?: "commercial" | "fedramp_moderate";
+                };
                 header?: never;
                 path: {
                     /** @description The unique identifier for this app, for example "com.atlassian.confluence.plugins.confluence-questions" */
@@ -2807,6 +2822,8 @@ export interface paths {
                     hosting?: "any" | "cloud" | "datacenter" | "server";
                     /** @description Includes private apps or versions if you are authorized to see them */
                     includePrivate?: boolean;
+                    /** @description Only returns app versions with the specified cloud compliance boundary, with "commercial" as the default for cloud apps. This parameter will be ignored for non-cloud app versions. */
+                    cloudComplianceBoundary?: components["schemas"]["CloudComplianceBoundary"];
                     /** @description If specified, skips ahead by this number of items */
                     offset?: number;
                     /** @description If specified, limits the result set to this number of items */
@@ -3120,6 +3137,8 @@ export interface paths {
                     hosting?: "any" | "cloud" | "datacenter" | "server";
                     /** @description Includes private apps or versions if you are authorized to see them */
                     includePrivate?: boolean;
+                    /** @description Only returns app version with the specified cloud compliance boundary, with "commercial" as the default for cloud apps. This parameter will be ignored for non-cloud app versions. */
+                    cloudComplianceBoundary?: components["schemas"]["CloudComplianceBoundary"];
                 };
                 header?: never;
                 path: {
@@ -3169,8 +3188,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Only returns apps with the specified hosting model */
+                    /** @description Only returns app version with the specified hosting model */
                     hosting?: "any" | "cloud" | "datacenter" | "server";
+                    /** @description Only returns app version with the specified cloud compliance boundary, with "commercial" as the default for cloud apps. This parameter will be ignored for non-cloud app versions. */
+                    cloudComplianceBoundary?: components["schemas"]["CloudComplianceBoundary"];
                 };
                 header?: never;
                 path: {
@@ -3294,6 +3315,7 @@ export interface paths {
         };
         /**
          * Get applications
+         * @deprecated
          * @description Get a list of applications.
          */
         get: {
@@ -3337,6 +3359,7 @@ export interface paths {
         };
         /**
          * Get application
+         * @deprecated
          * @description Get a specific application.
          */
         get: {
@@ -3385,6 +3408,7 @@ export interface paths {
         };
         /**
          * Get application versions
+         * @deprecated
          * @description Get a list of versions for the specified application.
          */
         get: {
@@ -3440,6 +3464,7 @@ export interface paths {
         };
         /**
          * Get application version (by number)
+         * @deprecated
          * @description Get details about a specific version, matching the specified build number, of the specified application.
          */
         get: {
@@ -3490,6 +3515,7 @@ export interface paths {
         };
         /**
          * Get application version (latest)
+         * @deprecated
          * @description Get the latest version of the specified application.
          */
         get: {
@@ -3538,6 +3564,7 @@ export interface paths {
         };
         /**
          * Get application version (by name)
+         * @deprecated
          * @description Get details about a specific version, matching the specified name, of the specified application.
          */
         get: {
@@ -4377,483 +4404,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/vendors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get vendors
-         * @deprecated
-         * @description Get a list of vendors matching the specified parameters.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Exclude vendors associated with Atlassian */
-                    excludeAtlassian?: boolean;
-                    /** @description Only returns vendors associated with the current user */
-                    forThisUser?: boolean;
-                    /** @description Only returns vendors with names that matches the search text */
-                    text?: string;
-                    /** @description If specified, skips ahead by this number of items */
-                    offset?: number;
-                    /** @description If specified, limits the result set to this number of items */
-                    limit?: number;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["VendorCollection"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /**
-         * Create vendor
-         * @description Create a new vendor.
-         *
-         *     This resource requires authentication.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreateVendorRepresentation"];
-                };
-            };
-            responses: {
-                /** @description Successfully created */
-                201: {
-                    headers: {
-                        /** @description URI of the new resource */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/vendors/{vendorId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get vendor
-         * @description Get a specific vendor.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Vendor"];
-                    };
-                };
-                /** @description The resource does not exist or isn't visible to you */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update vendor
-         * @description Update a specific vendor.
-         *
-         *     The request body must be a valid <a href="https://tools.ietf.org/html/rfc6902">JSON Patch</a> document. The properties which can be referenced in the PATCH are the same ones returned by a GET on this URI.
-         *
-         *     This resource requires authentication.
-         */
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                };
-                cookie?: never;
-            };
-            /** @description The request body must be a valid <a href="https://tools.ietf.org/html/rfc6902">JSON Patch</a> document. The properties which can be referenced in the PATCH are the same ones returned by a GET on this URI. */
-            requestBody: {
-                content: {
-                    "application/json-patch+json": components["schemas"]["JsonPatchRequest"];
-                };
-            };
-            responses: {
-                /** @description Successfully modified */
-                204: {
-                    headers: {
-                        /** @description URI of the resource */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Invalid properties */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["JsonErrorsDoc"];
-                    };
-                };
-                /** @description The resource does not exist or isn't visible to you */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        trace?: never;
-    };
-    "/vendors/{vendorId}/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get vendor contacts
-         * @description Get a list of contacts for the specified vendor.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["VendorContactList"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /**
-         * Add vendor contact
-         * @description Adds a user as a contact associated with a specific vendor. The `username` property in the request body must match a user who already has an account on Marketplace.
-         *
-         *     This resource requires authentication.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["VendorContact"];
-                };
-            };
-            responses: {
-                /** @description Successfully created */
-                201: {
-                    headers: {
-                        /** @description URI of the new resource */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description The user is already a contact for the vendor */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/vendors/{vendorId}/contacts/{userId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get vendor contact
-         * @description Get a specific contact for the specified vendor.
-         *
-         *     This resource requires authentication.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                    userId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["VendorContact"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        /**
-         * Delete vendor contact
-         * @description Removes the user from the vendor's list of contacts. This resource does *not* remove the user's Marketplace account.
-         *
-         *     This resource requires authentication.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                    userId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Success */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not allowed because you are changing your permissions. */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not allowed to remove because it is the only contact for the vendor */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        /**
-         * Update vendor contact
-         * @description Updates the permissions a particular user has in association with a particular vendor.
-         *
-         *     The request body must be a valid <a href="https://tools.ietf.org/html/rfc6902">JSON Patch</a> document. The properties which can be referenced in the PATCH are the same ones returned by a GET on this URI.
-         *
-         *     This resource requires authentication.
-         */
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                    userId: number;
-                };
-                cookie?: never;
-            };
-            /** @description The request body must be a valid <a href="https://tools.ietf.org/html/rfc6902">JSON Patch</a> document. The properties which can be referenced in the PATCH are the same ones returned by a GET on this URI. */
-            requestBody: {
-                content: {
-                    "application/json-patch+json": components["schemas"]["JsonPatchRequest"];
-                };
-            };
-            responses: {
-                /** @description Successfully modified */
-                204: {
-                    headers: {
-                        /** @description URI of the resource */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description No update was performed because the user is already assigned the given set of permissions. */
-                304: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not allowed because you are changing your permissions. */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        trace?: never;
-    };
-    "/vendors/{vendorId}/paymentInfo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get payment details
-         * @description Get the payment details for the specified vendor.
-         *
-         *     This resource requires authentication.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["VendorPaymentInfo"];
-                    };
-                };
-                /** @description The vendor has no payment information */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        /**
-         * Create / update payment details
-         * @description Create or update the payment details for a specific vendor.
-         *
-         *     Atlassian uses this information to send electronic payments for paid-via-Atlassian app sales. It is only required for vendors who are using the Atlassian payment and licensing system.
-         *
-         *     This resource requires authentication.
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The unique identifier for this vendor */
-                    vendorId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["VendorPaymentInfo"];
-                };
-            };
-            responses: {
-                /** @description Successfully modified */
-                204: {
-                    headers: {
-                        /** @description URI of the resource */
-                        Location?: string;
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/vendors/{vendorId}/promotions": {
         parameters: {
             query?: never;
@@ -5595,6 +5145,8 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to values for these cloud compliance boundaries types, with default value as "commercial". This parameter will be ignored for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Restricts the query to these app edition types */
                     appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values with the provided status */
@@ -5609,6 +5161,10 @@ export interface paths {
                     lastUpdated?: string;
                     /** @description If specified, determines whether to return only lifetime free apps data or paid apps data/data of free apps which were once paid. If the value is passed as true, only returns lifetime free apps data. If the value is passed as false or query param is not passed at all, return paid apps data or the data of apps that were once paid but free now. */
                     showLifeTimeFreeLicenses?: boolean;
+                    /** @description If specified,  restricts the query to values with the provided license level. */
+                    licenseLevel?: ("single-instance" | "multi-instance")[];
+                    /** @description If specified, determines whether to return the historical snapshots of the licenses as well or not */
+                    showLicensesHistory?: boolean;
                     /** @description If specified, determines the license sort order */
                     sortBy?: "addonName" | "company" | "country" | "endDate" | "hosting" | "licenseId" | "licenseType" | "partner" | "region" | "startDate" | "tier";
                     /** @description Determines whether values are sorted in ascending or descending order */
@@ -5686,6 +5242,8 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to values for these cloud compliance boundaries types, with default value as "commercial". This parameter will be ignored for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Restricts the query to these app edition types */
                     appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values with the provided status */
@@ -5700,6 +5258,10 @@ export interface paths {
                     lastUpdated?: string;
                     /** @description If specified, determines whether to return only lifetime free apps data or paid apps data/data of free apps which were once paid. If the value is passed as true, only returns lifetime free apps data. If the value is passed as false or query param is not passed at all, return paid apps data or the data of apps that were once paid but free now. */
                     showLifeTimeFreeLicenses?: boolean;
+                    /** @description If specified,  restricts the query to values with the provided license level. */
+                    licenseLevel?: ("single-instance" | "multi-instance")[];
+                    /** @description If specified, determines whether to return the historical snapshots of the licenses as well or not */
+                    showLicensesHistory?: boolean;
                     /** @description If specified, determines the license sort order */
                     sortBy?: "addonName" | "company" | "country" | "endDate" | "hosting" | "licenseId" | "licenseType" | "partner" | "region" | "startDate" | "tier";
                     /** @description Determines whether values are sorted in ascending or descending order */
@@ -5774,6 +5336,8 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to values for these cloud compliance boundaries types, with default value as "commercial". This parameter will be ignored for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Restricts the query to these app edition types */
                     appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values with the provided status */
@@ -5788,6 +5352,10 @@ export interface paths {
                     lastUpdated?: string;
                     /** @description If specified, determines whether to return only lifetime free apps data or paid apps data/data of free apps which were once paid. If the value is passed as true, only returns lifetime free apps data. If the value is passed as false or query param is not passed at all, return paid apps data or the data of apps that were once paid but free now. */
                     showLifeTimeFreeLicenses?: boolean;
+                    /** @description If specified,  restricts the query to values with the provided license level. */
+                    licenseLevel?: ("single-instance" | "multi-instance")[];
+                    /** @description If specified, determines whether to return the historical snapshots of the licenses as well or not */
+                    showLicensesHistory?: boolean;
                     /** @description If specified, determines the license sort order */
                     sortBy?: "addonName" | "company" | "country" | "endDate" | "hosting" | "licenseId" | "licenseType" | "partner" | "region" | "startDate" | "tier";
                     /** @description Determines whether values are sorted in ascending or descending order */
@@ -6469,16 +6037,22 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to values for these cloud compliance boundaries types, with default value as "commercial". This parameter will be ignored for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Restricts the query to these app edition types */
                     appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description If set to true, exclude $0 transactions from reports */
                     excludeZeroTransactions?: boolean;
+                    /** @description If set to true, returns all transaction lines with prorated charges for maximum quantity billing in the report. */
+                    showProratedTransactions?: boolean;
                     /** @description If set to true, include manual invoices in reports */
                     includeManualInvoice?: boolean;
                     /** @description Restricts the query to payment status of these types */
                     paymentStatus?: ("paid" | "open" | "uncollectible" | "refunded")[];
+                    /** @description If specified,  restricts the query to values with the provided license level. */
+                    licenseLevel?: ("single-instance" | "multi-instance")[];
                     /** @description If specified, determines the transaction sort order */
                     sortBy?: "addonName" | "company" | "country" | "date" | "hosting" | "licenseId" | "licenseType" | "partner" | "partnerType" | "purchasePrice" | "region" | "saleType" | "tier" | "transactionId" | "vendorAmount" | "paymentStatus";
                     /** @description Determines whether values are sorted in ascending or descending order */
@@ -6568,16 +6142,22 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to values for these cloud compliance boundaries types, with default value as "commercial". This parameter will be ignored for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Restricts the query to these app edition types */
                     appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description If set to true, exclude $0 transactions from reports */
                     excludeZeroTransactions?: boolean;
+                    /** @description If set to true, returns all transaction lines with prorated charges for maximum quantity billing in the report. */
+                    showProratedTransactions?: boolean;
                     /** @description If set to true, include manual invoices in reports */
                     includeManualInvoice?: boolean;
                     /** @description Restricts the query to payment status of these types */
                     paymentStatus?: ("paid" | "open" | "uncollectible" | "refunded")[];
+                    /** @description If specified,  restricts the query to values with the provided license level. */
+                    licenseLevel?: ("single-instance" | "multi-instance")[];
                     /** @description If specified, determines the transaction sort order */
                     sortBy?: "addonName" | "company" | "country" | "date" | "hosting" | "licenseId" | "licenseType" | "partner" | "partnerType" | "purchasePrice" | "region" | "saleType" | "tier" | "transactionId" | "vendorAmount" | "paymentStatus";
                     /** @description Determines whether values are sorted in ascending or descending order */
@@ -6664,16 +6244,22 @@ export interface paths {
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
                     hosting?: ("cloud" | "datacenter" | "server")[];
+                    /** @description Restricts the query to values for these cloud compliance boundaries types, with default value as "commercial". This parameter will be ignored for non-cloud apps. */
+                    cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
                     /** @description Restricts the query to these app edition types */
                     appEdition?: ("Standard" | "Advanced")[];
                     /** @description If specified, restricts the query to values updated on or after the specified date */
                     lastUpdated?: string;
                     /** @description If set to true, exclude $0 transactions from reports */
                     excludeZeroTransactions?: boolean;
+                    /** @description If set to true, returns all transaction lines with prorated charges for maximum quantity billing in the report. */
+                    showProratedTransactions?: boolean;
                     /** @description If set to true, include manual invoices in reports */
                     includeManualInvoice?: boolean;
                     /** @description Restricts the query to payment status of these types */
                     paymentStatus?: ("paid" | "open" | "uncollectible" | "refunded")[];
+                    /** @description If specified,  restricts the query to values with the provided license level. */
+                    licenseLevel?: ("single-instance" | "multi-instance")[];
                     /** @description If specified, determines the transaction sort order */
                     sortBy?: "addonName" | "company" | "country" | "date" | "hosting" | "licenseId" | "licenseType" | "partner" | "partnerType" | "purchasePrice" | "region" | "saleType" | "tier" | "transactionId" | "vendorAmount" | "paymentStatus";
                     /** @description Determines whether values are sorted in ascending or descending order */
@@ -8259,6 +7845,7 @@ export interface components {
              *       * `DISTRIBUTIONS`
              *       * `DOWNLOADS`
              *       * `FUNNEL_INSIGHTS`
+             *       * `GMV`
              *     * `APP_NAME` - Publicly displayed name of the app. Applicable MetricSets are:
              *       * `RECURRING_REVENUE`
              *       * `FUNNEL_INSIGHTS`
@@ -8269,6 +7856,7 @@ export interface components {
              *     * `APP_VERSION` - Version of the app. Applicable MetricSets are:
              *       * `DISTRIBUTIONS`
              *       * `DOWNLOADS`
+             *       * `GMV`
              *     * `PARENT_SOFTWARE` - Parent software name like - jira, confluence. Applicable MetricSets are:
              *       * `DISTRIBUTIONS`
              *     * `PARENT_SOFTWARE_VERSION` - Version of the parent software. Applicable MetricSets are:
@@ -8313,10 +7901,11 @@ export interface components {
                  *     * `DISTRIBUTIONS` - The metric providing distributions data.
                  *     * `FUNNEL_INSIGHTS` - The metric providing funnel insights data.
                  *     * `DOWNLOADS` - The metric providing downloads data.
+                 *     * `GMV` - The metric providing GMV (Gross Merchandise Value) data for apps.
                  *
                  * @enum {string}
                  */
-                name?: "RECURRING_REVENUE" | "DISTRIBUTIONS" | "FUNNEL_INSIGHTS" | "DOWNLOADS";
+                name?: "RECURRING_REVENUE" | "DISTRIBUTIONS" | "FUNNEL_INSIGHTS" | "DOWNLOADS" | "GMV";
             }[];
             /** @description Predefined metrics fields requested and displayed. */
             metricFields?: {
@@ -8347,10 +7936,12 @@ export interface components {
                  *       * `AVERAGE_CHURN_DAY` - The average number of days it takes for a user to churn.
                  *     * DOWNLOADS:
                  *       * `DOWNLOAD_COUNT` - Download counts for an app for specified time frame.
+                 *     * GMV:
+                 *       * `LIFETIME_GMV` - Lifetime Gross Merchandise Value (GMV) for all non-harmonised Forge app versions for the given partner account.
                  *
                  * @enum {string}
                  */
-                name?: "OPENING_MRR" | "NEW_MRR" | "EXPANSION_MRR" | "CONTRACTION_MRR" | "REACTIVATED_MRR" | "EXPIRED_MRR" | "CLOSING_MRR" | "ARR" | "INSTALL_COUNT" | "USER_COUNT" | "PROSPECT" | "D1_D6_AI" | "AVERAGE_CHURN_DAY" | "DOWNLOAD_COUNT";
+                name?: "OPENING_MRR" | "NEW_MRR" | "EXPANSION_MRR" | "CONTRACTION_MRR" | "REACTIVATED_MRR" | "EXPIRED_MRR" | "CLOSING_MRR" | "ARR" | "INSTALL_COUNT" | "USER_COUNT" | "PROSPECT" | "D1_D6_AI" | "AVERAGE_CHURN_DAY" | "DOWNLOAD_COUNT" | "LIFETIME_GMV";
             }[];
         };
         /** @description The date range of metrics to be fetched. */
@@ -8363,6 +7954,7 @@ export interface components {
              *     * DISTRIBUTIONS: End date should be less than current date
              *     * FUNNEL_INSIGHTS: End date should be less than or equal to last day of previous month
              *     * DOWNLOADS: End date should be less than current date
+             *     * GMV: End date should be less than current date
              *
              */
             endDate?: string;
@@ -8374,6 +7966,7 @@ export interface components {
              *     * `DISTRIBUTIONS`: `DATE`, `APP_KEY`, `APP_VERSION`, `HOSTING`, `PARENT_SOFTWARE`, `PARENT_SOFTWARE_VERSION`, `PARENT_SOFTWARE_MAJOR_VERSION`, `PARENT_SOFTWARE_MINOR_VERSION`, `INSTALL_COUNT`, `USER_COUNT`
              *     * `FUNNEL_INSIGHTS`: `DATE`, `APP_KEY`, `APP_NAME`, `PARENT_PRODUCT`, `PRODUCT_TYPE`, `PARENT_PRODUCT_TENURE_LEVEL`, `PARENT_PRODUCT_EDITION`, `PARENT_PRODUCT_UNIT_COUNT`, `LICENSE_STATUS`, `LICENSE_TYPE`, `PRODUCT_STATE`, `PROSPECT_TYPE`, `PROSPECT`, `D1_D6_AI`, `AVERAGE_CHURN_DAY`
              *     * `DOWNLOADS`: `DATE`, `APP_KEY`, `APP_VERSION`
+             *     * `GMV`: `DATE`, `LIFETIME_GMV`
              *      */
             name?: string;
             /** @description Order in which data needs to be sorted in response. Valid values for order are `asc` and `desc` */
@@ -8693,6 +8286,11 @@ export interface components {
             perUnitItems?: components["schemas"]["PricingItem"][];
             /** @description True if Atlassian Solution Partners _cannot_ purchase the app at a discount */
             expertDiscountOptOut: boolean;
+            /**
+             * @description The cloud compliance boundary for which the pricing is being set, with "commercial" as the default for cloud apps. Must be left null for non-cloud apps.
+             * @enum {string}
+             */
+            cloudComplianceBoundary?: "commercial" | "fedramp_moderate";
             /** @description True if the vendor can be contacted for additional pricing */
             readonly contactSalesForAdditionalPricing?: boolean;
             /** @description Key of the application that the app is for */
@@ -8887,6 +8485,11 @@ export interface components {
             partnerDetails?: components["schemas"]["TransactionPartnerDetails"];
             /** @description The unique identifier for the transaction line, for example "0123456789" or "a0bcdefgh-a01b-0a1b-0ab1-a0bcde12f345" */
             transactionLineItemId: string;
+            /** @description During specific scenarios such as apps for enterprise parent licenses, invoices are manually generated. These invoices are then incorporated into the transactions report. This field indicates whether an invoice is manual or not. Field will not be present for non-manual invoices. Few fields can be null if invoice is manual such as saleType, licenseType, partnerType etc. */
+            isInvoiceManual?: boolean;
+            cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
+            /** @description Tiers or categories within a cloud license based on the number of instances. Values can be 'single-instance','multi-instance' or null. */
+            licenseLevel?: string;
         };
         PromotionStatus: string;
         ProductLinks: {
@@ -8907,6 +8510,11 @@ export interface components {
             application: string;
             hosting: components["schemas"]["CompatibilityHosting"];
         };
+        /**
+         * @default commercial
+         * @enum {string}
+         */
+        CloudComplianceBoundary: "commercial" | "fedramp_moderate";
         CalculatedChurnPeriodSeries: {
             /** @description Name to describe the series */
             name: string;
@@ -9192,7 +8800,7 @@ export interface components {
         AddonExternalLinks: {
             /**
              * Format: uri
-             * @description Link to an issue tracker for the app
+             * @description Link to a work item tracker for the app
              */
             issueTracker?: string;
             /**
@@ -9313,6 +8921,11 @@ export interface components {
             legacy?: components["schemas"]["AddonVersionLegacyProperties"];
             deployment?: components["schemas"]["AddonVersionDeployment"];
             cloud?: components["schemas"]["AddonVersionCloudDeployment"];
+            /** @description The cloud compliance boundaries for this app version.\
+             *     When present in the request body, this parameter will be ignored for non-cloud app version while defaulting to "commercial" for cloud versions.\
+             *     When present in the response body, this field will always be null for non-cloud app versions.
+             *      */
+            cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
         };
         LicenseTypesCollectionLinks: {
             self: components["schemas"]["Link"];
@@ -9351,9 +8964,9 @@ export interface components {
             upgradeEvaluationStartDate?: string;
             /** @description The edition of the app that is being evaluated for upgrade */
             upgradeEvaluatingEdition?: string;
-            /** @description The start date of the latest evaluation */
+            /** @description Provides the start date of a customer's latest evaluation. Latest evaluation is the last evaluation a customer has taken. */
             latestEvaluationStartDate?: string;
-            /** @description The start date of the latest period */
+            /** @description Provides the latest maintenance period's start date. Latest maintenance is the last maintenance period a customer has taken. */
             latestMaintenanceStartDate?: string;
             /** @description Indicates whether the license is on the new billing system for paid apps (either 'Yes' or 'No') */
             isNewBillingSystem?: string;
@@ -9362,7 +8975,7 @@ export interface components {
              * @description The date on which the data was last updated. This can be used to identify when historical sale/license data is updated for any reason.
              */
             lastUpdated: string;
-            /** @description The unique identifier for this license type, for example "COMMERCIAL" */
+            /** @description The unique identifier for this license type, possible values are academic, commercial, community, demonstration, evaluation, net_new_evaluation, upgrade_evaluation, open_source, starter, free and classroom. */
             licenseType: string;
             /**
              * Format: date
@@ -9386,7 +8999,7 @@ export interface components {
             extendedServerSupport?: string;
             /** @description The source of the license based on the customer domain. Values can be 'Atlassian' or 'Non-Atlassian' */
             licenseSourceType?: string;
-            /** @description Evaluation opportunity information giving the host license size */
+            /** @description Evaluation opportunity information giving the host license size. If data insights are attached but the date is before the default start date then "NA" */
             evaluationOpportunitySize?: string;
             /** @description A mapping of the sale license to the corresponding evaluation license if present */
             evaluationLicense?: string;
@@ -9398,18 +9011,30 @@ export interface components {
             evaluationEndDate?: string;
             /** @description Sale date of the matching evaluation license for the current license */
             evaluationSaleDate?: string;
-            /** @description The number of months for which evaluation license parent product is valid. */
+            /** @description The number of months for which evaluation license parent product is valid. Non-cloud evaluation is always "ANNUAL". Non-cloud non-evaluation is "NA". Null when data insights are not requested. */
             parentProductBillingCycle?: string;
-            /** @description Name of the parent product on which the app is hosted, for example "Jira". */
+            /** @description Name of the parent product on which the app is hosted, for example "Jira". Non-cloud is "NA". Null when data insights are not requested. */
             parentProductName?: string;
-            /** @description A short description of the pricing tier or user level of the license's parent product, for example, "Premium". */
+            /** @description A short description of the pricing tier or user level of the license's parent product, for example, "Premium". Non-cloud is "NA". Null when data insights are not requested. */
             parentProductEdition?: string;
-            /** @description Licence is installed on sandbox site or not. */
+            /** @description Licence is installed on sandbox site or not. Non-cloud is "NA". Null when data insights are not requested. */
             installedOnSandbox?: string;
             /** @description A "transactionAccountId" is a unique identifier for a transaction account in Atlassian's ecosystem, linking billing details, payment methods, and optional shipping addresses to a user or company for cloud subscriptions in ccp. */
             transactionAccountId?: string;
             /** @description This indicator shows whether the license is currently in a grace period. "Yes" means the license is in an active grace period. "No" means the license was previously in a grace period but is no longer. If the license becomes inactive right after the grace period ends or during the grace period due to expiration, unsubscription, etc. the isGracePeriod field may still retain its previous value. So, always check this indicator along with whether the associated date is still active. */
             inGracePeriod?: string;
+            /** @description This indicates the reason if entitlement is in dunning state currently, field will not be present otherwise */
+            invoiceDunningReason?: string;
+            /** @description The cloud compliance boundary of the app. Will be null for non-cloud apps. */
+            cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
+            /** @description Tiers or categories within a cloud license based on the number of instances. Values can be 'single-instance','multi-instance' or null. */
+            licenseLevel?: string;
+            /** @description The unique ID of the multi-instance license to which this license is associated. */
+            multiInstanceEntitlementId?: string;
+            /** @description The unique identifier of the multi-instance license to which this license is associated. */
+            multiInstanceEntitlementNumber?: string;
+            /** @description Date of creation of the snapshot for the current license. Will be present only when the showLicensesHistory query parameter is set to true. */
+            recordCreatedDate?: string;
         };
         InitiateAsyncLicense: {
             /** @description Unique export id for licenses export, for example "12345678-ab12-12ab-1234-123a4b5678ab" */
@@ -9711,7 +9336,7 @@ export interface components {
             /** @description True if the vendor received the free licensing benefit from the Solution Partner program */
             solutionPartnerBenefit: boolean;
         };
-        /** @description License CMT details, if applicable. */
+        /** @description License CMT details, if applicable. Allows Server/Data Center customers to try Cloud products as part of their migration journey, linking their cloud trial back to their original on-premises license. */
         CmtDetails: {
             /** @description Status of the CMT license ('active', 'converted' or 'non-converted') */
             status: string;
@@ -9815,6 +9440,8 @@ export interface components {
             readonly deployable: boolean;
             deployment: components["schemas"]["AddonVersionDeploymentSummary"];
             vendorLinks: components["schemas"]["AddonVersionExternalLinks"];
+            /** @description The cloud compliance boundaries for this app version. This will be null for non-cloud app versions. */
+            cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
         };
         ConnectSupport: {
             /** @description True if the application supports Atlassian Connect for Cloud instances */
@@ -12171,11 +11798,13 @@ export interface components {
              */
             maintenanceEndDate: string;
             /**
-             * @description Credit limit offered to customers.
+             * @description Credit limit offered to customers. Net14 means that full payment is due 14 days after the transaction date, at the very latest, on an invoice. Net30 means that full payment is due 30 days after the transaction date, at the very latest, on an invoice.
              * @enum {string}
              */
             paymentTerms?: "Net14" | "Net30";
             originalTransactionDetails?: components["schemas"]["OriginalTransactionDetails"];
+            /** @description Returns an array of objects with number of users and corresponding dates added during the monthly billing cycle for tracking and calculating prorated charges. */
+            proratedDetails?: components["schemas"]["ProratedDetails"][];
         };
         /** @description Details of the original transaction for which amount is being adjusted */
         OriginalTransactionDetails: {
@@ -12296,6 +11925,10 @@ export interface components {
              * @description The number of months that this license is valid for
              */
             monthsValid?: number;
+            /** @description The unique ID of the multi-instance license to which this license is associated. */
+            multiInstanceEntitlementId?: string;
+            /** @description The unique identifier of the multi-instance license to which this license is associated. */
+            multiInstanceEntitlementNumber?: string;
         };
         CalculatedRenewalsSeries: {
             /** @description Name to describe the series */
@@ -12522,6 +12155,12 @@ export interface components {
              * @example 8.6.5
              */
             end?: string;
+        };
+        ProratedDetails: {
+            /** @description Number of additional users added during the monthly billing cycle */
+            addedUsers?: number;
+            /** @description Date on which additional users were added. */
+            date?: string;
         };
     };
     responses: never;

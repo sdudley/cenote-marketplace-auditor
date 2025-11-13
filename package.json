@@ -18,7 +18,7 @@
     "start": "NODE_ENV=production node -r ./dist/server/src/server/util/ModuleResolver.js dist/server/src/server/index.js",
     "start:dev": "NODE_ENV=development ts-node src/server/index.ts",
     "test": "jest",
-    "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.448 --output src/common/types/marketplace-api.ts",
+    "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.561 --output src/common/types/marketplace-api.ts",
     "jobs": "NODE_ENV=development ts-node src/server/cli/runJobs.ts",
     "add-addon": "ts-node src/server/cli/addAddon.ts",
     "add-ignored-field": "ts-node src/server/cli/addIgnoredField.ts",
