@@ -179,7 +179,7 @@ export class PriceCalculatorService {
 
         if (billingPeriod === 'Annual') {
             if (basePrice != Math.ceil(basePrice)) {
-                basePrice = Math.ceil(basePrice);
+                basePrice = basePrice > 0 ? Math.ceil(basePrice) : Math.floor(basePrice);
                 descriptors.push({ subtotal: basePrice, description: `Round to integer for annual billing`});
             }
         }
