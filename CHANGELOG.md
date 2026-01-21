@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.1] - 2026-01-21
+
+#### Data Display Enhancements
+
+- License maintenance periods are now colored green or red, depending on whether the license is
+expired or active.
+
+### 🐛 Bug Fixes
+
+- Fixed off-by-one-dollar pricing error for refunds
+- Minimal support for Maximum Quantity Billing (MQB) transactions. This update prevents errors from
+being thrown when processing these transactions, although the pricing calculation is not yet supported.
+
 ## [0.3.0] - 2025-10-08
 
 ### ✨ Major New Features

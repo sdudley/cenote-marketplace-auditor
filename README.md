@@ -6,7 +6,7 @@ Display and audit transactions/licenses with ease, based on data from the Atlass
 
 PRs are welcome.
 
-Copyright © 2025 by Cenote Labs, Inc. All rights reserved. The application is licensed for your use under the standard terms of the Gnu Affero GPL (see LICENSE.txt).
+Copyright © 2025-2026 by Cenote Labs, Inc. All rights reserved. The application is licensed for your use under the standard terms of the Gnu Affero GPL (see LICENSE.txt).
 
 # Features
 
