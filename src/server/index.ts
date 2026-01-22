@@ -13,9 +13,11 @@ import fs from 'fs';
 import { resolveModulePath } from './util/ModuleResolver';
 import { EXPRESS_TYPES } from './express/config/expressTypes';
 import { JobDao } from './database/dao/JobDao';
+import { ConfigDao } from './database/dao/ConfigDao';
 import { TYPES } from './config/types';
 import { SchedulerService } from './services/SchedulerService';
 import { configurePassport } from './express/config/passport';
+import { getSessionSecret } from './util/sessionSecret';
 
 // Optionally, patch require to use the resolver for #common
 const Module = require('module');
@@ -55,9 +57,13 @@ async function startServer() {
         // Configure Passport
         configurePassport(container);
 
+        // Get or generate session secret from database
+        const configDao = container.get<ConfigDao>(TYPES.ConfigDao);
+        const sessionSecret = await getSessionSecret(configDao);
+
         // Set up session middleware
         app.use(session({
-            secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
+            secret: sessionSecret,
             resave: false,
             saveUninitialized: false,
             cookie: {
