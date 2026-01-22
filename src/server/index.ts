@@ -5,6 +5,7 @@ import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
 import passport from 'passport';
+const connectPgSimple = require('connect-pg-simple')(session);
 import { configureContainer } from './express/config/container';
 import { ApiRouter } from './express/routes';
 import { initializeDatabase } from './config/database';
@@ -61,8 +62,17 @@ async function startServer() {
         const configDao = container.get<ConfigDao>(TYPES.ConfigDao);
         const sessionSecret = await getSessionSecret(configDao);
 
-        // Set up session middleware
+        // Configure PostgreSQL session store
+        // Use connection string to create a separate pool for sessions
+        const sessionStore = new connectPgSimple({
+            conString: `postgresql://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`,
+            tableName: 'session', // Table name for storing sessions
+            createTableIfMissing: true // Automatically create the session table if it doesn't exist
+        });
+
+        // Set up session middleware with persistent store
         app.use(session({
+            store: sessionStore,
             secret: sessionSecret,
             resave: false,
             saveUninitialized: false,
