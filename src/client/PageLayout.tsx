@@ -8,7 +8,8 @@ import {
     Toolbar,
     CssBaseline,
     ThemeProvider,
-    createTheme
+    createTheme,
+    Divider
 } from '@mui/material';
 import {
     Receipt as ReceiptIcon,
@@ -62,9 +63,12 @@ export const PageLayout: React.FC = () => {
         checkAdminStatus();
     }, []);
 
-    const baseMenuItems = [
+    const dataMenuItems = [
         { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
         { text: 'Licenses', icon: <CardMembershipIcon />, path: '/licenses' },
+    ];
+
+    const systemMenuItems = [
         { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
         { text: 'Tasks', icon: <PlayArrow />, path: '/tasks' }
     ];
@@ -72,8 +76,6 @@ export const PageLayout: React.FC = () => {
     const adminMenuItems = isAdmin(userType)
         ? [{ text: 'Users', icon: <PeopleIcon />, path: '/users' }]
         : [];
-
-    const menuItems = [...baseMenuItems, ...adminMenuItems];
 
     const handleLogout = async () => {
         try {
@@ -114,7 +116,7 @@ export const PageLayout: React.FC = () => {
                         anchor="left"
                     >
                         <List>
-                            {menuItems.map((item) => (
+                            {dataMenuItems.map((item) => (
                                 <StyledListItemButton
                                     key={item.text}
                                     onClick={() => navigate(item.path)}
@@ -133,6 +135,55 @@ export const PageLayout: React.FC = () => {
                                     />
                                 </StyledListItemButton>
                             ))}
+                            {isAdmin(userType) && (
+                                <>
+                                    <Divider
+                                        sx={{
+                                            my: 2,
+                                            mx: 2,
+                                            borderBottomWidth: 2
+                                        }}
+                                    />
+                                    {systemMenuItems.map((item) => (
+                                        <StyledListItemButton
+                                            key={item.text}
+                                            onClick={() => navigate(item.path)}
+                                            selected={location.pathname.startsWith(item.path)}
+                                        >
+                                            <ListItemIcon sx={{
+                                                color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                            }}>
+                                                {item.icon}
+                                            </ListItemIcon>
+                                            <ListItemText
+                                                primary={item.text}
+                                                sx={{
+                                                    color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                                }}
+                                            />
+                                        </StyledListItemButton>
+                                    ))}
+                                    {adminMenuItems.map((item) => (
+                                        <StyledListItemButton
+                                            key={item.text}
+                                            onClick={() => navigate(item.path)}
+                                            selected={location.pathname.startsWith(item.path)}
+                                        >
+                                            <ListItemIcon sx={{
+                                                color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                            }}>
+                                                {item.icon}
+                                            </ListItemIcon>
+                                            <ListItemText
+                                                primary={item.text}
+                                                sx={{
+                                                    color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                                }}
+                                            />
+                                        </StyledListItemButton>
+                                    ))}
+                                </>
+                            )}
                         </List>
                     </StyledDrawer>
                     <Main>

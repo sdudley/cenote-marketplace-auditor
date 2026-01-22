@@ -72,14 +72,14 @@ export class ApiRouter {
         this.router.use('/licenses', this.licenseRoute.router);
         this.router.use('/licenses', this.licenseVersionRoute.router);
 
-        // Config routes
-        this.router.use('/config', this.configRoute.getRouter());
+        // Config routes (admin only)
+        this.router.use('/config', requireAdmin(), this.configRoute.getRouter());
 
-        // Job routes
-        this.router.use('/jobs', this.jobRoute.getRouter());
+        // Job routes (admin only)
+        this.router.use('/jobs', requireAdmin(), this.jobRoute.getRouter());
 
-        // Scheduler routes
-        this.router.use('/scheduler', this.schedulerRoute.getRouter());
+        // Scheduler routes (admin only)
+        this.router.use('/scheduler', requireAdmin(), this.schedulerRoute.getRouter());
 
         // App routes
         this.router.use('/apps', this.appRoute.router);

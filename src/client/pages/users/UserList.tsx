@@ -16,6 +16,7 @@ import {
     FormControl,
     InputLabel,
     Box,
+    FormHelperText,
 } from '@mui/material';
 import { Delete as DeleteIcon, LockReset as LockResetIcon, Add as AddIcon } from '@mui/icons-material';
 import { StyledTableContainer, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
@@ -446,6 +447,7 @@ export const UserList: React.FC = () => {
                             <MenuItem value={UserType.User}>User</MenuItem>
                             <MenuItem value={UserType.Admin}>Administrator</MenuItem>
                         </Select>
+                        <FormHelperText>Regular users can only view transactions and licenses, without the ability to modify settings. Administrators can run tasks and modify the configuration.</FormHelperText>
                     </FormControl>
                     <TextField
                         label="Password"

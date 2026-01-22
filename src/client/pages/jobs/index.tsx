@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, CircularProgress, Alert } from '@mui/material';
+import { Typography, CircularProgress, Alert, Box } from '@mui/material';
 import { PlayArrow, CheckCircle, Error as ErrorIcon, Schedule } from '@mui/icons-material';
 import { JobType } from '#common/entities/JobStatus';
-import { PageContainer, HeaderContainer, JobList, JobCard, JobInfo, JobStatus, StartAllButton, StartJobButton } from './styles';
+import { PageContainer, PageTitle } from '../styles';
+import { JobList, JobCard, JobInfo, JobStatus, StartAllButton, StartJobButton } from './styles';
 
 interface JobStatusResponse {
     jobType: JobType;
@@ -118,18 +119,22 @@ export const JobsPage: React.FC = () => {
 
     return (
         <PageContainer>
-            <HeaderContainer>
-                <Typography variant="h4">Tasks</Typography>
-                <StartAllButton
-                    variant="contained"
-                    color="primary"
-                    onClick={startAllJobs}
-                    disabled={jobs.some(job => job.isRunning)}
-                    startIcon={<PlayArrow />}
-                >
-                    Start All Tasks
-                </StartAllButton>
-            </HeaderContainer>
+            <PageTitle>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <Typography variant="h4" component="h1">
+                        Tasks
+                    </Typography>
+                    <StartAllButton
+                        variant="contained"
+                        color="primary"
+                        onClick={startAllJobs}
+                        disabled={jobs.some(job => job.isRunning)}
+                        startIcon={<PlayArrow />}
+                    >
+                        Start All Tasks
+                    </StartAllButton>
+                </Box>
+            </PageTitle>
 
             {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
