@@ -11,6 +11,10 @@ import { LicenseVersionRoute } from './LicenseVersionRoute';
 import { SchedulerRoute } from './SchedulerRoute';
 import { TransactionPricingRoute } from './TransactionPricingRoute';
 import { AppRoute } from './AppRoutes';
+import { AuthRoute } from './AuthRoute';
+import { UserRoute } from './UserRoute';
+import { requireAuth } from '../middleware/authMiddleware';
+import { requireAdmin } from '../middleware/adminMiddleware';
 
 @injectable()
 export class ApiRouter {
@@ -26,7 +30,9 @@ export class ApiRouter {
         @inject(EXPRESS_TYPES.LicenseVersionRoute) private licenseVersionRoute: LicenseVersionRoute,
         @inject(EXPRESS_TYPES.SchedulerRoute) private schedulerRoute: SchedulerRoute,
         @inject(EXPRESS_TYPES.TransactionPricingRoute) private transactionPricingRoute: TransactionPricingRoute,
-        @inject(EXPRESS_TYPES.AppRoute) private appRoute: AppRoute
+        @inject(EXPRESS_TYPES.AppRoute) private appRoute: AppRoute,
+        @inject(EXPRESS_TYPES.AuthRoute) private authRoute: AuthRoute,
+        @inject(EXPRESS_TYPES.UserRoute) private userRoute: UserRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -45,10 +51,16 @@ export class ApiRouter {
         // Apply no-cache headers to all API routes
         this.router.use(this.setNoCacheHeaders.bind(this));
 
-        // Health check endpoint
+        // Public routes (no authentication required)
         this.router.get('/health', (req: Request, res: Response) => {
             res.json({ status: 'ok' });
         });
+
+        // Authentication routes (public)
+        this.router.use('/auth', this.authRoute.getRouter());
+
+        // Protected routes (require authentication)
+        this.router.use(requireAuth);
 
         // Transaction routes
         this.router.use('/transactions', this.transactionRoute.router);
@@ -71,6 +83,9 @@ export class ApiRouter {
 
         // App routes
         this.router.use('/apps', this.appRoute.router);
+
+        // User routes (admin only)
+        this.router.use('/users', requireAdmin(), this.userRoute.getRouter());
 
         // 404 handler for non-existent API endpoints
         this.router.use('*', (req: Request, res: Response) => {

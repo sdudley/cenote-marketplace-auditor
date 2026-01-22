@@ -3,6 +3,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import session from 'express-session';
+import passport from 'passport';
 import { configureContainer } from './express/config/container';
 import { ApiRouter } from './express/routes';
 import { initializeDatabase } from './config/database';
@@ -13,6 +15,7 @@ import { EXPRESS_TYPES } from './express/config/expressTypes';
 import { JobDao } from './database/dao/JobDao';
 import { TYPES } from './config/types';
 import { SchedulerService } from './services/SchedulerService';
+import { configurePassport } from './express/config/passport';
 
 // Optionally, patch require to use the resolver for #common
 const Module = require('module');
@@ -37,7 +40,10 @@ async function startServer() {
     let vite: ViteDevServer | undefined;
 
     // Set up basic middleware
-    app.use(cors());
+    app.use(cors({
+        origin: true,
+        credentials: true
+    }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
@@ -45,6 +51,25 @@ async function startServer() {
     try {
         const dataSource = await initializeDatabase();
         const container = configureContainer(dataSource);
+
+        // Configure Passport
+        configurePassport(container);
+
+        // Set up session middleware
+        app.use(session({
+            secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: true,
+                maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+            }
+        }));
+
+        // Initialize Passport middleware
+        app.use(passport.initialize());
+        app.use(passport.session());
 
         const jobDao = container.get<JobDao>(TYPES.JobDao);
         await jobDao.recordApplicationStart();

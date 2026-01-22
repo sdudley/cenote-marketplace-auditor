@@ -10,7 +10,8 @@
   },
   "include": [
     "./**/*",
-    "../common/**/*"
+    "../common/**/*",
+    "./types/**/*"
   ],
   "exclude": ["node_modules", "cli", "**/*.test.ts", "dist"]
 }

@@ -13,6 +13,8 @@ import { LicenseVersionRoute } from '../routes/LicenseVersionRoute';
 import { SchedulerRoute } from '../routes/SchedulerRoute';
 import { TransactionPricingRoute } from '../routes/TransactionPricingRoute';
 import { AppRoute } from '../routes/AppRoutes';
+import { AuthRoute } from '../routes/AuthRoute';
+import { UserRoute } from '../routes/UserRoute';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = configureCommonContainer(dataSource);
@@ -29,6 +31,8 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<SchedulerRoute>(EXPRESS_TYPES.SchedulerRoute).to(SchedulerRoute).inSingletonScope();
     container.bind<TransactionPricingRoute>(EXPRESS_TYPES.TransactionPricingRoute).to(TransactionPricingRoute).inSingletonScope();
     container.bind<AppRoute>(EXPRESS_TYPES.AppRoute).to(AppRoute).inSingletonScope();
+    container.bind<AuthRoute>(EXPRESS_TYPES.AuthRoute).to(AuthRoute).inSingletonScope();
+    container.bind<UserRoute>(EXPRESS_TYPES.UserRoute).to(UserRoute).inSingletonScope();
 
     return container;
 }

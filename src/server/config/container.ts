@@ -30,6 +30,7 @@ import { LicenseVersionDao } from '../database/dao/LicenseVersionDao';
 import { SchedulerService } from '../services/SchedulerService';
 import { SlackService } from '../services/SlackService';
 import { SenUpgradeJob } from '#server/jobs/SenUpgradeJob';
+import { UserDao } from '../database/dao/UserDao';
 
 /**
  * Build the DI container for the app. This is used when building the container for jobs, but when
@@ -72,6 +73,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<LicenseVersionDao>(TYPES.LicenseVersionDao).to(LicenseVersionDao).inSingletonScope();
     container.bind<SchedulerService>(TYPES.SchedulerService).to(SchedulerService).inSingletonScope();
     container.bind<SlackService>(TYPES.SlackService).to(SlackService).inSingletonScope();
+    container.bind<UserDao>(TYPES.UserDao).to(UserDao).inSingletonScope();
 
     return container;
 }

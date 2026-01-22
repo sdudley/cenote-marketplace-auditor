@@ -15,5 +15,7 @@ export const EXPRESS_TYPES = {
     LicenseVersionRoute: Symbol.for('LicenseVersionRoute'),
     SchedulerRoute: Symbol.for('SchedulerRoute'),
     TransactionPricingRoute: Symbol.for('TransactionPricingRoute'),
-    AppRoute: Symbol.for('AppRoute')
+    AppRoute: Symbol.for('AppRoute'),
+    AuthRoute: Symbol.for('AuthRoute'),
+    UserRoute: Symbol.for('UserRoute')
 };

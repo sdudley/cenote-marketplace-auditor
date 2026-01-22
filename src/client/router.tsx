@@ -5,31 +5,50 @@ import { TransactionsPage } from './pages/transactions';
 import { LicensesPage } from './pages/licenses';
 import { ConfigPage } from './pages/config';
 import { JobsPage } from './pages/jobs';
+import { UsersPage } from './pages/users';
+import { LoginPage, SetupPage } from './pages/auth';
+import { AuthGuard } from './components/AuthGuard';
 
 export const router = createBrowserRouter([
     {
+        path: '/login',
+        element: <LoginPage />,
+    },
+    {
+        path: '/setup',
+        element: <SetupPage />,
+    },
+    {
         path: '/',
-        element: <PageLayout />,
+        element: (
+            <AuthGuard>
+                <PageLayout />
+            </AuthGuard>
+        ),
         children: [
             {
-                path: '/',
+                index: true,
                 element: <TransactionsPage />,
             },
             {
-                path: '/transactions',
+                path: 'transactions',
                 element: <TransactionsPage />,
             },
             {
-                path: '/licenses',
+                path: 'licenses',
                 element: <LicensesPage />,
             },
             {
-                path: '/config',
+                path: 'config',
                 element: <ConfigPage />,
             },
             {
-                path: '/tasks',
+                path: 'tasks',
                 element: <JobsPage />,
+            },
+            {
+                path: 'users',
+                element: <UsersPage />,
             }
         ]
     }
