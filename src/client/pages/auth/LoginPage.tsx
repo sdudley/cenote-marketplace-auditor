@@ -86,7 +86,8 @@ export const LoginPage: React.FC = () => {
                             fullWidth
                             required
                             margin="normal"
-                            autoComplete="email"
+                            autoComplete="username"
+                            name="email"
                         />
                         <TextField
                             label="Password"
@@ -97,6 +98,7 @@ export const LoginPage: React.FC = () => {
                             required
                             margin="normal"
                             autoComplete="current-password"
+                            name="password"
                         />
                         <FormControlLabel
                             control={

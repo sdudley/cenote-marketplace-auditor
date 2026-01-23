@@ -132,7 +132,8 @@ export const SetupPage: React.FC = () => {
                             fullWidth
                             required
                             margin="normal"
-                            autoComplete="email"
+                            autoComplete="username"
+                            name="email"
                         />
                         <TextField
                             label="Password"
@@ -143,6 +144,7 @@ export const SetupPage: React.FC = () => {
                             required
                             margin="normal"
                             autoComplete="new-password"
+                            name="password"
                             helperText={getPasswordHelperText()}
                         />
                         <TextField
@@ -154,6 +156,7 @@ export const SetupPage: React.FC = () => {
                             required
                             margin="normal"
                             autoComplete="new-password"
+                            name="confirmPassword"
                         />
                         <Button
                             type="submit"
