@@ -77,7 +77,7 @@ export const LoginPage: React.FC = () => {
                     Cenote Marketplace Auditor
                     </Typography>
 
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} autoComplete="on">
                         <TextField
                             label="Email"
                             type="email"
@@ -88,6 +88,12 @@ export const LoginPage: React.FC = () => {
                             margin="normal"
                             autoComplete="username"
                             name="email"
+                            id="email"
+                            inputProps={{
+                                autoComplete: 'username',
+                                inputMode: 'email',
+                                'data-form-type': 'other'
+                            }}
                         />
                         <TextField
                             label="Password"
@@ -99,6 +105,11 @@ export const LoginPage: React.FC = () => {
                             margin="normal"
                             autoComplete="current-password"
                             name="password"
+                            id="password"
+                            inputProps={{
+                                autoComplete: 'current-password',
+                                'data-form-type': 'other'
+                            }}
                         />
                         <FormControlLabel
                             control={

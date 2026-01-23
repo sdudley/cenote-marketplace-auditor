@@ -123,7 +123,7 @@ export const SetupPage: React.FC = () => {
                         Create the first administrator account
                     </Typography>
 
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} autoComplete="on">
                         <TextField
                             label="Email"
                             type="email"
@@ -134,6 +134,12 @@ export const SetupPage: React.FC = () => {
                             margin="normal"
                             autoComplete="username"
                             name="email"
+                            id="email"
+                            inputProps={{
+                                autoComplete: 'username',
+                                inputMode: 'email',
+                                'data-form-type': 'other'
+                            }}
                         />
                         <TextField
                             label="Password"
@@ -145,7 +151,12 @@ export const SetupPage: React.FC = () => {
                             margin="normal"
                             autoComplete="new-password"
                             name="password"
+                            id="password"
                             helperText={getPasswordHelperText()}
+                            inputProps={{
+                                autoComplete: 'new-password',
+                                'data-form-type': 'other'
+                            }}
                         />
                         <TextField
                             label="Confirm Password"
@@ -157,6 +168,11 @@ export const SetupPage: React.FC = () => {
                             margin="normal"
                             autoComplete="new-password"
                             name="confirmPassword"
+                            id="confirmPassword"
+                            inputProps={{
+                                autoComplete: 'new-password',
+                                'data-form-type': 'other'
+                            }}
                         />
                         <Button
                             type="submit"
