@@ -13,6 +13,7 @@ import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { TransactionDiffValidationService } from '#server/services/transactionValidation/TransactionDiffValidationService';
 import { PricingService } from '#server/services/PricingService';
 import { CURRENT_RECONCILER_VERSION } from "#common/config/versions";
+import { SlackService } from '#server/services/SlackService';
 
 const DEFAULT_START_DATE = '2024-01-01';
 
@@ -31,7 +32,8 @@ export class ValidationJob {
         @inject(TYPES.TransactionAdjustmentDao) private transactionAdjustmentDao: TransactionAdjustmentDao,
         @inject(TYPES.TransactionVersionDao) private transactionVersionDao: TransactionVersionDao,
         @inject(TYPES.TransactionDiffValidationService) private transactionDiffValidationService: TransactionDiffValidationService,
-        @inject(TYPES.PricingService) private pricingService: PricingService
+        @inject(TYPES.PricingService) private pricingService: PricingService,
+        @inject(TYPES.SlackService) private slackService: SlackService
     ) {
     }
 
@@ -135,6 +137,16 @@ export class ValidationJob {
                     reconciled = false;
                 }
             }
+        }
+
+        // Post a message to the Slack exceptions channel indicating that the
+        // transaction was not reconciled.
+
+        if (!reconciled && (!existingReconcile || existingReconcile.reconciled)) {
+            await this.slackService.postExceptionToSlack({
+                transaction,
+                validationResult
+            });
         }
 
         if (reconciled) {
