@@ -70,6 +70,18 @@ async function startServer() {
             createTableIfMissing: true // Automatically create the session table if it doesn't exist
         });
 
+        // Determine if we should use secure cookies
+        // Only use secure cookies if explicitly enabled via SESSION_SECURE_COOKIE=true
+        // This is important because secure cookies only work over HTTPS
+        // If you're using HTTP (even in production), set SESSION_SECURE_COOKIE=false
+        const useSecureCookies = process.env.SESSION_SECURE_COOKIE === 'true';
+
+        // Trust proxy if behind a reverse proxy (common in containers)
+        // This allows Express to read X-Forwarded-Proto header to detect HTTPS
+        if (process.env.TRUST_PROXY === 'true') {
+            app.set('trust proxy', 1);
+        }
+
         // Set up session middleware with persistent store
         app.use(session({
             store: sessionStore,
@@ -77,8 +89,9 @@ async function startServer() {
             resave: false,
             saveUninitialized: false,
             cookie: {
-                secure: process.env.NODE_ENV === 'production',
+                secure: useSecureCookies,
                 httpOnly: true,
+                sameSite: 'lax', // Allows cookies to be sent on top-level navigations
                 maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
             }
         }));

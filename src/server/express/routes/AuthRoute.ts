@@ -70,10 +70,18 @@ export class AuthRoute {
                         req.session.cookie.maxAge = undefined; // Session cookie (expires when browser closes)
                     }
 
-                    const userResponse = { id: user.id, email: user.email, userType: user.userType };
-                    return res.json({
-                        authenticated: true,
-                        user: userResponse
+                    // Save the session before sending response
+                    req.session?.save((saveErr) => {
+                        if (saveErr) {
+                            console.error('Error saving session:', saveErr);
+                            return res.status(500).json({ error: 'Session save error' });
+                        }
+
+                        const userResponse = { id: user.id, email: user.email, userType: user.userType };
+                        return res.json({
+                            authenticated: true,
+                            user: userResponse
+                        });
                     });
                 });
             })(req, res, next);
@@ -128,10 +136,17 @@ export class AuthRoute {
                     if (err) {
                         return res.status(500).json({ error: 'Auto-login failed' });
                     }
-                    const userResponse = { id: user.id, email: user.email, userType: user.userType };
-                    res.json({
-                        authenticated: true,
-                        user: userResponse
+                    // Save the session before sending response
+                    req.session?.save((saveErr) => {
+                        if (saveErr) {
+                            console.error('Error saving session:', saveErr);
+                            return res.status(500).json({ error: 'Session save error' });
+                        }
+                        const userResponse = { id: user.id, email: user.email, userType: user.userType };
+                        res.json({
+                            authenticated: true,
+                            user: userResponse
+                        });
                     });
                 });
             } catch (error) {
