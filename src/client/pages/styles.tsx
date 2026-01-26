@@ -18,6 +18,15 @@ export const PageTitle = muiStyled(Box)(({ theme }) => ({
         paddingLeft: theme.spacing(1),
         paddingRight: theme.spacing(1),
     },
+    // Short viewport (e.g. mobile landscape): minimal height so table gets most of the screen
+    '@media (max-height: 500px)': {
+        marginBottom: theme.spacing(0.5),
+        paddingTop: theme.spacing(0.5),
+        '& .MuiTypography-root': {
+            fontSize: '1.1rem',
+            lineHeight: 1.3,
+        },
+    },
 }));
 
 export const StyledListItemButton = muiStyled(ListItemButton)(({ theme }) => ({

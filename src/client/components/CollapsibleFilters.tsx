@@ -30,15 +30,32 @@ export const CollapsibleFilters: React.FC<CollapsibleFiltersProps> = ({ children
 
     // On mobile, render as collapsible
     return (
-        <Box sx={{ width: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                <Box component="span" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>
+        <Box
+            sx={{
+                width: '100%',
+                // Short viewport: inline with search/columns, no extra margin
+                '@media (max-height: 500px)': {
+                    width: 'auto',
+                    '& > div:first-of-type': { marginBottom: 0 },
+                },
+            }}
+        >
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 1,
+                    '@media (max-height: 500px)': { mb: 0 },
+                }}
+            >
+                <Box component="span" sx={{ fontWeight: 500, fontSize: '0.875rem', '@media (max-height: 500px)': { fontSize: '0.8125rem' } }}>
                     {label || 'Filters'}
                 </Box>
                 <IconButton
                     size="small"
                     onClick={() => setExpanded(!expanded)}
-                    sx={{ padding: '4px' }}
+                    sx={{ padding: '4px', '@media (max-height: 500px)': { padding: '2px' } }}
                 >
                     {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                 </IconButton>

@@ -60,6 +60,7 @@ export const ResponsiveSearchContainer = styled(Box)(({ theme }) => ({
         flexDirection: 'column',
         alignItems: 'stretch',
         gap: '12px',
+        marginBottom: '12px',
 
         '& .search-field': {
             minWidth: 'unset',
@@ -75,6 +76,34 @@ export const ResponsiveSearchContainer = styled(Box)(({ theme }) => ({
 
         '& .columns-button': {
             alignSelf: 'flex-end',
+        },
+    },
+
+    // Short viewport (e.g. mobile landscape): single row, minimal gaps so header scrolls away and table gets space
+    '@media (max-height: 500px)': {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: '6px',
+        marginBottom: '6px',
+        alignItems: 'center',
+
+        '& .search-field': {
+            flex: '1 1 140px',
+            minWidth: '100px',
+            '& .MuiInputBase-root': {
+                fontSize: '0.875rem',
+            },
+        },
+
+        '& .filter-label': {
+            marginRight: '4px',
+            fontSize: '0.8125rem',
+        },
+
+        '& .columns-button': {
+            flexShrink: 0,
+            padding: '4px 10px',
+            fontSize: '0.8125rem',
         },
     },
 

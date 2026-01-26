@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
+    Box,
     TableRow,
     TablePagination,
     TextField,
@@ -196,7 +197,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     return (
         <TableContainer>
-            <ResponsiveSearchContainer>
+            <ResponsiveSearchContainer sx={{ mb: 0 }}>
                 <TextField
                     className="search-field"
                     label=""
@@ -282,6 +283,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     Columns
                 </Button>
             </ResponsiveSearchContainer>
+
+            <Box aria-hidden sx={{ height: 16, flexShrink: 0 }} />
 
             <TableWrapper>
                 <StyledTableContainer>

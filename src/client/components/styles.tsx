@@ -83,17 +83,16 @@ export const InfoTableHeader = styled(TableCell)({
 
 export const Main = styled('main')<{ isMobile?: boolean }>(({ theme, isMobile }) => ({
     flexGrow: 1,
-    paddingTop: theme.spacing(3),
+    padding: 0,
     marginLeft: 0,
     marginRight: 0,
-    height: 'calc(100vh - 64px)', // Changed from minHeight to height
+    height: 'calc(100vh - 64px)',
     width: isMobile ? '100%' : 'calc(100% - 240px)',
     maxWidth: isMobile ? '100%' : 'calc(100% - 240px)',
-    overflow: 'auto',  // Changed back to just 'auto'
+    overflow: 'auto',
     [theme.breakpoints.down('md')]: {
         width: '100%',
         maxWidth: '100%',
-        paddingTop: theme.spacing(2),
     },
 }));
 
@@ -154,7 +153,7 @@ export const StyledMobileDrawer = styled(Drawer)(({ theme }) => ({
     },
 }));
 
-export const ContentContainer = styled(Container)({
+export const ContentContainer = styled(Container)(({ theme }) => ({
     className: 'content-container',
     width: '100%',
     maxWidth: '100% !important',
@@ -164,12 +163,15 @@ export const ContentContainer = styled(Container)({
     paddingRight: 0,
     paddingBottom: 0,
     marginTop: 0,
-    paddingTop: 0,
+    paddingTop: theme.spacing(3),
+    [theme.breakpoints.down('md')]: {
+        paddingTop: theme.spacing(2),
+    },
     '&.MuiContainer-root': {
         paddingLeft: 0,
         paddingRight: 0
     }
-});
+}));
 
 export const ContentBoxWrapper = styled(Box)(({ theme }) => ({
     width: '100%',
@@ -199,53 +201,69 @@ export const TableWrapper = styled(Box)({
     width: '100%',
     maxWidth: '100%',
     position: 'relative',
-    height: 'calc(100vh - 280px - 16px)', // Increased to 16px to ensure full scrollbar visibility
-    marginBottom: 0
+    marginBottom: 0,
+    // No fixed height: table grows with rows so the page has one scroll (Main)
 });
 
 export const StyledTableContainer = styled(MuiTableContainer)({
     position: 'relative',
     width: '100%',
     maxWidth: '100%',
-    overflowX: 'auto',
-    overflowY: 'auto',
-    height: '100%',
+    overflow: 'visible',
     marginBottom: 0,
-    '&::-webkit-scrollbar': {
-        width: '8px',
-        height: '8px'
-    },
-    '&::-webkit-scrollbar-track': {
-        background: '#f1f1f1'
-    },
-    '&::-webkit-scrollbar-thumb': {
-        background: '#888',
-        borderRadius: '4px'
-    },
-    '&::-webkit-scrollbar-thumb:hover': {
-        background: '#555'
-    }
+    // No overflow on this wrapper so sticky header sticks to Main; Main provides horizontal scroll when table is wide
 });
 
-export const PaginationWrapper = styled(Box)({
+export const PaginationWrapper = styled(Box)(({ theme }) => ({
     position: 'sticky',
     bottom: 0,
     backgroundColor: 'white',
-    borderTop: '1px solid rgba(224, 224, 224, 1)',
+    borderTop: 'none',
     padding: '8px 0',
-    zIndex: 2,
-    marginBottom: 0
-});
+    zIndex: 10,
+    marginBottom: 0,
+    boxShadow: '0 -1px 0 0 rgba(0,0,0,0.08)',
+    '&::before': {
+        content: '""',
+        position: 'absolute',
+        left: theme.spacing(-2),
+        right: theme.spacing(-2),
+        top: 0,
+        height: 1,
+        backgroundColor: 'rgba(224, 224, 224, 1)',
+        [theme.breakpoints.down('md')]: {
+            left: theme.spacing(-1),
+            right: theme.spacing(-1),
+        },
+    },
+    '@media (max-height: 500px)': {
+        padding: '4px 0',
+        '& .MuiTablePagination-root': {
+            minHeight: 40,
+            '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                fontSize: '0.75rem',
+            },
+        },
+    },
+}));
 
 export const StyledTableHead = styled(TableHead)(({ theme }) => ({
-    position: 'sticky',
-    top: 0,
-    zIndex: 2,
-    backgroundColor: theme.palette.background.paper,
+    marginTop: 0,
+    paddingTop: 0,
     '& th': {
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        marginTop: 0,
+        paddingTop: 0,
         backgroundColor: theme.palette.background.paper,
-        borderBottom: `2px solid ${theme.palette.divider}`
-    }
+        borderBottom: `2px solid ${theme.palette.divider}`,
+        boxShadow: '0 1px 0 0 rgba(0,0,0,0.12)',
+        '@media (max-height: 500px)': {
+            padding: '4px 8px',
+            fontSize: '0.75rem',
+        },
+    },
 }));
 
 export const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -256,7 +274,11 @@ export const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    padding: '8px'
+    padding: '8px',
+    '@media (max-height: 500px)': {
+        padding: '4px 8px',
+        fontSize: '0.8125rem',
+    },
 }));
 
 export const SearchContainer = styled(Box)({
@@ -284,6 +306,9 @@ export const TableContainer = styled(Box)(({ theme }) => ({
     padding: '16px 16px 0 16px',
     [theme.breakpoints.down('md')]: {
         padding: '8px 8px 0 8px',
+    },
+    '@media (max-height: 500px)': {
+        padding: '4px 8px 0 8px',
     },
 }));
 
