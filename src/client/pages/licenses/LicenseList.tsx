@@ -18,6 +18,7 @@ import {
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { LicenseQuerySortType, LicenseResult, AppInfo } from '#common/types/apiTypes';
 import { StyledTableContainer, TableScrollWrapper, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
+import { TableWithMeasuredFooter } from '../../components/TableWithMeasuredFooter';
 import { LicenseDetailsDialog } from './LicenseDetailsDialog';
 import { SortOrder } from '../../components/SortableHeader';
 import { StyledTableRow, StyledListPaper, StyledTableCell } from '../../components/styles';
@@ -301,60 +302,65 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
 
             <Box aria-hidden sx={{ height: 16, flexShrink: 0 }} />
 
-            <TableScrollWrapper>
-                <TableWrapper>
-                    <StyledTableContainer>
-                        <StyledListPaper>
-                            {loading && (
-                                <LoadingOverlay>
-                                    <CircularProgress />
-                                </LoadingOverlay>
-                            )}
-                            <StyledTable>
-                                <StyledTableHead>
-                                    <TableRow>
-                                        {visibleColumns.map((column) =>
-                                            renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
-                                        )}
-                                    </TableRow>
-                                </StyledTableHead>
-                                <StyledTableBody>
-                                    {licenses && licenses.length > 0 ? (
-                                        licenses.map((license) => (
-                                            <StyledTableRow
-                                                key={`${license.license.id}`}
-                                                onClick={() => setSelectedLicense(license)}
-                                            >
-                                                {visibleColumns.map((column) =>
-                                                    renderCell(column, license, cellContext)
-                                                )}
-                                            </StyledTableRow>
-                                        ))
-                                    ) : !loading && (
-                                        <StyledTableRow>
-                                            <StyledTableCell colSpan={visibleColumns.length} align="center" sx={{ py: 4 }}>
-                                                No licenses found.
-                                            </StyledTableCell>
-                                        </StyledTableRow>
+            <TableWithMeasuredFooter
+                table={
+                    <TableScrollWrapper>
+                        <TableWrapper>
+                            <StyledTableContainer>
+                                <StyledListPaper>
+                                    {loading && (
+                                        <LoadingOverlay>
+                                            <CircularProgress />
+                                        </LoadingOverlay>
                                     )}
-                                </StyledTableBody>
-                            </StyledTable>
-                        </StyledListPaper>
-                    </StyledTableContainer>
-                </TableWrapper>
-            </TableScrollWrapper>
-
-            <PaginationWrapper>
-                <TablePagination
-                    component="div"
-                    count={total}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[10, 25, 50, 100]}
-                />
-            </PaginationWrapper>
+                                    <StyledTable>
+                                        <StyledTableHead>
+                                            <TableRow>
+                                                {visibleColumns.map((column) =>
+                                                    renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
+                                                )}
+                                            </TableRow>
+                                        </StyledTableHead>
+                                        <StyledTableBody>
+                                            {licenses && licenses.length > 0 ? (
+                                                licenses.map((license) => (
+                                                    <StyledTableRow
+                                                        key={`${license.license.id}`}
+                                                        onClick={() => setSelectedLicense(license)}
+                                                    >
+                                                        {visibleColumns.map((column) =>
+                                                            renderCell(column, license, cellContext)
+                                                        )}
+                                                    </StyledTableRow>
+                                                ))
+                                            ) : !loading && (
+                                                <StyledTableRow>
+                                                    <StyledTableCell colSpan={visibleColumns.length} align="center" sx={{ py: 4 }}>
+                                                        No licenses found.
+                                                    </StyledTableCell>
+                                                </StyledTableRow>
+                                            )}
+                                        </StyledTableBody>
+                                    </StyledTable>
+                                </StyledListPaper>
+                            </StyledTableContainer>
+                        </TableWrapper>
+                    </TableScrollWrapper>
+                }
+                footer={
+                    <PaginationWrapper>
+                        <TablePagination
+                            component="div"
+                            count={total}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            rowsPerPageOptions={[10, 25, 50, 100]}
+                        />
+                    </PaginationWrapper>
+                }
+            />
 
             <LicenseDetailsDialog
                 license={selectedLicense}

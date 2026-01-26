@@ -15,6 +15,7 @@ import {
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult, AppInfo } from '#common/types/apiTypes';
 import { StyledTableContainer, TableScrollWrapper, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
+import { TableWithMeasuredFooter } from '../../components/TableWithMeasuredFooter';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder } from '../../components/SortableHeader';
@@ -286,60 +287,65 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
             <Box aria-hidden sx={{ height: 16, flexShrink: 0 }} />
 
-            <TableScrollWrapper>
-                <TableWrapper>
-                    <StyledTableContainer>
-                        <StyledListPaper>
-                            {loading && (
-                                <LoadingOverlay>
-                                    <CircularProgress />
-                                </LoadingOverlay>
-                            )}
-                            <StyledTable>
-                                <StyledTableHead>
-                                    <TableRow>
-                                        {visibleColumns.map((column) =>
-                                            renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
-                                        )}
-                                    </TableRow>
-                                </StyledTableHead>
-                                <StyledTableBody>
-                                    {transactions && transactions.length > 0 ? (
-                                        transactions.map((tr) => (
-                                            <StyledTableRow
-                                                key={`${tr.transaction.id}`}
-                                                onClick={() => setSelectedTransaction(tr)}
-                                            >
-                                                {visibleColumns.map((column) =>
-                                                    renderCell(column, tr, cellContext)
-                                                )}
-                                            </StyledTableRow>
-                                        ))
-                                    ) : !loading && (
-                                        <StyledTableRow>
-                                            <StyledTableCell colSpan={visibleColumns.length} align="center" sx={{ py: 4 }}>
-                                                No transactions. Please configure the application through the Configuration page, then start all tasks on the Tasks page.
-                                            </StyledTableCell>
-                                        </StyledTableRow>
+            <TableWithMeasuredFooter
+                table={
+                    <TableScrollWrapper>
+                        <TableWrapper>
+                            <StyledTableContainer>
+                                <StyledListPaper>
+                                    {loading && (
+                                        <LoadingOverlay>
+                                            <CircularProgress />
+                                        </LoadingOverlay>
                                     )}
-                                </StyledTableBody>
-                            </StyledTable>
-                        </StyledListPaper>
-                    </StyledTableContainer>
-                </TableWrapper>
-            </TableScrollWrapper>
-
-            <PaginationWrapper>
-                <TablePagination
-                    component="div"
-                    count={total}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[10, 25, 50, 100]}
-                />
-            </PaginationWrapper>
+                                    <StyledTable>
+                                        <StyledTableHead>
+                                            <TableRow>
+                                                {visibleColumns.map((column) =>
+                                                    renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
+                                                )}
+                                            </TableRow>
+                                        </StyledTableHead>
+                                        <StyledTableBody>
+                                            {transactions && transactions.length > 0 ? (
+                                                transactions.map((tr) => (
+                                                    <StyledTableRow
+                                                        key={`${tr.transaction.id}`}
+                                                        onClick={() => setSelectedTransaction(tr)}
+                                                    >
+                                                        {visibleColumns.map((column) =>
+                                                            renderCell(column, tr, cellContext)
+                                                        )}
+                                                    </StyledTableRow>
+                                                ))
+                                            ) : !loading && (
+                                                <StyledTableRow>
+                                                    <StyledTableCell colSpan={visibleColumns.length} align="center" sx={{ py: 4 }}>
+                                                        No transactions. Please configure the application through the Configuration page, then start all tasks on the Tasks page.
+                                                    </StyledTableCell>
+                                                </StyledTableRow>
+                                            )}
+                                        </StyledTableBody>
+                                    </StyledTable>
+                                </StyledListPaper>
+                            </StyledTableContainer>
+                        </TableWrapper>
+                    </TableScrollWrapper>
+                }
+                footer={
+                    <PaginationWrapper>
+                        <TablePagination
+                            component="div"
+                            count={total}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            rowsPerPageOptions={[10, 25, 50, 100]}
+                        />
+                    </PaginationWrapper>
+                }
+            />
 
             <TransactionDetailsDialog
                 transaction={selectedTransaction}

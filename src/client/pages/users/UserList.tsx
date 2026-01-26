@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import { Delete as DeleteIcon, LockReset as LockResetIcon, Add as AddIcon } from '@mui/icons-material';
 import { StyledTableContainer, TableScrollWrapper, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
+import { TableWithMeasuredFooter } from '../../components/TableWithMeasuredFooter';
 import { StyledTableRow, StyledListPaper, StyledTableCell, TableHeaderCell } from '../../components/styles';
 import { UserType } from '../../util/userUtils';
 import { validatePassword, validatePasswordLength, getPasswordHelperText } from '../../util/passwordValidation';
@@ -302,79 +303,84 @@ export const UserList: React.FC = () => {
                     Create User
                 </Button>
             </Box>
-            <TableScrollWrapper>
-                <TableWrapper>
-                    <StyledTableContainer>
-                        <StyledListPaper>
-                            <StyledTable>
-                                <StyledTableHead>
-                                    <StyledTableRow>
-                                        <TableHeaderCell>Email</TableHeaderCell>
-                                        <TableHeaderCell>Access Level</TableHeaderCell>
-                                        <TableHeaderCell align="right">Actions</TableHeaderCell>
-                                    </StyledTableRow>
-                                </StyledTableHead>
-                                <StyledTableBody>
-                                    {loading ? (
-                                        <StyledTableRow>
-                                            <StyledTableCell colSpan={3}>
-                                                <LoadingOverlay>
-                                                    <CircularProgress />
-                                                </LoadingOverlay>
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    ) : users.length === 0 ? (
-                                        <StyledTableRow>
-                                            <StyledTableCell colSpan={3} align="center">
-                                                No users found
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    ) : (
-                                        users.map((user) => (
-                                            <StyledTableRow key={user.id}>
-                                                <StyledTableCell>{user.email}</StyledTableCell>
-                                                <StyledTableCell>
-                                                    {user.userType === UserType.Admin ? 'Administrator' : 'User'}
-                                                </StyledTableCell>
-                                                <StyledTableCell align="right">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => handleResetPasswordClick(user)}
-                                                        title="Reset Password"
-                                                    >
-                                                        <LockResetIcon />
-                                                    </IconButton>
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => handleDeleteClick(user)}
-                                                        disabled={user.id === currentUserId}
-                                                        title={user.id === currentUserId ? 'Cannot delete your own account' : 'Delete User'}
-                                                        color="error"
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </StyledTableCell>
+            <TableWithMeasuredFooter
+                table={
+                    <TableScrollWrapper>
+                        <TableWrapper>
+                            <StyledTableContainer>
+                                <StyledListPaper>
+                                    <StyledTable>
+                                        <StyledTableHead>
+                                            <StyledTableRow>
+                                                <TableHeaderCell>Email</TableHeaderCell>
+                                                <TableHeaderCell>Access Level</TableHeaderCell>
+                                                <TableHeaderCell align="right">Actions</TableHeaderCell>
                                             </StyledTableRow>
-                                        ))
-                                    )}
-                                </StyledTableBody>
-                            </StyledTable>
-                        </StyledListPaper>
-                    </StyledTableContainer>
-                </TableWrapper>
-            </TableScrollWrapper>
-
-            <PaginationWrapper>
-                <TablePagination
-                    component="div"
-                    count={total}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                    rowsPerPageOptions={[10, 25, 50, 100]}
-                />
-            </PaginationWrapper>
+                                        </StyledTableHead>
+                                        <StyledTableBody>
+                                            {loading ? (
+                                                <StyledTableRow>
+                                                    <StyledTableCell colSpan={3}>
+                                                        <LoadingOverlay>
+                                                            <CircularProgress />
+                                                        </LoadingOverlay>
+                                                    </StyledTableCell>
+                                                </StyledTableRow>
+                                            ) : users.length === 0 ? (
+                                                <StyledTableRow>
+                                                    <StyledTableCell colSpan={3} align="center">
+                                                        No users found
+                                                    </StyledTableCell>
+                                                </StyledTableRow>
+                                            ) : (
+                                                users.map((user) => (
+                                                    <StyledTableRow key={user.id}>
+                                                        <StyledTableCell>{user.email}</StyledTableCell>
+                                                        <StyledTableCell>
+                                                            {user.userType === UserType.Admin ? 'Administrator' : 'User'}
+                                                        </StyledTableCell>
+                                                        <StyledTableCell align="right">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleResetPasswordClick(user)}
+                                                                title="Reset Password"
+                                                            >
+                                                                <LockResetIcon />
+                                                            </IconButton>
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => handleDeleteClick(user)}
+                                                                disabled={user.id === currentUserId}
+                                                                title={user.id === currentUserId ? 'Cannot delete your own account' : 'Delete User'}
+                                                                color="error"
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </StyledTableCell>
+                                                    </StyledTableRow>
+                                                ))
+                                            )}
+                                        </StyledTableBody>
+                                    </StyledTable>
+                                </StyledListPaper>
+                            </StyledTableContainer>
+                        </TableWrapper>
+                    </TableScrollWrapper>
+                }
+                footer={
+                    <PaginationWrapper>
+                        <TablePagination
+                            component="div"
+                            count={total}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            rowsPerPageOptions={[10, 25, 50, 100]}
+                        />
+                    </PaginationWrapper>
+                }
+            />
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>

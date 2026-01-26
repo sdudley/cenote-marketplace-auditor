@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    Box,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -16,7 +17,6 @@ import {
     VersionDataBox,
     InfoTableBox,
     InfoTableHeader,
-    VersionButton,
     TreeViewScrollContainer,
     TreeViewScrollContent
 } from '../../components/styles';
@@ -47,19 +47,21 @@ export const LicenseVersionDialog: React.FC<LicenseVersionDialogProps> = ({ vers
             maxWidth="lg"
             fullWidth
         >
-            <DialogTitle>
-                License Version Details
-                <VersionButton>
+            <DialogTitle sx={{ pr: { xs: 11, sm: 8 }, position: 'relative' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Box component="span" sx={{ flex: '1 1 auto', minWidth: 0 }}>
+                        License Version Details
+                    </Box>
                     <Button
                         variant="outlined"
                         size="small"
                         onClick={() => handleExportLicense({ licenseData: version.data, suffix: `v${version.version}` })}
-                        sx={{ textTransform: 'none' }}
+                        sx={{ textTransform: 'none', flexShrink: 0 }}
                     >
                         Export as JSON
                     </Button>
-                </VersionButton>
-                <CloseButton onClose={onClose} />
+                    <CloseButton onClose={onClose} />
+                </Box>
             </DialogTitle>
             <DialogContent dividers>
                 <InfoTableBox>

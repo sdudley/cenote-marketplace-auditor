@@ -53,12 +53,14 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
             >
                 <DialogTitle sx={{
                     display: 'flex',
+                    flexWrap: 'wrap',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    pr: 8,
+                    gap: 1,
+                    pr: { xs: 11, sm: 8 },
                     position: 'relative'
                 }}>
-                    <Box component="span" sx={{ flex: 1, pr: 2 }}>
+                    <Box component="span" sx={{ flex: { xs: '1 1 100%', sm: 1 }, minWidth: 0 }}>
                         Transaction Details
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>

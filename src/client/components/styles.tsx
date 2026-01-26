@@ -205,6 +205,17 @@ export const TableScrollWrapper = styled(Box)({
     marginBottom: 0,
 });
 
+/** Wraps table + footer so the footer can match table width when overridden by a parent.
+ *  Last child (footer) is reset to width 100% when this wrapper is used. */
+export const TableAndFooterWrapper = styled(Box)({
+    width: '100%',
+    '& > *:last-child': {
+        marginLeft: 0,
+        marginRight: 0,
+        width: '100%',
+    },
+});
+
 export const TableWrapper = styled(Box)({
     width: '100%',
     maxWidth: '100%',
@@ -235,6 +246,14 @@ export const PaginationWrapper = styled(Box)(({ theme }) => ({
     width: `calc(100% + ${theme.spacing(4)})`,
     boxSizing: 'border-box',
     boxShadow: '0 -1px 0 0 rgba(0,0,0,0.08)',
+    '& .MuiTablePagination-toolbar': {
+        justifyContent: 'flex-start',
+        paddingLeft: 0,
+    },
+    '& .MuiTablePagination-spacer': {
+        flex: 'none',
+        width: 0,
+    },
     [theme.breakpoints.down('md')]: {
         marginLeft: theme.spacing(-1),
         marginRight: theme.spacing(-1),
