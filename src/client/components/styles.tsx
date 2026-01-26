@@ -89,8 +89,7 @@ export const Main = styled('main')<{ isMobile?: boolean }>(({ theme, isMobile })
     height: 'calc(100vh - 64px)',
     width: isMobile ? '100%' : 'calc(100% - 240px)',
     maxWidth: isMobile ? '100%' : 'calc(100% - 240px)',
-    overflowX: 'hidden',
-    overflowY: 'auto',
+    overflow: 'auto',
     [theme.breakpoints.down('md')]: {
         width: '100%',
         maxWidth: '100%',
@@ -198,12 +197,11 @@ export const SortArrows = styled(Box)(({ theme }) => ({
     },
 }));
 
-/** Wraps the table so only this area scrolls horizontally; rest of page (search, footer) stays full width.
- *  overflow-y: clip avoids creating a block-axis scroll container so thead stays sticky to Main. */
+/** Wraps the table. No overflow here — Main is the only scroll container so thead sticky works (pure CSS).
+ *  When the table is wide, Main scrolls horizontally; thead sticks to the top when scrolling vertically. */
 export const TableScrollWrapper = styled(Box)({
     width: '100%',
-    overflowX: 'auto',
-    overflowY: 'clip',
+    overflow: 'visible',
     marginBottom: 0,
 });
 
