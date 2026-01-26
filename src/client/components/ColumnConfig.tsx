@@ -20,6 +20,7 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     DragEndEvent,
@@ -148,11 +149,19 @@ const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisi
                 sx={{
                     cursor: 'grab',
                     '&:active': { cursor: 'grabbing' },
-                    p: 0.25, // Minimal padding
+                    p: 0.25,
                     borderRadius: 0.5,
                     '&:hover': {
                         backgroundColor: 'action.hover',
                     },
+                    // Let touch start drag instead of scroll (dnd-kit TouchSensor uses delay to disambiguate)
+                    touchAction: 'none',
+                    // At least 44px touch target so the grab handle is easy to hit on mobile
+                    minWidth: 44,
+                    minHeight: 44,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}
             >
                 <DragIndicator color="action" fontSize="small" />
@@ -180,6 +189,12 @@ export const ColumnConfigDialog = <T extends any, C extends any, S extends any>(
 
     const sensors = useSensors(
         useSensor(PointerSensor),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
