@@ -34,8 +34,6 @@ export const LabelContainer = styled(Box)({
 });
 
 export const JsonValue = styled(Typography)({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
     whiteSpace: 'nowrap'
 }) as typeof Typography;
 
@@ -363,6 +361,22 @@ export const TreeToggle = styled(Box)({
 export const TreeBorder = styled(Box)({
     border: '1px solid gainsboro',
     padding: '8px'
+});
+
+/** One horizontal scroll for the entire tree view. Wrap the tree (e.g. SimpleTreeView) in this plus TreeViewScrollContent. */
+export const TreeViewScrollContainer = styled(Box)({
+    overflowX: 'auto',
+    width: '100%'
+});
+
+/** Inner wrapper for tree view scroll; use as direct child of TreeViewScrollContainer so content width drives the scroll. */
+export const TreeViewScrollContent = styled(Box)({
+    display: 'inline-block',
+    width: 'max-content',
+    minWidth: '100%',
+    '& > *': {
+        width: 'max-content'
+    }
 });
 
 export const StyledListPaper = styled(Paper)({

@@ -16,7 +16,9 @@ import {
     VersionDataBox,
     InfoTableBox,
     InfoTableHeader,
-    VersionButton
+    VersionButton,
+    TreeViewScrollContainer,
+    TreeViewScrollContent
 } from '../../components/styles';
 import { JsonDiffObjectTreeView } from '../../components/JsonDiffObjectTreeView';
 import { getObjectDiff } from '#common/util/objectDiff';
@@ -80,19 +82,23 @@ export const LicenseVersionDialog: React.FC<LicenseVersionDialogProps> = ({ vers
                 </InfoTableBox>
 
                 <VersionDataBox>
-                    <SimpleTreeView
-                        slots={{
-                            expandIcon: ExpandMore,
-                            collapseIcon: ExpandLess
-                        }}
-                        defaultExpandedItems={allIds}
-                    >
-                        <JsonDiffObjectTreeView
-                            data={jsonDiffObject}
-                            humanizeKeys={true}
-                            highlightNew={version.version !== 1}
-                        />
-                    </SimpleTreeView>
+                    <TreeViewScrollContainer>
+                        <TreeViewScrollContent>
+                            <SimpleTreeView
+                                slots={{
+                                    expandIcon: ExpandMore,
+                                    collapseIcon: ExpandLess
+                                }}
+                                defaultExpandedItems={allIds}
+                            >
+                                <JsonDiffObjectTreeView
+                                    data={jsonDiffObject}
+                                    humanizeKeys={true}
+                                    highlightNew={version.version !== 1}
+                                />
+                            </SimpleTreeView>
+                        </TreeViewScrollContent>
+                    </TreeViewScrollContainer>
                 </VersionDataBox>
             </DialogContent>
         </Dialog>

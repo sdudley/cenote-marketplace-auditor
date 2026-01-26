@@ -8,7 +8,8 @@ import {
     TableBody,
     TableCell,
     TableRow,
-    Button
+    Button,
+    Box
 } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
@@ -17,7 +18,8 @@ import { JsonTreeView } from '../../components/JsonTreeView';
 import {
     InfoTableBox,
     InfoTableHeader,
-    VersionButton
+    TreeViewScrollContainer,
+    TreeViewScrollContent
 } from '../../components/styles';
 import { collectIds } from '#client/util/collectIds';
 import { CloseButton } from '../../components/CloseButton';
@@ -49,14 +51,22 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                 maxWidth="lg"
                 fullWidth
             >
-                <DialogTitle>
-                    Transaction Details
-                    <VersionButton>
+                <DialogTitle sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    pr: 8,
+                    position: 'relative'
+                }}>
+                    <Box component="span" sx={{ flex: 1, pr: 2 }}>
+                        Transaction Details
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
                         <Button
                             variant="outlined"
                             size="small"
                             onClick={() => handleExportTransaction({ transactionData: transaction.transaction.data })}
-                            sx={{ textTransform: 'none', marginRight: 1 }}
+                            sx={{ textTransform: 'none' }}
                         >
                             Export as JSON
                         </Button>
@@ -68,7 +78,7 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                         >
                             Show all versions
                         </Button>
-                    </VersionButton>
+                    </Box>
                     <CloseButton onClose={onClose} />
                 </DialogTitle>
                 <DialogContent dividers>
@@ -100,12 +110,16 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                         </Table>
                     </InfoTableBox>
 
-                    <SimpleTreeView
-                        slots={{expandIcon: ExpandMore, collapseIcon: ExpandLess}}
-                        defaultExpandedItems={allIds}
-                    >
-                        <JsonTreeView data={formattedData} nodeId="root" humanizeKeys={true} />
-                    </SimpleTreeView>
+                    <TreeViewScrollContainer>
+                        <TreeViewScrollContent>
+                            <SimpleTreeView
+                                slots={{expandIcon: ExpandMore, collapseIcon: ExpandLess}}
+                                defaultExpandedItems={allIds}
+                            >
+                                <JsonTreeView data={formattedData} nodeId="root" humanizeKeys={true} />
+                            </SimpleTreeView>
+                        </TreeViewScrollContent>
+                    </TreeViewScrollContainer>
                 </DialogContent>
             </Dialog>
 
