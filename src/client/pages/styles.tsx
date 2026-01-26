@@ -4,12 +4,20 @@ import { Box, ListItemButton, Typography, Link } from '@mui/material';
 export const PageContainer = muiStyled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
     margin: 0,
-    padding: 0
+    padding: 0,
+    [theme.breakpoints.down('md')]: {
+        padding: theme.spacing(1),
+    },
 }));
 
 export const PageTitle = muiStyled(Box)(({ theme }) => ({
     marginBottom: theme.spacing(3),
     paddingLeft: theme.spacing(2),
+    [theme.breakpoints.down('md')]: {
+        marginBottom: theme.spacing(2),
+        paddingLeft: theme.spacing(1),
+        paddingRight: theme.spacing(1),
+    },
 }));
 
 export const StyledListItemButton = muiStyled(ListItemButton)(({ theme }) => ({
@@ -31,11 +39,18 @@ export const ConfigFormContainer = muiStyled(Box)(({ theme }) => ({
     maxWidth: 900,
     margin: '0 auto',
     padding: theme.spacing(3),
+    [theme.breakpoints.down('md')]: {
+        padding: theme.spacing(2),
+    },
 }));
 
 export const ConfigFormFields = muiStyled(Box)(({ theme }) => ({
     display: 'flex',
     gap: theme.spacing(4),
+    [theme.breakpoints.down('md')]: {
+        flexDirection: 'column',
+        gap: theme.spacing(2),
+    },
 }));
 
 export const ConfigColumn = muiStyled(Box)(({ theme }) => ({
@@ -44,6 +59,9 @@ export const ConfigColumn = muiStyled(Box)(({ theme }) => ({
     flexDirection: 'column',
     gap: theme.spacing(3),
     maxWidth: 400,
+    [theme.breakpoints.down('md')]: {
+        maxWidth: '100%',
+    },
 }));
 
 export const ConfigSaveButtonContainer = muiStyled(Box)(({ theme }) => ({

@@ -120,7 +120,14 @@ export const JobsPage: React.FC = () => {
     return (
         <PageContainer>
             <PageTitle>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    flexWrap: 'wrap',
+                    gap: 2
+                }}>
                     <Typography variant="h4" component="h1">
                         Tasks
                     </Typography>

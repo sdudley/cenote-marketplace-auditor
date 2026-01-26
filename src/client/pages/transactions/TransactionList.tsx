@@ -23,6 +23,7 @@ import { useColumnConfig } from '../../components/useColumnConfig';
 import { defaultTransactionColumns, TransactionCellContext } from './transactionColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
+import { CollapsibleFilters } from '../../components/CollapsibleFilters';
 
 interface TransactionListProps {
     // Add props if needed
@@ -213,62 +214,63 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                         ),
                     }}
                 />
-                <span className="filter-label">Filters:</span>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>Reconciliation Status</InputLabel>
-                    <Select
-                        value={reconciledFilter}
-                        label="Reconciliation Status"
-                        onChange={handleReconciledFilterChange}
-                    >
-                        <MenuItem value="">All Transactions</MenuItem>
-                        <MenuItem value="Y">Reconciled</MenuItem>
-                        <MenuItem value="N">Unreconciled</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>Sale Type</InputLabel>
-                    <Select
-                        value={saleTypeFilter}
-                        label="Sale Type"
-                        onChange={handleSaleTypeFilterChange}
-                    >
-                        <MenuItem value="">All Sale Types</MenuItem>
-                        <MenuItem value="New">New</MenuItem>
-                        <MenuItem value="Refund">Refund</MenuItem>
-                        <MenuItem value="Renewal">Renewal</MenuItem>
-                        <MenuItem value="Upgrade">Upgrade</MenuItem>
-                        <MenuItem value="Downgrade">Downgrade</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>Hosting</InputLabel>
-                    <Select
-                        value={hostingFilter}
-                        label="Hosting"
-                        onChange={handleHostingFilterChange}
-                    >
-                        <MenuItem value="">All Hosting</MenuItem>
-                        <MenuItem value="Cloud">Cloud</MenuItem>
-                        <MenuItem value="Data Center">Data Center</MenuItem>
-                        <MenuItem value="Server">Server</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>App</InputLabel>
-                    <Select
-                        value={appFilter}
-                        label="App"
-                        onChange={handleAppFilterChange}
-                    >
-                        <MenuItem value="">All Apps</MenuItem>
-                        {apps.map((app) => (
-                            <MenuItem key={app.addonKey} value={app.addonKey}>
-                                {app.name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <CollapsibleFilters label={<span className="filter-label">Filters:</span>}>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>Reconciliation Status</InputLabel>
+                        <Select
+                            value={reconciledFilter}
+                            label="Reconciliation Status"
+                            onChange={handleReconciledFilterChange}
+                        >
+                            <MenuItem value="">All Transactions</MenuItem>
+                            <MenuItem value="Y">Reconciled</MenuItem>
+                            <MenuItem value="N">Unreconciled</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>Sale Type</InputLabel>
+                        <Select
+                            value={saleTypeFilter}
+                            label="Sale Type"
+                            onChange={handleSaleTypeFilterChange}
+                        >
+                            <MenuItem value="">All Sale Types</MenuItem>
+                            <MenuItem value="New">New</MenuItem>
+                            <MenuItem value="Refund">Refund</MenuItem>
+                            <MenuItem value="Renewal">Renewal</MenuItem>
+                            <MenuItem value="Upgrade">Upgrade</MenuItem>
+                            <MenuItem value="Downgrade">Downgrade</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>Hosting</InputLabel>
+                        <Select
+                            value={hostingFilter}
+                            label="Hosting"
+                            onChange={handleHostingFilterChange}
+                        >
+                            <MenuItem value="">All Hosting</MenuItem>
+                            <MenuItem value="Cloud">Cloud</MenuItem>
+                            <MenuItem value="Data Center">Data Center</MenuItem>
+                            <MenuItem value="Server">Server</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>App</InputLabel>
+                        <Select
+                            value={appFilter}
+                            label="App"
+                            onChange={handleAppFilterChange}
+                        >
+                            <MenuItem value="">All Apps</MenuItem>
+                            {apps.map((app) => (
+                                <MenuItem key={app.addonKey} value={app.addonKey}>
+                                    {app.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </CollapsibleFilters>
                 <Button
                     className="columns-button"
                     variant="outlined"

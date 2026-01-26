@@ -57,18 +57,24 @@ export const ResponsiveSearchContainer = styled(Box)(({ theme }) => ({
     },
 
     [theme.breakpoints.down('md')]: {
-        gap: '8px',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        gap: '12px',
 
         '& .search-field': {
-            minWidth: '160px',
-            flex: '1 1 160px',
-            maxWidth: '250px',
+            minWidth: 'unset',
+            flex: '1 1 auto',
+            maxWidth: 'unset',
         },
 
         '& .filter-dropdown': {
-            minWidth: '120px',
-            flex: '1 1 120px',
-            maxWidth: '160px',
+            minWidth: 'unset',
+            flex: '1 1 auto',
+            maxWidth: 'unset',
+        },
+
+        '& .columns-button': {
+            alignSelf: 'flex-end',
         },
     },
 

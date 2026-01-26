@@ -83,15 +83,20 @@ export const InfoTableHeader = styled(TableCell)({
     fontWeight: 'bold'
 });
 
-export const Main = styled('main')(({ theme }) => ({
+export const Main = styled('main')<{ isMobile?: boolean }>(({ theme, isMobile }) => ({
     flexGrow: 1,
     paddingTop: theme.spacing(3),
     marginLeft: 0,
     marginRight: 0,
     height: 'calc(100vh - 64px)', // Changed from minHeight to height
-    width: 'calc(100% - 240px)',
-    maxWidth: 'calc(100% - 240px)',
-    overflow: 'auto'  // Changed back to just 'auto'
+    width: isMobile ? '100%' : 'calc(100% - 240px)',
+    maxWidth: isMobile ? '100%' : 'calc(100% - 240px)',
+    overflow: 'auto',  // Changed back to just 'auto'
+    [theme.breakpoints.down('md')]: {
+        width: '100%',
+        maxWidth: '100%',
+        paddingTop: theme.spacing(2),
+    },
 }));
 
 export const StyledAppBar = styled(AppBar)({
@@ -121,9 +126,13 @@ export const ContentBox = styled(Box)({
     overflow: 'hidden'
 });
 
-export const StyledDrawer = styled(Drawer)({
+export const StyledDrawer = styled(Drawer)(({ theme }) => ({
     width: drawerWidth,
     flexShrink: 0,
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+        display: 'block',
+    },
     '& .MuiDrawer-paper': {
         width: drawerWidth,
         boxSizing: 'border-box',
@@ -132,7 +141,20 @@ export const StyledDrawer = styled(Drawer)({
         height: 'calc(100vh - 64px)', // Subtract AppBar height
         borderRight: '1px solid rgba(0, 0, 0, 0.12)',
     },
-});
+}));
+
+export const StyledMobileDrawer = styled(Drawer)(({ theme }) => ({
+    display: 'block',
+    [theme.breakpoints.up('md')]: {
+        display: 'none',
+    },
+    '& .MuiDrawer-paper': {
+        width: drawerWidth,
+        boxSizing: 'border-box',
+        top: '64px', // AppBar height
+        height: 'calc(100vh - 64px)', // Subtract AppBar height
+    },
+}));
 
 export const ContentContainer = styled(Container)({
     className: 'content-container',
@@ -259,10 +281,13 @@ export const LoadingOverlay = styled(Box)({
     zIndex: 1
 });
 
-export const TableContainer = styled(Box)({
+export const TableContainer = styled(Box)(({ theme }) => ({
     width: '100%',
-    padding: '16px 16px 0 16px'
-});
+    padding: '16px 16px 0 16px',
+    [theme.breakpoints.down('md')]: {
+        padding: '8px 8px 0 8px',
+    },
+}));
 
 export const VisibilityCell = styled(TableCell)({
     width: 40,

@@ -25,6 +25,7 @@ import { useColumnConfig } from '../../components/useColumnConfig';
 import { defaultLicenseColumns, LicenseCellContext } from './licenseColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
+import { CollapsibleFilters } from '../../components/CollapsibleFilters';
 
 interface LicenseListProps {
     // Add props if needed
@@ -185,105 +186,106 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                         ),
                     }}
                 />
-                <span className="filter-label">Filters:</span>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>License Type</InputLabel>
-                    <Select
-                        multiple
-                        value={licenseTypeFilter}
-                        label="License Type"
-                        onChange={handleLicenseTypeFilterChange}
-                        input={<OutlinedInput label="License Type" />}
-                        renderValue={(selected) => {
-                            if ((selected as string[]).length === 0) {
-                                return 'All License Types';
-                            }
-                            return `${(selected as string[]).length} selected`;
-                        }}
-                    >
-                        <MenuItem value="ACADEMIC">
-                            <Checkbox checked={licenseTypeFilter.indexOf('ACADEMIC') > -1} />
-                            <ListItemText primary="Academic" />
-                        </MenuItem>
-                        <MenuItem value="COMMERCIAL">
-                            <Checkbox checked={licenseTypeFilter.indexOf('COMMERCIAL') > -1} />
-                            <ListItemText primary="Commercial" />
-                        </MenuItem>
-                        <MenuItem value="COMMUNITY">
-                            <Checkbox checked={licenseTypeFilter.indexOf('COMMUNITY') > -1} />
-                            <ListItemText primary="Community" />
-                        </MenuItem>
-                        <MenuItem value="DEMONSTRATION">
-                            <Checkbox checked={licenseTypeFilter.indexOf('DEMONSTRATION') > -1} />
-                            <ListItemText primary="Demonstration" />
-                        </MenuItem>
-                        <MenuItem value="EVALUATION">
-                            <Checkbox checked={licenseTypeFilter.indexOf('EVALUATION') > -1} />
-                            <ListItemText primary="Evaluation" />
-                        </MenuItem>
-                        <MenuItem value="FREE">
-                            <Checkbox checked={licenseTypeFilter.indexOf('FREE') > -1} />
-                            <ListItemText primary="Free" />
-                        </MenuItem>
-                        <MenuItem value="NON_COMMERCIAL">
-                            <Checkbox checked={licenseTypeFilter.indexOf('NON_COMMERCIAL') > -1} />
-                            <ListItemText primary="Non-Commercial" />
-                        </MenuItem>
-                        <MenuItem value="OPEN_SOURCE">
-                            <Checkbox checked={licenseTypeFilter.indexOf('OPEN_SOURCE') > -1} />
-                            <ListItemText primary="Open Source" />
-                        </MenuItem>
-                        <MenuItem value="PERSONAL">
-                            <Checkbox checked={licenseTypeFilter.indexOf('PERSONAL') > -1} />
-                            <ListItemText primary="Personal" />
-                        </MenuItem>
-                        <MenuItem value="CLASSROOM">
-                            <Checkbox checked={licenseTypeFilter.indexOf('CLASSROOM') > -1} />
-                            <ListItemText primary="Classroom" />
-                        </MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                        value={statusFilter}
-                        label="Status"
-                        onChange={handleStatusFilterChange}
-                    >
-                        <MenuItem value="">All Statuses</MenuItem>
-                        <MenuItem value="active">Active</MenuItem>
-                        <MenuItem value="inactive">Inactive</MenuItem>
-                        <MenuItem value="cancelled">Cancelled</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>Hosting</InputLabel>
-                    <Select
-                        value={hostingFilter}
-                        label="Hosting"
-                        onChange={handleHostingFilterChange}
-                    >
-                        <MenuItem value="">All Hosting</MenuItem>
-                        <MenuItem value="Cloud">Cloud</MenuItem>
-                        <MenuItem value="Data Center">Data Center</MenuItem>
-                        <MenuItem value="Server">Server</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl size="small" className="filter-dropdown">
-                    <InputLabel>App</InputLabel>
-                    <Select
-                        value={appFilter}
-                        label="App"
-                        onChange={handleAppFilterChange}
-                    >
-                        <MenuItem value="">All Apps</MenuItem>
-                        {apps.map((app) => (
-                            <MenuItem key={app.addonKey} value={app.addonKey}>
-                                {app.name}
+                <CollapsibleFilters label={<span className="filter-label">Filters:</span>}>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>License Type</InputLabel>
+                        <Select
+                            multiple
+                            value={licenseTypeFilter}
+                            label="License Type"
+                            onChange={handleLicenseTypeFilterChange}
+                            input={<OutlinedInput label="License Type" />}
+                            renderValue={(selected) => {
+                                if ((selected as string[]).length === 0) {
+                                    return 'All License Types';
+                                }
+                                return `${(selected as string[]).length} selected`;
+                            }}
+                        >
+                            <MenuItem value="ACADEMIC">
+                                <Checkbox checked={licenseTypeFilter.indexOf('ACADEMIC') > -1} />
+                                <ListItemText primary="Academic" />
                             </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                            <MenuItem value="COMMERCIAL">
+                                <Checkbox checked={licenseTypeFilter.indexOf('COMMERCIAL') > -1} />
+                                <ListItemText primary="Commercial" />
+                            </MenuItem>
+                            <MenuItem value="COMMUNITY">
+                                <Checkbox checked={licenseTypeFilter.indexOf('COMMUNITY') > -1} />
+                                <ListItemText primary="Community" />
+                            </MenuItem>
+                            <MenuItem value="DEMONSTRATION">
+                                <Checkbox checked={licenseTypeFilter.indexOf('DEMONSTRATION') > -1} />
+                                <ListItemText primary="Demonstration" />
+                            </MenuItem>
+                            <MenuItem value="EVALUATION">
+                                <Checkbox checked={licenseTypeFilter.indexOf('EVALUATION') > -1} />
+                                <ListItemText primary="Evaluation" />
+                            </MenuItem>
+                            <MenuItem value="FREE">
+                                <Checkbox checked={licenseTypeFilter.indexOf('FREE') > -1} />
+                                <ListItemText primary="Free" />
+                            </MenuItem>
+                            <MenuItem value="NON_COMMERCIAL">
+                                <Checkbox checked={licenseTypeFilter.indexOf('NON_COMMERCIAL') > -1} />
+                                <ListItemText primary="Non-Commercial" />
+                            </MenuItem>
+                            <MenuItem value="OPEN_SOURCE">
+                                <Checkbox checked={licenseTypeFilter.indexOf('OPEN_SOURCE') > -1} />
+                                <ListItemText primary="Open Source" />
+                            </MenuItem>
+                            <MenuItem value="PERSONAL">
+                                <Checkbox checked={licenseTypeFilter.indexOf('PERSONAL') > -1} />
+                                <ListItemText primary="Personal" />
+                            </MenuItem>
+                            <MenuItem value="CLASSROOM">
+                                <Checkbox checked={licenseTypeFilter.indexOf('CLASSROOM') > -1} />
+                                <ListItemText primary="Classroom" />
+                            </MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                            value={statusFilter}
+                            label="Status"
+                            onChange={handleStatusFilterChange}
+                        >
+                            <MenuItem value="">All Statuses</MenuItem>
+                            <MenuItem value="active">Active</MenuItem>
+                            <MenuItem value="inactive">Inactive</MenuItem>
+                            <MenuItem value="cancelled">Cancelled</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>Hosting</InputLabel>
+                        <Select
+                            value={hostingFilter}
+                            label="Hosting"
+                            onChange={handleHostingFilterChange}
+                        >
+                            <MenuItem value="">All Hosting</MenuItem>
+                            <MenuItem value="Cloud">Cloud</MenuItem>
+                            <MenuItem value="Data Center">Data Center</MenuItem>
+                            <MenuItem value="Server">Server</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl size="small" className="filter-dropdown">
+                        <InputLabel>App</InputLabel>
+                        <Select
+                            value={appFilter}
+                            label="App"
+                            onChange={handleAppFilterChange}
+                        >
+                            <MenuItem value="">All Apps</MenuItem>
+                            {apps.map((app) => (
+                                <MenuItem key={app.addonKey} value={app.addonKey}>
+                                    {app.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </CollapsibleFilters>
                 <Button
                     className="columns-button"
                     variant="outlined"

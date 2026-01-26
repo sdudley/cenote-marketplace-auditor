@@ -9,7 +9,9 @@ import {
     CssBaseline,
     ThemeProvider,
     createTheme,
-    Divider
+    Divider,
+    IconButton,
+    useMediaQuery
 } from '@mui/material';
 import {
     Receipt as ReceiptIcon,
@@ -17,7 +19,8 @@ import {
     Settings as SettingsIcon,
     PlayArrow,
     Logout as LogoutIcon,
-    People as PeopleIcon
+    People as PeopleIcon,
+    Menu as MenuIcon
 } from '@mui/icons-material';
 import { Button, Box } from '@mui/material';
 import {
@@ -26,13 +29,14 @@ import {
     RootBox,
     ContentBox,
     StyledDrawer,
+    StyledMobileDrawer,
     ContentContainer,
     ContentBoxWrapper,
 } from './components/styles';
 import { StyledListItemButton } from './pages/styles';
 import { UserType, isAdmin } from './util/userUtils';
 
-const theme = createTheme({
+const appTheme = createTheme({
     palette: {
         mode: 'light',
         primary: {
@@ -44,7 +48,9 @@ const theme = createTheme({
 export const PageLayout: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const isMobile = useMediaQuery(appTheme.breakpoints.down('md'));
     const [userType, setUserType] = useState<string>(UserType.User);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
         const checkAdminStatus = async () => {
@@ -62,6 +68,10 @@ export const PageLayout: React.FC = () => {
         };
         checkAdminStatus();
     }, []);
+
+    const handleDrawerToggle = () => {
+        setMobileOpen(!mobileOpen);
+    };
 
     const dataMenuItems = [
         { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
@@ -91,12 +101,111 @@ export const PageLayout: React.FC = () => {
         }
     };
 
+    const drawerContent = (
+        <List>
+            {dataMenuItems.map((item) => (
+                <StyledListItemButton
+                    key={item.text}
+                    onClick={() => {
+                        navigate(item.path);
+                        if (isMobile) {
+                            setMobileOpen(false);
+                        }
+                    }}
+                    selected={location.pathname.startsWith(item.path)}
+                >
+                    <ListItemIcon sx={{
+                        color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                    }}>
+                        {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={item.text}
+                        sx={{
+                            color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                        }}
+                    />
+                </StyledListItemButton>
+            ))}
+            {isAdmin(userType) && (
+                <>
+                    <Divider
+                        sx={{
+                            my: 2,
+                            mx: 2,
+                            borderBottomWidth: 2
+                        }}
+                    />
+                    {systemMenuItems.map((item) => (
+                        <StyledListItemButton
+                            key={item.text}
+                            onClick={() => {
+                                navigate(item.path);
+                                if (isMobile) {
+                                    setMobileOpen(false);
+                                }
+                            }}
+                            selected={location.pathname.startsWith(item.path)}
+                        >
+                            <ListItemIcon sx={{
+                                color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                            }}>
+                                {item.icon}
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={item.text}
+                                sx={{
+                                    color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                }}
+                            />
+                        </StyledListItemButton>
+                    ))}
+                    {adminMenuItems.map((item) => (
+                        <StyledListItemButton
+                            key={item.text}
+                            onClick={() => {
+                                navigate(item.path);
+                                if (isMobile) {
+                                    setMobileOpen(false);
+                                }
+                            }}
+                            selected={location.pathname.startsWith(item.path)}
+                        >
+                            <ListItemIcon sx={{
+                                color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                            }}>
+                                {item.icon}
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={item.text}
+                                sx={{
+                                    color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                                }}
+                            />
+                        </StyledListItemButton>
+                    ))}
+                </>
+            )}
+        </List>
+    );
+
     return (
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={appTheme}>
             <CssBaseline />
             <RootBox>
                 <StyledAppBar position="fixed">
                     <Toolbar>
+                        {isMobile && (
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                edge="start"
+                                onClick={handleDrawerToggle}
+                                sx={{ mr: 2 }}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                        )}
                         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
                             Cenote Marketplace Auditor
                         </Typography>
@@ -111,82 +220,26 @@ export const PageLayout: React.FC = () => {
                     </Toolbar>
                 </StyledAppBar>
                 <ContentBox>
-                    <StyledDrawer
-                        variant="permanent"
-                        anchor="left"
-                    >
-                        <List>
-                            {dataMenuItems.map((item) => (
-                                <StyledListItemButton
-                                    key={item.text}
-                                    onClick={() => navigate(item.path)}
-                                    selected={location.pathname.startsWith(item.path)}
-                                >
-                                    <ListItemIcon sx={{
-                                        color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
-                                    }}>
-                                        {item.icon}
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={item.text}
-                                        sx={{
-                                            color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
-                                        }}
-                                    />
-                                </StyledListItemButton>
-                            ))}
-                            {isAdmin(userType) && (
-                                <>
-                                    <Divider
-                                        sx={{
-                                            my: 2,
-                                            mx: 2,
-                                            borderBottomWidth: 2
-                                        }}
-                                    />
-                                    {systemMenuItems.map((item) => (
-                                        <StyledListItemButton
-                                            key={item.text}
-                                            onClick={() => navigate(item.path)}
-                                            selected={location.pathname.startsWith(item.path)}
-                                        >
-                                            <ListItemIcon sx={{
-                                                color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
-                                            }}>
-                                                {item.icon}
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={item.text}
-                                                sx={{
-                                                    color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
-                                                }}
-                                            />
-                                        </StyledListItemButton>
-                                    ))}
-                                    {adminMenuItems.map((item) => (
-                                        <StyledListItemButton
-                                            key={item.text}
-                                            onClick={() => navigate(item.path)}
-                                            selected={location.pathname.startsWith(item.path)}
-                                        >
-                                            <ListItemIcon sx={{
-                                                color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
-                                            }}>
-                                                {item.icon}
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={item.text}
-                                                sx={{
-                                                    color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
-                                                }}
-                                            />
-                                        </StyledListItemButton>
-                                    ))}
-                                </>
-                            )}
-                        </List>
-                    </StyledDrawer>
-                    <Main>
+                    {isMobile ? (
+                        <StyledMobileDrawer
+                            variant="temporary"
+                            open={mobileOpen}
+                            onClose={handleDrawerToggle}
+                            ModalProps={{
+                                keepMounted: true, // Better open performance on mobile.
+                            }}
+                        >
+                            {drawerContent}
+                        </StyledMobileDrawer>
+                    ) : (
+                        <StyledDrawer
+                            variant="permanent"
+                            anchor="left"
+                        >
+                            {drawerContent}
+                        </StyledDrawer>
+                    )}
+                    <Main isMobile={isMobile}>
                         <ContentContainer>
                             <ContentBoxWrapper>
                                 <Outlet />
