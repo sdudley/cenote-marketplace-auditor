@@ -13,6 +13,8 @@ export function getConfigKeyType(key: ConfigKey): ConfigValueType {
             return 'string';
         case ConfigKey.SchedulerFrequency:
             return 'number';
+        case ConfigKey.DemoMode:
+            return 'boolean';
         default:
             throw new Error(`Unknown config key type for key: ${key}`);
     }

@@ -5,7 +5,9 @@ import {
     Snackbar,
     Alert,
     CircularProgress,
+    FormControl,
     FormControlLabel,
+    FormHelperText,
     Checkbox,
     Typography,
     Box
@@ -13,11 +15,11 @@ import {
 import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer, ConfigColumn, SchedulerContainer } from '../styles';
 import { ConfigKey } from '#common/types/configItem';
 import { StyledLink } from '../styles';
-import { SlackContainer } from './styles';
+import { DemoModeContainer, SlackContainer } from './styles';
 import { APP_VERSION } from '#common/config/versions';
 
 export const ConfigPage: React.FC = () => {
-    const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number>>({
+    const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number | boolean>>({
         [ConfigKey.AtlassianAccountUser]: '',
         [ConfigKey.AtlassianAccountApiToken]: '',
         [ConfigKey.AtlassianVendorId]: '',
@@ -26,6 +28,7 @@ export const ConfigPage: React.FC = () => {
         [ConfigKey.SlackChannelSales]: '',
         [ConfigKey.SlackChannelEvaluations]: '',
         [ConfigKey.SlackChannelExceptions]: '',
+        [ConfigKey.DemoMode]: false,
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -58,7 +61,7 @@ export const ConfigPage: React.FC = () => {
                             const data = await response.json();
                             return [key, data.value];
                         }
-                        return [key, ''];
+                        return [key, key === ConfigKey.DemoMode ? false : ''];
                     })
             );
 
@@ -186,6 +189,13 @@ export const ConfigPage: React.FC = () => {
         }
     };
 
+    const handleDemoModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setConfigValues((prev) => ({
+            ...prev,
+            [ConfigKey.DemoMode]: event.target.checked,
+        }));
+    };
+
     if (loading) {
         return (
             <PageContainer>
@@ -252,6 +262,7 @@ export const ConfigPage: React.FC = () => {
                             fullWidth
                             helperText="Vendor ID for your developer account. This is visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
                         />
+
                         <SchedulerContainer>
                             <FormControlLabel
                                 control={
@@ -334,6 +345,22 @@ export const ConfigPage: React.FC = () => {
                                 </>
                             )}
                         </SlackContainer>
+                        <DemoModeContainer>
+                            <FormControl component="fieldset">
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={Boolean(configValues[ConfigKey.DemoMode])}
+                                            onChange={handleDemoModeChange}
+                                        />
+                                    }
+                                    label="Demo Mode"
+                                />
+                                <FormHelperText>
+                                    When displaying the UI, adapt existing data to show fictitious pseudonymous customer names and other identifiers, for demonstration purposes. This is safe and it does not change any stored data.
+                                </FormHelperText>
+                            </FormControl>
+                        </DemoModeContainer>
                     </ConfigColumn>
                 </ConfigFormFields>
 

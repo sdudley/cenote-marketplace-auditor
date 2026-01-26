@@ -11,6 +11,7 @@ export interface ConfigKeyType {
     [ConfigKey.SlackChannelSales]: string;
     [ConfigKey.SlackChannelEvaluations]: string;
     [ConfigKey.SlackChannelExceptions]: string;
+    [ConfigKey.DemoMode]: boolean;
 }
 
 // Define the enum with type information
@@ -22,7 +23,8 @@ export enum ConfigKey {
     SlackBotToken = 'SlackBotToken',
     SlackChannelSales = 'SlackChannelSales',
     SlackChannelEvaluations = 'SlackChannelEvaluations',
-    SlackChannelExceptions = 'SlackChannelExceptions'
+    SlackChannelExceptions = 'SlackChannelExceptions',
+    DemoMode = 'DemoMode'
 }
 
 // Helper type to get the value type for a config key

@@ -2,15 +2,18 @@ import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { LicenseDao } from '../../database/dao/LicenseDao';
+import { ConfigDao } from '../../database/dao/ConfigDao';
 import { LicenseQueryParams, LicenseQuerySortType, LicenseQueryResult } from '#common/types/apiTypes';
 import { pseudonymizeLicense } from '#common/pseudonymize/pseudonymizeLicense';
+import { ConfigKey } from '#common/types/configItem';
 
 @injectable()
 export class LicenseRoute {
     public router: Router;
 
     constructor(
-        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao
+        @inject(TYPES.LicenseDao) private licenseDao: LicenseDao,
+        @inject(TYPES.ConfigDao) private configDao: ConfigDao
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -55,7 +58,8 @@ export class LicenseRoute {
 
             const result: LicenseQueryResult = await this.licenseDao.getLicenses(params);
 
-            if (process.env.RANDOMIZE_LICENSES === 'true') {
+            const demoMode = await this.configDao.get<boolean>(ConfigKey.DemoMode);
+            if (demoMode === true) {
                 result.licenses = result.licenses.map(l => ({...l, license: pseudonymizeLicense(l.license)}));
             }
 

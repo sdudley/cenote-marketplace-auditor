@@ -2,16 +2,19 @@ import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../../config/types';
 import { TransactionDao } from '../../database/dao/TransactionDao';
+import { ConfigDao } from '../../database/dao/ConfigDao';
 import { TransactionQueryParams, TransactionQuerySortType } from '#common/types/apiTypes';
 import { TransactionQueryResult } from '#common/types/apiTypes';
 import { pseudonymizeTransaction } from '#common/pseudonymize/pseudonymizeTransaction';
+import { ConfigKey } from '#common/types/configItem';
 
 @injectable()
 export class TransactionRoute {
     public router: Router;
 
     constructor(
-        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao
+        @inject(TYPES.TransactionDao) private transactionDao: TransactionDao,
+        @inject(TYPES.ConfigDao) private configDao: ConfigDao
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -56,7 +59,8 @@ export class TransactionRoute {
 
             const result : TransactionQueryResult = await this.transactionDao.getTransactions(params);
 
-            if (process.env.RANDOMIZE_TRANSACTIONS === 'true') {
+            const demoMode = await this.configDao.get<boolean>(ConfigKey.DemoMode);
+            if (demoMode === true) {
                 result.transactions = result.transactions.map(tr => ({...tr, transaction: pseudonymizeTransaction(tr.transaction)}));
             }
 
