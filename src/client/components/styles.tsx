@@ -89,7 +89,8 @@ export const Main = styled('main')<{ isMobile?: boolean }>(({ theme, isMobile })
     height: 'calc(100vh - 64px)',
     width: isMobile ? '100%' : 'calc(100% - 240px)',
     maxWidth: isMobile ? '100%' : 'calc(100% - 240px)',
-    overflow: 'auto',
+    overflowX: 'hidden',
+    overflowY: 'auto',
     [theme.breakpoints.down('md')]: {
         width: '100%',
         maxWidth: '100%',
@@ -197,6 +198,15 @@ export const SortArrows = styled(Box)(({ theme }) => ({
     },
 }));
 
+/** Wraps the table so only this area scrolls horizontally; rest of page (search, footer) stays full width.
+ *  overflow-y: clip avoids creating a block-axis scroll container so thead stays sticky to Main. */
+export const TableScrollWrapper = styled(Box)({
+    width: '100%',
+    overflowX: 'auto',
+    overflowY: 'clip',
+    marginBottom: 0,
+});
+
 export const TableWrapper = styled(Box)({
     width: '100%',
     maxWidth: '100%',
@@ -218,26 +228,23 @@ export const PaginationWrapper = styled(Box)(({ theme }) => ({
     position: 'sticky',
     bottom: 0,
     backgroundColor: 'white',
-    borderTop: 'none',
-    padding: '8px 0',
+    borderTop: '1px solid rgba(224, 224, 224, 1)',
+    padding: theme.spacing(1, 2),
     zIndex: 10,
     marginBottom: 0,
+    marginLeft: theme.spacing(-2),
+    marginRight: theme.spacing(-2),
+    width: `calc(100% + ${theme.spacing(4)})`,
+    boxSizing: 'border-box',
     boxShadow: '0 -1px 0 0 rgba(0,0,0,0.08)',
-    '&::before': {
-        content: '""',
-        position: 'absolute',
-        left: theme.spacing(-2),
-        right: theme.spacing(-2),
-        top: 0,
-        height: 1,
-        backgroundColor: 'rgba(224, 224, 224, 1)',
-        [theme.breakpoints.down('md')]: {
-            left: theme.spacing(-1),
-            right: theme.spacing(-1),
-        },
+    [theme.breakpoints.down('md')]: {
+        marginLeft: theme.spacing(-1),
+        marginRight: theme.spacing(-1),
+        width: `calc(100% + ${theme.spacing(2)})`,
+        padding: theme.spacing(1, 1),
     },
     '@media (max-height: 500px)': {
-        padding: '4px 0',
+        padding: theme.spacing(0.5, 2),
         '& .MuiTablePagination-root': {
             minHeight: 40,
             '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {

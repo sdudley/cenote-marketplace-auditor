@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import { TransactionQuerySortType, TransactionResult, AppInfo } from '#common/types/apiTypes';
-import { StyledTableContainer, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
+import { StyledTableContainer, TableScrollWrapper, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';
 import { TransactionReconcileDialog } from './TransactionReconcileDialog';
 import { SortOrder } from '../../components/SortableHeader';
@@ -286,46 +286,48 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
             <Box aria-hidden sx={{ height: 16, flexShrink: 0 }} />
 
-            <TableWrapper>
-                <StyledTableContainer>
-                    <StyledListPaper>
-                        {loading && (
-                            <LoadingOverlay>
-                                <CircularProgress />
-                            </LoadingOverlay>
-                        )}
-                        <StyledTable>
-                            <StyledTableHead>
-                                <TableRow>
-                                    {visibleColumns.map((column) =>
-                                        renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
-                                    )}
-                                </TableRow>
-                            </StyledTableHead>
-                            <StyledTableBody>
-                                {transactions && transactions.length > 0 ? (
-                                    transactions.map((tr) => (
-                                        <StyledTableRow
-                                            key={`${tr.transaction.id}`}
-                                            onClick={() => setSelectedTransaction(tr)}
-                                        >
-                                            {visibleColumns.map((column) =>
-                                                renderCell(column, tr, cellContext)
-                                            )}
+            <TableScrollWrapper>
+                <TableWrapper>
+                    <StyledTableContainer>
+                        <StyledListPaper>
+                            {loading && (
+                                <LoadingOverlay>
+                                    <CircularProgress />
+                                </LoadingOverlay>
+                            )}
+                            <StyledTable>
+                                <StyledTableHead>
+                                    <TableRow>
+                                        {visibleColumns.map((column) =>
+                                            renderHeader(column, { sortBy, sortOrder, onSort: handleSort })
+                                        )}
+                                    </TableRow>
+                                </StyledTableHead>
+                                <StyledTableBody>
+                                    {transactions && transactions.length > 0 ? (
+                                        transactions.map((tr) => (
+                                            <StyledTableRow
+                                                key={`${tr.transaction.id}`}
+                                                onClick={() => setSelectedTransaction(tr)}
+                                            >
+                                                {visibleColumns.map((column) =>
+                                                    renderCell(column, tr, cellContext)
+                                                )}
+                                            </StyledTableRow>
+                                        ))
+                                    ) : !loading && (
+                                        <StyledTableRow>
+                                            <StyledTableCell colSpan={visibleColumns.length} align="center" sx={{ py: 4 }}>
+                                                No transactions. Please configure the application through the Configuration page, then start all tasks on the Tasks page.
+                                            </StyledTableCell>
                                         </StyledTableRow>
-                                    ))
-                                ) : ( !loading &&
-                                    <StyledTableRow>
-                                        <StyledTableCell colSpan={visibleColumns.length} align="center" sx={{ py: 4 }}>
-                                            No transactions. Please configure the application through the Configuration page, then start all tasks on the Tasks page.
-                                        </StyledTableCell>
-                                    </StyledTableRow>
-                                )}
-                            </StyledTableBody>
-                        </StyledTable>
-                    </StyledListPaper>
-                </StyledTableContainer>
-            </TableWrapper>
+                                    )}
+                                </StyledTableBody>
+                            </StyledTable>
+                        </StyledListPaper>
+                    </StyledTableContainer>
+                </TableWrapper>
+            </TableScrollWrapper>
 
             <PaginationWrapper>
                 <TablePagination
