@@ -70,7 +70,9 @@ export class JobRunner {
 
         return runner(JobType.TransactionJob, async () => {
             const transactions = await this.marketplaceService.getTransactions();
-            await this.transactionJob.processTransactions(transactions);
+            const onProgress = (current: number, total: number) =>
+                this.jobDao.updateJobProgress(JobType.TransactionJob, current, total);
+            await this.transactionJob.processTransactions(transactions, onProgress);
         });
     }
 
@@ -79,16 +81,20 @@ export class JobRunner {
 
         return runner(JobType.LicenseJob, async () => {
             const licenses = await this.marketplaceService.getLicenses();
-            await this.licenseJob.processLicenses(licenses);
+            const onProgress = (current: number, total: number) =>
+                this.jobDao.updateJobProgress(JobType.LicenseJob, current, total);
+            await this.licenseJob.processLicenses(licenses, onProgress);
         });
     }
 
     public startValidationJob(startDate?: string, runSync: boolean = false): Promise<void> {
         const runner = this.getRunner(runSync);
 
-        return runner(JobType.ValidationJob, async () =>
-            await this.validationJob.validateTransactions(startDate)
-        );
+        return runner(JobType.ValidationJob, async () => {
+            const onProgress = (current: number, total: number) =>
+                this.jobDao.updateJobProgress(JobType.ValidationJob, current, total);
+            await this.validationJob.validateTransactions(startDate, onProgress);
+        });
     }
 
     public startSenUpgradeJob(runSync: boolean = false): Promise<void> {

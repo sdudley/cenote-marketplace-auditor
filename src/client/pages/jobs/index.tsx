@@ -11,6 +11,8 @@ interface JobStatusResponse {
     lastEndTime: Date | null;
     lastSuccess: boolean | null;
     lastError: string | null;
+    progressCurrent: number | null;
+    progressTotal: number | null;
 }
 
 interface Job {
@@ -30,12 +32,21 @@ const JOBS: Job[] = [
 ];
 
 const formatRunDate = (job: Job) => {
-    if (job.status?.lastEndTime) return new Date(job.status.lastEndTime).toLocaleString();
+    const progressSuffix =
+        job.status?.progressCurrent != null && job.status?.progressTotal != null
+            ? ` (${job.status.progressCurrent} out of ${job.status.progressTotal})`
+            : '';
 
-    if (job.status?.lastStartTime) return `Started ${new Date(job.status.lastStartTime).toLocaleString()}`;
+    if (job.status?.lastEndTime) {
+        return `${new Date(job.status.lastEndTime).toLocaleString()}${progressSuffix}`;
+    }
+
+    if (job.status?.lastStartTime) {
+        return `Started ${new Date(job.status.lastStartTime).toLocaleString()}${progressSuffix}`;
+    }
 
     return 'Never';
-}
+};
 
 export const JobsPage: React.FC = () => {
     const [jobs, setJobs] = useState<Job[]>(JOBS);

@@ -11,6 +11,8 @@ interface JobStatusResponse {
     lastEndTime: Date | null;
     lastSuccess: boolean | null;
     lastError: string | null;
+    progressCurrent: number | null;
+    progressTotal: number | null;
 }
 
 @injectable()
@@ -31,7 +33,9 @@ export class JobRoute {
             lastStartTime: status.lastStartTime ?? null,
             lastEndTime: status.lastEndTime ?? null,
             lastSuccess: status.lastSuccess ?? null,
-            lastError: status.lastError ?? null
+            lastError: status.lastError ?? null,
+            progressCurrent: status.progressCurrent ?? null,
+            progressTotal: status.progressTotal ?? null
         };
     }
 

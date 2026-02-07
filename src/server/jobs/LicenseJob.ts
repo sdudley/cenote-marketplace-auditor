@@ -62,9 +62,12 @@ export class LicenseJob {
                 changedPaths.some(path => path.includes('lastUpdated'));
     }
 
-    async processLicenses(licenses: LicenseData[]): Promise<void> {
+    async processLicenses(
+        licenses: LicenseData[],
+        onProgress?: (current: number, total: number) => void | Promise<void>
+    ): Promise<void> {
         let processedCount = 0;
-        let totalCount = licenses.length;
+        const totalCount = licenses.length;
         let modifiedCount = 0;
         let skippedCount = 0;
         let newCount = 0;
@@ -73,6 +76,8 @@ export class LicenseJob {
 
         // Initialize ignored fields list
         await this.getIgnoredFields();
+
+        await onProgress?.(0, totalCount);
 
         for (const licenseData of licenses) {
             const entitlementId = this.licenseDao.getEntitlementIdForLicense(licenseData);
@@ -172,7 +177,13 @@ export class LicenseJob {
             }
 
             processedCount++;
+
+            if ((processedCount % 100)===0) {
+                await onProgress?.(processedCount, totalCount);
+            }
         }
+
+        await onProgress?.(totalCount, totalCount);
 
         console.log(`Completed processing ${totalCount} licenses; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
 

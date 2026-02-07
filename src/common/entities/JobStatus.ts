@@ -50,4 +50,16 @@ export class JobStatus {
         nullable: true
     })
     lastError?: string|null;
+
+    @Column({
+        type: 'int',
+        nullable: true
+    })
+    progressCurrent?: number|null;
+
+    @Column({
+        type: 'int',
+        nullable: true
+    })
+    progressTotal?: number|null;
 }

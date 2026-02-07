@@ -74,9 +74,12 @@ export class TransactionJob {
         return normalizedData;
     }
 
-    async processTransactions(transactions: TransactionData[]): Promise<void> {
+    async processTransactions(
+        transactions: TransactionData[],
+        onProgress?: (current: number, total: number) => void | Promise<void>
+    ): Promise<void> {
         let processedCount = 0;
-        let totalCount = transactions.length;
+        const totalCount = transactions.length;
         let modifiedCount = 0;
         let newCount = 0;
         let skippedCount = 0;
@@ -84,6 +87,8 @@ export class TransactionJob {
 
         // Initialize ignored fields list
         await this.getIgnoredFields();
+
+        await onProgress?.(0, totalCount);
 
         for (const transactionData of transactions) {
             const transactionKey = this.transactionDao.getKeyForTransaction(transactionData);
@@ -163,7 +168,13 @@ export class TransactionJob {
             }
 
             processedCount++;
+
+            if ((processedCount % 100)===0) {
+                await onProgress?.(processedCount, totalCount);
+            }
         }
+
+        await onProgress?.(totalCount, totalCount);
 
         console.log(`Completed processing ${totalCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
 

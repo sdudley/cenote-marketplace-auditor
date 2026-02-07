@@ -51,7 +51,21 @@ export class JobDao {
         jobStatus.lastEndTime = null;
         jobStatus.lastSuccess = null;
         jobStatus.lastError = null;
+        jobStatus.progressCurrent = null;
+        jobStatus.progressTotal = null;
 
+        await this.repository.save(jobStatus);
+    }
+
+    /**
+     * Updates progress for a running job (e.g. "x out of y").
+     */
+    async updateJobProgress(jobType: JobType, current: number, total: number): Promise<void> {
+        const jobStatus = await this.repository.findOne({ where: { jobType } });
+        if (!jobStatus) return;
+
+        jobStatus.progressCurrent = current;
+        jobStatus.progressTotal = total;
         await this.repository.save(jobStatus);
     }
 

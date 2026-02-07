@@ -40,8 +40,12 @@ export class ValidationJob {
     /**
      * Validate all transactions in the database
      * @param startDate Optional start date to filter transactions
+     * @param onProgress Optional callback for progress (current, total)
      */
-    async validateTransactions(startDate?: string|null): Promise<void> {
+    async validateTransactions(
+        startDate?: string|null,
+        onProgress?: (current: number, total: number) => void | Promise<void>
+    ): Promise<void> {
         const actualStartDate = startDate ?? DEFAULT_START_DATE;
         const transactions = await this.transactionDao.getTransactionsBySaleDate(actualStartDate);
 
@@ -49,8 +53,12 @@ export class ValidationJob {
 
         let validCount = 0;
         let expectedPriceCount = 0;
+        const totalCount = transactions.length;
 
-        for (const transaction of transactions) {
+        await onProgress?.(0, totalCount);
+
+        for (let i = 0; i < transactions.length; i++) {
+            const transaction = transactions[i];
             try {
                 const pricing = await this.pricingService.getPricingForTransaction(transaction);
                 const validationResult = await this.transactionValidationService.validateTransaction({ transaction, pricing });
@@ -71,7 +79,13 @@ export class ValidationJob {
                 console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
                 console.log(`- Error: ${error.message}`);
             }
+
+            if (((i+1) % 100)===0) {
+                await onProgress?.(i + 1, totalCount);
+            }
         }
+
+        await onProgress?.(totalCount, totalCount);
 
         const invalidCount = transactions.length - expectedPriceCount;
 
