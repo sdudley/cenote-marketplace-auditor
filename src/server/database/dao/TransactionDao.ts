@@ -57,15 +57,24 @@ class TransactionDao {
         return `${t.transactionLineItemId}:${t.transactionId}`;
     }
 
-    // Fetch all transactions from the database that have a sale date greater than or equal to the start date.
-
-    public async getTransactionsBySaleDate(startDate: string): Promise<Transaction[]> {
-        return await this.transactionRepo
+    // Fetch all transaction IDs that have a sale date greater than or equal to the start date (ordered by sale date).
+    public async getTransactionIdsBySaleDate(startDate: string): Promise<string[]> {
+        const rows = await this.transactionRepo
             .createQueryBuilder('transaction')
+            .select('transaction.id')
             .where('transaction.data->\'purchaseDetails\'->>\'saleDate\' >= :startDate', { startDate })
             .orderBy("transaction.data->'purchaseDetails'->>'saleDate'", 'ASC')
             .addOrderBy('transaction.created_at', 'ASC')
-            .getMany();
+            .getRawMany();
+        return rows.map((r: { transaction_id: string }) => r.transaction_id);
+    }
+
+    // Load transactions by IDs, returned in the same order as the input array.
+    public async getTransactionsByIds(ids: string[]): Promise<Transaction[]> {
+        if (ids.length === 0) return [];
+        const transactions = await this.transactionRepo.find({ where: { id: In(ids) } });
+        const byId = new Map(transactions.map(t => [t.id, t]));
+        return ids.map(id => byId.get(id)).filter((t): t is Transaction => t != null);
     }
 
     // Loads all transactions that are related to the given entitlement ID, ordered by

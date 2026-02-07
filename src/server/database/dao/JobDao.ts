@@ -58,14 +58,14 @@ export class JobDao {
     }
 
     /**
-     * Updates progress for a running job (e.g. "x out of y").
+     * Updates progress for a running job. Use total when known ("x out of y"); omit total for streaming jobs ("x so far").
      */
-    async updateJobProgress(jobType: JobType, current: number, total: number): Promise<void> {
+    async updateJobProgress(jobType: JobType, current: number, total?: number | null): Promise<void> {
         const jobStatus = await this.repository.findOne({ where: { jobType } });
         if (!jobStatus) return;
 
         jobStatus.progressCurrent = current;
-        jobStatus.progressTotal = total;
+        jobStatus.progressTotal = total ?? null;
         await this.repository.save(jobStatus);
     }
 

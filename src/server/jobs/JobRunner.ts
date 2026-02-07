@@ -67,10 +67,15 @@ export class JobRunner {
         const runner = this.getRunner(runSync);
 
         return runner(JobType.TransactionJob, async () => {
-            const transactions = await this.marketplaceService.getTransactions();
-            const onProgress = (current: number, total: number) =>
-                this.jobDao.updateJobProgress(JobType.TransactionJob, current, total);
-            await this.transactionJob.processTransactions(transactions, onProgress);
+            let stream: Awaited<ReturnType<typeof this.marketplaceService.getTransactionsStream>> | null = null;
+            try {
+                stream = await this.marketplaceService.getTransactionsStream();
+                const onProgress = (current: number, total?: number) =>
+                    this.jobDao.updateJobProgress(JobType.TransactionJob, current, total);
+                await this.transactionJob.processTransactionsFromStream(stream, onProgress);
+            } finally {
+                stream?.destroy();
+            }
         });
     }
 
@@ -78,10 +83,15 @@ export class JobRunner {
         const runner = this.getRunner(runSync);
 
         return runner(JobType.LicenseJob, async () => {
-            const licenses = await this.marketplaceService.getLicenses();
-            const onProgress = (current: number, total: number) =>
-                this.jobDao.updateJobProgress(JobType.LicenseJob, current, total);
-            await this.licenseJob.processLicenses(licenses, onProgress);
+            let streams: Awaited<ReturnType<typeof this.marketplaceService.getLicensesStreams>> = [];
+            try {
+                streams = await this.marketplaceService.getLicensesStreams();
+                const onProgress = (current: number, total?: number) =>
+                    this.jobDao.updateJobProgress(JobType.LicenseJob, current, total);
+                await this.licenseJob.processLicensesFromStreams(streams, onProgress);
+            } finally {
+                streams.forEach(s => s.destroy());
+            }
         });
     }
 

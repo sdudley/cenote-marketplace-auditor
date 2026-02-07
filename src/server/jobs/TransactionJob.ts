@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+import StreamArray from 'stream-json/streamers/StreamArray';
 import { Transaction } from '#common/entities/Transaction';
 import { TransactionVersion } from '#common/entities/TransactionVersion';
 import { deepEqual, normalizeObject, computeJsonPaths } from '#common/util/objectUtils';
@@ -10,6 +12,14 @@ import { TransactionDao } from '../database/dao/TransactionDao';
 import { isProperSubsetOfFields } from '#common/util/fieldUtils';
 import { TransactionVersionDao } from '#server/database/dao/TransactionVersionDao';
 import { SlackService, SlackTransactionData } from '#server/services/SlackService';
+
+export interface ProcessOneTransactionResult {
+    processed: number;
+    new: number;
+    modified: number;
+    skipped: number;
+    slackData?: SlackTransactionData;
+}
 
 const ignoreTransactionFieldsForDiffDisplay = [
     'lastUpdated',
@@ -74,114 +84,114 @@ export class TransactionJob {
         return normalizedData;
     }
 
-    async processTransactions(
-        transactions: TransactionData[],
-        onProgress?: (current: number, total: number) => void | Promise<void>
+    /**
+     * Process a single transaction. Returns counts to increment (each 0 or 1) and optional Slack payload.
+     */
+    async processOneTransaction(transactionData: TransactionData): Promise<ProcessOneTransactionResult> {
+        const transactionKey = this.transactionDao.getKeyForTransaction(transactionData);
+        const existingTransaction = await this.transactionDao.getTransactionForKey(transactionKey);
+        const entitlementId = this.transactionDao.getEntitlementIdForTransaction(transactionData);
+
+        const normalizedData: TransactionData = this.normalizeTransactionData(transactionData);
+        let currentVersion = 1;
+
+        if (existingTransaction) {
+            if (!deepEqual(existingTransaction.data, normalizedData)) {
+                const changedPaths = computeJsonPaths(existingTransaction.data, normalizedData);
+                const changedPathsString = changedPaths.join(' | ');
+
+                if (this.isProperSubsetOfIgnoredFields(changedPaths)) {
+                    return { processed: 1, new: 0, modified: 0, skipped: 1 };
+                }
+
+                console.log(`Transaction changed: ${transactionKey}`);
+                console.log('Changed paths:', changedPathsString);
+
+                if (!isProperSubsetOfFields(changedPaths, ignoreTransactionFieldsForDiffDisplay)) {
+                    printJsonDiff(existingTransaction.data, normalizedData);
+                }
+
+                const oldVersionNum = await this.transactionVersionDao.getTransactionHighestVersion(existingTransaction);
+                currentVersion = oldVersionNum + 1;
+
+                const version = new TransactionVersion();
+                version.data = normalizedData;
+                version.transaction = existingTransaction;
+                version.entitlementId = entitlementId;
+                version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
+                version.version = currentVersion;
+
+                await this.transactionVersionDao.saveTransactionVersions(version);
+
+                existingTransaction.data = normalizedData;
+                existingTransaction.currentVersion = currentVersion;
+                await this.transactionDao.saveTransaction(existingTransaction);
+                return { processed: 1, new: 0, modified: 1, skipped: 0 };
+            }
+            return { processed: 1, new: 0, modified: 0, skipped: 0 };
+        }
+
+        const transaction = new Transaction();
+        transaction.marketplaceTransactionId = transactionKey;
+        transaction.data = normalizedData;
+        transaction.entitlementId = entitlementId;
+        transaction.currentVersion = currentVersion;
+        await this.transactionDao.saveTransaction(transaction);
+
+        const version = new TransactionVersion();
+        version.data = normalizedData;
+        version.transaction = transaction;
+        version.entitlementId = entitlementId;
+        version.version = currentVersion;
+        await this.transactionVersionDao.saveTransactionVersions(version);
+
+        const { saleDate, vendorAmount, tier } = normalizedData.purchaseDetails;
+        const customerName = normalizedData.customerDetails.company;
+        const { maintenanceStartDate, maintenanceEndDate } = normalizedData.purchaseDetails;
+
+        console.log(`Created new transaction: ${saleDate} $${vendorAmount} for ${entitlementId} (${customerName}) at tier ${tier}, with maintenance from ${maintenanceStartDate} to ${maintenanceEndDate}`);
+
+        const slackData = this.slackService.mapTransactionForSlack(transaction);
+        return { processed: 1, new: 1, modified: 0, skipped: 0, slackData };
+    }
+
+    /**
+     * Process transactions from an API response stream. Prefix/suffix (counts, Slack) run once; each record is processed as it is received.
+     */
+    async processTransactionsFromStream(
+        responseStream: Readable,
+        onProgress?: (current: number, total?: number) => void | Promise<void>
     ): Promise<void> {
+        await this.getIgnoredFields();
+        const originalTransactionCount = await this.transactionDao.getTransactionCount();
+        const newTransactions: SlackTransactionData[] = [];
+
         let processedCount = 0;
-        const totalCount = transactions.length;
         let modifiedCount = 0;
         let newCount = 0;
         let skippedCount = 0;
-        const newTransactions: SlackTransactionData[] = [];
 
-        // Initialize ignored fields list
-        await this.getIgnoredFields();
+        await onProgress?.(0);
 
-        const originalTransactionCount = await this.transactionDao.getTransactionCount();
+        const parserStream = StreamArray.withParser();
+        responseStream.pipe(parserStream as NodeJS.WritableStream);
 
-        await onProgress?.(0, totalCount);
+        for await (const data of parserStream as AsyncIterable<{ value: TransactionData }>) {
+            const result = await this.processOneTransaction(data.value);
+            processedCount += result.processed;
+            newCount += result.new;
+            modifiedCount += result.modified;
+            skippedCount += result.skipped;
+            if (result.slackData) newTransactions.push(result.slackData);
 
-        for (const transactionData of transactions) {
-            const transactionKey = this.transactionDao.getKeyForTransaction(transactionData);
-            const existingTransaction = await this.transactionDao.getTransactionForKey(transactionKey);
-            const entitlementId = this.transactionDao.getEntitlementIdForTransaction(transactionData);
-
-            // Normalize the incoming data
-            const normalizedData: TransactionData = this.normalizeTransactionData(transactionData);
-            let currentVersion = 1;
-
-            if (existingTransaction) {
-                // Compare with current data using deepEqual
-                if (!deepEqual(existingTransaction.data, normalizedData)) {
-                    // Compute and print JSONPaths of differences
-                    const changedPaths = computeJsonPaths(existingTransaction.data, normalizedData);
-                    const changedPathsString = changedPaths.join(' | ');
-
-                    // Check if changes are only in ignored fields
-                    if (this.isProperSubsetOfIgnoredFields(changedPaths)) {
-                        // console.log(`Skipping transaction version creation for transaction #${transactionKey} - changes only in ignored fields: ${changedPathsString}`);
-                        skippedCount++;
-                        continue;
-                    }
-
-                    console.log(`Transaction changed: ${transactionKey}`);
-                    console.log('Changed paths:', changedPathsString);
-
-                    if (!isProperSubsetOfFields(changedPaths, ignoreTransactionFieldsForDiffDisplay)) {
-                        printJsonDiff(existingTransaction.data, normalizedData);
-                    }
-
-                    // Get the current highest version number
-                    const oldVersionNum = await this.transactionVersionDao.getTransactionHighestVersion(existingTransaction);
-                    currentVersion = oldVersionNum + 1;
-
-                    // Create new version
-                    const version = new TransactionVersion();
-                    version.data = normalizedData;
-                    version.transaction = existingTransaction;
-                    version.entitlementId = entitlementId;
-                    version.diff = changedPaths.length > 0 ? changedPaths.join(' | ') : undefined;
-                    version.version = currentVersion;
-
-                    await this.transactionVersionDao.saveTransactionVersions(version);
-
-                    // Update current data
-                    existingTransaction.data = normalizedData;
-                    existingTransaction.currentVersion = currentVersion;
-                    await this.transactionDao.saveTransaction(existingTransaction);
-                    modifiedCount++;
-                }
-            } else {
-                // Create new transaction
-                const transaction = new Transaction();
-                transaction.marketplaceTransactionId = transactionKey;
-                transaction.data = normalizedData;
-                transaction.entitlementId = entitlementId;
-                transaction.currentVersion = currentVersion;
-                await this.transactionDao.saveTransaction(transaction);
-
-                // Create initial version
-                const version = new TransactionVersion();
-                version.data = normalizedData;
-                version.transaction = transaction;
-                version.entitlementId = entitlementId;
-                version.version = currentVersion;
-                await this.transactionVersionDao.saveTransactionVersions(version);
-
-                const { saleDate, vendorAmount, tier } = normalizedData.purchaseDetails;
-                const customerName = normalizedData.customerDetails.company;
-                const { maintenanceStartDate, maintenanceEndDate } = normalizedData.purchaseDetails;
-
-                console.log(`Created new transaction: ${saleDate} $${vendorAmount} for ${entitlementId} (${customerName}) at tier ${tier}, with maintenance from ${maintenanceStartDate} to ${maintenanceEndDate}`);
-                newCount++;
-
-                newTransactions.push(this.slackService.mapTransactionForSlack(transaction));
-            }
-
-            processedCount++;
-
-            if ((processedCount % 100)===0) {
-                await onProgress?.(processedCount, totalCount);
+            if ((processedCount % 100) === 0) {
+                await onProgress?.(processedCount);
             }
         }
 
-        await onProgress?.(totalCount, totalCount);
+        await onProgress?.(processedCount, processedCount);
 
-        console.log(`Completed processing ${totalCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
-
-        // Only post to Slack if there were existing transactions before the job ran,
-        // to avoid spamming ourselves with all transactions on the first run.
+        console.log(`Completed processing ${processedCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
 
         if (originalTransactionCount > 0 &&
             newTransactions.length > 0 &&

@@ -16,6 +16,7 @@ import { CURRENT_RECONCILER_VERSION } from "#common/config/versions";
 import { SlackService } from '#server/services/SlackService';
 
 const DEFAULT_START_DATE = '2024-01-01';
+const BATCH_SIZE = 1000;
 
 // TODO: evaluate licenses against transactions
 // License end dates that extend those of transactions (see SQL queries)
@@ -47,7 +48,8 @@ export class ValidationJob {
         onProgress?: (current: number, total: number) => void | Promise<void>
     ): Promise<void> {
         const actualStartDate = startDate ?? DEFAULT_START_DATE;
-        const transactions = await this.transactionDao.getTransactionsBySaleDate(actualStartDate);
+        const transactionIds = await this.transactionDao.getTransactionIdsBySaleDate(actualStartDate);
+        const totalCount = transactionIds.length;
 
         console.log(`\n=== Validating transactions since ${actualStartDate} ===`);
 
@@ -59,48 +61,56 @@ export class ValidationJob {
 
         let validCount = 0;
         let expectedPriceCount = 0;
-        const totalCount = transactions.length;
+        let processedCount = 0;
 
         await onProgress?.(0, totalCount);
 
-        for (let i = 0; i < transactions.length; i++) {
-            const transaction = transactions[i];
-            try {
-                const pricing = await this.pricingService.getPricingForTransaction(transaction);
-                const validationResult = await this.transactionValidationService.validateTransaction({ transaction, pricing });
+        for (let offset = 0; offset < transactionIds.length; offset += BATCH_SIZE) {
+            const batchIds = transactionIds.slice(offset, offset + BATCH_SIZE);
+            const transactions = await this.transactionDao.getTransactionsByIds(batchIds);
 
-                if (validationResult) {
-                    await this.recordTransactionReconcile({
-                        validationResult,
-                        transaction,
-                        postToSlack
-                    });
+            for (let i = 0; i < transactions.length; i++) {
+                const transaction = transactions[i];
+                try {
+                    const pricing = await this.pricingService.getPricingForTransaction(transaction);
+                    const validationResult = await this.transactionValidationService.validateTransaction({ transaction, pricing });
 
-                    await this.logTransactionValidation({ validationResult, transaction });
+                    if (validationResult) {
+                        await this.recordTransactionReconcile({
+                            validationResult,
+                            transaction,
+                            postToSlack
+                        });
 
-                    if (validationResult.isExpectedPrice) {
-                        expectedPriceCount++;
+                        await this.logTransactionValidation({ validationResult, transaction });
+
+                        if (validationResult.isExpectedPrice) {
+                            expectedPriceCount++;
+                        }
+
+                        if (validationResult.valid) {
+                            validCount++;
+                        }
                     }
-
-                    if (validationResult.valid) {
-                        validCount++;
-                    }
+                } catch (error: any) {
+                    console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
+                    console.log(`- Error: ${error.message}`);
                 }
-            } catch (error: any) {
-                console.log(`\nTransaction ${transaction.marketplaceTransactionId}:`);
-                console.log(`- Error: ${error.message}`);
+
+                processedCount++;
+                if ((processedCount % 100) === 0) {
+                    await onProgress?.(processedCount, totalCount);
+                }
             }
 
-            if (((i+1) % 100)===0) {
-                await onProgress?.(i + 1, totalCount);
-            }
+            await onProgress?.(processedCount, totalCount);
         }
 
         await onProgress?.(totalCount, totalCount);
 
-        const invalidCount = transactions.length - expectedPriceCount;
+        const invalidCount = totalCount - expectedPriceCount;
 
-        console.log(`\nSummary: ${transactions.length} transactions; ${expectedPriceCount} have expected price; ${validCount} are reconciled; ${invalidCount} need correction.`);
+        console.log(`\nSummary: ${totalCount} transactions; ${expectedPriceCount} have expected price; ${validCount} are reconciled; ${invalidCount} need correction.`);
     }
 
     private async recordTransactionReconcile(opts: { validationResult: TransactionValidationResult, transaction: Transaction; postToSlack: boolean;}) : Promise<void> {

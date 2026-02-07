@@ -31,10 +31,13 @@ const JOBS: Job[] = [
 ];
 
 const formatRunDate = (job: Job) => {
-    const progressSuffix =
-        job.status?.progressCurrent != null && job.status?.progressTotal != null
-            ? ` (${job.status.progressCurrent} out of ${job.status.progressTotal})`
-            : '';
+    let progressSuffix = '';
+    if (job.status?.progressCurrent != null) {
+        progressSuffix =
+            job.status.progressTotal != null
+                ? ` (${job.status.progressCurrent} out of ${job.status.progressTotal})`
+                : ` (${job.status.progressCurrent})`;
+    }
 
     if (job.status?.lastEndTime) {
         return `${new Date(job.status.lastEndTime).toLocaleString()}${progressSuffix}`;

@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import axios from 'axios';
+import { Readable } from 'stream';
 import {
     InitiateAsyncLicense,
     InitiateAsyncLicenseCollection,
@@ -80,6 +81,16 @@ export class MarketplaceService {
         }
 
         return resultUrl;
+    }
+
+    private async getStreamForResultUrl(resultUrl: string): Promise<Readable> {
+        const response = await axios.get(resultUrl, {
+            responseType: 'stream',
+            headers: {
+                'Authorization': await this.getAuthHeader()
+            }
+        });
+        return response.data as Readable;
     }
 
     private async fetchTransactionsWithParams(params: TransactionQueryParams): Promise<TransactionData[]> {
@@ -165,6 +176,85 @@ export class MarketplaceService {
             excludeZeroTransactions: false,
             includeManualInvoice: true
         });
+    }
+
+    /**
+     * Start transaction export and return a stream of the JSON array. Caller must consume and destroy the stream.
+     */
+    async getTransactionsStream(): Promise<Readable> {
+        await this.initializeConfig();
+        const exportUrl = this.buildUrlWithParams(
+            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`,
+            { excludeZeroTransactions: false, includeManualInvoice: true }
+        );
+        console.log(`Calling Marketplace API: ${exportUrl}`);
+
+        const exportResponse = await axios.post<InitiateAsyncTransactionCollection>(
+            exportUrl,
+            {},
+            { headers: { 'Authorization': await this.getAuthHeader(), 'Content-Type': 'application/json' } }
+        );
+
+        const resultUrl = await this.pollForCompletion<StatusAsyncTransactionCollection>(
+            exportResponse.data._links.status.href,
+            exportResponse.data._links.download.href,
+            (data) => data.export.status
+        );
+
+        console.log(`Streaming transactions from API`);
+        return this.getStreamForResultUrl(resultUrl);
+    }
+
+    /**
+     * Start both license exports and return streams of the JSON arrays (one per date range). Caller must consume and destroy the streams.
+     */
+    async getLicensesStreams(): Promise<Readable[]> {
+        await this.initializeConfig();
+        const streams: Readable[] = [];
+
+        const firstExportUrl = this.buildUrlWithParams(
+            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
+            { startDate: '2010-01-01', endDate: '2018-06-30', includeAtlassianLicenses: true }
+        );
+        console.log(`Calling Marketplace API: ${firstExportUrl}`);
+
+        const firstExportResponse = await axios.post<InitiateAsyncLicenseCollection>(
+            firstExportUrl,
+            {},
+            { headers: { 'Authorization': await this.getAuthHeader(), 'Content-Type': 'application/json' } }
+        );
+
+        const firstResultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
+            firstExportResponse.data._links.status.href,
+            firstExportResponse.data._links.download.href,
+            (data) => data.export.status
+        );
+
+        console.log(`Streaming licenses (batch 1) from API`);
+        streams.push(await this.getStreamForResultUrl(firstResultUrl));
+
+        const secondExportUrl = this.buildUrlWithParams(
+            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
+            { startDate: '2018-07-01', withDataInsights: true, includeAtlassianLicenses: true }
+        );
+        console.log(`Calling Marketplace API: ${secondExportUrl}`);
+
+        const secondExportResponse = await axios.post<InitiateAsyncLicenseCollection>(
+            secondExportUrl,
+            {},
+            { headers: { 'Authorization': await this.getAuthHeader(), 'Content-Type': 'application/json' } }
+        );
+
+        const secondResultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
+            secondExportResponse.data._links.status.href,
+            secondExportResponse.data._links.download.href,
+            (data) => data.export.status
+        );
+
+        console.log(`Streaming licenses (batch 2) from API`);
+        streams.push(await this.getStreamForResultUrl(secondResultUrl));
+
+        return streams;
     }
 
     async getLicenses(): Promise<LicenseData[]> {
