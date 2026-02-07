@@ -378,13 +378,12 @@ export class SlackService {
                             },
                             {
                                 type: 'mrkdwn',
-                                text: encodeSlackText(`Last Updated:\n*${l.lastUpdated}*`)
+                                text: encodeSlackText(`Evaluation Period:\n*${maintenanceDaysText}* (${l.maintenanceStartDate} to ${l.maintenanceEndDate})${opportunityText}${extensionText}`)
                             },
                             {
                                 type: 'mrkdwn',
-                                text: encodeSlackText(`Evaluation Period:\n*${maintenanceDaysText}* (${l.maintenanceStartDate} to ${l.maintenanceEndDate})${opportunityText}${extensionText}`)
+                                text: encodeSlackText(`Last Updated:\n*${l.lastUpdated}*`)
                             }
-
                         ]
                     },
                     {
