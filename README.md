@@ -14,6 +14,8 @@ Copyright © 2025-2026 by Cenote Labs, Inc. All rights reserved. The application
 downloads a list of your apps, your apps' pricing, all transactions, and all licenses
 - All data is stored in a local database. The only egress is to fetch your transactions
 from the Atlassian servers, and if enabled, posting to the Slack integration.
+- An administrator login is created when starting up the app, and additional accounts
+can be later created for other users.
 - Validates expected versus actual pricing for all transactions since 2024
 - Permits marking transactions as reconciled or unreconciled, including automatic
 reconciliation of transactions that have expected pricing
@@ -32,13 +34,10 @@ received
 
 This is beta software:
 
-- **This application does not include any authentication. DO NOT RUN THIS CONTAINER ON THE OPEN INTERNET.**
-- However, the default Docker configuration runs the container with local-only ports. This means that users
-on other machines cannot access it, and it should be relatively safe to run on your local machine. If you
-change the configuration yourself to open these ports, it must be placed behind some other server with protection.
-- The pricing calculations are designed for Cloud and Data Center licenses. Pricing
-for Server licenses is not supported.
-- Discounted Forge pricing is not yet supported.
+- The pricing calculations are designed for Cloud and Data Center licenses.
+- Pricing for Server licenses is not supported.
+- 2026 "free" Forge pricing is not yet supported.
+- Maximum Quantity Billing pricing is not yet calculated.
 - If you have previously modified the pricing for your app, pricing for those transactions cannot be correctly
 computed until you import prior period pricing into the app. Data entry for prior period pricing is not
 currently supported in the UI, although the functionality exists via scripts (see below). Prior period pricing
