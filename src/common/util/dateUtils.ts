@@ -28,8 +28,8 @@ export function stripTimeFromDate(date: Date): Date {
 }
 
 export function isoDateMath(date: string, days: number): string {
-    const dateObj = new Date(date);
-    dateObj.setDate(dateObj.getDate() + days);
+    const dateObj = createUTCDateFromString(date);
+    dateObj.setUTCDate(dateObj.getUTCDate() + days);
     return dateObj.toISOString().split('T')[0];
 }
 
