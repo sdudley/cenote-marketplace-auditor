@@ -355,9 +355,7 @@ export class SlackService {
                     opportunityText = `\nOpportunity Size:\n*${l.evaluationOpportunitySize}*`;
                 }
 
-                const maintenanceDaysText = typeof maintenanceDays === 'number' && maintenanceDays > 30 ?
-                    `*${maintenanceDays} days*` :
-                    `${maintenanceDays} days`;
+                const maintenanceDaysText = `${maintenanceDays} days`;
 
                 blocks.push(
                     {
