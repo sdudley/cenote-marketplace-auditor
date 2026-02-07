@@ -3,3 +3,11 @@
 /backups
 /.env
 /scripts
+/.stfolder
+/.stversions
+/.vscode
+/.git
+/env
+/.dockerignore
+/.idea
+/.gitignore
