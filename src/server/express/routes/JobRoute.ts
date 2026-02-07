@@ -107,9 +107,6 @@ export class JobRoute {
                     case JobType.ValidationJob:
                         this.jobStarter.startValidationJob(undefined, false);
                         break;
-                    case JobType.SenUpgradeJob:
-                        this.jobStarter.startSenUpgradeJob(false);
-                        break;
                     default:
                         return res.status(400).json({ error: 'Invalid job type' });
                 }

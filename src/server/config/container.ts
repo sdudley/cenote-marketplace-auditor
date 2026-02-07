@@ -29,7 +29,6 @@ import { JobRunner } from '../jobs/JobRunner';
 import { LicenseVersionDao } from '../database/dao/LicenseVersionDao';
 import { SchedulerService } from '../services/SchedulerService';
 import { SlackService } from '../services/SlackService';
-import { SenUpgradeJob } from '#server/jobs/SenUpgradeJob';
 import { UserDao } from '../database/dao/UserDao';
 
 /**
@@ -50,7 +49,6 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionJob>(TYPES.TransactionJob).to(TransactionJob).inSingletonScope();
     container.bind<LicenseJob>(TYPES.LicenseJob).to(LicenseJob).inSingletonScope();
     container.bind<PricingJob>(TYPES.PricingJob).to(PricingJob).inSingletonScope();
-    container.bind<SenUpgradeJob>(TYPES.SenUpgradeJob).to(SenUpgradeJob).inSingletonScope();
     container.bind<PricingService>(TYPES.PricingService).to(PricingService).inSingletonScope();
     container.bind<ValidationJob>(TYPES.ValidationJob).to(ValidationJob).inSingletonScope();
     container.bind<PriceCalculatorService>(TYPES.PriceCalculatorService).to(PriceCalculatorService).inSingletonScope();

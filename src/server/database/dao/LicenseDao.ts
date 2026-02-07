@@ -6,7 +6,7 @@ import { TYPES } from "../../config/types";
 import { LicenseData } from "#common/types/marketplace";
 import { LicenseQueryParams, LicenseQueryResult, LicenseQuerySortType } from "#common/types/apiTypes";
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
-import { DuplicateLicense, LicenseResult } from "#common/types/apiTypes";
+import { LicenseResult } from "#common/types/apiTypes";
 
 
 @injectable()
@@ -164,62 +164,6 @@ export class LicenseDao {
             };
         } catch (error: any) {
             throw error;
-        }
-    }
-
-    // Get duplicate licenses based on this SQL query, due to Atlassian having added
-    // entitlementId fields to the license table (and we were previously using
-    // either the SEN or entitlementId as the PK):
-    //
-    // SELECT l1.id as orig_id, l2.id as dupe_id, l1.entitlement_id as SEN, l2.entitlement_id as entitlement_id
-    // FROM license l1
-    // INNER JOIN license l2 ON l2.data->>'licenseId'=l1.data->>'licenseId' AND l2.id != l1.id
-    // WHERE l1.data->>'hosting'='Data Center' AND l1.data->>'appEntitlementNumber' IS NULL;
-
-    public async findDuplicateLicenses(): Promise<DuplicateLicense[]> {
-
-        const queryBuilder = this.licenseRepo.createQueryBuilder('l1');
-        queryBuilder.select('l1.id', 'orig_id');
-        queryBuilder.addSelect('l2.id', 'dupe_id');
-        queryBuilder.addSelect('l1.entitlement_id', 'SEN');
-        queryBuilder.addSelect('l2.entitlement_id', 'entitlement_id');
-        queryBuilder.innerJoin('license', 'l2', 'l2.data->>\'licenseId\' = l1.data->>\'licenseId\' AND l2.id != l1.id');
-        queryBuilder.where('l1.data->>\'hosting\' = \'Data Center\' AND l1.data->>\'appEntitlementNumber\' IS NULL');
-
-        const data = await queryBuilder.getRawMany();
-
-        return data.map((row: any) => ({
-            originalLicenseId: row.orig_id,
-            duplicateLicenseId: row.dupe_id,
-            sen: row.SEN,
-            entitlementId: row.entitlement_id
-        }));
-    }
-
-    public async deleteDuplicateLicenses(duplicateLicenseIds: string[]): Promise<void> {
-        console.log('Deleting duplicate licenses:')
-        console.dir(duplicateLicenseIds, { depth: null });
-
-        const { affected } = await this.licenseRepo.delete({ id: In(duplicateLicenseIds) });
-        console.log(`Deleted ${affected} licenses`);
-    }
-
-    public async updatePkForDuplicateLicenses(duplicateLicenses: DuplicateLicense[]): Promise<void> {
-        for (const duplicateLicense of duplicateLicenses) {
-            const { originalLicenseId, sen, entitlementId } = duplicateLicense;
-
-            // Update the license identified by originalLicenseId to set its 'entitlementId' to
-            // entitlementId.
-
-            console.log(`Updating licenseId ${originalLicenseId} PK from ${sen} to ${entitlementId}`);
-            const origLicense = await this.licenseRepo.findOne({ where: { id: originalLicenseId } });
-
-
-            if (origLicense?.data.licenseId !== sen) {
-                throw new Error(`For license ${originalLicenseId}, found unexpected sen ${origLicense?.data.licenseId}`);
-            }
-
-            await this.licenseRepo.update( { id: originalLicenseId }, { entitlementId });
         }
     }
 }

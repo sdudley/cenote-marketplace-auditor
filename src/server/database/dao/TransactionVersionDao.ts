@@ -4,7 +4,6 @@ import { TYPES } from "#server/config/types";
 import { inject, injectable } from "inversify";
 import { DataSource, Repository } from "typeorm";
 import { isUUID } from "validator";
-import { ObsoleteTransaction } from "#common/types/apiTypes";
 
 @injectable()
 export class TransactionVersionDao {
@@ -49,16 +48,5 @@ export class TransactionVersionDao {
 
     public async saveTransactionVersions(...versions: TransactionVersion[]) : Promise<void> {
         await this.transactionVersionRepo.save(versions);
-    }
-
-    public async updateTransactionVersionsWithObsoleteEntitlementNumbers(obsoleteTransactions: ObsoleteTransaction[]) {
-        for (const tx of obsoleteTransactions) {
-            const { affected } = await this.transactionVersionRepo.update(
-                { transaction: { id: tx.id } },
-                { entitlementId: tx.data_entitlement_number }
-            );
-
-            console.log(`Updated transaction versions for transactionId ${tx.id}: ${affected} affected`);
-        }
     }
 }
