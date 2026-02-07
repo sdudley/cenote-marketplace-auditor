@@ -72,6 +72,7 @@ export class LicenseJob {
         let skippedCount = 0;
         let newCount = 0;
 
+        const originalLicenseCount = await this.licenseDao.getLicenseCount();
         const newLicenses: SlackLicenseData[] = [];
 
         // Initialize ignored fields list
@@ -187,7 +188,12 @@ export class LicenseJob {
 
         console.log(`Completed processing ${totalCount} licenses; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
 
-        if (newLicenses.length > 0 && processedCount !== newCount) {
+        // Only post to Slack if there were existing licenses before the job ran,
+        // to avoid spamming ourselves with all licenses on the first run.
+
+        if (originalLicenseCount > 0 &&
+            newLicenses.length > 0 &&
+            processedCount !== newCount) {
             await this.slackService.postNewLicensesToSlack(newLicenses);
         }
     }

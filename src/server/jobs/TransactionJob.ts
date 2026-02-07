@@ -88,6 +88,8 @@ export class TransactionJob {
         // Initialize ignored fields list
         await this.getIgnoredFields();
 
+        const originalTransactionCount = await this.transactionDao.getTransactionCount();
+
         await onProgress?.(0, totalCount);
 
         for (const transactionData of transactions) {
@@ -178,7 +180,12 @@ export class TransactionJob {
 
         console.log(`Completed processing ${totalCount} transactions; ${newCount} were new; ${modifiedCount} were updated; ${skippedCount} were skipped due to ignored fields`);
 
-        if (newTransactions.length > 0 && processedCount !== newCount) {
+        // Only post to Slack if there were existing transactions before the job ran,
+        // to avoid spamming ourselves with all transactions on the first run.
+
+        if (originalTransactionCount > 0 &&
+            newTransactions.length > 0 &&
+            processedCount !== newCount) {
             await this.slackService.postNewTransactionsToSlack(newTransactions);
         }
     }

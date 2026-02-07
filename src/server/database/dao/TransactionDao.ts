@@ -39,6 +39,10 @@ class TransactionDao {
         await this.transactionRepo.save(transaction);
     }
 
+    public async getTransactionCount(): Promise<number> {
+        return await this.transactionRepo.count();
+    }
+
     public getEntitlementIdForTransaction(t: TransactionData) {
         const { appEntitlementNumber, licenseId, addonLicenseId } = t;
 

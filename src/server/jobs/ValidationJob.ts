@@ -51,6 +51,12 @@ export class ValidationJob {
 
         console.log(`\n=== Validating transactions since ${actualStartDate} ===`);
 
+        // Only post to Slack if there were existing exception-type transactions before the job ran,
+        // to avoid spamming ourselves with all exception-type transactions on the first run.
+
+        const originalTransactionReconcileCount = await this.transactionReconcileDao.getTransactionReconcileCount();
+        const postToSlack = originalTransactionReconcileCount > 0;
+
         let validCount = 0;
         let expectedPriceCount = 0;
         const totalCount = transactions.length;
@@ -64,7 +70,12 @@ export class ValidationJob {
                 const validationResult = await this.transactionValidationService.validateTransaction({ transaction, pricing });
 
                 if (validationResult) {
-                    await this.recordTransactionReconcile({ validationResult, transaction });
+                    await this.recordTransactionReconcile({
+                        validationResult,
+                        transaction,
+                        postToSlack
+                    });
+
                     await this.logTransactionValidation({ validationResult, transaction });
 
                     if (validationResult.isExpectedPrice) {
@@ -92,8 +103,8 @@ export class ValidationJob {
         console.log(`\nSummary: ${transactions.length} transactions; ${expectedPriceCount} have expected price; ${validCount} are reconciled; ${invalidCount} need correction.`);
     }
 
-    private async recordTransactionReconcile(opts: { validationResult: TransactionValidationResult, transaction: Transaction; }) : Promise<void> {
-        const { validationResult, transaction } = opts;
+    private async recordTransactionReconcile(opts: { validationResult: TransactionValidationResult, transaction: Transaction; postToSlack: boolean;}) : Promise<void> {
+        const { validationResult, transaction, postToSlack } = opts;
         const { valid: currentValid, notes, vendorAmount, expectedVendorAmount } = validationResult;
 
         let reconciled = currentValid;
@@ -156,7 +167,7 @@ export class ValidationJob {
         // Post a message to the Slack exceptions channel indicating that the
         // transaction was not reconciled.
 
-        if (!reconciled && (!existingReconcile || existingReconcile.reconciled)) {
+        if (postToSlack && !reconciled && (!existingReconcile || existingReconcile.reconciled)) {
             await this.slackService.postExceptionToSlack({
                 transaction,
                 validationResult

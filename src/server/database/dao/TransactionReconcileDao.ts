@@ -26,6 +26,10 @@ export class TransactionReconcileDao {
         this.transactionReconcileNoteRepo = dataSource.getRepository(TransactionReconcileNote);
     }
 
+    public async getTransactionReconcileCount(): Promise<number> {
+        return await this.transactionReconcileRepo.count();
+    }
+
     // Gets the current reconcile record for a transaction.
 
     public async getTransactionReconcileForTransaction(transaction: Transaction): Promise<TransactionReconcile | null> {

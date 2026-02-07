@@ -55,6 +55,10 @@ export class LicenseDao {
         await this.licenseRepo.save(license);
     }
 
+    public async getLicenseCount(): Promise<number> {
+        return await this.licenseRepo.count();
+    }
+
     private escapeDoubleQuotes(str: string): string {
         return str.replace(/"/g, '\\"');
     }
