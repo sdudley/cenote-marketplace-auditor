@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.0] - 2026-02-07
+
+### ✨ Major New Features
+
+- Implement email/password authorization. The app prompts to create an admin account on initial run (or after upgrading existing pre-0.4.0 deployments). Additional users can be created or administered using the new "Users" tab.
+- The UI is now built with responsive design, allowing the app to render correctly on mobile devices.
+- Exceptions with transactions are now posted to the configured Slack channel (if any). Exceptions include pricing calculation mismatches as well as maintenance date mismatches. (Since MQB pricing calculations are not yet implemented, this means that MQB transactions will also generally show up as exceptions with small dollar differences.)
+- Report data is now streamed from the marketplace in small chunks, allowing vendors with large transaction/license lists to be processed without getting SIGKILLs and running out of memory in the node process.
+
+#### Data Display Enhancements
+
+- The task page displays a progress counter when processing licenses, transactions and validations.
+- Slack notifications of transactions now include the sale type.
+- Slack notifications of evaluations now include the evaluation opportunity size.
+
+#### Other
+
+- Remove upgrade code for Atlassian's September 2025 addition of Entitlement Numbers for DC licenses, since this code should no longer be necessary for most users. If you have previously imported data to this app but you have not yet upgraded to 0.3.x, please upgrade to 0.3.x first and execute the upgrade job on the Tasks page before upgrading to 0.4.0.
+
 ## [0.3.1] - 2026-01-21
 
 #### Data Display Enhancements
