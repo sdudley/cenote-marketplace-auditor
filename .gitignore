@@ -3,3 +3,7 @@
 /dist/
 /backups/
 /.idea/
+/.stfolder
+/.stversions
+/.vscode
+/env
