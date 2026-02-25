@@ -10,7 +10,7 @@
     "#*": "./src/*"
   },
   "scripts": {
-    "build": "npm run build:server && npm run build:client",
+    "build": "npm audit && npm run build:server && npm run build:client",
     "build:server": "tsc -p src/server/tsconfig.json",
     "build:client": "vite build",
     "build:client:dev": "vite build --mode development",
