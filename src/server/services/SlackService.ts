@@ -406,13 +406,14 @@ export class SlackService {
     public async postExceptionToSlack(opts: { transaction: Transaction; validationResult: TransactionValidationResult }): Promise<void> {
         const { transaction, validationResult } = opts;
         const { addonName } = transaction.data;
-        const { saleDate, licenseType, hosting, tier, purchasePrice } = transaction.data.purchaseDetails;
+        const { saleDate } = transaction.data.purchaseDetails;
         const { company } = transaction.data.customerDetails;
-        const { expectedVendorAmount, vendorAmount, price, notes } = validationResult;
+        const { expectedVendorAmount, vendorAmount, notes } = validationResult;
 
         const vendorDifference = vendorAmount - expectedVendorAmount;
+        const sanitizedCompany = company ?? 'Unknown';
 
-        const message = encodeSlackText(`⚠️ Transaction Exception - ${addonName}`);
+        const message = encodeSlackText(`⚠️ Transaction Exception - ${addonName}  - ${sanitizedCompany} (${formatCurrency(vendorDifference)})`);
 
         // Note: This function is called per exception (not batched), so it should never exceed 50 blocks.
         // Current block count: header (1) + divider (1) + section (1) + section with fields (1) +
@@ -436,7 +437,7 @@ export class SlackService {
                 fields: [
                     {
                         type: 'mrkdwn',
-                        text: encodeSlackText(`Licensee:\n*${company ?? 'Unknown'}*`)
+                        text: encodeSlackText(`Licensee:\n*${sanitizedCompany}*`)
                     },
                     {
                         type: 'mrkdwn',
