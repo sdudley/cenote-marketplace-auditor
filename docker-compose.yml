@@ -14,11 +14,13 @@ services:
       - SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE:-false} # Set to true if using HTTPS
       - TRUST_PROXY=${TRUST_PROXY:-false} # Set to true if behind a reverse proxy
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     container_name: auditor-postgres
     image: postgres:16.2-bullseye
+    restart: unless-stopped
     environment:
       - POSTGRES_USER=${DB_USERNAME:-postgres}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
@@ -27,6 +29,15 @@ services:
       - "127.0.0.1:5431:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-marketplace_auditor}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
