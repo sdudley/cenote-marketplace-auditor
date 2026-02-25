@@ -181,6 +181,9 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                     onKeyPress={handleKeyPress}
                     size="small"
                     placeholder="Search"
+                    spellCheck={false}
+                    autoCorrect="off"
+                    autoCapitalize="off"
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">

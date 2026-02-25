@@ -209,6 +209,9 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                     onKeyPress={handleKeyPress}
                     size="small"
                     placeholder="Search"
+                    spellCheck={false}
+                    autoCorrect="off"
+                    autoCapitalize="off"
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
