@@ -28,6 +28,7 @@ import { defaultLicenseColumns, LicenseCellContext } from './licenseColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
 import { CollapsibleFilters } from '../../components/CollapsibleFilters';
+import { useSearchParamState } from '../../hooks/useSearchParamState';
 
 interface LicenseListProps {
     // Add props if needed
@@ -44,7 +45,7 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
     const [rowsPerPage, setRowsPerPage] = useState(25);
     const [sortBy, setSortBy] = useState<LicenseQuerySortType>(LicenseQuerySortType.AtlassianLastUpdated);
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useSearchParamState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [selectedLicense, setSelectedLicense] = useState<LicenseResult | null>(null);

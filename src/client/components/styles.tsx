@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -646,4 +647,8 @@ export const StyledTableBody = styled(TableBody)({
 
 export const WrappedLabel = styled('span')({
     lineHeight: '18px'
+});
+
+export const EntitlementIdLink = styled(Link)({
+    textDecoration: 'none'
 });

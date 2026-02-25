@@ -1,9 +1,10 @@
 import { ColumnConfig } from '../../components/ColumnConfig';
 import { LicenseQuerySortType, LicenseResult } from '#common/types/apiTypes';
-import { WrappedLabel } from '#client/components/styles.js';
+import { WrappedLabel, EntitlementIdLink } from '#client/components/styles.js';
 import { isoStringWithOnlyDate } from '#common/util/dateUtils';
 import { dateDiff } from '#common/util/dateUtils';
 import { EmphasizedAnnotation } from '../../components/styles';
+import { getLicenseDisplayId } from '#client/util/displayIdUtils';
 
 // Define the context type for license cell rendering (currently no context needed)
 export interface LicenseCellContext {
@@ -30,7 +31,14 @@ export const defaultLicenseColumns: ColumnConfig<LicenseResult, LicenseCellConte
         label: 'Entitlement ID',
         visible: true,
         nowrap: true,
-        renderSimpleCell: (lr) => lr.license.entitlementId
+        renderSimpleCell: (lr) => {
+            const displayId = getLicenseDisplayId(lr.license.data);
+            return (
+                <EntitlementIdLink to={`/transactions?search=${encodeURIComponent(displayId)}`}>
+                    {displayId}
+                </EntitlementIdLink>
+            );
+        }
     },
     {
         id: 'app',

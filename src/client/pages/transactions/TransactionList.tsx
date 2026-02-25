@@ -26,6 +26,7 @@ import { defaultTransactionColumns, TransactionCellContext } from './transaction
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
 import { CollapsibleFilters } from '../../components/CollapsibleFilters';
+import { useSearchParamState } from '../../hooks/useSearchParamState';
 
 interface TransactionListProps {
     // Add props if needed
@@ -38,7 +39,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
     const [rowsPerPage, setRowsPerPage] = useState(25);
     const [sortBy, setSortBy] = useState<TransactionQuerySortType>(TransactionQuerySortType.SaleDate);
     const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useSearchParamState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [selectedTransaction, setSelectedTransaction] = useState<TransactionResult | null>(null);

@@ -1,6 +1,6 @@
 import { ColumnConfig } from '../../components/ColumnConfig';
 import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
-import { WrappedLabel } from '#client/components/styles';
+import { WrappedLabel, EntitlementIdLink } from '#client/components/styles';
 import { formatCurrency } from '#common/util/formatCurrency';
 import { isoStringWithOnlyDate } from '#common/util/dateUtils';
 import { dateDiff } from '#common/util/dateUtils';
@@ -11,6 +11,7 @@ import { EmphasizedAnnotation } from '../../components/styles';
 import { mapDiscountTypeToDescription } from './util';
 import { StatusCell, ReconciliationHeaderCell } from '../../components/styles';
 import { ReconciliationControls } from './ReconciliationControls';
+import { getTransactionDisplayId } from '#client/util/displayIdUtils';
 
 // Define the context type for transaction cell rendering
 export interface TransactionCellContext {
@@ -42,7 +43,15 @@ export const defaultTransactionColumns: ColumnConfig<TransactionResult, Transact
         label: 'Entitlement ID',
         visible: true,
         nowrap: true,
-        renderSimpleCell: (tr) => tr.transaction.entitlementId
+        renderSimpleCell: (tr) => {
+            const displayId = getTransactionDisplayId(tr.transaction.data);
+
+            return (
+                <EntitlementIdLink to={`/licenses?search=${encodeURIComponent(displayId)}`}>
+                    {displayId}
+                </EntitlementIdLink>
+            );
+        }
     },
     {
         id: 'invoiceNumber',
