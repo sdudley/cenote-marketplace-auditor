@@ -4,7 +4,7 @@ services:
     image: sjdudley/cenote-marketplace-auditor:latest
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000"
+      - "${LISTEN_HOST:-127.0.0.1}:3000:3000"
     environment:
       - DB_HOST=${DB_HOST:-db}
       - DB_PORT=${DB_PORT:-5432}
