@@ -24,6 +24,8 @@ module.exports = {
     // Exclude test files in the dist/ directory
     testPathIgnorePatterns: [
         '/node_modules/',
-        '/dist/'
+        '/dist/',
+        '/.stversions/',
+        '/.stfolder/'
     ]
 };
