@@ -1,6 +1,13 @@
 import { PriceCalculatorService } from '../PriceCalculatorService';
-import { cloudAnnualPricingTiers, cloudPerUserPricingTiers, cloudPricingTierResult, dataCenterPricingTierResult, dataCenterLegacyPricing, dataCenterExtraLegacyPricing } from './pricingTable';
-import { PriceResult } from '#server/services/types';
+import {
+    cloudAnnualPricingTiers,
+    cloudPerUserPricingTiers,
+    cloudPricingTierResult,
+    dataCenterPricingTierResult,
+    dataCenterLegacyPricing,
+    dataCenterExtraLegacyPricing
+} from './pricingTable';
+import { PriceResult } from '../../../server/services/types';
 
 const stripDailyPrice = (data: PriceResult) => ({ purchasePrice: data.purchasePrice, vendorPrice: data.vendorPrice });
 

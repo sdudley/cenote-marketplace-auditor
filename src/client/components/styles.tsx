@@ -69,6 +69,20 @@ export const DialogContentBox = styled(Box)({
     padding: 16
 });
 
+export const SnippetTextAreaBox = styled(Box)(({ theme }) => ({
+    border: '1px solid',
+    borderColor: theme.palette.divider,
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(1),
+    backgroundColor: theme.palette.action.hover
+}));
+
+export const SnippetLabel = styled(Typography)(({ theme }) => ({
+    fontWeight: 600,
+    marginBottom: theme.spacing(0.5),
+    display: 'block'
+}));
+
 export const StyledDialog = styled(Box)({
     minHeight: '80vh',
     maxHeight: '90vh'
