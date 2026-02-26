@@ -14,6 +14,7 @@ import { isSignificantlyDifferent } from "#common/util/significantDifferenceTest
 import { PriceCalcOpts, PriceResult } from '#server/services/types';
 import { AddonDao } from "../../database/dao/AddonDao";
 import { sumDiscountArrayForTransaction } from "#common/util/transactionDiscounts";
+import { isCommunityLicense } from "#server/util/communityLicense";
 
 @injectable()
 export class TransactionValidator {
@@ -95,9 +96,9 @@ export class TransactionValidator {
         const licenseDurationInDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
         const { licenseType } = purchaseDetails;
 
-        // Check for continuity for upgrade and renewal transactions. Community licenses are exempt because they are free anyway.
+        // Check for continuity for upgrade and renewal transactions. Social impact licenses are exempt because they are free anyway.
 
-        if ((saleType==='Upgrade' || saleType==='Renewal' || saleType==='Downgrade') && licenseDurationInDays !== 0  && licenseType !== 'COMMUNITY') {
+        if ((saleType==='Upgrade' || saleType==='Renewal' || saleType==='Downgrade') && licenseDurationInDays !== 0  && !isCommunityLicense(licenseType)) {
             if (!previousPurchase) {
                 notes.push('This is an upgrade/downgrade/renewal, but we could not find related transaction for previous purchase');
                 valid = false;

@@ -17,8 +17,12 @@ export type StatusAsyncTransactionCollection = components["schemas"]["StatusAsyn
 type InternalSaleType = components["schemas"]["TransactionPurchaseDetails"]["saleType"];
 export type SaleType = InternalSaleType | 'Downgrade';
 
-interface EnhancedTransactionPurchaseDetails extends Omit<components["schemas"]["TransactionPurchaseDetails"], 'saleType'> {
+// Hack until Atlassian adds the 'SOCIAL_IMPACT' license type to the OpenAPI spec
+export type EnhancedLicenseType = components["schemas"]["TransactionPurchaseDetails"]["licenseType"] | 'SOCIAL_IMPACT' | 'SOCIAL_IMPACT_GLOBAL_ACCESS';
+
+interface EnhancedTransactionPurchaseDetails extends Omit<components["schemas"]["TransactionPurchaseDetails"], 'saleType' | 'licenseType'> {
     saleType: SaleType;
+    licenseType: EnhancedLicenseType;
 }
 
 export interface TransactionData extends Omit<components["schemas"]["Transaction"], 'purchaseDetails'> {

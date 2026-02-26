@@ -8,12 +8,15 @@ import {
     ACADEMIC_DC_PRICE_RATIO_CURRENT_START_DATE,
     ACADEMIC_DC_PRICE_RATIO_LEGACY,
     CLOUD_DISCOUNT_RATIO,
-    DC_DISCOUNT_RATIO
+    COMMUNITY_CLOUD_PRICE_RATIO,
+    DC_DISCOUNT_RATIO,
+    SOCIAL_IMPACT_GLOBAL_ACCESS_CLOUD_PRICE_RATIO
 } from "#server/util/validationConstants";
 import { injectable } from "inversify";
-import { DeploymentType, HostingType } from "#common/types/marketplace";
+import { DeploymentType, EnhancedLicenseType, HostingType } from "#common/types/marketplace";
 import { PriceCalcDescriptor, PriceCalcOpts, PriceResult } from '#server/services/types';
 import { formatCurrency } from "#common/util/formatCurrency";
+import { isAcademicOrCommunityLicense, isCommunityLicense } from "#server/util/communityLicense";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
 
@@ -110,9 +113,9 @@ export class PriceCalculatorService {
             descriptors.push({ subtotal: basePrice, description: `Refund: negate base price`});
         }
 
-        // Apply academic/community discount if applicable
-        if (licenseType==='ACADEMIC' || licenseType==='COMMUNITY') {
-            const licenseTypeDiscountFraction = this.getLicenseTypeDiscountFraction({ saleDate, hosting, userCount, parentProduct });
+        // Apply academic/social impact discount if applicable
+        if (isAcademicOrCommunityLicense(licenseType)) {
+            const licenseTypeDiscountFraction = this.getLicenseTypeDiscountFraction({ licenseType, saleDate, hosting, userCount, parentProduct });
             basePrice *= licenseTypeDiscountFraction;
             descriptors.push({ subtotal: basePrice, description: `Apply ${licenseType.toLowerCase()} discount of ${(1-licenseTypeDiscountFraction)*100}%`});
         }
@@ -257,13 +260,25 @@ export class PriceCalculatorService {
         return cost;
     }
 
-    // Apply expecteddiscounts for academic and community licenses
+    // Apply expected discounts for academic and social impact licenses
 
-    private getLicenseTypeDiscountFraction(opts: { saleDate: string; hosting: HostingType; userCount: number; parentProduct: string; }): number {
-        const { saleDate, hosting, userCount, parentProduct } = opts;
+    private getLicenseTypeDiscountFraction(opts: { licenseType: EnhancedLicenseType; saleDate: string; hosting: HostingType; userCount: number; parentProduct: string; }): number {
+        const { licenseType, saleDate, hosting, userCount, parentProduct } = opts;
 
         if (hosting==='Cloud') {
-            return ACADEMIC_CLOUD_PRICE_RATIO;
+            if (licenseType==='ACADEMIC') {
+                return ACADEMIC_CLOUD_PRICE_RATIO;
+            }
+
+            if (licenseType==='SOCIAL_IMPACT' || licenseType==='COMMUNITY') {
+                return COMMUNITY_CLOUD_PRICE_RATIO;
+            }
+
+            if (licenseType==='SOCIAL_IMPACT_GLOBAL_ACCESS') {
+                return SOCIAL_IMPACT_GLOBAL_ACCESS_CLOUD_PRICE_RATIO;
+            }
+
+            throw new Error(`Unknown discounted cloud license type: ${licenseType}`);
         }
 
         // Somewhere in 2024, Atlassian changed the pricing for academic data center licenses to apply a
@@ -291,8 +306,8 @@ export class PriceCalculatorService {
             return { isFreeLicense: true, freeDescriptors: [{ subtotal: 0, description: 'Open source licenses are free' }] };
         }
 
-        if (licenseType==='COMMUNITY' && hosting==='Data Center') {
-            return { isFreeLicense: true, freeDescriptors: [{ subtotal: 0, description: 'Community DC licenses are free' }] };
+        if (isCommunityLicense(licenseType) && hosting==='Data Center') {
+            return { isFreeLicense: true, freeDescriptors: [{ subtotal: 0, description: 'Social Impact DC licenses are free' }] };
         }
 
         if (discounts && discounts.some(d => d.type==='MANUAL' && d.reason==='DUAL_LICENSING')) {

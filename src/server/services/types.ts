@@ -1,5 +1,5 @@
 import { PricingTierResult } from '#common/types/pricingTierResult';
-import { BillingPeriod, HostingType, LicenseType, SaleType } from '#common/types/marketplace';
+import { BillingPeriod, HostingType, SaleType, EnhancedLicenseType } from '#common/types/marketplace';
 import { Transaction } from '#common/entities/Transaction';
 import { TransactionDiscount } from '#common/types/marketplace';
 
@@ -10,7 +10,7 @@ export interface PriceCalcOpts {
     isSandbox: boolean;
     hosting: HostingType;
     parentProduct: string;
-    licenseType: LicenseType;
+    licenseType: EnhancedLicenseType;
     tier: string;
     maintenanceStartDate: string;
     maintenanceEndDate: string;

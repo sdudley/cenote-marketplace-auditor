@@ -13,7 +13,8 @@ export interface LicenseCellContext {
 
 // Helper function for toMixedCase
 const toMixedCase = (str: string) => {
-    return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+    const partial = str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : '';
+    return partial.replace('_', ' ')
 };
 
 // Maintenance is considered active when maintenanceEndDate is today or later

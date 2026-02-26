@@ -271,14 +271,14 @@ describe('PriceCalculatorService', () => {
         expect(result).toEqual({ purchasePrice: 3060, vendorPrice: 2295 });
     });
 
-    it('should calculate correct price for 800 users annual community cloud renewal', () => {
+    it('should calculate correct price for 800 users annual social impact cloud renewal', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
             pricingTierResult: cloudPricingTierResult,
             saleType: 'Renewal',
             saleDate: '2025-04-27',
             isSandbox: false,
             hosting: 'Cloud',
-            licenseType: 'COMMUNITY',
+            licenseType: 'SOCIAL_IMPACT',
             tier: '800 Users',
             maintenanceStartDate: '2025-02-28',
             maintenanceEndDate: '2026-02-28',
@@ -288,6 +288,25 @@ describe('PriceCalculatorService', () => {
         }));
 
         expect(result).toEqual({ purchasePrice: 1252, vendorPrice: 1064.20 }); // Actual is 1063.56 per Atlassian
+    });
+
+    it('should calculate correct price for 800 users annual social impact global accesscloud renewal', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: cloudPricingTierResult,
+            saleType: 'Renewal',
+            saleDate: '2025-04-27',
+            isSandbox: false,
+            hosting: 'Cloud',
+            licenseType: 'SOCIAL_IMPACT_GLOBAL_ACCESS',
+            tier: '800 Users',
+            maintenanceStartDate: '2025-02-28',
+            maintenanceEndDate: '2026-02-28',
+            billingPeriod: 'Annual',
+            declaredPartnerDiscount: 0,
+            parentProduct: 'confluence'
+        }));
+
+        expect(result).toEqual({ purchasePrice: 751, vendorPrice: 638.35 });
     });
 
     it('should calculate correct price for 15k DC renewal with reseller discount', () => {
