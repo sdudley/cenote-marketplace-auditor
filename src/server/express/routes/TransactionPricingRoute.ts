@@ -100,12 +100,11 @@ export class TransactionPricingRoute {
                 return;
             }
 
-            const { purchaseDetails } = transactionData;
             const response: PriceTestSnippetResponse = {
                 pricingTierResult: validationResult.pricingOpts.pricingTierResult,
                 pricingOpts: validationResult.pricingOpts,
-                purchasePrice: purchaseDetails.purchasePrice,
-                vendorAmount: purchaseDetails.vendorAmount
+                purchasePrice: validationResult.price.purchasePrice,
+                vendorAmount: validationResult.price.vendorPrice
             };
             res.json(response);
         } finally {
