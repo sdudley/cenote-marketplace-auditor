@@ -5,7 +5,10 @@ import {
     cloudPricingTierResult,
     dataCenterPricingTierResult,
     dataCenterLegacyPricing,
-    dataCenterExtraLegacyPricing
+    dataCenterExtraLegacyPricing,
+    pricingTierResult_151ff35b,
+    pricingTierResult_93f67ba5,
+    pricingTierResult_118424d0
 } from './pricingTable';
 import { PriceResult } from '../../../server/services/types';
 
@@ -486,5 +489,114 @@ describe('PriceCalculatorService', () => {
           }));
 
           expect(result).toEqual({ purchasePrice: 4875, vendorPrice: 3656.25 });
+    });
+
+    it('live: 2025-10-17 Refund 1600 Users', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: pricingTierResult_151ff35b,
+            saleType: "Refund",
+            saleDate: "2025-10-17",
+            isSandbox: false,
+            hosting: "Cloud",
+            licenseType: "COMMERCIAL",
+            tier: "1600 Users",
+            maintenanceStartDate: "2025-02-09",
+            maintenanceEndDate: "2027-02-09",
+            billingPeriod: "Annual",
+            expectedDiscount: 0,
+            declaredPartnerDiscount: 0,
+            parentProduct: "confluence"
+        }));
+
+        expect(result.purchasePrice).toBeCloseTo(-14370, 2);
+        expect(result.vendorPrice).toBeCloseTo(-12214.5, 2);
+    });
+
+    it('live: 2025-08-25 Refund 200 Users', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: pricingTierResult_93f67ba5,
+            saleType: "Refund",
+            saleDate: "2025-08-25",
+            isSandbox: false,
+            hosting: "Cloud",
+            licenseType: "COMMERCIAL",
+            tier: "200 Users",
+            maintenanceStartDate: "2025-08-20",
+            maintenanceEndDate: "2026-02-20",
+            billingPeriod: "Annual",
+            expectedDiscount: 0,
+            declaredPartnerDiscount: 0,
+            parentProduct: "confluence"
+        }));
+
+        expect(result.purchasePrice).toBeCloseTo(-1462, 2);
+        expect(result.vendorPrice).toBeCloseTo(-1242.7, 2);
+    });
+
+    it('live: 2025-08-19 Refund 600 Users', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: pricingTierResult_151ff35b,
+            saleType: "Refund",
+            saleDate: "2025-08-19",
+            isSandbox: false,
+            hosting: "Cloud",
+            licenseType: "COMMERCIAL",
+            tier: "600 Users",
+            maintenanceStartDate: "2025-08-19",
+            maintenanceEndDate: "2025-12-30",
+            billingPeriod: "Annual",
+            expectedDiscount: 0,
+            declaredPartnerDiscount: 0,
+            parentProduct: "confluence"
+        }));
+
+        expect(result.purchasePrice).toBeCloseTo(-1533, 2);
+        expect(result.vendorPrice).toBeCloseTo(-1303.05, 2);
+    });
+
+    it('live: 2024-08-07 Upgrade 4000 Users', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: pricingTierResult_118424d0,
+            saleType: "Upgrade",
+            saleDate: "2024-08-07",
+            isSandbox: false,
+            hosting: "Data Center",
+            licenseType: "COMMERCIAL",
+            tier: "4000 Users",
+            maintenanceStartDate: "2024-07-26",
+            maintenanceEndDate: "2025-07-31",
+            billingPeriod: "Annual",
+            previousPurchaseMaintenanceEndDate: "2025-02-08",
+            previousPricing: { purchasePrice: 6300, vendorPrice: 4725, dailyNominalPrice: 17.26027397260274, descriptors: [] },
+            expectedDiscount: 0,
+            declaredPartnerDiscount: 0,
+            parentProduct: "confluence"
+        }));
+
+        expect(result.purchasePrice).toBeCloseTo(3696, 2);
+        expect(result.vendorPrice).toBeCloseTo(2772, 2);
+    });
+
+    it('live: 2024-06-27 Upgrade 3000 Users', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: pricingTierResult_118424d0,
+            saleType: "Upgrade",
+            saleDate: "2024-06-27",
+            isSandbox: false,
+            hosting: "Data Center",
+            licenseType: "COMMERCIAL",
+            tier: "3000 Users",
+            maintenanceStartDate: "2024-06-30",
+            maintenanceEndDate: "2026-06-30",
+            billingPeriod: "Annual",
+            previousPurchaseMaintenanceEndDate: "2026-06-30",
+            previousPricing: { purchasePrice: 11200, vendorPrice: 8400, dailyNominalPrice: 15.342465753424657, descriptors: [] },
+            expectedDiscount: 0,
+            declaredPartnerDiscount: 0,
+            parentProduct: "confluence"
+        }));
+
+        expect(result.purchasePrice).toBeCloseTo(1401, 2);
+        expect(result.vendorPrice).toBeCloseTo(1050.75, 2);
     });
 });

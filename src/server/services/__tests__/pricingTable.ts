@@ -197,6 +197,35 @@ export const serverPricing : UserTierPricing[] = [
     { userTier: 10000, cost: 7300 }
 ];
 
+export const newCloudPerUserPricingTiers : UserTierPricing[] = [
+    { userTier: 10, cost: 10 },
+    { userTier: 100, cost: 1.98 },
+    { userTier: 250, cost: 0.92 },
+    { userTier: 1000, cost: 0.48 },
+    { userTier: 2500, cost: 0.27 },
+    { userTier: 5000, cost: 0.27 },
+    { userTier: 7500, cost: 0.17 },
+    { userTier: 10000, cost: 0.17 },
+    { userTier: 15000, cost: 0.15 },
+    { userTier: 20000, cost: 0.15 },
+    { userTier: 25000, cost: 0.15 },
+    { userTier: 30000, cost: 0.15 },
+    { userTier: 35000, cost: 0.15 },
+    { userTier: 40000, cost: 0.15 },
+    { userTier: 45000, cost: 0.15 },
+    { userTier: 50000, cost: 0.15 },
+    { userTier: 60000, cost: 0.15 },
+    { userTier: 70000, cost: 0.15 },
+    { userTier: 80000, cost: 0.15 },
+    { userTier: 90000, cost: 0.15 },
+    { userTier: 100000, cost: 0.15 },
+    { userTier: 110000, cost: 0.15 },
+    { userTier: 120000, cost: 0.15 },
+    { userTier: 130000, cost: 0.15 },
+    { userTier: 140000, cost: 0.15 },
+    { userTier: -1, cost: 0.15 }
+];
+
 export const cloudPricingTierResult : PricingTierResult = {
     tiers: cloudPerUserPricingTiers,
     priorTiers: undefined,
@@ -209,3 +238,22 @@ export const dataCenterPricingTierResult : PricingTierResult = {
     priorPricingEndDate: '2024-09-18'
 };
 
+// Pricing tier results for automated tests
+
+export const pricingTierResult_118424d0: PricingTierResult = {
+    tiers: dataCenterExtraLegacyPricing,
+    priorTiers: undefined,
+    priorPricingEndDate: undefined
+};
+
+export const pricingTierResult_151ff35b: PricingTierResult = {
+    tiers: cloudPerUserPricingTiers,
+    priorTiers: undefined,
+    priorPricingEndDate: undefined
+};
+
+export const pricingTierResult_93f67ba5: PricingTierResult = {
+    tiers: newCloudPerUserPricingTiers,
+    priorTiers: cloudPerUserPricingTiers,
+    priorPricingEndDate: '2025-08-14'
+};
