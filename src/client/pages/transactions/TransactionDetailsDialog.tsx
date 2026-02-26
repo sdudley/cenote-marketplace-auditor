@@ -27,7 +27,6 @@ import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import { formatTransactionData } from './transactionUtils';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { handleExportTransaction } from './util';
-import { CopyPriceTestDialog } from './CopyPriceTestDialog';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;
@@ -37,7 +36,6 @@ interface TransactionDetailsProps {
 
 export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ transaction, open, onClose }) => {
     const [showVersions, setShowVersions] = useState(false);
-    const [copyTestDialogOpen, setCopyTestDialogOpen] = useState(false);
 
     if (!transaction) return null;
 
@@ -73,14 +71,6 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                             sx={{ textTransform: 'none' }}
                         >
                             Export as JSON
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => setCopyTestDialogOpen(true)}
-                            sx={{ textTransform: 'none' }}
-                        >
-                            Copy as test
                         </Button>
                         <Button
                             variant="outlined"
@@ -139,12 +129,6 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                 open={showVersions}
                 onClose={() => setShowVersions(false)}
                 transactionResult={transaction}
-            />
-            <CopyPriceTestDialog
-                open={copyTestDialogOpen}
-                onClose={() => setCopyTestDialogOpen(false)}
-                transactionId={transaction.transaction.id}
-                transactionData={transaction.transaction.data}
             />
         </>
     );

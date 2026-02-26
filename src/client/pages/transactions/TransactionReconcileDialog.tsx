@@ -30,6 +30,7 @@ import {
 } from '../../components/styles';
 import { CloseButton } from '../../components/CloseButton';
 import { TransactionPricingDetail } from './TransactionPricingDetail';
+import { CopyPriceTestDialog } from './CopyPriceTestDialog';
 
 interface TransactionReconcileDialogProps {
     transaction: TransactionResult | null;
@@ -49,6 +50,7 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
     const [existingNotes, setExistingNotes] = useState<TransactionReconcileNote[]>([]);
     const [pricing, setPricing] = useState<TransactionPricingResponse | null>(null);
     const [isLoadingPricing, setIsLoadingPricing] = useState(false);
+    const [copyTestDialogOpen, setCopyTestDialogOpen] = useState(false);
 
     useEffect(() => {
         setExistingNotes(transaction?.transaction.reconcile?.notes ?? []);
@@ -117,20 +119,39 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
     };
 
     return (
+        <>
         <Dialog
             open={open}
             onClose={onClose}
             maxWidth="md"
             fullWidth
         >
-            <DialogTitle>
-                <DialogTitleBox>
+            <DialogTitle sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 1,
+                pr: { xs: 11, sm: 8 },
+                position: 'relative'
+            }}>
+                <DialogTitleBox sx={{ flex: { xs: '1 1 100%', sm: 1 }, minWidth: 0 }}>
                     <Typography variant="h6">Transaction Reconciliation Details</Typography>
                     <DialogTitleSubtitle variant="subtitle1">
                         {saleDate} • {addonKey} • {saleType} • {tier} • {formatCurrency(vendorAmount)} • {company}
                     </DialogTitleSubtitle>
                 </DialogTitleBox>
-                <CloseButton onClose={onClose} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setCopyTestDialogOpen(true)}
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Copy as test
+                    </Button>
+                    <CloseButton onClose={onClose} />
+                </Box>
             </DialogTitle>
             <DialogContent>
                 <StyledDialog>
@@ -223,5 +244,12 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
                 </Button>
             </DialogActions> */}
         </Dialog>
+        <CopyPriceTestDialog
+            open={copyTestDialogOpen}
+            onClose={() => setCopyTestDialogOpen(false)}
+            transactionId={transaction.transaction.id}
+            transactionData={transaction.transaction.data}
+        />
+        </>
     );
 };
