@@ -15,6 +15,7 @@ import { PriceCalcOpts, PriceResult } from '#server/services/types';
 import { AddonDao } from "../../database/dao/AddonDao";
 import { sumDiscountArrayForTransaction } from "#common/util/transactionDiscounts";
 import { isCommunityLicense } from "#server/util/communityLicense";
+import { isMQBTransaction } from "#common/util/mqbUtils";
 
 @injectable()
 export class TransactionValidator {
@@ -37,7 +38,8 @@ export class TransactionValidator {
             hasActualAdjustments,
             isSandbox,
             previousPurchaseFindResult,
-            expectedDiscountForPreviousPurchase
+            expectedDiscountForPreviousPurchase,
+            mqbLicenseUserCount
         } = opts;
         const { data } = transaction;
         const { addonKey, purchaseDetails } = data;
@@ -53,14 +55,15 @@ export class TransactionValidator {
         const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
         const parentProduct = await this.addonDao.getParentProductForApp(addonKey);
 
-        // If it is an upgrade, we need to also load details about the previous purchase and potentially-different
-        // pricing tiers for that transaction.
+        // If it is an upgrade, downgrade, renewal, or refund (with overlap context), we need to load details
+        // about the previous purchase and potentially-different pricing tiers for that transaction.
 
         let previousPurchase : Transaction | undefined;
         let previousPurchasePricingTierResult : PricingTierResult | undefined;
         let previousPurchaseEffectiveMaintenanceEndDate : string | undefined;
 
-        if ((saleType==='Upgrade' || saleType==='Downgrade' || saleType==='Renewal') && previousPurchaseFindResult) {
+        const needsPreviousForPricing = (saleType==='Upgrade' || saleType==='Downgrade' || saleType==='Renewal' || saleType==='Refund') && previousPurchaseFindResult;
+        if (needsPreviousForPricing) {
             previousPurchase = previousPurchaseFindResult.transaction;
             const { effectiveMaintenanceEndDate } = previousPurchaseFindResult;
 
@@ -73,17 +76,30 @@ export class TransactionValidator {
         }
 
         // Calculate the expected price for the previous transaction, if it exists. The previous transaction is
-        // only relevant to pricing if we are performing an upgrade, since the prior license cost then comes into play
-        // if there are overlapping maintenance periods.
+        // relevant to pricing for upgrades/downgrades (overlap). For Refund we only need previousPricing when
+        // the refund is MQB (e.g. to resolve mqbLicenseUserCount from context); non-MQB Refunds should not
+        // get overlap pricing, so we leave previousPricing undefined for them.
 
+        const needsPreviousPricing = (saleType==='Upgrade' || saleType==='Downgrade' || (saleType==='Refund' && isMQBTransaction(transaction)));
         const previousPurchasePricing =
-                    (saleType==='Upgrade' || saleType==='Downgrade') && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
+                    needsPreviousPricing && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
                         ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, parentProduct })
                         : undefined;
 
         // Calculate the expected price for the current transaction.
 
-        const { price, pricingOpts } = this.calculatePriceForTransaction({ transaction, isSandbox, pricingTierResult: pricingTierResult, previousPurchase, previousPricing: previousPurchasePricing?.price, useLegacyPricingTier: useLegacyPricingTierForCurrent, expectedDiscount, previousPurchaseEffectiveMaintenanceEndDate, parentProduct });
+        const { price, pricingOpts } = this.calculatePriceForTransaction({
+            transaction,
+            isSandbox,
+            pricingTierResult,
+            previousPurchase,
+            previousPricing: previousPurchasePricing?.price,
+            useLegacyPricingTier: useLegacyPricingTierForCurrent,
+            expectedDiscount,
+            previousPurchaseEffectiveMaintenanceEndDate,
+            parentProduct,
+            mqbLicenseUserCount
+        });
 
         let expectedVendorAmount = price.vendorPrice;
 
@@ -97,8 +113,13 @@ export class TransactionValidator {
         const { licenseType } = purchaseDetails;
 
         // Check for continuity for upgrade and renewal transactions. Social impact licenses are exempt because they are free anyway.
+        // MQB (prorated) transactions do not affect maintenance continuity, so skip continuity checks for them.
 
-        if ((saleType==='Upgrade' || saleType==='Renewal' || saleType==='Downgrade') && licenseDurationInDays !== 0  && !isCommunityLicense(licenseType)) {
+        if ((saleType==='Upgrade' || saleType==='Renewal' || saleType==='Downgrade') &&
+                licenseDurationInDays !== 0  &&
+                !isCommunityLicense(licenseType) &&
+                !isMQBTransaction(transaction)) {
+
             if (!previousPurchase) {
                 notes.push('This is an upgrade/downgrade/renewal, but we could not find related transaction for previous purchase');
                 valid = false;
@@ -120,6 +141,11 @@ export class TransactionValidator {
                     valid = false;
                 }
             }
+        }
+
+        if (isMQBTransaction(transaction) && !mqbLicenseUserCount) {
+            notes.push('Correct MQB transaction price cannot be computed because parent (non-MQB) transaction is missing');
+            valid = false;
         }
 
         const result : TransactionValidationResult = {
@@ -152,6 +178,7 @@ export class TransactionValidator {
         previousPurchaseEffectiveMaintenanceEndDate: string|undefined;
         expectedDiscount: number;
         parentProduct: string;
+        mqbLicenseUserCount?: number;
     }) : PriceWithPricingOpts {
         const {
             transaction,
@@ -161,7 +188,8 @@ export class TransactionValidator {
             useLegacyPricingTier,
             expectedDiscount,
             previousPurchaseEffectiveMaintenanceEndDate,
-            parentProduct
+            parentProduct,
+            mqbLicenseUserCount
         } = opts;
         const { purchaseDetails } = transaction.data;
 
@@ -184,7 +212,9 @@ export class TransactionValidator {
             expectedDiscount,
             declaredPartnerDiscount,
             discounts: purchaseDetails.discounts,
-            parentProduct
+            parentProduct,
+            proratedDetails: purchaseDetails.proratedDetails,
+            mqbLicenseUserCount
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator

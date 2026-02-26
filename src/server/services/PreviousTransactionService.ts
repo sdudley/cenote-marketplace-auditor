@@ -3,6 +3,7 @@ import { TYPES } from '../config/types';
 import { Transaction } from '#common/entities/Transaction';
 import { TransactionDao } from '../database/dao/TransactionDao';
 import { PreviousTransactionResult } from '#server/services/types';
+import { findParentForMQBTransaction, isMQBTransaction } from '#common/util/mqbUtils';
 
 @injectable()
 export class PreviousTransactionService {
@@ -20,8 +21,10 @@ export class PreviousTransactionService {
     public async findPreviousTransaction(transaction: Transaction): Promise<PreviousTransactionResult | undefined> {
         const relatedTransactions = await this.transactionDao.loadRelatedTransactions(transaction.entitlementId);
 
-        // Filter out the current transaction
-        const otherTransactions = relatedTransactions.filter(t => t.id !== transaction.id);
+        // Filter out the current transaction and MQB (prorated) transactions; MQB does not affect maintenance continuity
+        const otherTransactions = relatedTransactions.filter(
+            (t) => t.id !== transaction.id && !isMQBTransaction(t)
+        );
 
         // Track the effective end date of each transaction
         const effectiveEndDates = new Map<string, string>();
@@ -113,5 +116,65 @@ export class PreviousTransactionService {
         }
 
         return undefined;
+    }
+
+    /**
+     * For a Refund transaction, finds the transaction that this refund is refunding (overlapping
+     * maintenance period, same tier, sold before the refund). Used so we can apply the same
+     * overlap-based pricing when the refunded purchase was an upgrade.
+     *
+     * @param refundTransaction A transaction with saleType === 'Refund'
+     * @returns The transaction being refunded, or undefined if none found
+     */
+    public async findRefundedTransaction(refundTransaction: Transaction): Promise<Transaction | undefined> {
+        if (refundTransaction.data.purchaseDetails.saleType !== 'Refund') {
+            return undefined;
+        }
+
+        const thisTransactionIsMQB = isMQBTransaction(refundTransaction);
+
+        const relatedTransactions = await this.transactionDao.loadRelatedTransactions(refundTransaction.entitlementId);
+        const otherTransactions = relatedTransactions.filter(
+            (t) => t.id !== refundTransaction.id && isMQBTransaction(t)===thisTransactionIsMQB
+        );
+
+        const refundStart = refundTransaction.data.purchaseDetails.maintenanceStartDate;
+        const refundEnd = refundTransaction.data.purchaseDetails.maintenanceEndDate;
+        const refundSaleDate = refundTransaction.data.purchaseDetails.saleDate;
+        const refundTier = refundTransaction.data.purchaseDetails.tier;
+
+        const refundedTxs = otherTransactions.filter(t =>
+            t.data.purchaseDetails.saleType !== 'Refund' &&
+            t.data.purchaseDetails.maintenanceStartDate <= refundEnd &&
+            t.data.purchaseDetails.maintenanceEndDate >= refundStart &&
+            t.data.purchaseDetails.saleDate <= refundSaleDate &&
+            t.data.purchaseDetails.tier === refundTier
+        );
+
+        let bestMatch: Transaction | undefined;
+        let maxOverlap = 0;
+
+        for (const refundedTx of refundedTxs) {
+            const overlapStart = Math.max(new Date(refundStart).getTime(), new Date(refundedTx.data.purchaseDetails.maintenanceStartDate).getTime());
+            const overlapEnd = Math.min(new Date(refundEnd).getTime(), new Date(refundedTx.data.purchaseDetails.maintenanceEndDate).getTime());
+            const overlap = overlapEnd - overlapStart;
+
+            if (overlap > maxOverlap) {
+                maxOverlap = overlap;
+                bestMatch = refundedTx;
+            }
+        }
+
+        return bestMatch;
+    }
+
+    /**
+     * For a prorated (MQB) transaction, finds the base (primary) transaction that is being upgraded—
+     * the full-period transaction for the same entitlement and maintenance end date, non-prorated.
+     * Used to get the real license size for MQB marginal pricing; tier/oldTier on the MQB line are unreliable.
+     */
+    public async findParentTransactionForProratedTransaction(transaction: Transaction): Promise<Transaction | undefined> {
+        const related = await this.transactionDao.loadRelatedTransactions(transaction.entitlementId);
+        return findParentForMQBTransaction(transaction, related);
     }
 }

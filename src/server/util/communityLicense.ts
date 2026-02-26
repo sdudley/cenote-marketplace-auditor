@@ -6,6 +6,6 @@ export const isCommunityLicense = (licenseType: EnhancedLicenseType): boolean =>
             licenseType==='SOCIAL_IMPACT_GLOBAL_ACCESS';
 };
 
-export const isAcademicOrCommunityLicense = (licenseType: EnhancedLicenseType): boolean => {
+export const isDiscountedLicenseType = (licenseType: EnhancedLicenseType): boolean => {
     return licenseType==='ACADEMIC' || isCommunityLicense(licenseType);
 };

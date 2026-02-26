@@ -238,6 +238,12 @@ export const dataCenterPricingTierResult : PricingTierResult = {
     priorPricingEndDate: '2024-09-18'
 };
 
+export const mqbPricingTierResult: PricingTierResult = {
+    tiers: newCloudPerUserPricingTiers,
+    priorTiers: undefined,
+    priorPricingEndDate: undefined
+};
+
 // Pricing tier results for automated tests
 
 export const pricingTierResult_118424d0: PricingTierResult = {

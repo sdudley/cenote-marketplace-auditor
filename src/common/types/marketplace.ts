@@ -39,5 +39,6 @@ export type PricingItem = components["schemas"]["PricingItem"];
 export type LicenseType = components["schemas"]["TransactionPurchaseDetails"]["licenseType"];
 export type HostingType = components["schemas"]["TransactionPurchaseDetails"]["hosting"];
 export type BillingPeriod = components["schemas"]["TransactionPurchaseDetails"]["billingPeriod"];
+export type ProratedDetails = components["schemas"]["ProratedDetails"];
 
 export type DeploymentType = 'server' | 'datacenter' | 'cloud';

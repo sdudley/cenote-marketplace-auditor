@@ -8,11 +8,24 @@ import {
     dataCenterExtraLegacyPricing,
     pricingTierResult_151ff35b,
     pricingTierResult_93f67ba5,
-    pricingTierResult_118424d0
+    pricingTierResult_118424d0,
+    mqbPricingTierResult
 } from './pricingTable';
 import { PriceResult } from '../../../server/services/types';
 
-const stripDailyPrice = (data: PriceResult) => ({ purchasePrice: data.purchasePrice, vendorPrice: data.vendorPrice });
+const stripDailyPrice = (data: PriceResult) => (
+    {
+        purchasePrice: data.purchasePrice,
+        vendorPrice: data.vendorPrice
+    });
+
+const stripDailyPriceWithNominal = (data: PriceResult) => (
+    {
+        purchasePrice: data.purchasePrice,
+        vendorPrice: data.vendorPrice,
+        dailyNominalPrice: data.dailyNominalPrice
+    });
+
 
 describe('PriceCalculatorService', () => {
     let service: PriceCalculatorService;
@@ -387,6 +400,64 @@ describe('PriceCalculatorService', () => {
           expect(result).toEqual({ purchasePrice: 1988, vendorPrice: 1491 });
     });
 
+    it('calculates refund of overlapping (upgrade) transaction with same overlap descriptors', () => {
+        // Refund of the same upgrade as above: overlap-adjusted amount should be negated
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: dataCenterPricingTierResult,
+            saleType: 'Refund',
+            saleDate: '2025-05-01',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'COMMERCIAL',
+            tier: '2000 Users',
+            maintenanceStartDate: '2025-04-14',
+            maintenanceEndDate: '2026-01-29',
+            billingPeriod: 'Annual',
+            previousPurchaseMaintenanceEndDate: '2026-01-29',
+            previousPricing: {
+                purchasePrice: 4200,
+                vendorPrice: 3150,
+                dailyNominalPrice: 11.506849315068493,
+                descriptors: []
+            },
+            expectedDiscount: 0,
+            declaredPartnerDiscount: 0,
+            parentProduct: 'confluence'
+        }));
+
+        // Refund of overlap-adjusted upgrade: amount should match negated upgrade (allow 1 unit rounding)
+        expect(result.purchasePrice).toBeLessThanOrEqual(-1987);
+        expect(result.purchasePrice).toBeGreaterThanOrEqual(-1989);
+        expect(result.vendorPrice).toBeLessThanOrEqual(-1490);
+        expect(result.vendorPrice).toBeGreaterThanOrEqual(-1492);
+        const fullResult = service.calculateExpectedPrice({
+            pricingTierResult: dataCenterPricingTierResult,
+            saleType: 'Refund',
+            saleDate: '2025-05-01',
+            isSandbox: false,
+            hosting: 'Data Center',
+            licenseType: 'COMMERCIAL',
+            tier: '2000 Users',
+            maintenanceStartDate: '2025-04-14',
+            maintenanceEndDate: '2026-01-29',
+            billingPeriod: 'Annual',
+            previousPurchaseMaintenanceEndDate: '2026-01-29',
+            previousPricing: {
+                purchasePrice: 4200,
+                vendorPrice: 3150,
+                dailyNominalPrice: 11.506849315068493,
+                descriptors: []
+            },
+            expectedDiscount: 0,
+            declaredPartnerDiscount: 0,
+            parentProduct: 'confluence'
+        });
+        const overlapDescriptor = fullResult.descriptors.find(d =>
+            d.description.includes('Subscription overlaps') && d.description.includes('days with old license')
+        );
+        expect(overlapDescriptor).toBeDefined();
+    });
+
     it('calculates non-full-month monthly pricing correctly', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
             pricingTierResult: cloudPricingTierResult,
@@ -598,5 +669,147 @@ describe('PriceCalculatorService', () => {
 
         expect(result.purchasePrice).toBeCloseTo(1401, 2);
         expect(result.vendorPrice).toBeCloseTo(1050.75, 2);
+    });
+
+    describe('MQB (Maximum Quantity Billing) prorated cloud monthly', () => {
+        it('calculates MQB price for real-life test2: 1 user added 2026-01-19, period to 2026-02-05 (license size 63 → 11–100 tier)', () => {
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                pricingTierResult: mqbPricingTierResult,
+                saleDate: '2026-02-06',
+                saleType: 'Renewal',
+                isSandbox: false,
+                hosting: 'Cloud',
+                licenseType: 'COMMERCIAL',
+                tier: 'Per Unit Pricing (1 Users)',
+                maintenanceStartDate: '2026-01-19',
+                maintenanceEndDate: '2026-02-05',
+                billingPeriod: 'Monthly',
+                declaredPartnerDiscount: 0,
+                parentProduct: 'confluence',
+                proratedDetails: [{ date: '2026-01-19T10:03:51.000Z', addedUsers: 1 }],
+                mqbLicenseUserCount: 63
+            }));
+
+            expect(result.purchasePrice).toBeCloseTo(1.08, 1);
+            expect(result.vendorPrice).toBeCloseTo(0.92, 1);
+        });
+
+        it('calculates MQB price for real-life test1: 17 added users across 9 segments to 2026-01-15 (license size 63 → 11–100 tier)', () => {
+            const proratedDetails = [
+                { date: '2025-12-15T13:20:38.000Z', addedUsers: 1 },
+                { date: '2025-12-15T20:19:28.000Z', addedUsers: 1 },
+                { date: '2025-12-16T20:27:47.000Z', addedUsers: 1 },
+                { date: '2025-12-29T18:23:55.000Z', addedUsers: 1 },
+                { date: '2025-12-30T15:15:13.000Z', addedUsers: 9 },
+                { date: '2025-12-30T20:06:20.000Z', addedUsers: 1 },
+                { date: '2026-01-06T15:47:04.000Z', addedUsers: 1 },
+                { date: '2026-01-06T18:00:32.000Z', addedUsers: 1 },
+                { date: '2026-01-14T14:43:43.000Z', addedUsers: 1 }
+            ];
+
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                pricingTierResult: mqbPricingTierResult,
+                saleDate: '2026-01-16',
+                saleType: 'Renewal',
+                isSandbox: false,
+                hosting: 'Cloud',
+                licenseType: 'COMMERCIAL',
+                tier: 'Per Unit Pricing (17 Users)',
+                maintenanceStartDate: '2026-01-14',
+                maintenanceEndDate: '2026-01-15',
+                billingPeriod: 'Monthly',
+                declaredPartnerDiscount: 0,
+                parentProduct: 'confluence',
+                proratedDetails,
+                mqbLicenseUserCount: 63
+            }));
+
+            expect(result.purchasePrice).toBeCloseTo(18.13, 0);
+            expect(result.vendorPrice).toBeCloseTo(15.41, 0);
+        });
+
+        it('calculates MQB price for real-life test3: 7 users across 6 segments (full license 184 → 100–250 tier)', () => {
+            const proratedDetails = [
+                { date: '2026-01-07T16:27:58.000Z', addedUsers: 2 },
+                { date: '2026-01-09T21:21:49.000Z', addedUsers: 1 },
+                { date: '2026-01-13T15:18:31.000Z', addedUsers: 1 },
+                { date: '2026-01-20T16:17:49.000Z', addedUsers: 1 },
+                { date: '2026-01-21T17:03:36.000Z', addedUsers: 1 },
+                { date: '2026-01-27T18:56:10.000Z', addedUsers: 1 }
+            ];
+
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                pricingTierResult: mqbPricingTierResult,
+                saleDate: '2026-02-01',
+                saleType: 'Renewal',
+                isSandbox: false,
+                hosting: 'Cloud',
+                licenseType: 'COMMERCIAL',
+                tier: 'Per Unit Pricing (7 Users)',
+                maintenanceStartDate: '2026-01-27',
+                maintenanceEndDate: '2026-02-01',
+                billingPeriod: 'Monthly',
+                declaredPartnerDiscount: 0,
+                parentProduct: 'confluence',
+                proratedDetails,
+                mqbLicenseUserCount: 184
+            }));
+
+            expect(result.purchasePrice).toBeCloseTo(3.4, 0);
+            expect(result.vendorPrice).toBeCloseTo(2.89, 0);
+        });
+
+        it('calculates MQB price for real-life test4: 8 users across 5 segments (full license 184 → 100–250 tier)', () => {
+            const proratedDetails = [
+                { date: '2025-12-04T15:35:42.000Z', addedUsers: 1 },
+                { date: '2025-12-04T19:06:41.000Z', addedUsers: 1 },
+                { date: '2025-12-11T21:56:51.000Z', addedUsers: 4 },
+                { date: '2025-12-16T16:42:49.000Z', addedUsers: 1 },
+                { date: '2025-12-22T16:14:41.000Z', addedUsers: 1 }
+            ];
+
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                pricingTierResult: mqbPricingTierResult,
+                saleDate: '2026-01-01',
+                saleType: 'Renewal',
+                isSandbox: false,
+                hosting: 'Cloud',
+                licenseType: 'COMMERCIAL',
+                tier: 'Per Unit Pricing (8 Users)',
+                maintenanceStartDate: '2025-12-22',
+                maintenanceEndDate: '2026-01-01',
+                billingPeriod: 'Monthly',
+                declaredPartnerDiscount: 0,
+                parentProduct: 'confluence',
+                proratedDetails,
+                mqbLicenseUserCount: 184
+            }));
+
+            expect(result.purchasePrice).toBeCloseTo(4.74, 0);
+            expect(result.vendorPrice).toBeCloseTo(4.03, 0);
+        });
+    });
+
+    it('live: 2023-06-09 New 25000 Users', () => {
+        const result = stripDailyPriceWithNominal(service.calculateExpectedPrice({
+            pricingTierResult: pricingTierResult_118424d0,
+            saleType: "New",
+            saleDate: "2023-06-09",
+            isSandbox: false,
+            hosting: "Data Center",
+            licenseType: "COMMERCIAL",
+            tier: "25000 Users",
+            maintenanceStartDate: "2023-06-16",
+            maintenanceEndDate: "2024-06-16",
+            billingPeriod: "Annual",
+            expectedDiscount: 562.4736842105267,
+            declaredPartnerDiscount: 0,
+            discounts: [{ type: "MANUAL", amount: 563 }],
+            parentProduct: "confluence"
+        }));
+
+        expect(result.purchasePrice).toBeCloseTo(10688, 2);
+        expect(result.vendorPrice).toBeCloseTo(8016, 2);
+        expect(result.dailyNominalPrice).toBeCloseTo(30.82, 2);
     });
 });

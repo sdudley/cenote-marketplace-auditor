@@ -2,6 +2,7 @@ import { PreviousTransactionService } from '../PreviousTransactionService';
 import { Transaction } from '../../../common/entities/Transaction';
 import { TransactionDao } from '../../database/dao/TransactionDao';
 import { SaleType } from '../../../common/types/marketplace';
+import { isMQBTransaction } from '../../../common/util/mqbUtils';
 
 let uniqueTransactionId = 0;
 
@@ -330,6 +331,39 @@ describe('PreviousTransactionService', () => {
                 effectiveMaintenanceEndDate: '2024-02-28'
             });
         });
+
+        it('should ignore MQB (proratedDetails) transactions when finding previous transaction', async () => {
+            const t1 = createTransaction('2025-12-15', '2026-01-15', '2025-12-10', 'New', '50 Users');
+            const mqb = createTransactionWithProratedDetails('2026-01-14', '2026-01-15', '2026-01-16', [
+                { date: '2025-12-15T12:00:00.000Z', addedUsers: 5 }
+            ]);
+            const t2 = createTransaction('2026-01-15', '2026-02-15', '2026-01-14', 'Renewal', '55 Users');
+
+            transactionDao.loadRelatedTransactions.mockResolvedValue([t2, mqb, t1]);
+
+            const result = await service.findPreviousTransaction(t2);
+
+            expect(isMQBTransaction(mqb)).toBe(true);
+            expect(result).toEqual({
+                transaction: t1,
+                effectiveMaintenanceEndDate: '2026-01-15'
+            });
+        });
+
+        it('should not consider MQB transaction as previous for a renewal', async () => {
+            const t1 = createTransaction('2025-12-15', '2026-01-15', '2025-12-10', 'New', '50 Users');
+            const mqb = createTransactionWithProratedDetails('2026-01-10', '2026-01-15', '2026-01-12', [
+                { date: '2026-01-10T12:00:00.000Z', addedUsers: 3 }
+            ]);
+            const t2 = createTransaction('2026-01-15', '2026-02-15', '2026-01-14', 'Renewal', '53 Users');
+
+            transactionDao.loadRelatedTransactions.mockResolvedValue([t2, mqb, t1]);
+
+            const result = await service.findPreviousTransaction(t2);
+
+            expect(result?.transaction.id).toBe(t1.id);
+            expect(result?.transaction.id).not.toBe(mqb.id);
+        });
     });
 });
 
@@ -343,6 +377,28 @@ function createTransaction(startDate: string, endDate: string, saleDate: string,
             maintenanceStartDate: startDate,
             maintenanceEndDate: endDate,
             tier
+        }
+    } as any;
+    return transaction;
+}
+
+function createTransactionWithProratedDetails(
+    startDate: string,
+    endDate: string,
+    saleDate: string,
+    proratedDetails: Array<{ date: string; addedUsers: number }>,
+    tier: string = 'Per Unit Pricing (1 Users)'
+): Transaction {
+    const transaction = new Transaction();
+    transaction.id = '' + uniqueTransactionId++;
+    transaction.data = {
+        purchaseDetails: {
+            saleDate,
+            saleType: 'Renewal' as SaleType,
+            maintenanceStartDate: startDate,
+            maintenanceEndDate: endDate,
+            tier,
+            proratedDetails
         }
     } as any;
     return transaction;

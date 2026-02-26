@@ -12,4 +12,5 @@ export interface PriceTestSnippetResponse {
     pricingOpts: PriceCalcOpts;
     purchasePrice: number;
     vendorAmount: number;
+    dailyNominalPrice: number;
 }

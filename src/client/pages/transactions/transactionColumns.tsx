@@ -9,7 +9,8 @@ import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscount
 import { TransactionDiscount } from '#common/types/marketplace';
 import { EmphasizedAnnotation } from '../../components/styles';
 import { mapDiscountTypeToDescription } from './util';
-import { StatusCell, ReconciliationHeaderCell } from '../../components/styles';
+import { StatusCell, ReconciliationHeaderCell, MqbAnnotation } from '../../components/styles';
+import { isMQBTransaction } from '#common/util/mqbUtils';
 import { ReconciliationControls } from './ReconciliationControls';
 import { getTransactionDisplayId } from '#client/util/displayIdUtils';
 
@@ -87,6 +88,7 @@ export const defaultTransactionColumns: ColumnConfig<TransactionResult, Transact
                 {tr.transaction.data.purchaseDetails.tier}
                 {tr.isSandbox && <EmphasizedAnnotation>Sandbox</EmphasizedAnnotation>}
                 {tr.transaction.data.purchaseDetails.discounts?.some(d => d.type==='MANUAL' && d.reason==='DUAL_LICENSING') && <EmphasizedAnnotation>Dual Licensing</EmphasizedAnnotation>}
+                {isMQBTransaction(tr.transaction) && <MqbAnnotation>(MQB)</MqbAnnotation>}
             </>
         )
     },

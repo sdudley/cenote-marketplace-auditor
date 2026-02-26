@@ -478,6 +478,13 @@ export const EmphasizedAnnotation = styled('p')({
     fontSize: '10px'
 });
 
+export const MqbAnnotation = styled('span')({
+    display: 'block',
+    fontWeight: 'bold',
+    fontSize: '10px',
+    color: '#f58623'
+});
+
 export const VersionButton = styled(Box)({
     position: 'absolute',
     right: 48,

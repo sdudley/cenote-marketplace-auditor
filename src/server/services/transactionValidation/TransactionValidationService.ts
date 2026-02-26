@@ -13,6 +13,8 @@ import { ALERT_DAYS_AFTER_PRICING_CHANGE } from './constants';
 import { PreviousTransactionService } from '../PreviousTransactionService';
 import { PreviousTransactionResult } from '#server/services/types';
 import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts';
+import { hasProratedDetails } from '#common/util/mqbUtils';
+import { userCountFromTier } from '#common/util/validationUtils';
 
 @injectable()
 export class TransactionValidationService {
@@ -48,21 +50,42 @@ export class TransactionValidationService {
         let validationResult : TransactionValidationResult|undefined = undefined;
 
         const { saleType } = transaction.data.purchaseDetails;
-        const legacyPricePermutations = (saleType === 'Upgrade' || saleType === 'Downgrade')
-                                            ? LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE
-                                            : LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE;
 
         // But first, load details about the previous purchase (if any). We do this at the top level so we only need to do
         // it once (which is somewhat expensive), rather than for each permutation.
 
         let previousPurchaseFindResult : PreviousTransactionResult|undefined = undefined;
         let expectedDiscountForPreviousPurchase : DiscountResult | undefined = undefined;
+        let mqbLicenseUserCount : number | undefined = undefined;
 
         if (saleType==='Upgrade' || saleType==='Downgrade' || saleType==='Renewal') {
             previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(transaction);
 
             if (previousPurchaseFindResult) {
                 expectedDiscountForPreviousPurchase = await this.transactionAdjustmentValidationService.calculateFinalExpectedDiscountForTransaction(previousPurchaseFindResult.transaction);
+            }
+        } else if (saleType==='Refund') {
+            // For a refund, the "previous" for overlap pricing is the license that was active when the
+            // refunded purchase was made (the one it overlapped with). Find the transaction being refunded,
+            // then find that transaction's previous transaction.
+            const refundedTx = await this.previousTransactionService.findRefundedTransaction(transaction);
+            if (refundedTx) {
+                previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(refundedTx);
+                if (previousPurchaseFindResult) {
+                    expectedDiscountForPreviousPurchase = await this.transactionAdjustmentValidationService.calculateFinalExpectedDiscountForTransaction(previousPurchaseFindResult.transaction);
+                }
+            }
+        }
+
+        const legacyPricePermutations = (saleType === 'Upgrade' || saleType === 'Downgrade' || (saleType === 'Refund' && !!previousPurchaseFindResult))
+                                            ? LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE
+                                            : LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE;
+
+        // For MQB (prorated) transactions, resolve license size from the parent full-period transaction.
+        if (hasProratedDetails(transaction.data.purchaseDetails?.proratedDetails)) {
+            const parent = await this.previousTransactionService.findParentTransactionForProratedTransaction(transaction);
+            if (parent) {
+                mqbLicenseUserCount = userCountFromTier(parent.data.purchaseDetails.tier);
             }
         }
 
@@ -95,7 +118,8 @@ export class TransactionValidationService {
                     hasActualAdjustments,
                     isSandbox,
                     previousPurchaseFindResult,
-                    expectedDiscountForPreviousPurchase
+                    expectedDiscountForPreviousPurchase,
+                    mqbLicenseUserCount
                 });
 
                 const { isExpectedPrice, notes } = validationResult;

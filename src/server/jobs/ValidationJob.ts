@@ -129,7 +129,7 @@ export class ValidationJob {
             // has changed, unreconcile it now.
 
             if (existingReconcile.automatic &&
-                validationResult.valid !== existingReconcile.reconciled&&
+                validationResult.valid !== existingReconcile.reconciled &&
                 existingReconcile.reconcilerVersion < CURRENT_RECONCILER_VERSION) {
 
                 notes.push(`Re-evaluating transaction as ${validationResult.valid ? 'reconciled' : 'unreconciled'} with new reconciler logic (v.${CURRENT_RECONCILER_VERSION})`);

@@ -104,7 +104,8 @@ export class TransactionPricingRoute {
                 pricingTierResult: validationResult.pricingOpts.pricingTierResult,
                 pricingOpts: validationResult.pricingOpts,
                 purchasePrice: validationResult.price.purchasePrice,
-                vendorAmount: validationResult.price.vendorPrice
+                vendorAmount: validationResult.price.vendorPrice,
+                dailyNominalPrice: validationResult.price.dailyNominalPrice
             };
             res.json(response);
         } finally {

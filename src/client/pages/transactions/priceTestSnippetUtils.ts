@@ -49,7 +49,7 @@ function formatValue(v: unknown): string {
 }
 
 /** Build the test code string: calculateExpectedPrice opts + expect toBeCloseTo. */
-function buildTestCode(opts: Record<string, unknown>, constantName: string, purchasePrice: number, vendorAmount: number, testName: string): string {
+function buildTestCode(opts: Record<string, unknown>, constantName: string, purchasePrice: number, vendorAmount: number, dailyNominalPrice: number, testName: string): string {
     const optsCopy = { ...opts };
     optsCopy.pricingTierResult = constantName;
     const lines: string[] = [];
@@ -69,12 +69,13 @@ function buildTestCode(opts: Record<string, unknown>, constantName: string, purc
     }
     const optsBlock = lines.join('\n').replace(/,\s*$/, '');
     return `    it('${testName.replace(/'/g, "\\'")}', () => {
-        const result = stripDailyPrice(service.calculateExpectedPrice({
+        const result = stripDailyPriceWithNominal(service.calculateExpectedPrice({
 ${optsBlock}
         }));
 
-        expect(result.purchasePrice).toBeCloseTo(${purchasePrice}, 2);
-        expect(result.vendorPrice).toBeCloseTo(${vendorAmount}, 2);
+        expect(result.purchasePrice).toBeCloseTo(${purchasePrice.toFixed(2)}, 2);
+        expect(result.vendorPrice).toBeCloseTo(${vendorAmount.toFixed(2)}, 2);
+        expect(result.dailyNominalPrice).toBeCloseTo(${dailyNominalPrice.toFixed(2)}, 2);
     });`;
 }
 
@@ -109,7 +110,7 @@ export function buildPriceTestSnippetStrings(
     const constantName = `pricingTierResult_${hash}`;
     const opts = response.pricingOpts as unknown as Record<string, unknown>;
     const testName = testNameSuggest || `live: ${opts.saleDate} ${opts.saleType} ${opts.tier}`;
-    const testCode = buildTestCode(opts, constantName, response.purchasePrice, response.vendorAmount, testName);
+    const testCode = buildTestCode(opts, constantName, response.purchasePrice, response.vendorAmount, response.dailyNominalPrice, testName);
     const pricingTableExport = buildPricingTableExport(response.pricingTierResult, constantName);
     return { testCode, pricingTableExport, constantName };
 }
