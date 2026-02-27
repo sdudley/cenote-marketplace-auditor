@@ -23,6 +23,7 @@ export const ConfigPage: React.FC = () => {
         [ConfigKey.AtlassianAccountUser]: '',
         [ConfigKey.AtlassianAccountApiToken]: '',
         [ConfigKey.AtlassianVendorId]: '',
+        [ConfigKey.BaseUrl]: '',
         [ConfigKey.SchedulerFrequency]: 0,
         [ConfigKey.SlackBotToken]: '',
         [ConfigKey.SlackChannelSales]: '',
@@ -261,6 +262,13 @@ export const ConfigPage: React.FC = () => {
                             onChange={handleChange(ConfigKey.AtlassianVendorId)}
                             fullWidth
                             helperText="Vendor ID for your developer account. This is visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
+                        />
+                        <TextField
+                            label="Base URL"
+                            value={configValues[ConfigKey.BaseUrl]}
+                            onChange={handleChange(ConfigKey.BaseUrl)}
+                            fullWidth
+                            helperText="Base URL of this application, e.g. http://localhost:3000"
                         />
 
                         <SchedulerContainer>

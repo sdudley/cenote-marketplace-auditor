@@ -6,6 +6,7 @@ export function getConfigKeyType(key: ConfigKey): ConfigValueType {
         case ConfigKey.AtlassianAccountUser:
         case ConfigKey.AtlassianAccountApiToken:
         case ConfigKey.AtlassianVendorId:
+        case ConfigKey.BaseUrl:
         case ConfigKey.SlackBotToken:
         case ConfigKey.SlackChannelSales:
         case ConfigKey.SlackChannelEvaluations:

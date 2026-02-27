@@ -6,6 +6,7 @@ export interface ConfigKeyType {
     [ConfigKey.AtlassianAccountUser]: string;
     [ConfigKey.AtlassianAccountApiToken]: string;
     [ConfigKey.AtlassianVendorId]: string;
+    [ConfigKey.BaseUrl]: string;
     [ConfigKey.SchedulerFrequency]: number;
     [ConfigKey.SlackBotToken]: string;
     [ConfigKey.SlackChannelSales]: string;
@@ -19,6 +20,7 @@ export enum ConfigKey {
     AtlassianAccountUser = 'AtlassianAccountUser',
     AtlassianAccountApiToken = 'AtlassianAccountApiToken',
     AtlassianVendorId = 'AtlassianVendorId',
+    BaseUrl = 'BaseUrl',
     SchedulerFrequency = 'SchedulerFrequency',
     SlackBotToken = 'SlackBotToken',
     SlackChannelSales = 'SlackChannelSales',

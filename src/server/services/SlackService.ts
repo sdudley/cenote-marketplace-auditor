@@ -67,6 +67,17 @@ export class SlackService {
         return this.client;
     }
 
+    private async getBaseUrl(): Promise<string> {
+        const configuredBaseUrl = await this.configDao.get<string>(ConfigKey.BaseUrl);
+
+        const baseUrl = (configuredBaseUrl && configuredBaseUrl.trim().length > 0)
+            ? configuredBaseUrl.trim()
+            : 'http://localhost:3000';
+
+        // Normalize to avoid trailing slash issues
+        return baseUrl.replace(/\/+$/, '');
+    }
+
     private async getChannelId(channelName: string): Promise<string | null> {
         const client = await this.getClient();
         if (!client) {
@@ -185,6 +196,7 @@ export class SlackService {
 
     public async postNewTransactionsToSlack(transactions: SlackTransactionData[]): Promise<void> {
         const totalVendorAmount = transactions.reduce((acc, t) => acc + t.vendorAmount, 0);
+        const baseUrl = await this.getBaseUrl();
 
         // Slack has a limit of 50 blocks per message
         // Header + divider = 2 blocks
@@ -231,6 +243,8 @@ export class SlackService {
             // Add a block for each transaction in this batch
             for (const t of batch) {
                 const maintenanceDays = dateDiff(t.maintenanceStartDate, t.maintenanceEndDate);
+                const entitlementUrl = `${baseUrl}/transactions?search=${encodeURIComponent(t.entitlementId)}`;
+                const entitlementIdText = encodeSlackText(t.entitlementId);
 
                 blocks.push(
                     {
@@ -249,7 +263,7 @@ export class SlackService {
                             },
                             {
                                 type: 'mrkdwn',
-                                text: encodeSlackText(`Entitlement ID:\n*${t.entitlementId}*`)
+                                text: `Entitlement ID:\n<${entitlementUrl}|*${entitlementIdText}*>`
                             },
                             {
                                 type: 'mrkdwn',
@@ -296,6 +310,8 @@ export class SlackService {
     }
 
     public async postNewLicensesToSlack(licenses: SlackLicenseData[]): Promise<void> {
+        const baseUrl = await this.getBaseUrl();
+
         // Slack has a limit of 50 blocks per message
         // Header + divider = 2 blocks
         // Per license: 3 blocks (section, section with fields, divider)
@@ -342,6 +358,8 @@ export class SlackService {
                 const maintenanceDays = l.maintenanceEndDate ? dateDiff(l.maintenanceStartDate, l.maintenanceEndDate) : 'Unknown';
                 let extensionText = '';
                 let opportunityText = '';
+                const entitlementUrl = `${baseUrl}/licenses?search=${encodeURIComponent(l.entitlementId)}`;
+                const entitlementIdText = encodeSlackText(l.entitlementId);
 
                 if (l.extended && l.oldMaintenanceEndDate && l.maintenanceEndDate) {
                     const extensionDays = dateDiff(l.oldMaintenanceEndDate, l.maintenanceEndDate);
@@ -374,7 +392,7 @@ export class SlackService {
                             },
                             {
                                 type: 'mrkdwn',
-                                text: encodeSlackText(`Entitlement ID:\n*${l.entitlementId}*`)
+                                text: `Entitlement ID:\n<${entitlementUrl}|*${entitlementIdText}*>`
                             },
                             {
                                 type: 'mrkdwn',
@@ -412,6 +430,9 @@ export class SlackService {
 
         const vendorDifference = vendorAmount - expectedVendorAmount;
         const sanitizedCompany = company ?? 'Unknown';
+        const baseUrl = await this.getBaseUrl();
+        const entitlementUrl = `${baseUrl}/transactions?search=${encodeURIComponent(transaction.entitlementId)}`;
+        const entitlementIdText = encodeSlackText(transaction.entitlementId);
 
         const message = encodeSlackText(`⚠️ Transaction Exception - ${addonName}  - ${sanitizedCompany} (${formatCurrency(vendorDifference)})`);
 
@@ -441,7 +462,7 @@ export class SlackService {
                     },
                     {
                         type: 'mrkdwn',
-                        text: encodeSlackText(`Entitlement ID:\n*${transaction.entitlementId}*`)
+                        text: `Entitlement ID:\n<${entitlementUrl}|*${entitlementIdText}*>`
                     },
                     {
                         type: 'mrkdwn',
