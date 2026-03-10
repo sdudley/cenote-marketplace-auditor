@@ -8,7 +8,7 @@ import { LicenseData, TransactionData } from "#common/types/marketplace";
  * Determines the appropriate ID to display based on hosting type and availability
  */
 export const getDisplayId = (hosting: string | null, licenseId?: string | null, entitlementId?: string | null): string => {
-  if (hosting === 'Data Center' && licenseId) {
+  if (licenseId && (hosting==='Data Center' || hosting==='Server')) {
     return licenseId;
   }
   return entitlementId || '';
