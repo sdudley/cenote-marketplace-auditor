@@ -212,17 +212,13 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                 <Checkbox checked={licenseTypeFilter.indexOf('ACADEMIC') > -1} />
                                 <ListItemText primary="Academic" />
                             </MenuItem>
+                            <MenuItem value="CLASSROOM">
+                                <Checkbox checked={licenseTypeFilter.indexOf('CLASSROOM') > -1} />
+                                <ListItemText primary="Classroom" />
+                            </MenuItem>
                             <MenuItem value="COMMERCIAL">
                                 <Checkbox checked={licenseTypeFilter.indexOf('COMMERCIAL') > -1} />
                                 <ListItemText primary="Commercial" />
-                            </MenuItem>
-                            <MenuItem value="SOCIAL_IMPACT">
-                                <Checkbox checked={licenseTypeFilter.indexOf('SOCIAL_IMPACT') > -1} />
-                                <ListItemText primary="Social Impact" />
-                            </MenuItem>
-                            <MenuItem value="SOCIAL_IMPACT_GLOBAL_ACCESS">
-                                <Checkbox checked={licenseTypeFilter.indexOf('SOCIAL_IMPACT_GLOBAL_ACCESS') > -1} />
-                                <ListItemText primary="Social Impact Global Access" />
                             </MenuItem>
                             <MenuItem value="DEMONSTRATION">
                                 <Checkbox checked={licenseTypeFilter.indexOf('DEMONSTRATION') > -1} />
@@ -231,6 +227,10 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                             <MenuItem value="EVALUATION">
                                 <Checkbox checked={licenseTypeFilter.indexOf('EVALUATION') > -1} />
                                 <ListItemText primary="Evaluation" />
+                            </MenuItem>
+                            <MenuItem value="FOUNDATION_FREE">
+                                <Checkbox checked={licenseTypeFilter.indexOf('FOUNDATION_FREE') > -1} />
+                                <ListItemText primary="Foundation-Free" />
                             </MenuItem>
                             <MenuItem value="FREE">
                                 <Checkbox checked={licenseTypeFilter.indexOf('FREE') > -1} />
@@ -248,9 +248,13 @@ export const LicenseList: React.FC<LicenseListProps> = () => {
                                 <Checkbox checked={licenseTypeFilter.indexOf('PERSONAL') > -1} />
                                 <ListItemText primary="Personal" />
                             </MenuItem>
-                            <MenuItem value="CLASSROOM">
-                                <Checkbox checked={licenseTypeFilter.indexOf('CLASSROOM') > -1} />
-                                <ListItemText primary="Classroom" />
+                            <MenuItem value="SOCIAL_IMPACT">
+                                <Checkbox checked={licenseTypeFilter.indexOf('SOCIAL_IMPACT') > -1} />
+                                <ListItemText primary="Social Impact" />
+                            </MenuItem>
+                            <MenuItem value="SOCIAL_IMPACT_GLOBAL_ACCESS">
+                                <Checkbox checked={licenseTypeFilter.indexOf('SOCIAL_IMPACT_GLOBAL_ACCESS') > -1} />
+                                <ListItemText primary="Social Impact Global Access" />
                             </MenuItem>
                         </Select>
                     </FormControl>

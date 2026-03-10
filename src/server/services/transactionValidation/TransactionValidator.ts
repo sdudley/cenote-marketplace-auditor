@@ -16,6 +16,7 @@ import { AddonDao } from "../../database/dao/AddonDao";
 import { sumDiscountArrayForTransaction } from "#common/util/transactionDiscounts";
 import { isCommunityLicense } from "#server/util/communityLicense";
 import { isMQBTransaction } from "#common/util/mqbUtils";
+import { EnhancedLicenseType, HostingType } from '#common/types/marketplace';
 
 @injectable()
 export class TransactionValidator {
@@ -112,12 +113,13 @@ export class TransactionValidator {
         const licenseDurationInDays = getLicenseDurationInDays(maintenanceStartDate, maintenanceEndDate);
         const { licenseType } = purchaseDetails;
 
-        // Check for continuity for upgrade and renewal transactions. Social impact licenses are exempt because they are free anyway.
-        // MQB (prorated) transactions do not affect maintenance continuity, so skip continuity checks for them.
+        // Check for continuity for upgrade and renewal transactions. DC social impact licenses are exempt because
+        // they are free anyway. MQB (prorated) transactions do not affect maintenance continuity, so skip continuity
+        // checks for them.
 
         if ((saleType==='Upgrade' || saleType==='Renewal' || saleType==='Downgrade') &&
                 licenseDurationInDays !== 0  &&
-                !isCommunityLicense(licenseType) &&
+                !this.isDCCommunityLicense(purchaseDetails.hosting, licenseType) &&
                 !isMQBTransaction(transaction)) {
 
             if (!previousPurchase) {
@@ -250,5 +252,9 @@ export class TransactionValidator {
             !(vendorAmount===0 && expectedVendorAmount > 0);
 
         return { valid, notes: [] };
+    }
+
+    private isDCCommunityLicense(hosting: HostingType, licenseType: EnhancedLicenseType): boolean {
+        return hosting==='Data Center' && isCommunityLicense(licenseType);
     }
 }

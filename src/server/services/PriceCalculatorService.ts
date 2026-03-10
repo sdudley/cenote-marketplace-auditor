@@ -248,7 +248,7 @@ export class PriceCalculatorService {
                 return ACADEMIC_CLOUD_PRICE_RATIO;
             }
 
-            if (licenseType==='SOCIAL_IMPACT' || licenseType==='COMMUNITY') {
+            if (licenseType==='SOCIAL_IMPACT' || licenseType==='COMMUNITY' || licenseType==='FOUNDATION_FREE') {
                 return COMMUNITY_CLOUD_PRICE_RATIO;
             }
 

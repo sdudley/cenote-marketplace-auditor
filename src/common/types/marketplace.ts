@@ -18,7 +18,7 @@ type InternalSaleType = components["schemas"]["TransactionPurchaseDetails"]["sal
 export type SaleType = InternalSaleType | 'Downgrade';
 
 // Hack until Atlassian adds the 'SOCIAL_IMPACT' license type to the OpenAPI spec
-export type EnhancedLicenseType = components["schemas"]["TransactionPurchaseDetails"]["licenseType"] | 'SOCIAL_IMPACT' | 'SOCIAL_IMPACT_GLOBAL_ACCESS';
+export type EnhancedLicenseType = components["schemas"]["TransactionPurchaseDetails"]["licenseType"] | 'SOCIAL_IMPACT' | 'SOCIAL_IMPACT_GLOBAL_ACCESS' | 'FOUNDATION_FREE';
 
 interface EnhancedTransactionPurchaseDetails extends Omit<components["schemas"]["TransactionPurchaseDetails"], 'saleType' | 'licenseType'> {
     saleType: SaleType;
