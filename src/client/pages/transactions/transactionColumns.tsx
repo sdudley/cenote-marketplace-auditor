@@ -20,6 +20,18 @@ export interface TransactionCellContext {
     onShowDetails: (transaction: TransactionResult) => void;
 }
 
+// Convert snake_case or UPPER_CASE to Title Case
+const toTitleCase = (str: string): string => {
+    if (!str) return '';
+    return str
+        .split('_')
+        .filter(Boolean)
+        .map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(' ');
+};
+
 // Helper function for discounts
 const discountsToDescriptions = (discounts: TransactionDiscount[]|undefined) => {
     if (!discounts) return undefined;
@@ -71,7 +83,36 @@ export const defaultTransactionColumns: ColumnConfig<TransactionResult, Transact
         id: 'saleType',
         label: 'Sale Type',
         visible: true,
-        renderSimpleCell: (tr) => tr.transaction.data.purchaseDetails.saleType
+        renderSimpleCell: (tr) => {
+            const { saleType, refundReason, creditNoteReason } =
+                tr.transaction.data.purchaseDetails;
+
+            const renderReason = (reason?: string) => {
+                if (!reason) return null;
+                const formatted = reason
+                    .split('_')
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+                return formatted.join(' ');
+            };
+
+            const baseContent = (
+                <>
+                    {saleType}
+                    {refundReason && (
+                        <div style={{ marginTop: '4px', fontSize: '0.85em', color: '#888' }}>
+                            <span style={{ fontWeight: 'bold' }}>Reason:</span> {renderReason(refundReason)}
+                        </div>
+                    )}
+                    {creditNoteReason && (
+                        <div style={{ marginTop: '4px', fontSize: '0.85em', color: '#888' }}>
+                            <span style={{ fontWeight: 'bold' }}>Credit&nbsp;Note:</span> {renderReason(creditNoteReason)}
+                        </div>
+                    )}
+                </>
+            );
+
+            return baseContent;
+        }
     },
     {
         id: 'hosting',
