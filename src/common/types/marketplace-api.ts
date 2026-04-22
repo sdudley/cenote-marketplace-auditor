@@ -1317,7 +1317,7 @@ export interface paths {
             parameters: {
                 query?: {
                     /** @description The cloud compliance boundary for which the pricing is to be fetched, with "commercial" as the default for cloud apps. Must be left null for non-cloud apps. */
-                    cloudComplianceBoundary?: "commercial" | "fedramp_moderate";
+                    cloudComplianceBoundary?: "commercial" | "fedramp_moderate" | "isolated_cloud";
                 };
                 header?: never;
                 path: {
@@ -7821,6 +7821,13 @@ export interface components {
          *           "expansionMrr": 102494.66,
          *           "contractionMrr": -63709.51,
          *           "closingMrr": 1435169.03
+         *         },
+         *         {
+         *           "date": "2024-10-01",
+         *           "lifetimeGmv": 120000,
+         *           "nonHarmonisedForgeVersionsGmv": 80000,
+         *           "standardForgeAppVersionsGmv": 40000,
+         *           "lifetimeGmvAppVersionType": "NON_HARMONISED_FORGE_VERSIONS"
          *         }
          *       ]
          *     } */
@@ -7832,6 +7839,27 @@ export interface components {
             } & {
                 [key: string]: unknown;
             })[];
+        };
+        /** @description Optional GMV fields that may be present on each record when the request targets the `GMV` metric set.
+         *     `lifetimeGmvAppVersionType` is only returned when `LIFETIME_GMV` is part of the request, while `NON_HARMONISED_FORGE_VERSIONS_LIFETIME_GMV` and `STANDARD_FORGE_VERSIONS_LIFETIME_GMV` ignore the `attributesFilter` and are produced from predefined SQL. */
+        LifetimeGmvMetricsRecord: {
+            /**
+             * Format: double
+             * @description Lifetime GMV filtered to the requested `APP_VERSION_TYPE`.
+             */
+            lifetimeGmv?: number;
+            /**
+             * Format: double
+             * @description Lifetime GMV accumulated for non-harmonised Forge app versions.
+             */
+            nonHarmonisedForgeVersionsGmv?: number;
+            /**
+             * Format: double
+             * @description Lifetime GMV accumulated for Forge app versions where `has_connect_modules = false`.
+             */
+            standardForgeAppVersionsGmv?: number;
+            /** @description Returned only when `LIFETIME_GMV` is requested; echoes the `APP_VERSION_TYPE` supplied in the filter or the default `NON_HARMONISED_FORGE_VERSIONS`. */
+            lifetimeGmvAppVersionType?: string;
         };
         /** @description The attributes requested and displayed. */
         ReportingMetricTimeSeriesRequestAttributes: {
@@ -7856,6 +7884,8 @@ export interface components {
              *     * `APP_VERSION` - Version of the app. Applicable MetricSets are:
              *       * `DISTRIBUTIONS`
              *       * `DOWNLOADS`
+             *       * `GMV`
+             *     * `APP_VERSION_TYPE` - Classification for Forge versions. Possible values are `RUNS_ON_ATLASSIAN`, `NATIVE_APP`, or `NON_HARMONISED`. Applicable MetricSets are:
              *       * `GMV`
              *     * `PARENT_SOFTWARE` - Parent software name like - jira, confluence. Applicable MetricSets are:
              *       * `DISTRIBUTIONS`
@@ -7888,7 +7918,7 @@ export interface components {
              *
              * @enum {string}
              */
-            name?: "APP_KEY" | "APP_NAME" | "GRACE_PERIOD_IN_DAYS" | "SUBSCRIPTION" | "APP_VERSION" | "PARENT_SOFTWARE" | "PARENT_SOFTWARE_VERSION" | "PARENT_SOFTWARE_MAJOR_VERSION" | "PARENT_SOFTWARE_MINOR_VERSION" | "HOSTING" | "PARENT_PRODUCT" | "PRODUCT_TYPE" | "PARENT_PRODUCT_TENURE_LEVEL" | "PARENT_PRODUCT_EDITION" | "PARENT_PRODUCT_UNIT_COUNT" | "LICENSE_STATUS" | "LICENSE_TYPE" | "PRODUCT_STATE" | "PROSPECT_TYPE";
+            name?: "APP_KEY" | "APP_NAME" | "GRACE_PERIOD_IN_DAYS" | "SUBSCRIPTION" | "APP_VERSION" | "APP_VERSION_TYPE" | "PARENT_SOFTWARE" | "PARENT_SOFTWARE_VERSION" | "PARENT_SOFTWARE_MAJOR_VERSION" | "PARENT_SOFTWARE_MINOR_VERSION" | "HOSTING" | "PARENT_PRODUCT" | "PRODUCT_TYPE" | "PARENT_PRODUCT_TENURE_LEVEL" | "PARENT_PRODUCT_EDITION" | "PARENT_PRODUCT_UNIT_COUNT" | "LICENSE_STATUS" | "LICENSE_TYPE" | "PRODUCT_STATE" | "PROSPECT_TYPE";
         }[];
         /** @description The predefined metrics requested and displayed. At least one of metricFields or metricSets must be provided */
         ReportingMetricTimeSeriesRequestMetrics: {
@@ -7937,11 +7967,14 @@ export interface components {
                  *     * DOWNLOADS:
                  *       * `DOWNLOAD_COUNT` - Download counts for an app for specified time frame.
                  *     * GMV:
-                 *       * `LIFETIME_GMV` - Lifetime Gross Merchandise Value (GMV) for all non-harmonised Forge app versions for the given partner account.
+                 *       * `LIFETIME_GMV` - Lifetime GMV filtered to a single `APP_VERSION_TYPE`. Provide exactly one `APP_VERSION_TYPE` filter (`RUNS_ON_ATLASSIAN`, `NATIVE_APP`, or `NON_HARMONISED`) when this field is requested; default is `NON_HARMONISED`; the API responds with `400` when the filter is invalid, or contains multiple values.
+                 *       * `NON_HARMONISED_FORGE_VERSIONS_LIFETIME_GMV` - Lifetime GMV for non-harmonised Forge versions. This breakout ignores the `attributesFilter` and is computed via predefined SQL.
+                 *       * `STANDARD_FORGE_VERSIONS_LIFETIME_GMV` - Lifetime GMV for Forge app versions that do not use connect modules (`has_connect_modules = false`). This breakout ignores the `attributesFilter` and is computed via predefined SQL.
+                 *       * GMV field names are case-insensitive. Requests that only specify `metricSets: [{ "name": "GMV" }]` receive all three fields for backward compatibility.
                  *
                  * @enum {string}
                  */
-                name?: "OPENING_MRR" | "NEW_MRR" | "EXPANSION_MRR" | "CONTRACTION_MRR" | "REACTIVATED_MRR" | "EXPIRED_MRR" | "CLOSING_MRR" | "ARR" | "INSTALL_COUNT" | "USER_COUNT" | "PROSPECT" | "D1_D6_AI" | "AVERAGE_CHURN_DAY" | "DOWNLOAD_COUNT" | "LIFETIME_GMV";
+                name?: "OPENING_MRR" | "NEW_MRR" | "EXPANSION_MRR" | "CONTRACTION_MRR" | "REACTIVATED_MRR" | "EXPIRED_MRR" | "CLOSING_MRR" | "ARR" | "INSTALL_COUNT" | "USER_COUNT" | "PROSPECT" | "D1_D6_AI" | "AVERAGE_CHURN_DAY" | "DOWNLOAD_COUNT" | "LIFETIME_GMV" | "NON_HARMONISED_FORGE_VERSIONS_LIFETIME_GMV" | "STANDARD_FORGE_VERSIONS_LIFETIME_GMV";
             }[];
         };
         /** @description The date range of metrics to be fetched. */
@@ -7988,7 +8021,7 @@ export interface components {
              * @description Enum representing the attribute. The default value of filter on `GRACE_PERIOD_IN_DAYS` is 0.
              * @enum {string}
              */
-            fieldName?: "APP_KEY" | "APP_NAME" | "GRACE_PERIOD_IN_DAYS" | "SUBSCRIPTION" | "APP_VERSION" | "PARENT_SOFTWARE" | "PARENT_SOFTWARE_VERSION" | "PARENT_SOFTWARE_MAJOR_VERSION" | "PARENT_SOFTWARE_MINOR_VERSION" | "HOSTING" | "PARENT_PRODUCT" | "PRODUCT_TYPE" | "PARENT_PRODUCT_TENURE_LEVEL" | "PARENT_PRODUCT_EDITION" | "PARENT_PRODUCT_UNIT_COUNT" | "LICENSE_STATUS" | "LICENSE_TYPE" | "PRODUCT_STATE" | "PROSPECT_TYPE";
+            fieldName?: "APP_KEY" | "APP_NAME" | "GRACE_PERIOD_IN_DAYS" | "SUBSCRIPTION" | "APP_VERSION" | "APP_VERSION_TYPE" | "PARENT_SOFTWARE" | "PARENT_SOFTWARE_VERSION" | "PARENT_SOFTWARE_MAJOR_VERSION" | "PARENT_SOFTWARE_MINOR_VERSION" | "HOSTING" | "PARENT_PRODUCT" | "PRODUCT_TYPE" | "PARENT_PRODUCT_TENURE_LEVEL" | "PARENT_PRODUCT_EDITION" | "PARENT_PRODUCT_UNIT_COUNT" | "LICENSE_STATUS" | "LICENSE_TYPE" | "PRODUCT_STATE" | "PROSPECT_TYPE";
             oneFilter?: {
                 stringFilter?: components["schemas"]["ReportingMetricTimeSeriesRequestStringFilter"];
             } | {
@@ -8290,7 +8323,7 @@ export interface components {
              * @description The cloud compliance boundary for which the pricing is being set, with "commercial" as the default for cloud apps. Must be left null for non-cloud apps.
              * @enum {string}
              */
-            cloudComplianceBoundary?: "commercial" | "fedramp_moderate";
+            cloudComplianceBoundary?: "commercial" | "fedramp_moderate" | "isolated_cloud";
             /** @description True if the vendor can be contacted for additional pricing */
             readonly contactSalesForAdditionalPricing?: boolean;
             /** @description Key of the application that the app is for */
@@ -8514,7 +8547,7 @@ export interface components {
          * @default commercial
          * @enum {string}
          */
-        CloudComplianceBoundary: "commercial" | "fedramp_moderate";
+        CloudComplianceBoundary: "commercial" | "fedramp_moderate" | "isolated_cloud";
         CalculatedChurnPeriodSeries: {
             /** @description Name to describe the series */
             name: string;
@@ -8923,7 +8956,8 @@ export interface components {
             cloud?: components["schemas"]["AddonVersionCloudDeployment"];
             /** @description The cloud compliance boundaries for this app version.\
              *     When present in the request body, this parameter will be ignored for non-cloud app version while defaulting to "commercial" for cloud versions.\
-             *     When present in the response body, this field will always be null for non-cloud app versions.
+             *     When present in the response body, this field will always be null for non-cloud app versions.\
+             *     Currently, an Addon version can only be assigned to a single immutable compliance boundary.
              *      */
             cloudComplianceBoundaries?: components["schemas"]["CloudComplianceBoundary"][];
         };
