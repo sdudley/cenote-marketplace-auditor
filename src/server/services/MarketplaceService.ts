@@ -231,7 +231,7 @@ export class MarketplaceService {
         );
 
         console.log(`Streaming licenses (batch 1) from API`);
-        streams.push(await this.getStreamForResultUrl(firstResultUrl));
+        const stream1 = await this.getStreamForResultUrl(firstResultUrl)
 
         const secondExportUrl = this.buildUrlWithParams(
             `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
@@ -252,7 +252,14 @@ export class MarketplaceService {
         );
 
         console.log(`Streaming licenses (batch 2) from API`);
-        streams.push(await this.getStreamForResultUrl(secondResultUrl));
+        const stream2 = await this.getStreamForResultUrl(secondResultUrl);
+
+        // Push in reverse order so that we process the newer licenses (with attribution data)
+        // first, to work around MP-557 by ensuring that if there are duplicates, we always process
+        // first the one with attribution data.
+
+        streams.push(stream2);
+        streams.push(stream1);
 
         return streams;
     }

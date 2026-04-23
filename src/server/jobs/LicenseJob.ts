@@ -158,6 +158,7 @@ export class LicenseJob {
         await this.getIgnoredFields();
         const originalLicenseCount = await this.licenseDao.getLicenseCount();
         const newLicenses: SlackLicenseData[] = [];
+        const processedEntitlementIds = new Set<string>();
 
         let processedCount = 0;
         let modifiedCount = 0;
@@ -171,6 +172,12 @@ export class LicenseJob {
             responseStream.pipe(parserStream as NodeJS.WritableStream);
 
             for await (const data of parserStream as AsyncIterable<{ value: LicenseData }>) {
+                const entitlementId = this.licenseDao.getEntitlementIdForLicense(data.value);
+                if (processedEntitlementIds.has(entitlementId)) {
+                    continue;
+                }
+                processedEntitlementIds.add(entitlementId);
+
                 const result = await this.processOneLicense(data.value);
                 processedCount += result.processed;
                 newCount += result.new;
