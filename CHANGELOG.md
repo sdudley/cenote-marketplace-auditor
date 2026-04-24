@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.5.0] - 2026-04-24
+
+### ✨ Major New Features
+
+- Support for Atlassian's cloud discount rate change on 2026-04-01.
+- Support for Minimum Quantity Billing (MQB) pricing.
+- Add a new "App" section to the sidebar, which allows you to configure each app as Forge
+or not, as well as a Forge migration date, so that the Cloud discount rate can be correctly
+calculated.
+- Slack messages now include hyperlinks to the actual license. For this to work correctly,
+the new "Base URL" must be configured in the app configuration page.
+
+#### Other
+
+- Add support for new social impact and foundation license types.
+- Slack notification exceptions now also list the difference between the expected
+and actual prices.
+- Clicking on a license SEN will hyperlink to a search of the the related transaction,
+and vice versa.
+- The Docker container includes a restart policy and health check to ensure that the
+container remains running.
+
+### 🐛 Bug Fixes
+
+- Works around a bug in the Atlassian Marketplace API (MP-557) introduced in February 2026
+that caused certain licenses from 2018 to be exported multiple times regardless of the
+date filter, causing hundreds or thousands of duplicate versions to be created for these
+licenses.
+- For systems impacted by this scenario, the SQL script in migrations/license-version-fix.sql
+contains a query to show the duplicated versions, as well as a query to remove them from the
+database.
+- Correctly display the SEN of server licenses.
+- Fix an off-by-one error for date calculations when the server running the app was
+east of UTC.
+
 ## [0.4.0] - 2026-02-07
 
 ### ✨ Major New Features
