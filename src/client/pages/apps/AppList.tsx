@@ -27,11 +27,17 @@ import {
 } from './styles';
 
 export const AppList: React.FC = () => {
+    interface AppEditDraft {
+        alwaysForge: boolean;
+        forgeMigrationDate: string;
+        forgeReleaseDate: string;
+    }
+
     const [apps, setApps] = useState<AppInfo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [editingAddonKey, setEditingAddonKey] = useState<string | null>(null);
-    const [draft, setDraft] = useState<AppUpdateRequest | null>(null);
+    const [draft, setDraft] = useState<AppEditDraft | null>(null);
     const [saving, setSaving] = useState(false);
     const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
         open: false,
@@ -64,12 +70,12 @@ export const AppList: React.FC = () => {
     }, []);
 
     const beginEdit = (app: AppInfo) => {
-        setEditingAddonKey(app.addonKey);
         setDraft({
             alwaysForge: app.alwaysForge ?? false,
-            forgeMigrationDate: app.forgeMigrationDate ?? null,
-            forgeReleaseDate: app.forgeReleaseDate ?? null
+            forgeMigrationDate: app.forgeMigrationDate ?? '',
+            forgeReleaseDate: app.forgeReleaseDate ?? ''
         });
+        setEditingAddonKey(app.addonKey);
     };
 
     const cancelEdit = () => {
@@ -77,8 +83,8 @@ export const AppList: React.FC = () => {
         setDraft(null);
     };
 
-    const updateDraft = (changes: Partial<AppUpdateRequest>) => {
-        setDraft(prev => ({ ...prev, ...changes }));
+    const updateDraft = (changes: Partial<AppEditDraft>) => {
+        setDraft(prev => (prev ? { ...prev, ...changes } : prev));
     };
 
     const saveEdit = async (addonKey: string) => {
@@ -146,14 +152,13 @@ export const AppList: React.FC = () => {
                             <AppsTableHeadCell>Parent Product</AppsTableHeadCell>
                             <AppsTableHeadCell>Forge Migration Date</AppsTableHeadCell>
                             <AppsTableHeadCell>This app has always been Forge</AppsTableHeadCell>
-                            <AppsTableHeadCell>Forge Release Date</AppsTableHeadCell>
                             <AppsTableHeadCell align="right">Actions</AppsTableHeadCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {apps.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7}>
+                                <TableCell colSpan={6}>
                                     <EmptyStateText variant="body2" color="text.secondary">
                                         No apps found in the addon table.
                                     </EmptyStateText>
@@ -166,30 +171,32 @@ export const AppList: React.FC = () => {
                                     <TableCell>{app.addonKey}</TableCell>
                                     <TableCell>{app.parentProduct || 'unknown'}</TableCell>
                                     <TableCell>
-                                        {editingAddonKey === app.addonKey ? (
+                                        {editingAddonKey === app.addonKey && draft ? (
                                             <DateField
-                                                type="date"
+                                                type="text"
                                                 size="small"
-                                                value={draft?.forgeMigrationDate || ''}
-                                                onChange={(e) => updateDraft({ forgeMigrationDate: e.target.value || null })}
-                                                disabled={Boolean(draft?.alwaysForge) || saving}
+                                                placeholder="YYYY-MM-DD"
+                                                value={draft.forgeMigrationDate}
+                                                onChange={(e) => updateDraft({ forgeMigrationDate: e.target.value || '' })}
+                                                disabled={draft.alwaysForge || saving}
+                                                inputProps={{ pattern: '\\d{4}-\\d{2}-\\d{2}' }}
                                             />
                                         ) : (
                                             app.forgeMigrationDate || '-'
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        {editingAddonKey === app.addonKey ? (
+                                        {editingAddonKey === app.addonKey && draft ? (
                                             <ForgeToggle
                                                 control={(
                                                     <ForgeCheckbox
-                                                        checked={Boolean(draft?.alwaysForge)}
+                                                        checked={draft.alwaysForge}
                                                         onChange={(e) => {
                                                             const checked = e.target.checked;
                                                             updateDraft({
                                                                 alwaysForge: checked,
-                                                                forgeMigrationDate: checked ? null : (draft?.forgeMigrationDate || null),
-                                                                forgeReleaseDate: checked ? (draft?.forgeReleaseDate || null) : null
+                                                                forgeMigrationDate: checked ? '' : draft.forgeMigrationDate,
+                                                                forgeReleaseDate: checked ? draft.forgeReleaseDate : ''
                                                             });
                                                         }}
                                                         disabled={saving}
@@ -199,19 +206,6 @@ export const AppList: React.FC = () => {
                                             />
                                         ) : (
                                             app.alwaysForge ? 'Yes' : 'No'
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {editingAddonKey === app.addonKey ? (
-                                            <DateField
-                                                type="date"
-                                                size="small"
-                                                value={draft?.forgeReleaseDate || ''}
-                                                onChange={(e) => updateDraft({ forgeReleaseDate: e.target.value || null })}
-                                                disabled={!Boolean(draft?.alwaysForge) || saving}
-                                            />
-                                        ) : (
-                                            app.forgeReleaseDate || '-'
                                         )}
                                     </TableCell>
                                     <ActionsCell align="right">
