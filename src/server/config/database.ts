@@ -10,6 +10,7 @@ import { PricingInfo } from '#common/entities/PricingInfo';
 import { AddGinIndexes1711234567890 } from '../database/migrations/1711234567890-AddGinIndexes';
 import { UpdateExistingRecords1711234567891 } from '../database/migrations/1711234567891-UpdateExistingRecords';
 import { InitializeIgnoredFields1711234567892 } from '../database/migrations/1711234567892-InitializeIgnoredFields';
+import { AddAddonForgeColumns1711234567893 } from '../database/migrations/1711234567893-AddAddonForgeColumns';
 import { IgnoredField } from '#common/entities/IgnoredField';
 import { TransactionReconcile } from '#common/entities/TransactionReconcile';
 import { Reseller } from '#common/entities/Reseller';
@@ -65,7 +66,8 @@ export const AppDataSource = new DataSource({
     migrations: [
         AddGinIndexes1711234567890,
         UpdateExistingRecords1711234567891,
-        InitializeIgnoredFields1711234567892
+        InitializeIgnoredFields1711234567892,
+        AddAddonForgeColumns1711234567893
     ],
 });
 

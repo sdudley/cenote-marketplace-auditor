@@ -38,6 +38,12 @@ export class AddonDao {
         return await this.addonRepository.find();
     }
 
+    public async getAddon(addonKey: string): Promise<Addon | null> {
+        return await this.addonRepository.findOne({
+            where: { addonKey }
+        });
+    }
+
     public async getAddonKeys(): Promise<string[]> {
         const addons = await this.addonRepository.find();
         return addons.map(addon => addon.addonKey);

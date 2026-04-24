@@ -11,6 +11,15 @@ export class Addon {
     @Column({ nullable: true })
     name?: string;
 
+    @Column({ type: 'date', nullable: true })
+    forgeMigrationDate?: string | null;
+
+    @Column({ type: 'date', nullable: true })
+    forgeReleaseDate?: string | null;
+
+    @Column({ default: false })
+    alwaysForge!: boolean;
+
     @Column()
     @Index({ unique: true })
     addonKey!: string;

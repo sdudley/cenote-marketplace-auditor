@@ -24,6 +24,8 @@ const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
 
 /** Days in billing month used for MQB proration (vendor convention) */
 const MQB_BILLING_MONTH_DAYS = 31;
+const CLOUD_DISCOUNT_RATIO_CHANGE_DATE = '2026-04-01';
+const CLOUD_DISCOUNT_RATIO_FOR_NON_FORGE = 0.8;
 
 
 /** Result of the core pricing step (MQB or regular) before refund/academic/discounts/finalization. */
@@ -36,9 +38,31 @@ interface CorePriceResult {
 
 @injectable()
 export class PriceCalculatorService {
-    private getDiscountAmount(_saleDate: string, deploymentType: DeploymentType): number {
-        // For revenue share changes, we will eventually need to use the sale date.
-        return deploymentType==='cloud' ? CLOUD_DISCOUNT_RATIO : DC_DISCOUNT_RATIO;
+    private getDiscountAmount(opts: {
+        saleDate: string;
+        deploymentType: DeploymentType;
+        forgeMigrationDate?: string | null;
+        alwaysForge?: boolean;
+    }): number {
+        const { saleDate, deploymentType, forgeMigrationDate, alwaysForge } = opts;
+
+        if (deploymentType !== 'cloud') {
+            return DC_DISCOUNT_RATIO;
+        }
+
+        if (saleDate < CLOUD_DISCOUNT_RATIO_CHANGE_DATE) {
+            return CLOUD_DISCOUNT_RATIO;
+        }
+
+        if (alwaysForge) {
+            return CLOUD_DISCOUNT_RATIO;
+        }
+
+        if (forgeMigrationDate && forgeMigrationDate < saleDate) {
+            return CLOUD_DISCOUNT_RATIO;
+        }
+
+        return CLOUD_DISCOUNT_RATIO_FOR_NON_FORGE;
     }
 
     public calculateExpectedPrice(opts: PriceCalcOpts): PriceResult {
@@ -353,9 +377,9 @@ export class PriceCalculatorService {
         dailyNominalPrice: number,
         descriptors: PriceCalcDescriptor[]
     ): PriceResult {
-        const { saleDate } = opts;
+        const { saleDate, forgeMigrationDate, alwaysForge } = opts;
         const deploymentType = deploymentTypeFromHosting(opts.hosting);
-        const discountAmount = this.getDiscountAmount(saleDate, deploymentType);
+        const discountAmount = this.getDiscountAmount({ saleDate, deploymentType, forgeMigrationDate, alwaysForge });
         const vendorPrice = basePriceAfterDiscounts * discountAmount;
 
         descriptors = [

@@ -6,6 +6,7 @@ import { LicensesPage } from './pages/licenses';
 import { ConfigPage } from './pages/config';
 import { JobsPage } from './pages/jobs';
 import { UsersPage } from './pages/users';
+import { AppsPage } from './pages/apps';
 import { LoginPage, SetupPage } from './pages/auth';
 import { AuthGuard } from './components/AuthGuard';
 
@@ -41,6 +42,10 @@ export const router = createBrowserRouter([
             {
                 path: 'config',
                 element: <ConfigPage />,
+            },
+            {
+                path: 'apps',
+                element: <AppsPage />,
             },
             {
                 path: 'tasks',

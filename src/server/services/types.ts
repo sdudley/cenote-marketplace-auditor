@@ -27,6 +27,8 @@ export interface PriceCalcOpts {
     proratedDetails?: ProratedDetail[];
     /** When set, MQB uses this as the license size (from the overlapping full-period transaction) to compute marginal per-user tier. Caller must pass this; tier/oldTier on the MQB line are unreliable. */
     mqbLicenseUserCount?: number;
+    forgeMigrationDate?: string | null;
+    alwaysForge?: boolean;
 }
 
 export interface PriceResult {

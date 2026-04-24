@@ -16,6 +16,7 @@ import {
 import {
     Receipt as ReceiptIcon,
     CardMembership as CardMembershipIcon,
+    Apps as AppsIcon,
     Settings as SettingsIcon,
     PlayArrow,
     Logout as LogoutIcon,
@@ -80,6 +81,7 @@ export const PageLayout: React.FC = () => {
 
     const systemMenuItems = [
         { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
+        { text: 'Apps', icon: <AppsIcon />, path: '/apps' },
         { text: 'Tasks', icon: <PlayArrow />, path: '/tasks' }
     ];
 

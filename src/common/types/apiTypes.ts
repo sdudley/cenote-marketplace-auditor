@@ -74,4 +74,14 @@ export interface LicenseQueryResult {
 export interface AppInfo {
     addonKey: string;
     name: string;
+    parentProduct: string;
+    forgeMigrationDate?: string | null;
+    forgeReleaseDate?: string | null;
+    alwaysForge: boolean;
+}
+
+export interface AppUpdateRequest {
+    forgeMigrationDate?: string | null;
+    forgeReleaseDate?: string | null;
+    alwaysForge?: boolean;
 }

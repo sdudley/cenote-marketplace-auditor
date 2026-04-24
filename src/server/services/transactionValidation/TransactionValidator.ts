@@ -55,6 +55,11 @@ export class TransactionValidator {
         const deploymentType = deploymentTypeFromHosting(purchaseDetails.hosting);
         const pricingTierResult = await this.pricingService.getPricingTiers({ addonKey, deploymentType, saleDate });
         const parentProduct = await this.addonDao.getParentProductForApp(addonKey);
+        const addon = await this.addonDao.getAddon(addonKey);
+
+        if (!addon) {
+            throw new Error(`Addon with key '${addonKey}' not found`);
+        }
 
         // If it is an upgrade, downgrade, renewal, or refund (with overlap context), we need to load details
         // about the previous purchase and potentially-different pricing tiers for that transaction.
@@ -84,7 +89,17 @@ export class TransactionValidator {
         const needsPreviousPricing = (saleType==='Upgrade' || saleType==='Downgrade' || (saleType==='Refund' && isMQBTransaction(transaction)));
         const previousPurchasePricing =
                     needsPreviousPricing && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
-                        ? this.calculatePriceForTransaction({ transaction: previousPurchase, isSandbox: false, pricingTierResult: previousPurchasePricingTierResult, useLegacyPricingTier: useLegacyPricingTierForPrevious, expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse, previousPurchaseEffectiveMaintenanceEndDate: undefined, parentProduct })
+                        ? this.calculatePriceForTransaction({
+                            transaction: previousPurchase,
+                            isSandbox: false,
+                            pricingTierResult: previousPurchasePricingTierResult,
+                            useLegacyPricingTier: useLegacyPricingTierForPrevious,
+                            expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse,
+                            previousPurchaseEffectiveMaintenanceEndDate: undefined,
+                            parentProduct,
+                            forgeMigrationDate: addon.forgeMigrationDate ?? null,
+                            alwaysForge: addon.alwaysForge ?? false
+                        })
                         : undefined;
 
         // Calculate the expected price for the current transaction.
@@ -99,7 +114,9 @@ export class TransactionValidator {
             expectedDiscount,
             previousPurchaseEffectiveMaintenanceEndDate,
             parentProduct,
-            mqbLicenseUserCount
+            mqbLicenseUserCount,
+            forgeMigrationDate: addon.forgeMigrationDate ?? null,
+            alwaysForge: addon.alwaysForge ?? false
         });
 
         let expectedVendorAmount = price.vendorPrice;
@@ -181,6 +198,8 @@ export class TransactionValidator {
         expectedDiscount: number;
         parentProduct: string;
         mqbLicenseUserCount?: number;
+        forgeMigrationDate?: string | null;
+        alwaysForge?: boolean;
     }) : PriceWithPricingOpts {
         const {
             transaction,
@@ -191,7 +210,9 @@ export class TransactionValidator {
             expectedDiscount,
             previousPurchaseEffectiveMaintenanceEndDate,
             parentProduct,
-            mqbLicenseUserCount
+            mqbLicenseUserCount,
+            forgeMigrationDate,
+            alwaysForge
         } = opts;
         const { purchaseDetails } = transaction.data;
 
@@ -216,7 +237,9 @@ export class TransactionValidator {
             discounts: purchaseDetails.discounts,
             parentProduct,
             proratedDetails: purchaseDetails.proratedDetails,
-            mqbLicenseUserCount
+            mqbLicenseUserCount,
+            forgeMigrationDate,
+            alwaysForge
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator
