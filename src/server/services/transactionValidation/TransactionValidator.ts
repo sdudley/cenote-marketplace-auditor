@@ -40,7 +40,8 @@ export class TransactionValidator {
             isSandbox,
             previousPurchaseFindResult,
             expectedDiscountForPreviousPurchase,
-            mqbLicenseUserCount
+            mqbLicenseUserCount,
+            discountReferenceSaleDate
         } = opts;
         const { data } = transaction;
         const { addonKey, purchaseDetails } = data;
@@ -115,6 +116,7 @@ export class TransactionValidator {
             previousPurchaseEffectiveMaintenanceEndDate,
             parentProduct,
             mqbLicenseUserCount,
+            discountReferenceSaleDate,
             forgeMigrationDate: addon.forgeMigrationDate ?? null,
             alwaysForge: addon.alwaysForge ?? false
         });
@@ -198,6 +200,7 @@ export class TransactionValidator {
         expectedDiscount: number;
         parentProduct: string;
         mqbLicenseUserCount?: number;
+        discountReferenceSaleDate?: string;
         forgeMigrationDate?: string | null;
         alwaysForge?: boolean;
     }) : PriceWithPricingOpts {
@@ -211,6 +214,7 @@ export class TransactionValidator {
             previousPurchaseEffectiveMaintenanceEndDate,
             parentProduct,
             mqbLicenseUserCount,
+            discountReferenceSaleDate,
             forgeMigrationDate,
             alwaysForge
         } = opts;
@@ -238,6 +242,7 @@ export class TransactionValidator {
             parentProduct,
             proratedDetails: purchaseDetails.proratedDetails,
             mqbLicenseUserCount,
+            discountReferenceSaleDate,
             forgeMigrationDate,
             alwaysForge
         };

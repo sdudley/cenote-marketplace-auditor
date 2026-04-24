@@ -57,6 +57,7 @@ export class TransactionValidationService {
         let previousPurchaseFindResult : PreviousTransactionResult|undefined = undefined;
         let expectedDiscountForPreviousPurchase : DiscountResult | undefined = undefined;
         let mqbLicenseUserCount : number | undefined = undefined;
+        let discountReferenceSaleDate : string | undefined = undefined;
 
         if (saleType==='Upgrade' || saleType==='Downgrade' || saleType==='Renewal') {
             previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(transaction);
@@ -70,9 +71,15 @@ export class TransactionValidationService {
             // then find that transaction's previous transaction.
             const refundedTx = await this.previousTransactionService.findRefundedTransaction(transaction);
             if (refundedTx) {
+                const isUpgradePair = await this.previousTransactionService.isRefundPartOfUpgradePair(transaction);
                 previousPurchaseFindResult = await this.previousTransactionService.findPreviousTransaction(refundedTx);
                 if (previousPurchaseFindResult) {
                     expectedDiscountForPreviousPurchase = await this.transactionAdjustmentValidationService.calculateFinalExpectedDiscountForTransaction(previousPurchaseFindResult.transaction);
+                }
+
+                // Standalone refund: partner payout ratio should track the original refunded sale date.
+                if (!isUpgradePair) {
+                    discountReferenceSaleDate = refundedTx.data.purchaseDetails.saleDate;
                 }
             }
         }
@@ -119,7 +126,8 @@ export class TransactionValidationService {
                     isSandbox,
                     previousPurchaseFindResult,
                     expectedDiscountForPreviousPurchase,
-                    mqbLicenseUserCount
+                    mqbLicenseUserCount,
+                    discountReferenceSaleDate
                 });
 
                 const { isExpectedPrice, notes } = validationResult;

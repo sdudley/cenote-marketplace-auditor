@@ -169,6 +169,32 @@ export class PreviousTransactionService {
     }
 
     /**
+     * Tests whether a refund is part of an upgrade pair generated on the same sale date
+     * and for the same maintenance period, where the upgrade has a different tier.
+     */
+    public async isRefundPartOfUpgradePair(refundTransaction: Transaction): Promise<boolean> {
+        if (refundTransaction.data.purchaseDetails.saleType !== 'Refund') {
+            return false;
+        }
+
+        const relatedTransactions = await this.transactionDao.loadRelatedTransactions(refundTransaction.entitlementId);
+        const { saleDate, maintenanceStartDate, maintenanceEndDate, tier } = refundTransaction.data.purchaseDetails;
+
+        return relatedTransactions.some((transaction) => {
+            if (transaction.id === refundTransaction.id) {
+                return false;
+            }
+
+            const purchaseDetails = transaction.data.purchaseDetails;
+            return purchaseDetails.saleType === 'Upgrade' &&
+                purchaseDetails.saleDate === saleDate &&
+                purchaseDetails.maintenanceStartDate === maintenanceStartDate &&
+                purchaseDetails.maintenanceEndDate === maintenanceEndDate &&
+                purchaseDetails.tier !== tier;
+        });
+    }
+
+    /**
      * For a prorated (MQB) transaction, finds the base (primary) transaction that is being upgraded—
      * the full-period transaction for the same entitlement and maintenance end date, non-prorated.
      * Used to get the real license size for MQB marginal pricing; tier/oldTier on the MQB line are unreliable.

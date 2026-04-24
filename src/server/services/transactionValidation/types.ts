@@ -14,6 +14,8 @@ export interface ValidationOptions {
     expectedDiscountForPreviousPurchase : DiscountResult | undefined;
     /** For MQB (prorated) transactions: license size from the overlapping full-period transaction. Resolved by ValidationService when not provided. */
     mqbLicenseUserCount?: number;
+    /** Optional override for discount-date selection used by pricing calculation. */
+    discountReferenceSaleDate?: string;
 }
 
 export type PurchaseDetails = components['schemas']['TransactionPurchaseDetails'];

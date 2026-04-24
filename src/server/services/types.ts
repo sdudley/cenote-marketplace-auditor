@@ -27,6 +27,8 @@ export interface PriceCalcOpts {
     proratedDetails?: ProratedDetail[];
     /** When set, MQB uses this as the license size (from the overlapping full-period transaction) to compute marginal per-user tier. Caller must pass this; tier/oldTier on the MQB line are unreliable. */
     mqbLicenseUserCount?: number;
+    /** Optional override used for selecting partner payout rate date logic (e.g. standalone refunds). */
+    discountReferenceSaleDate?: string;
     forgeMigrationDate?: string | null;
     alwaysForge?: boolean;
 }

@@ -65,6 +65,27 @@ describe('PriceCalculatorService', () => {
         expect(result).toEqual({ purchasePrice: 221.21, vendorPrice: 188.03 });
     });
 
+    it('uses discountReferenceSaleDate override for cloud payout ratio selection', () => {
+        const result = stripDailyPrice(service.calculateExpectedPrice({
+            pricingTierResult: cloudPricingTierResult,
+            saleDate: '2026-05-10',
+            discountReferenceSaleDate: '2026-03-15',
+            saleType: 'Refund',
+            isSandbox: false,
+            hosting: 'Cloud',
+            licenseType: 'COMMERCIAL',
+            tier: 'Per Unit Pricing (173 Users)',
+            maintenanceStartDate: '2026-05-01',
+            maintenanceEndDate: '2026-06-01',
+            billingPeriod: 'Monthly',
+            declaredPartnerDiscount: 0,
+            parentProduct: 'confluence'
+        }));
+
+        // Purchase price is unchanged; vendor price reflects pre-2026-04-01 ratio (0.85 instead of 0.80).
+        expect(result).toEqual({ purchasePrice: -221.21, vendorPrice: -188.03 });
+    });
+
     it('should return $0 for sandbox licenses regardless of user count', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
             pricingTierResult: cloudPricingTierResult,

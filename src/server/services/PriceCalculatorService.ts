@@ -377,9 +377,10 @@ export class PriceCalculatorService {
         dailyNominalPrice: number,
         descriptors: PriceCalcDescriptor[]
     ): PriceResult {
-        const { saleDate, forgeMigrationDate, alwaysForge } = opts;
+        const { saleDate, discountReferenceSaleDate, forgeMigrationDate, alwaysForge } = opts;
+        const discountDate = discountReferenceSaleDate || saleDate;
         const deploymentType = deploymentTypeFromHosting(opts.hosting);
-        const discountAmount = this.getDiscountAmount({ saleDate, deploymentType, forgeMigrationDate, alwaysForge });
+        const discountAmount = this.getDiscountAmount({ saleDate: discountDate, deploymentType, forgeMigrationDate, alwaysForge });
         const vendorPrice = basePriceAfterDiscounts * discountAmount;
 
         descriptors = [

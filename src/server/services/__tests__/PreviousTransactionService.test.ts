@@ -365,6 +365,38 @@ describe('PreviousTransactionService', () => {
             expect(result?.transaction.id).not.toBe(mqb.id);
         });
     });
+
+    describe('isRefundPartOfUpgradePair', () => {
+        it('returns true for refund + upgrade on same date and maintenance period with different tiers', async () => {
+            const refund = createTransaction('2025-06-01', '2025-12-01', '2025-06-01', 'Refund', '500 Users');
+            const upgrade = createTransaction('2025-06-01', '2025-12-01', '2025-06-01', 'Upgrade', '1000 Users');
+
+            transactionDao.loadRelatedTransactions.mockResolvedValue([refund, upgrade]);
+
+            const result = await service.isRefundPartOfUpgradePair(refund);
+            expect(result).toBe(true);
+        });
+
+        it('returns false when only same-tier upgrade exists', async () => {
+            const refund = createTransaction('2025-06-01', '2025-12-01', '2025-06-01', 'Refund', '500 Users');
+            const upgradeSameTier = createTransaction('2025-06-01', '2025-12-01', '2025-06-01', 'Upgrade', '500 Users');
+
+            transactionDao.loadRelatedTransactions.mockResolvedValue([refund, upgradeSameTier]);
+
+            const result = await service.isRefundPartOfUpgradePair(refund);
+            expect(result).toBe(false);
+        });
+
+        it('returns false when upgrade date differs from refund date', async () => {
+            const refund = createTransaction('2025-06-01', '2025-12-01', '2025-06-01', 'Refund', '500 Users');
+            const upgradeDifferentDate = createTransaction('2025-06-01', '2025-12-01', '2025-06-02', 'Upgrade', '1000 Users');
+
+            transactionDao.loadRelatedTransactions.mockResolvedValue([refund, upgradeDifferentDate]);
+
+            const result = await service.isRefundPartOfUpgradePair(refund);
+            expect(result).toBe(false);
+        });
+    });
 });
 
 function createTransaction(startDate: string, endDate: string, saleDate: string, saleType: SaleType = 'New', tier: string = 'Unknown Tier'): Transaction {
