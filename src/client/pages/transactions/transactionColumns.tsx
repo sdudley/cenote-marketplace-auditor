@@ -20,6 +20,8 @@ export interface TransactionCellContext {
     onShowDetails: (transaction: TransactionResult) => void;
 }
 
+export const TRANSACTION_LAST_COLUMN_IDS = ['reconciliation'];
+
 // Convert snake_case or UPPER_CASE to Title Case
 const toTitleCase = (str: string): string => {
     if (!str) return '';

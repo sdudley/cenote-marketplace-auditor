@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { ColumnConfig } from './ColumnConfig';
+import { enforceLastColumnOrder, enforceLastColumns } from './columnOrderUtils';
 
 interface ColumnPreferences {
     order: string[]; // Array of column IDs in the desired order
     visibility: Record<string, boolean>; // Map of column ID to visibility
 }
 
-export const useColumnConfig = <T extends any, C extends any = any>(
-    defaultColumns: ColumnConfig<T, C>[],
-    storageKey: string
+export const useColumnConfig = <T extends any, C extends any = any, S extends any = any>(
+    defaultColumns: ColumnConfig<T, C, S>[],
+    storageKey: string,
+    lastColumnIds: string[] = []
 ) => {
-    const [columns, setColumns] = useState<ColumnConfig<T, C>[]>([]);
+    const [columns, setColumns] = useState<ColumnConfig<T, C, S>[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
     // Load configuration from localStorage on mount
@@ -28,42 +30,49 @@ export const useColumnConfig = <T extends any, C extends any = any>(
 
                 // Add any new columns that weren't in the saved order
                 const newColumns = defaultColumns.filter(col => !validOrder.includes(col.id));
-                const finalOrder = [...validOrder, ...newColumns.map(col => col.id)];
+                const finalOrder = enforceLastColumnOrder(
+                    [...validOrder, ...newColumns.map(col => col.id)],
+                    lastColumnIds
+                );
 
                 // Apply saved visibility, using defaults for new columns
                 const visibility = preferences.visibility || {};
 
                 // Build the final column configuration
-                const mergedColumns = finalOrder.map(id => {
-                    const defaultCol = defaultColumnsMap.get(id);
-                    if (!defaultCol) return null; // This shouldn't happen, but just in case
+                const mergedColumns = enforceLastColumns(
+                    finalOrder.map(id => {
+                        const defaultCol = defaultColumnsMap.get(id);
+                        if (!defaultCol) return null; // This shouldn't happen, but just in case
 
-                    return {
-                        ...defaultCol,
-                        visible: visibility.hasOwnProperty(id) ? visibility[id] : defaultCol.visible
-                    };
-                }).filter(Boolean) as ColumnConfig<T, C>[];
+                        return {
+                            ...defaultCol,
+                            visible: visibility.hasOwnProperty(id) ? visibility[id] : defaultCol.visible
+                        };
+                    }).filter(Boolean) as ColumnConfig<T, C, S>[],
+                    lastColumnIds
+                );
 
                 setColumns(mergedColumns);
             } catch (error) {
                 console.warn('Failed to load column configuration:', error);
-                setColumns(defaultColumns);
+                setColumns(enforceLastColumns(defaultColumns, lastColumnIds));
             }
         } else {
             // No saved preferences, use defaults
-            setColumns(defaultColumns);
+            setColumns(enforceLastColumns(defaultColumns, lastColumnIds));
         }
         setIsLoaded(true);
-    }, [defaultColumns, storageKey]);
+    }, [defaultColumns, storageKey, lastColumnIds]);
 
     // Save configuration to localStorage when it changes
-    const updateColumns = (newColumns: ColumnConfig<T, C>[]) => {
-        setColumns(newColumns);
+    const updateColumns = (newColumns: ColumnConfig<T, C, S>[]) => {
+        const orderedColumns = enforceLastColumns(newColumns, lastColumnIds);
+        setColumns(orderedColumns);
 
         // Only save the essential preferences
         const preferences: ColumnPreferences = {
-            order: newColumns.map(col => col.id),
-            visibility: Object.fromEntries(newColumns.map(col => [col.id, col.visible]))
+            order: orderedColumns.map(col => col.id),
+            visibility: Object.fromEntries(orderedColumns.map(col => [col.id, col.visible]))
         };
 
         localStorage.setItem(storageKey, JSON.stringify(preferences));

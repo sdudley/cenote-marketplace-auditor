@@ -35,6 +35,7 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { enforceLastColumns } from './columnOrderUtils';
 
 // T = item type for row
 // C = context type for cell rendering
@@ -60,14 +61,16 @@ interface ColumnConfigDialogProps<T = any, C = any, S = any> {
     onColumnsChange: (columns: ColumnConfig<T, C, S>[]) => void;
     title: string;
     isLoaded?: boolean;
+    lastColumnIds?: string[];
 }
 
 interface SortableColumnItemProps<T = any, C = any, S = any> {
     column: ColumnConfig<T, C, S>;
     onToggleVisibility: (columnId: string) => void;
+    isPinnedLast?: boolean;
 }
 
-const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisibility }: SortableColumnItemProps<T, C>) => {
+const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisibility, isPinnedLast = false }: SortableColumnItemProps<T, C>) => {
     const {
         attributes,
         listeners,
@@ -75,7 +78,7 @@ const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisi
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: column.id });
+    } = useSortable({ id: column.id, disabled: isPinnedLast });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -118,8 +121,8 @@ const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisi
                 py: 0.25, // Minimal padding
                 px: 0.5,  // Minimal padding
                 mb: 0.25, // Minimal margin
-                cursor: 'grab',
-                '&:active': { cursor: 'grabbing' },
+                cursor: isPinnedLast ? 'default' : 'grab',
+                '&:active': { cursor: isPinnedLast ? 'default' : 'grabbing' },
                 backgroundColor: isDragging ? 'action.hover' : 'transparent',
                 borderRadius: 0.5,
                 '&:hover': {
@@ -145,17 +148,18 @@ const SortableColumnItem = <T extends any, C extends any>({ column, onToggleVisi
             />
 
             <Box
-                {...listeners}
+                {...(isPinnedLast ? {} : listeners)}
                 sx={{
-                    cursor: 'grab',
-                    '&:active': { cursor: 'grabbing' },
+                    cursor: isPinnedLast ? 'default' : 'grab',
+                    '&:active': { cursor: isPinnedLast ? 'default' : 'grabbing' },
                     p: 0.25,
                     borderRadius: 0.5,
-                    '&:hover': {
+                    visibility: isPinnedLast ? 'hidden' : 'visible',
+                    '&:hover': isPinnedLast ? undefined : {
                         backgroundColor: 'action.hover',
                     },
                     // Let touch start drag instead of scroll (dnd-kit TouchSensor uses delay to disambiguate)
-                    touchAction: 'none',
+                    touchAction: isPinnedLast ? undefined : 'none',
                     // At least 44px touch target so the grab handle is easy to hit on mobile
                     minWidth: 44,
                     minHeight: 44,
@@ -176,9 +180,11 @@ export const ColumnConfigDialog = <T extends any, C extends any, S extends any>(
     columns,
     onColumnsChange,
     title,
-    isLoaded = true
+    isLoaded = true,
+    lastColumnIds = []
 }: ColumnConfigDialogProps<T, C, S>) => {
     const [localColumns, setLocalColumns] = useState<ColumnConfig<T, C, S>[]>(columns);
+    const lastColumnIdSet = new Set(lastColumnIds);
 
     // Update local columns when the prop changes (after loading)
     useEffect(() => {
@@ -218,13 +224,13 @@ export const ColumnConfigDialog = <T extends any, C extends any, S extends any>(
                 const oldIndex = items.findIndex((item) => item.id === active.id);
                 const newIndex = items.findIndex((item) => item.id === over?.id);
 
-                return arrayMove(items, oldIndex, newIndex);
+                return enforceLastColumns(arrayMove(items, oldIndex, newIndex), lastColumnIds);
             });
         }
     };
 
     const handleSave = () => {
-        onColumnsChange(localColumns);
+        onColumnsChange(enforceLastColumns(localColumns, lastColumnIds));
         onClose();
     };
 
@@ -279,6 +285,7 @@ export const ColumnConfigDialog = <T extends any, C extends any, S extends any>(
                                     key={column.id}
                                     column={column}
                                     onToggleVisibility={handleToggleVisibility}
+                                    isPinnedLast={lastColumnIdSet.has(column.id)}
                                 />
                             ))}
                         </List>

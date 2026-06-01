@@ -22,7 +22,7 @@ import { SortOrder } from '../../components/SortableHeader';
 import { StyledTableRow, StyledListPaper, StyledTableCell } from '../../components/styles';
 import { ColumnConfigDialog } from '../../components/ColumnConfig';
 import { useColumnConfig } from '../../components/useColumnConfig';
-import { defaultTransactionColumns, TransactionCellContext } from './transactionColumns';
+import { defaultTransactionColumns, TransactionCellContext, TRANSACTION_LAST_COLUMN_IDS } from './transactionColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
 import { CollapsibleFilters } from '../../components/CollapsibleFilters';
@@ -54,7 +54,8 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
 
     const { columns, visibleColumns, updateColumns, isLoaded } = useColumnConfig(
         defaultTransactionColumns,
-        'transaction-column-config'
+        'transaction-column-config',
+        TRANSACTION_LAST_COLUMN_IDS
     );
 
     useEffect(() => {
@@ -371,6 +372,7 @@ export const TransactionList: React.FC<TransactionListProps> = () => {
                 onColumnsChange={updateColumns}
                 title="Configure Transaction Columns"
                 isLoaded={isLoaded}
+                lastColumnIds={TRANSACTION_LAST_COLUMN_IDS}
             />
         </TableContainer>
     );
