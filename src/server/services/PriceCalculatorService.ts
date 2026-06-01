@@ -1,4 +1,4 @@
-import { getLicenseDurationInDays, getSubscriptionOverlapDays } from "#common/util/licenseDurationCalculator";
+import { getLicenseDurationInDays, getSubscriptionOverlapDays, getMonthsInDateRange, getDaysInDateRangeForMonth } from "#common/util/licenseDurationCalculator";
 import { UserTierPricing } from '#common/types/userTiers';
 import { deploymentTypeFromHosting, userCountFromTier } from "#common/util/validationUtils";
 import {
@@ -15,6 +15,7 @@ import {
 import { injectable } from "inversify";
 import { DeploymentType, EnhancedLicenseType, HostingType } from "#common/types/marketplace";
 import { PriceCalcDescriptor, PriceCalcOpts, PriceResult } from '#server/services/types';
+import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing';
 import { formatCurrency } from "#common/util/formatCurrency";
 import { isDiscountedLicenseType, isCommunityLicense } from "#server/util/communityLicense";
 import { isoStringWithOnlyDate } from "#common/util/dateUtils";
@@ -155,6 +156,198 @@ export class PriceCalculatorService {
         }
 
         return this.finalizePriceResult(opts, basePrice, purchasePrice, dailyNominalPrice, descriptors);
+    }
+
+    /**
+     * Apportions expected and actual vendor price across calendar months based on license days,
+     * including overlap adjustments for upgrades/downgrades/refunds.
+     */
+    public calculateMonthlyPriceApportionment(opts: {
+        pricingOpts: PriceCalcOpts;
+        expectedVendorAmount: number;
+        actualVendorAmount: number;
+    }): TransactionMonthlyApportionmentEntry[] {
+        const { pricingOpts, expectedVendorAmount, actualVendorAmount } = opts;
+        const { maintenanceStartDate, maintenanceEndDate } = pricingOpts;
+        const months = getMonthsInDateRange(maintenanceStartDate, maintenanceEndDate);
+
+        if (months.length === 0) {
+            return [];
+        }
+
+        const { isFreeLicense } = this.isFreeLicense(pricingOpts);
+        if (isFreeLicense) {
+            return months.map(month => ({ month, estimatedValue: 0, actualValue: 0 }));
+        }
+
+        const deploymentType = deploymentTypeFromHosting(pricingOpts.hosting);
+        const isMQB =
+            deploymentType === 'cloud' &&
+            pricingOpts.billingPeriod === 'Monthly' &&
+            hasProratedDetails(pricingOpts.proratedDetails);
+
+        const monthlyWeights = isMQB
+            ? this.computeMQBMonthlyWeights(pricingOpts)
+            : this.computeRegularMonthlyWeights(pricingOpts);
+
+        return this.scaleMonthlyWeightsToAmounts({
+            monthlyWeights,
+            expectedVendorAmount,
+            actualVendorAmount
+        });
+    }
+
+    private computeRegularMonthlyWeights(pricingOpts: PriceCalcOpts): Map<string, number> {
+        const {
+            maintenanceStartDate,
+            maintenanceEndDate,
+            billingPeriod,
+            saleType,
+            previousPurchaseMaintenanceEndDate,
+            previousPricing
+        } = pricingOpts;
+
+        const core = this.computeRegularCore(pricingOpts);
+        const { basePrice: academicAdjustedPrice } = this.applyRefundAndAcademicDiscounts(
+            pricingOpts,
+            core.basePrice,
+            [],
+            core.userCount
+        );
+
+        let purchasePrice = billingPeriod === 'Annual' ? Math.ceil(academicAdjustedPrice) : academicAdjustedPrice;
+        const dailyNominalPrice = core.licenseDurationDays === 0 ? 0 : purchasePrice / core.licenseDurationDays;
+
+        let overlapDailyRate = 0;
+        let overlapEndDate: string | undefined;
+        const isOverlapRelevant =
+            (saleType === 'Upgrade' || saleType === 'Downgrade' || saleType === 'Refund') &&
+            previousPurchaseMaintenanceEndDate;
+
+        if (isOverlapRelevant && previousPricing && previousPricing.purchasePrice > 0) {
+            const overlapDays = getSubscriptionOverlapDays(maintenanceStartDate, previousPurchaseMaintenanceEndDate);
+            if (overlapDays > 0) {
+                overlapEndDate = previousPurchaseMaintenanceEndDate;
+                const currentDailyForDisplay = saleType === 'Refund' ? Math.abs(dailyNominalPrice) : dailyNominalPrice;
+                overlapDailyRate = saleType === 'Refund'
+                    ? previousPricing.dailyNominalPrice - currentDailyForDisplay
+                    : dailyNominalPrice - previousPricing.dailyNominalPrice;
+            }
+        }
+
+        const weights = new Map<string, number>();
+        for (const month of getMonthsInDateRange(maintenanceStartDate, maintenanceEndDate)) {
+            const totalDaysInMonth = getDaysInDateRangeForMonth(maintenanceStartDate, maintenanceEndDate, month);
+            if (totalDaysInMonth === 0) {
+                continue;
+            }
+
+            let overlapDaysInMonth = 0;
+            if (overlapEndDate) {
+                overlapDaysInMonth = getDaysInDateRangeForMonth(
+                    maintenanceStartDate,
+                    overlapEndDate,
+                    month
+                );
+            }
+
+            const nonOverlapDaysInMonth = totalDaysInMonth - overlapDaysInMonth;
+            const monthWeight =
+                overlapDaysInMonth * overlapDailyRate +
+                nonOverlapDaysInMonth * dailyNominalPrice;
+
+            weights.set(month, monthWeight);
+        }
+
+        return weights;
+    }
+
+    private computeMQBMonthlyWeights(pricingOpts: PriceCalcOpts): Map<string, number> {
+        const { maintenanceEndDate, proratedDetails, maintenanceStartDate } = pricingOpts;
+        const weights = new Map<string, number>();
+
+        for (const segment of proratedDetails ?? []) {
+            const addedUsers = segment.addedUsers ?? 0;
+            const segmentStartRaw = segment.date ?? maintenanceStartDate;
+            const segmentStart = isoStringWithOnlyDate(segmentStartRaw);
+
+            if (addedUsers <= 0) {
+                continue;
+            }
+
+            const daysInSegment = getLicenseDurationInDays(segmentStart, maintenanceEndDate);
+            if (daysInSegment <= 0) {
+                continue;
+            }
+
+            const core = this.computeMQBCore({
+                ...pricingOpts,
+                maintenanceStartDate: segmentStart,
+                proratedDetails: [{ ...segment, date: segmentStart }]
+            });
+            const { basePrice: adjustedSegmentPrice } = this.applyRefundAndAcademicDiscounts(
+                pricingOpts,
+                core.basePrice,
+                [],
+                core.userCount
+            );
+            const segmentDailyRate = adjustedSegmentPrice / daysInSegment;
+
+            for (const month of getMonthsInDateRange(segmentStart, maintenanceEndDate)) {
+                const daysInMonth = getDaysInDateRangeForMonth(segmentStart, maintenanceEndDate, month);
+                if (daysInMonth === 0) {
+                    continue;
+                }
+                weights.set(month, (weights.get(month) ?? 0) + daysInMonth * segmentDailyRate);
+            }
+        }
+
+        return weights;
+    }
+
+    private scaleMonthlyWeightsToAmounts(opts: {
+        monthlyWeights: Map<string, number>;
+        expectedVendorAmount: number;
+        actualVendorAmount: number;
+    }): TransactionMonthlyApportionmentEntry[] {
+        const { monthlyWeights, expectedVendorAmount, actualVendorAmount } = opts;
+        const months = [...monthlyWeights.keys()].sort();
+        const totalWeight = months.reduce((sum, month) => sum + (monthlyWeights.get(month) ?? 0), 0);
+
+        if (totalWeight === 0) {
+            return months.map(month => ({ month, estimatedValue: 0, actualValue: 0 }));
+        }
+
+        const entries: TransactionMonthlyApportionmentEntry[] = months.map(month => {
+            const fraction = (monthlyWeights.get(month) ?? 0) / totalWeight;
+            return {
+                month,
+                estimatedValue: Math.round(fraction * expectedVendorAmount * 100) / 100,
+                actualValue: Math.round(fraction * actualVendorAmount * 100) / 100
+            };
+        });
+
+        this.adjustRoundedAmountRemainder(entries, 'estimatedValue', expectedVendorAmount);
+        this.adjustRoundedAmountRemainder(entries, 'actualValue', actualVendorAmount);
+
+        return entries;
+    }
+
+    private adjustRoundedAmountRemainder(
+        entries: TransactionMonthlyApportionmentEntry[],
+        field: 'estimatedValue' | 'actualValue',
+        targetTotal: number
+    ): void {
+        if (entries.length === 0) {
+            return;
+        }
+
+        const currentTotal = entries.reduce((sum, entry) => sum + entry[field], 0);
+        const remainder = Math.round((targetTotal - currentTotal) * 100) / 100;
+        if (remainder !== 0) {
+            entries[entries.length - 1][field] =
+                Math.round((entries[entries.length - 1][field] + remainder) * 100) / 100;
+        }
     }
 
     // Used in tests to validate that we can correctly calculate annual pricing tiers

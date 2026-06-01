@@ -58,8 +58,62 @@ const getExactYearDiff = (d1: Date, d2: Date): number | null => {
     return d2.getUTCFullYear() - d1.getUTCFullYear();
 };
 
+/**
+ * Returns YYYY-MM strings for each calendar month overlapping [startDate, endDate).
+ */
+const getMonthsInDateRange = (startDate: string, endDate: string): string[] => {
+    const months: string[] = [];
+    let year = parseInt(startDate.substring(0, 4));
+    let month = parseInt(startDate.substring(5, 7));
+
+    while (true) {
+        const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+        if (getDaysInDateRangeForMonth(startDate, endDate, monthKey) > 0) {
+            months.push(monthKey);
+        }
+
+        const nextMonthStart = month === 12
+            ? `${year + 1}-01-01`
+            : `${year}-${String(month + 1).padStart(2, '0')}-01`;
+        if (nextMonthStart >= endDate) {
+            break;
+        }
+
+        if (month === 12) {
+            year += 1;
+            month = 1;
+        } else {
+            month += 1;
+        }
+    }
+
+    return months;
+};
+
+/**
+ * Counts days in [rangeStart, rangeEnd) that fall within the given YYYY-MM month.
+ */
+const getDaysInDateRangeForMonth = (rangeStart: string, rangeEnd: string, month: string): number => {
+    const monthStart = `${month}-01`;
+    const [year, monthNum] = month.split('-').map(Number);
+    const nextMonthStart = monthNum === 12
+        ? `${year + 1}-01-01`
+        : `${year}-${String(monthNum + 1).padStart(2, '0')}-01`;
+
+    const periodStart = rangeStart > monthStart ? rangeStart : monthStart;
+    const periodEnd = rangeEnd < nextMonthStart ? rangeEnd : nextMonthStart;
+
+    if (periodStart >= periodEnd) {
+        return 0;
+    }
+
+    return getLicenseDurationInDays(periodStart, periodEnd);
+};
+
 export {
     getSubscriptionOverlapDays,
     getLicenseDurationInDays,
-    getExactYearDiff
+    getExactYearDiff,
+    getMonthsInDateRange,
+    getDaysInDateRangeForMonth
 };

@@ -833,4 +833,95 @@ describe('PriceCalculatorService', () => {
         expect(result.vendorPrice).toBeCloseTo(8016, 2);
         expect(result.dailyNominalPrice).toBeCloseTo(30.82, 2);
     });
+
+    describe('calculateMonthlyPriceApportionment', () => {
+        const baseAnnualOpts = {
+            pricingTierResult: cloudPricingTierResult,
+            saleDate: '2025-05-01',
+            saleType: 'Renewal' as const,
+            isSandbox: false,
+            hosting: 'Cloud' as const,
+            licenseType: 'COMMERCIAL' as const,
+            tier: '300 Users',
+            maintenanceStartDate: '2026-06-01',
+            maintenanceEndDate: '2027-06-01',
+            billingPeriod: 'Annual' as const,
+            declaredPartnerDiscount: 0,
+            parentProduct: 'confluence'
+        };
+
+        it('apportions a full-year annual license evenly by days per month', () => {
+            const price = service.calculateExpectedPrice(baseAnnualOpts);
+            const months = service.calculateMonthlyPriceApportionment({
+                pricingOpts: baseAnnualOpts,
+                expectedVendorAmount: price.vendorPrice,
+                actualVendorAmount: price.vendorPrice + 10
+            });
+
+            expect(months).toHaveLength(12);
+            expect(months[0].month).toBe('2026-06');
+            expect(months[11].month).toBe('2027-05');
+
+            const estimatedTotal = months.reduce((sum, entry) => sum + entry.estimatedValue, 0);
+            const actualTotal = months.reduce((sum, entry) => sum + entry.actualValue, 0);
+            expect(estimatedTotal).toBeCloseTo(price.vendorPrice, 2);
+            expect(actualTotal).toBeCloseTo(price.vendorPrice + 10, 2);
+
+            // June has 30 days, July has 31 — July should earn slightly more
+            const june = months.find(entry => entry.month === '2026-06')!;
+            const july = months.find(entry => entry.month === '2026-07')!;
+            expect(july.estimatedValue).toBeGreaterThan(june.estimatedValue);
+        });
+
+        it('apportions upgrade overlap months at the differential daily rate', () => {
+            const pricingOpts = {
+                pricingTierResult: dataCenterPricingTierResult,
+                saleType: 'Upgrade' as const,
+                saleDate: '2025-04-14',
+                isSandbox: false,
+                hosting: 'Data Center' as const,
+                licenseType: 'COMMERCIAL' as const,
+                tier: '2000 Users',
+                maintenanceStartDate: '2025-04-14',
+                maintenanceEndDate: '2026-01-29',
+                billingPeriod: 'Annual' as const,
+                previousPurchaseMaintenanceEndDate: '2026-01-29',
+                previousPricing: {
+                    purchasePrice: 4200,
+                    vendorPrice: 3150,
+                    dailyNominalPrice: 11.506849315068493,
+                    descriptors: []
+                },
+                expectedDiscount: 0,
+                declaredPartnerDiscount: 0,
+                parentProduct: 'confluence'
+            };
+
+            const price = service.calculateExpectedPrice(pricingOpts);
+            const months = service.calculateMonthlyPriceApportionment({
+                pricingOpts,
+                expectedVendorAmount: price.vendorPrice,
+                actualVendorAmount: 1500
+            });
+
+            expect(months.length).toBeGreaterThan(0);
+            expect(months.reduce((sum, entry) => sum + entry.estimatedValue, 0)).toBeCloseTo(price.vendorPrice, 2);
+            expect(months.reduce((sum, entry) => sum + entry.actualValue, 0)).toBeCloseTo(1500, 2);
+        });
+
+        it('returns zero values for free licenses', () => {
+            const pricingOpts = {
+                ...baseAnnualOpts,
+                isSandbox: true
+            };
+            const months = service.calculateMonthlyPriceApportionment({
+                pricingOpts,
+                expectedVendorAmount: 0,
+                actualVendorAmount: 0
+            });
+
+            expect(months).toHaveLength(12);
+            expect(months.every(entry => entry.estimatedValue === 0 && entry.actualValue === 0)).toBe(true);
+        });
+    });
 });

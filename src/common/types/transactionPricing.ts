@@ -6,6 +6,16 @@ export interface TransactionPricingResponse {
     expectedAmount: number;
 }
 
+export interface TransactionMonthlyApportionmentEntry {
+    month: string;
+    estimatedValue: number;
+    actualValue: number;
+}
+
+export interface TransactionMonthlyApportionmentResponse {
+    months: TransactionMonthlyApportionmentEntry[];
+}
+
 /** Response for price-test-snippet: data to generate a PriceCalculatorService test from live transaction. */
 export interface PriceTestSnippetResponse {
     pricingTierResult: PricingTierResult;

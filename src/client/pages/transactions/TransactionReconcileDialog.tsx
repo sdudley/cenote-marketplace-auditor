@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { TransactionResult } from '#common/types/apiTypes';
 import { TransactionReconcileNote } from '#common/entities/TransactionReconcileNote';
-import { TransactionPricingResponse } from '#common/types/transactionPricing';
+import { TransactionPricingResponse, TransactionMonthlyApportionmentResponse } from '#common/types/transactionPricing';
 import { formatCurrency } from '#common/util/formatCurrency';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import {
@@ -30,6 +30,7 @@ import {
 } from '../../components/styles';
 import { CloseButton } from '../../components/CloseButton';
 import { TransactionPricingDetail } from './TransactionPricingDetail';
+import { TransactionMonthlyApportionment } from './TransactionMonthlyApportionment';
 import { CopyPriceTestDialog } from './CopyPriceTestDialog';
 
 interface TransactionReconcileDialogProps {
@@ -49,6 +50,7 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
     const [isSaving, setIsSaving] = useState(false);
     const [existingNotes, setExistingNotes] = useState<TransactionReconcileNote[]>([]);
     const [pricing, setPricing] = useState<TransactionPricingResponse | null>(null);
+    const [apportionment, setApportionment] = useState<TransactionMonthlyApportionmentResponse | null>(null);
     const [isLoadingPricing, setIsLoadingPricing] = useState(false);
     const [copyTestDialogOpen, setCopyTestDialogOpen] = useState(false);
 
@@ -67,23 +69,34 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
 
         setIsLoadingPricing(true);
         try {
-            const response = await fetch(`/api/transactions/${transaction.transaction.id}/pricing`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            const [pricingResponse, apportionmentResponse] = await Promise.all([
+                fetch(`/api/transactions/${transaction.transaction.id}/pricing`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                }),
+                fetch(`/api/transactions/${transaction.transaction.id}/pricing/apportionment`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+            ]);
 
-            if (response.ok) {
-                const pricingData = await response.json();
-                setPricing(pricingData);
+            if (pricingResponse.ok) {
+                setPricing(await pricingResponse.json());
             } else {
                 console.error('Failed to fetch pricing data');
                 setPricing(null);
             }
+
+            if (apportionmentResponse.ok) {
+                setApportionment(await apportionmentResponse.json());
+            } else {
+                console.error('Failed to fetch pricing apportionment data');
+                setApportionment(null);
+            }
         } catch (error) {
             console.error('Error fetching pricing data:', error);
             setPricing(null);
+            setApportionment(null);
         } finally {
             setIsLoadingPricing(false);
         }
@@ -197,6 +210,8 @@ export const TransactionReconcileDialog: React.FC<TransactionReconcileDialogProp
                         )}
 
                         <TransactionPricingDetail pricing={pricing} />
+
+                        <TransactionMonthlyApportionment apportionment={apportionment} />
 
                         {existingNotes.length > 0 && (
                             <NotesSectionBox>
