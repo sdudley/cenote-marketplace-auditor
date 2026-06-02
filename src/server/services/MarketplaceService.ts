@@ -143,91 +143,6 @@ export class MarketplaceService {
         return response.data as Readable;
     }
 
-    private async fetchTransactionsWithParams(params: TransactionQueryParams): Promise<TransactionData[]> {
-        await this.initializeConfig();
-        const exportUrl = this.buildUrlWithParams(
-            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`,
-            params
-        );
-        console.log(`Calling Marketplace API: ${exportUrl}`);
-
-        // Start the async export
-        const exportResponse = await axios.post<InitiateAsyncTransactionCollection>(
-            exportUrl,
-            {},
-            {
-                headers: {
-                    'Authorization': await this.getAuthHeader(),
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-
-        const resultUrl = await this.pollForCompletion<StatusAsyncTransactionCollection>(
-            exportResponse.data._links.status.href,
-            exportResponse.data._links.download.href,
-            (data) => data.export.status
-        );
-
-        // Download the results
-        const downloadUrl = resultUrl.split('?')[0]; // Remove query parameters
-        console.log(`Calling Marketplace API: ${downloadUrl}`);
-
-        const resultResponse = await axios.get<TransactionData[]>(resultUrl, {
-            headers: {
-                'Authorization': await this.getAuthHeader()
-            }
-        });
-
-        return resultResponse.data;
-    }
-
-    private async fetchLicensesWithParams(params: LicenseQueryParams): Promise<LicenseData[]> {
-        await this.initializeConfig();
-        const exportUrl = this.buildUrlWithParams(
-            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
-            params
-        );
-        console.log(`Calling Marketplace API: ${exportUrl}`);
-
-        // Start the async export
-        const exportResponse = await axios.post<InitiateAsyncLicenseCollection>(
-            exportUrl,
-            {},
-            {
-                headers: {
-                    'Authorization': await this.getAuthHeader(),
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-
-        const resultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
-            exportResponse.data._links.status.href,
-            exportResponse.data._links.download.href,
-            (data) => data.export.status
-        );
-
-        // Download the results
-        const downloadUrl = resultUrl.split('?')[0]; // Remove query parameters
-        console.log(`Calling Marketplace API: ${downloadUrl}`);
-
-        const resultResponse = await axios.get<LicenseData[]>(resultUrl, {
-            headers: {
-                'Authorization': await this.getAuthHeader()
-            }
-        });
-
-        return resultResponse.data;
-    }
-
-    async getTransactions(): Promise<TransactionData[]> {
-        return await this.fetchTransactionsWithParams({
-            excludeZeroTransactions: false,
-            includeManualInvoice: true
-        });
-    }
-
     /**
      * Start transaction export and return a stream of the JSON array. Caller must consume and destroy the stream.
      */
@@ -312,34 +227,6 @@ export class MarketplaceService {
         streams.push(stream1);
 
         return streams;
-    }
-
-    async getLicenses(): Promise<LicenseData[]> {
-        // First call: 2010-01-01 to 2018-06-30
-        const firstBatch = await this.fetchLicensesWithParams({
-            startDate: '2010-01-01',
-            endDate: '2018-06-30',
-            includeAtlassianLicenses: true
-        });
-
-        // Second call: 2018-07-01 onwards
-        const secondBatch = await this.fetchLicensesWithParams({
-            startDate: '2018-07-01',
-            withDataInsights: true,
-            includeAtlassianLicenses: true
-        });
-
-        // The second "with insights" may duplicate data from the first batch, but we should
-        // always override that with the second batch data because it includes more fields.
-
-        // Create a map of secondBatch keys for quick lookup
-        const secondBatchKeys = new Set(secondBatch.map(licenseKey));
-
-        // Filter out any licenses from firstBatch that appear in secondBatch
-        const filteredFirstBatch = firstBatch.filter(license => !secondBatchKeys.has(licenseKey(license)));
-
-        // Combine the filtered first batch with the second batch
-        return [...filteredFirstBatch, ...secondBatch];
     }
 
     async getPricing(
