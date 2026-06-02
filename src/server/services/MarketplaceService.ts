@@ -179,20 +179,22 @@ export class MarketplaceService {
         await this.initializeConfig();
         const streams: Readable[] = [];
 
+        const licenseExportUrl = `${this.baseUrlV3}/reporting/developer-space/${this.developerId}/licenses/async/export`;
+
         const firstExportUrl = this.buildUrlWithParams(
-            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
+            licenseExportUrl,
             { startDate: '2010-01-01', endDate: '2018-06-30', includeAtlassianLicenses: true }
         );
         console.log(`Calling Marketplace API: ${firstExportUrl}`);
 
-        const firstExportResponse = await axios.post<InitiateAsyncLicenseCollection>(
+        const firstExportResponse = await axios.post<v3Components["schemas"]["Reports_InitiateAsyncExportLicenses"]>(
             firstExportUrl,
             {},
             { headers: { 'Authorization': await this.getAuthHeader(), 'Content-Type': 'application/json' } }
         );
 
         const firstResultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
-            this.baseUrl,
+            this.baseUrlV3,
             firstExportResponse.data._links.status.href,
             firstExportResponse.data._links.download.href,
             (data) => data.export.status
@@ -202,7 +204,7 @@ export class MarketplaceService {
         const stream1 = await this.getStreamForResultUrl(firstResultUrl)
 
         const secondExportUrl = this.buildUrlWithParams(
-            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/licenses/async/export`,
+            licenseExportUrl,
             { startDate: '2018-07-01', withDataInsights: true, includeAtlassianLicenses: true }
         );
         console.log(`Calling Marketplace API: ${secondExportUrl}`);
@@ -214,7 +216,7 @@ export class MarketplaceService {
         );
 
         const secondResultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
-            this.baseUrl,
+            this.baseUrlV3,
             secondExportResponse.data._links.status.href,
             secondExportResponse.data._links.download.href,
             (data) => data.export.status
