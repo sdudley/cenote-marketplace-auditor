@@ -13,6 +13,7 @@ import {
 } from '#common/types/apportionment';
 import { parsePurchaseMonth } from '#common/util/purchaseMonthUtils';
 import { buildYearlyApportionmentFromMonths } from '#common/util/apportionmentAggregation';
+import { rebindApportionmentBeforeSaleMonth } from '#common/util/apportionmentSaleMonthRebinding';
 
 @injectable()
 export class ApportionmentService {
@@ -43,11 +44,16 @@ export class ApportionmentService {
             return null;
         }
 
-        return this.priceCalculatorService.calculateMonthlyPriceApportionment({
+        const months = this.priceCalculatorService.calculateMonthlyPriceApportionment({
             pricingOpts: validationResult.pricingOpts,
             expectedVendorAmount: validationResult.expectedVendorAmount,
             actualVendorAmount: transaction.data.purchaseDetails.vendorAmount
         });
+
+        return rebindApportionmentBeforeSaleMonth(
+            months,
+            transaction.data.purchaseDetails.saleDate
+        );
     }
 
     public async calculateAggregateApportionment(purchaseMonth: string): Promise<MonthlyAggregateApportionmentResponse> {

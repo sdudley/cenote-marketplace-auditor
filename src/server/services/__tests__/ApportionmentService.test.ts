@@ -160,4 +160,40 @@ describe('ApportionmentService', () => {
         ]);
         expect(result.years).toEqual([{ year: '2026', actualValue: 10 }]);
     });
+
+    it('rebinds months before sale date in calculateApportionmentForTransaction', async () => {
+        const transaction = createTransaction('tx-1', 1, { addonKey: 'com.app.a', hosting: 'Cloud' });
+        transaction.data.purchaseDetails.saleDate = '2026-06-15';
+
+        const priceCalculator = {
+            calculateMonthlyPriceApportionment: jest.fn().mockReturnValue([
+                { month: '2026-04', estimatedValue: 20, actualValue: 20 },
+                { month: '2026-05', estimatedValue: 30, actualValue: 30 },
+                { month: '2026-06', estimatedValue: 40, actualValue: 40 },
+                { month: '2026-07', estimatedValue: 10, actualValue: 10 }
+            ])
+        };
+
+        const service = new ApportionmentService(
+            {} as any,
+            {} as any,
+            {
+                getPricingForTransaction: jest.fn().mockResolvedValue({})
+            } as any,
+            {
+                validateTransaction: jest.fn().mockResolvedValue({
+                    pricingOpts: {},
+                    expectedVendorAmount: 100
+                })
+            } as any,
+            priceCalculator as any
+        );
+
+        const result = await service.calculateApportionmentForTransaction(transaction);
+
+        expect(result).toEqual([
+            { month: '2026-06', estimatedValue: 90, actualValue: 90 },
+            { month: '2026-07', estimatedValue: 10, actualValue: 10 }
+        ]);
+    });
 });
