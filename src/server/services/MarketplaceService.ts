@@ -11,6 +11,7 @@ import {
     TransactionData
 } from '#common/types/marketplace';
 import { components } from '#common/types/marketplace-api';
+import { components as v3Components } from '#common/types/marketplace-v3-api';
 import { TYPES } from '../config/types';
 import { ConfigDao } from '../database/dao/ConfigDao';
 import { ConfigKey } from '#common/types/configItem';
@@ -24,6 +25,7 @@ export class MarketplaceService {
     private username: string = '';
     private password: string = '';
     private vendorId: string = '';
+    private developerId: string = '';
 
     constructor(
         @inject(TYPES.ConfigDao) private readonly configDao: ConfigDao
@@ -33,6 +35,54 @@ export class MarketplaceService {
         this.username = await this.configDao.get<string>(ConfigKey.AtlassianAccountUser) || '';
         this.password = await this.configDao.get<string>(ConfigKey.AtlassianAccountApiToken) || '';
         this.vendorId = await this.configDao.get<string>(ConfigKey.AtlassianVendorId) || '';
+        this.developerId = await this.configDao.get<string>(ConfigKey.AtlassianDeveloperId) || '';
+    }
+
+    /**
+     * Resolves developer ID from vendor ID via Marketplace V3 developer-space API.
+     */
+    async fetchDeveloperIdByVendorId(vendorId: string): Promise<string> {
+        const url = `${this.baseUrl}/rest/3/developer-space/vendor/${vendorId}`;
+        console.log(`Calling Marketplace API: ${url}`);
+
+        const response = await axios.get<v3Components['schemas']['DeveloperId']>(url, {
+            headers: {
+                'Authorization': await this.getAuthHeader()
+            }
+        });
+
+        return response.data.developerId;
+    }
+
+    /**
+     * If a vendor ID is configured but developer ID is not, fetch and persist the developer ID.
+     */
+    async migrateDeveloperIdFromVendorIdIfNeeded(): Promise<void> {
+        const vendorId = await this.configDao.get<string>(ConfigKey.AtlassianVendorId);
+        const developerId = await this.configDao.get<string>(ConfigKey.AtlassianDeveloperId);
+
+        if (!vendorId?.trim() || developerId?.trim()) {
+            return;
+        }
+
+        const username = await this.configDao.get<string>(ConfigKey.AtlassianAccountUser);
+        const apiToken = await this.configDao.get<string>(ConfigKey.AtlassianAccountApiToken);
+        if (!username?.trim() || !apiToken?.trim()) {
+            console.warn(
+                'Atlassian vendor ID is configured but developer ID is missing; ' +
+                'cannot resolve developer ID without account credentials.'
+            );
+            return;
+        }
+
+        try {
+            const resolvedDeveloperId = await this.fetchDeveloperIdByVendorId(vendorId.trim());
+            await this.configDao.set(ConfigKey.AtlassianDeveloperId, resolvedDeveloperId);
+            this.developerId = resolvedDeveloperId;
+            console.log(`Resolved and saved Atlassian developer ID for vendor ID ${vendorId}`);
+        } catch (error) {
+            console.error('Failed to resolve Atlassian developer ID from vendor ID:', error);
+        }
     }
 
     private async getAuthHeader(): Promise<string> {

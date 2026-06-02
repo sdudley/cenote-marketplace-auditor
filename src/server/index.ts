@@ -17,6 +17,7 @@ import { JobDao } from './database/dao/JobDao';
 import { ConfigDao } from './database/dao/ConfigDao';
 import { TYPES } from './config/types';
 import { SchedulerService } from './services/SchedulerService';
+import { MarketplaceService } from './services/MarketplaceService';
 import { configurePassport } from './express/config/passport';
 import { getSessionSecret } from './util/sessionSecret';
 
@@ -102,6 +103,9 @@ async function startServer() {
 
         const jobDao = container.get<JobDao>(TYPES.JobDao);
         await jobDao.recordApplicationStart();
+
+        const marketplaceService = container.get<MarketplaceService>(TYPES.MarketplaceService);
+        await marketplaceService.migrateDeveloperIdFromVendorIdIfNeeded();
 
         // Initialize scheduler
         const schedulerService = container.get<SchedulerService>(TYPES.SchedulerService);

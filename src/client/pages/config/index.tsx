@@ -23,6 +23,7 @@ export const ConfigPage: React.FC = () => {
         [ConfigKey.AtlassianAccountUser]: '',
         [ConfigKey.AtlassianAccountApiToken]: '',
         [ConfigKey.AtlassianVendorId]: '',
+        [ConfigKey.AtlassianDeveloperId]: '',
         [ConfigKey.BaseUrl]: '',
         [ConfigKey.SchedulerFrequency]: 0,
         [ConfigKey.SlackBotToken]: '',
@@ -261,7 +262,14 @@ export const ConfigPage: React.FC = () => {
                             value={configValues[ConfigKey.AtlassianVendorId]}
                             onChange={handleChange(ConfigKey.AtlassianVendorId)}
                             fullWidth
-                            helperText="Vendor ID for your developer account. This is visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
+                            helperText="Legacy vendor ID for your developer account. Visible in the URL for the Marketplace vendor dashboard, such as: https://marketplace.atlassian.com/manage/vendors/########/"
+                        />
+                        <TextField
+                            label="Atlassian Developer ID"
+                            value={configValues[ConfigKey.AtlassianDeveloperId]}
+                            onChange={handleChange(ConfigKey.AtlassianDeveloperId)}
+                            fullWidth
+                            helperText="Developer ID (UUID) for Marketplace V3 APIs. If left empty but a vendor ID is configured, it will be resolved automatically on startup."
                         />
                         <TextField
                             label="Base URL"
