@@ -1,4 +1,5 @@
 import { components } from './marketplace-api';
+import { components as v3Components } from './marketplace-v3-api';
 
 // Simplified type names to represent individual components imported from the
 // Atlassian Marketplace OpenAPI spec
@@ -14,31 +15,33 @@ export type StatusAsyncTransactionCollection = components["schemas"]["StatusAsyn
 // export type SaleType = components["schemas"]["TransactionPurchaseDetails"]["saleType"];
 // export type TransactionData = components["schemas"]["Transaction"];
 
-type InternalSaleType = components["schemas"]["TransactionPurchaseDetails"]["saleType"];
+type InternalSaleType = v3Components["schemas"]["TransactionPurchaseDetails"]["saleType"];
 export type SaleType = InternalSaleType | 'Downgrade';
 
 // Hack until Atlassian adds the 'SOCIAL_IMPACT' license type to the OpenAPI spec
-export type EnhancedLicenseType = components["schemas"]["TransactionPurchaseDetails"]["licenseType"] | 'SOCIAL_IMPACT' | 'SOCIAL_IMPACT_GLOBAL_ACCESS' | 'FOUNDATION_FREE';
+export type EnhancedLicenseType = v3Components["schemas"]["TransactionPurchaseDetails"]["licenseType"] | 'SOCIAL_IMPACT' | 'SOCIAL_IMPACT_GLOBAL_ACCESS' | 'FOUNDATION_FREE';
 
 interface EnhancedTransactionPurchaseDetails extends Omit<components["schemas"]["TransactionPurchaseDetails"], 'saleType' | 'licenseType'> {
     saleType: SaleType;
     licenseType: EnhancedLicenseType;
 }
 
-export interface TransactionData extends Omit<components["schemas"]["Transaction"], 'purchaseDetails'> {
+export interface TransactionData extends Omit<v3Components["schemas"]["Transaction"], 'purchaseDetails'> {
     purchaseDetails: EnhancedTransactionPurchaseDetails;
 }
 // END: Hack to work around problem of missing saleType='Downgrade' in the OpenAPI spec
 
-export type TransactionDiscount = components["schemas"]["TransactionDiscount"];
-export type TransactionDiscountType = components["schemas"]["TransactionDiscount"]["type"];
+export type TransactionDiscount = v3Components["schemas"]["TransactionDiscount"];
+export type TransactionDiscountType = v3Components["schemas"]["TransactionDiscount"]["type"];
 export type LicenseData = components["schemas"]["License"];
 export type PricingData = components["schemas"]["Pricing"];
 export type PricingItem = components["schemas"]["PricingItem"];
 
-export type LicenseType = components["schemas"]["TransactionPurchaseDetails"]["licenseType"];
-export type HostingType = components["schemas"]["TransactionPurchaseDetails"]["hosting"];
-export type BillingPeriod = components["schemas"]["TransactionPurchaseDetails"]["billingPeriod"];
-export type ProratedDetails = components["schemas"]["ProratedDetails"];
+export type LicenseType = v3Components["schemas"]["TransactionPurchaseDetails"]["licenseType"];
+export type HostingType = v3Components["schemas"]["TransactionPurchaseDetails"]["hosting"];
+export type BillingPeriod = v3Components["schemas"]["TransactionPurchaseDetails"]["billingPeriod"];
+// TODO FIXME!!!!!!!!!!!!!
+export type ProratedDetails = components["schemas"]["ProratedDetails"]; // TODO FIXME not in v3 API?
+// TODO FIXME!!!!!!!!!!!!!
 
 export type DeploymentType = 'server' | 'datacenter' | 'cloud';

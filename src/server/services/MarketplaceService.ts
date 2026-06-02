@@ -4,7 +4,6 @@ import { Readable } from 'stream';
 import {
     InitiateAsyncLicense,
     InitiateAsyncLicenseCollection,
-    InitiateAsyncTransactionCollection,
     LicenseData,
     PricingData,
     StatusAsyncTransactionCollection,
@@ -22,6 +21,7 @@ const licenseKey = (license : LicenseData) : string => license.appEntitlementNum
 @injectable()
 export class MarketplaceService {
     private readonly baseUrl = 'https://marketplace.atlassian.com';
+    private readonly baseUrlV3 = 'https://api.atlassian.com/marketplace/rest/3';
     private username: string = '';
     private password: string = '';
     private vendorId: string = '';
@@ -102,6 +102,7 @@ export class MarketplaceService {
     }
 
     private async pollForCompletion<T>(
+        baseUrl: string,
         statusLink: string,
         downloadLink: string,
         checkStatus: (data: any) => string
@@ -112,7 +113,7 @@ export class MarketplaceService {
         while (status === 'IN_PROGRESS' || status === 'QUEUED') {
             await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds between polls
 
-            const statusResponse = await axios.get<T>(this.baseUrl + statusLink, {
+            const statusResponse = await axios.get<T>(baseUrl + statusLink, {
                 headers: {
                     'Authorization': await this.getAuthHeader()
                 }
@@ -120,7 +121,7 @@ export class MarketplaceService {
 
             status = checkStatus(statusResponse.data);
             if (status === 'COMPLETED') {
-                resultUrl = this.baseUrl + downloadLink;
+                resultUrl = baseUrl + downloadLink;
             } else if (status === 'FAILED') {
                 throw new Error(`Export failed: ${statusResponse.data}`);
             }
@@ -149,18 +150,19 @@ export class MarketplaceService {
     async getTransactionsStream(): Promise<Readable> {
         await this.initializeConfig();
         const exportUrl = this.buildUrlWithParams(
-            `${this.baseUrl}/rest/2/vendors/${this.vendorId}/reporting/sales/transactions/async/export`,
+            `${this.baseUrlV3}/reporting/developer-space/${this.developerId}/sales/transactions/async/export`,
             { excludeZeroTransactions: false, includeManualInvoice: true }
         );
         console.log(`Calling Marketplace API: ${exportUrl}`);
 
-        const exportResponse = await axios.post<InitiateAsyncTransactionCollection>(
+        const exportResponse = await axios.post<v3Components["schemas"]["Reports_InitiateAsyncExportTransactions"]>(
             exportUrl,
             {},
             { headers: { 'Authorization': await this.getAuthHeader(), 'Content-Type': 'application/json' } }
         );
 
         const resultUrl = await this.pollForCompletion<StatusAsyncTransactionCollection>(
+            this.baseUrlV3,
             exportResponse.data._links.status.href,
             exportResponse.data._links.download.href,
             (data) => data.export.status
@@ -190,6 +192,7 @@ export class MarketplaceService {
         );
 
         const firstResultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
+            this.baseUrl,
             firstExportResponse.data._links.status.href,
             firstExportResponse.data._links.download.href,
             (data) => data.export.status
@@ -211,6 +214,7 @@ export class MarketplaceService {
         );
 
         const secondResultUrl = await this.pollForCompletion<InitiateAsyncLicense>(
+            this.baseUrl,
             secondExportResponse.data._links.status.href,
             secondExportResponse.data._links.download.href,
             (data) => data.export.status
