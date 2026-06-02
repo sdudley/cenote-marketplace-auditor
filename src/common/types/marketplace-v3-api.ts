@@ -2082,6 +2082,12 @@ export interface paths {
                          *           "status": "NON_PARTICIPANT"
                          *         }
                          *       ],
+                         *       "legacyListingDetails": {
+                         *         "description": "Detailed documentation and links for the app",
+                         *         "wikiLink": "https://wiki.example.com/app-documentation",
+                         *         "sourceLink": "https://github.com/example/app-source",
+                         *         "buildsLink": "https://ci.example.com/builds/app"
+                         *       },
                          *       "state": "PUBLIC",
                          *       "approvalStatus": "APPROVED",
                          *       "approvalDetails": {
@@ -2197,6 +2203,26 @@ export interface paths {
                                 /** @enum {string} */
                                 status: "APPROVED" | "REJECTED" | "NON_PARTICIPANT" | "APPLIED";
                             }[];
+                            /** @description Legacy listing details containing additional metadata like wiki, source, and builds links */
+                            legacyListingDetails?: {
+                                /** @description A general description of the app */
+                                description?: string;
+                                /**
+                                 * Format: uri
+                                 * @description Link to a wiki related to the app
+                                 */
+                                wikiLink?: string;
+                                /**
+                                 * Format: uri
+                                 * @description Link to a source control repository for the app
+                                 */
+                                sourceLink?: string;
+                                /**
+                                 * Format: uri
+                                 * @description Link to a continuous integration server for the app
+                                 */
+                                buildsLink?: string;
+                            };
                             /**
                              * @description Indicates the current state of the Marketplace app
                              *
@@ -2334,11 +2360,13 @@ export interface paths {
          *     - `developerId` - Developer Id can not be using using this API. Contact Marketplace support for any help.
          *     - `images.titleLogoFileId` - Only updatable by marketplace administrators
          *     - `enrolledPrograms` - Managed by Atlassian marketplace team
-         *     - `state` - Not enabled currently using this API. You can use Marketplace UI to update
          *     - `approvalStatus` - Not enabled currently using this API. You can use Marketplace UI to update
          *     - `hostingVisibility` - Only updatable by marketplace administrators
          *     - `stateAfterApproval` - Can't modify stateAfterApproval if state of app is already PUBLIC or READY_TO_LAUNCH
          *     - `revision` - System-managed field for conflict resolution
+         *
+         *     **Partially updatable fields**:
+         *     - `state` - Only transitioning the App Listing from PRIVATE to PUBLIC is available via this API. Other state transitions (e.g., to ARCHIVED, DELETED, READY_TO_LAUNCH) are not supported and must be done through the Marketplace UI.
          *
          *     **Important:** For non-updatable fields, you must pass the current values from the Get Marketplace app listing (`/rest/3/product-listing/{productId}`) API response to avoid validation errors.
          *
@@ -2418,6 +2446,12 @@ export interface paths {
                      *           "status": "NON_PARTICIPANT"
                      *         }
                      *       ],
+                     *       "legacyListingDetails": {
+                     *         "description": "Updated documentation and resource links",
+                     *         "wikiLink": "https://wiki.updated-example.com/app-docs",
+                     *         "sourceLink": "https://github.com/updated-example/app-repository",
+                     *         "buildsLink": "https://ci.updated-example.com/jobs/app-build"
+                     *       },
                      *       "state": "PUBLIC",
                      *       "approvalStatus": "SUBMITTED",
                      *       "dataCenterReviewIssueKey": "DCHELP-456",
@@ -2504,6 +2538,12 @@ export interface paths {
                          *           "status": "APPLIED"
                          *         }
                          *       ],
+                         *       "legacyListingDetails": {
+                         *         "description": "Updated documentation and resource links",
+                         *         "wikiLink": "https://wiki.updated-example.com/app-docs",
+                         *         "sourceLink": "https://github.com/updated-example/app-repository",
+                         *         "buildsLink": "https://ci.updated-example.com/jobs/app-build"
+                         *       },
                          *       "state": "PUBLIC",
                          *       "approvalStatus": "SUBMITTED",
                          *       "approvalDetails": {
@@ -2617,6 +2657,26 @@ export interface paths {
                                 /** @enum {string} */
                                 status: "APPROVED" | "REJECTED" | "NON_PARTICIPANT" | "APPLIED";
                             }[];
+                            /** @description Legacy listing details containing additional metadata like wiki, source, and builds links */
+                            legacyListingDetails?: {
+                                /** @description A general description of the app */
+                                description?: string;
+                                /**
+                                 * Format: uri
+                                 * @description Link to a wiki related to the app
+                                 */
+                                wikiLink?: string;
+                                /**
+                                 * Format: uri
+                                 * @description Link to a source control repository for the app
+                                 */
+                                sourceLink?: string;
+                                /**
+                                 * Format: uri
+                                 * @description Link to a continuous integration server for the app
+                                 */
+                                buildsLink?: string;
+                            };
                             /**
                              * @description Indicates the current state of the Marketplace app
                              *
@@ -2879,6 +2939,12 @@ export interface paths {
                          *               "status": "NON_PARTICIPANT"
                          *             }
                          *           ],
+                         *           "legacyListingDetails": {
+                         *             "description": "Detailed documentation and links for the app",
+                         *             "wikiLink": "https://wiki.example.com/app-documentation",
+                         *             "sourceLink": "https://github.com/example/app-source",
+                         *             "buildsLink": "https://ci.example.com/builds/app"
+                         *           },
                          *           "state": "PUBLIC",
                          *           "approvalStatus": "APPROVED",
                          *           "approvalDetails": {
@@ -2942,6 +3008,12 @@ export interface paths {
                          *               "status": "APPROVED"
                          *             }
                          *           ],
+                         *           "legacyListingDetails": {
+                         *             "description": "Additional app resources and documentation",
+                         *             "wikiLink": "https://wiki.another-example.com/docs",
+                         *             "sourceLink": "https://github.com/another-example/source",
+                         *             "buildsLink": "https://ci.another-example.com/builds"
+                         *           },
                          *           "state": "PUBLIC",
                          *           "approvalStatus": "APPROVED",
                          *           "approvalDetails": {
@@ -3082,6 +3154,26 @@ export interface paths {
                                     /** @enum {string} */
                                     status: "APPROVED" | "REJECTED" | "NON_PARTICIPANT" | "APPLIED";
                                 }[];
+                                /** @description Legacy listing details containing additional metadata like wiki, source, and builds links */
+                                legacyListingDetails?: {
+                                    /** @description A general description of the app */
+                                    description?: string;
+                                    /**
+                                     * Format: uri
+                                     * @description Link to a wiki related to the app
+                                     */
+                                    wikiLink?: string;
+                                    /**
+                                     * Format: uri
+                                     * @description Link to a source control repository for the app
+                                     */
+                                    sourceLink?: string;
+                                    /**
+                                     * Format: uri
+                                     * @description Link to a continuous integration server for the app
+                                     */
+                                    buildsLink?: string;
+                                };
                                 /**
                                  * @description Indicates the current state of the Marketplace app
                                  *
@@ -3565,8 +3657,10 @@ export interface paths {
          *     - Approval status
          *
          *     **Approval Status Transition Restrictions:**
-         *     - Only allowed transition: `REJECTED` → `PENDING_REVIEW`
-         *     - All other approval status transitions are not allowed
+         *     - Approval status transitions are not allowed
+         *
+         *     **State Transition Restrictions:**
+         *     - Transitioning from `PUBLIC` to `PRIVATE` is not allowed when the version is the only public version of the app
          *
          *     **Recommended workflow:**
          *     1. First, fetch the current version listing using the Get app version listing (`/rest/3/app-software/{appSoftwareId}/versions/{buildNumber}/listing`) API
@@ -5287,7 +5381,8 @@ export interface paths {
         /**
          * Get licenses
          * @description Get a list of licenses for the specified vendor's apps.
-         *     This resource requires authentication.
+         *     <br>This resource requires authentication.
+         *     <br><b>NOTE</b>: Developers are recommended to use the async export endpoints since this endpoint might return 5xx for large datasets.
          */
         get: {
             parameters: {
@@ -5305,7 +5400,7 @@ export interface paths {
                     /** @description The date field against which filters will be applied */
                     dateType?: "end" | "start";
                     /** @description If specified, restricts the query to values with the provided license type. */
-                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free")[];
+                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free" | "legacy_free")[];
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
@@ -5379,7 +5474,8 @@ export interface paths {
         /**
          * Export licenses
          * @description Export all licenses, matching the specified filters, for the specified vendor's apps.
-         *     This resource requires authentication.
+         *     <br>This resource requires authentication.
+         *     <br><b>NOTE</b>: Developers are recommended to use the async export endpoints since this endpoint might return 5xx for large datasets.
          */
         get: {
             parameters: {
@@ -5397,7 +5493,7 @@ export interface paths {
                     /** @description The date field against which filters will be applied */
                     dateType?: "end" | "start";
                     /** @description If specified, restricts the query to values with the provided license type; 'inactive' queries for expired licenses. Queries for 'starter' are deprecated; results may not be as expected */
-                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free")[];
+                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free" | "legacy_free")[];
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
@@ -5487,7 +5583,7 @@ export interface paths {
                     /** @description The date field against which filters will be applied */
                     dateType?: "end" | "start";
                     /** @description If specified, restricts the query to values with the provided license type; 'inactive' queries for expired licenses. Queries for 'starter' are deprecated; results may not be as expected */
-                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free")[];
+                    licenseType?: ("academic" | "commercial" | "community" | "demonstration" | "evaluation" | "open_source" | "classroom" | "free" | "legacy_free")[];
                     /** @description Specifies whether to query only direct sales, expert sales, or reseller sales */
                     partnerType?: ("direct" | "expert" | "reseller")[];
                     /** @description Restricts the query to values for these hosting types */
@@ -6236,7 +6332,8 @@ export interface paths {
         /**
          * Get transactions
          * @description Get a list of transactions for the specified vendor's apps.
-         *     This resource requires authentication.
+         *     <br>This resource requires authentication.
+         *     <br><b>NOTE</b>: Developers are recommended to use the async export endpoints since this endpoint might return 5xx for large datasets.
          */
         get: {
             parameters: {
@@ -6336,7 +6433,8 @@ export interface paths {
         /**
          * Export transactions
          * @description Export all transactions, matching the specified filters, for the specified vendor's apps.
-         *     This resource requires authentication.
+         *     <br>This resource requires authentication.
+         *     <br><b>NOTE</b>: Developers are recommended to use the async export endpoints since this endpoint might return 5xx for large datasets.
          */
         get: {
             parameters: {
@@ -7678,6 +7776,7 @@ export interface paths {
          *     | `review_score` | Review score of the product |
          *     | `average_stars` | Average star rating of the product |
          *     | `download_count` | Number of downloads |
+         *     | `install_count` | Number of installations |
          *     | `version_number` | The display name of the version, for example "1.0.0" |
          *     | `version_status` | Indicates whether the version is manually approved or auto approved. uninitiated → auto approved approved → manually approved by Atlassian Support |
          *     | `publicly_visible` | This is always True, but kept for extensibility purposes for future |
@@ -8038,7 +8137,8 @@ export interface paths {
          *           "totalVotes": 15,
          *           "helpfulVotes": 14,
          *           "productHosting": "cloud",
-         *           "isFlagged": false
+         *           "isFlagged": false,
+         *           "authorName": "John Doe"
          *         }
          *       ],
          *       "cursor": "eyJkYXRlIjoiMjAyNS0wMS0xMiIsImlkIjoiNjc4OTAifQ==",
@@ -8338,70 +8438,90 @@ export interface paths {
                         /** @example {
                          *       "commonCloud": {
                          *         "dataAccessAndStorage": {
-                         *           "dataAccess": {
-                         *             "dataAccessDescription": "This app accesses user data to provide core functionality",
-                         *             "dataAccessTypes": [
-                         *               "USER_PROFILE",
-                         *               "CONTENT"
-                         *             ],
-                         *             "dataAccessScope": "USER_LEVEL"
-                         *           },
-                         *           "dataStorage": {
-                         *             "dataStorageDescription": "User data is stored securely in our cloud infrastructure",
-                         *             "dataRetentionPeriod": "90_DAYS",
-                         *             "dataDeletionPolicy": "AUTOMATIC"
-                         *           }
+                         *           "typesOfDataAccessed": [
+                         *             "USER_PROFILE",
+                         *             "CONTENT"
+                         *           ],
+                         *           "typesOfDataStored": [
+                         *             "USER_PROFILE"
+                         *           ],
+                         *           "isSameDataProcessedAndStored": true,
+                         *           "appProcessEUDOutsideAtlassian": false,
+                         *           "appStoresEUDOutsideAtlassian": false,
+                         *           "appExposesRemoteRestApis": false,
+                         *           "remoteRestApisAdditionalDetails": null
                          *         },
                          *         "thirdPartyInformation": {
-                         *           "thirdPartyServices": [
-                         *             "AWS",
-                         *             "Google Analytics"
-                         *           ],
-                         *           "dataSharing": false,
-                         *           "dataSharingDescription": "No user data is shared with third parties"
+                         *           "isEndUserDataShared": false,
+                         *           "dataSubProcessors": null,
+                         *           "thirdPartyDetails": []
                          *         },
                          *         "logDetails": {
-                         *           "loggingEnabled": true,
-                         *           "logRetention": "30_DAYS",
-                         *           "sensitiveDataLogging": false
+                         *           "logEndUserData": false,
+                         *           "logProcessAndOrStoreEUDOutsideAtlassian": false,
+                         *           "logEUDShareWithThirdParty": false,
+                         *           "logsIntegralForAppFunctionality": false
                          *         },
                          *         "dataResidency": {
-                         *           "dataResidencyRegions": [
+                         *           "isDataResidencySupported": "STORED_IN_ATLASSIAN_AND_DR_SUPPORTED",
+                         *           "countriesWhereEndUserDataStored": [
                          *             "US",
                          *             "EU"
                          *           ],
-                         *           "dataResidencyCompliance": true
+                         *           "realmMigrationSupported": true,
+                         *           "inScopeDataTypes": [
+                         *             "USER_PROFILE"
+                         *           ],
+                         *           "outOfScopeDataTypes": [
+                         *             "CONTENT"
+                         *           ]
                          *         },
                          *         "dataRetention": {
-                         *           "retentionPeriod": "90_DAYS",
-                         *           "deletionProcess": "AUTOMATIC",
-                         *           "backupRetention": "30_DAYS"
+                         *           "isDataRetentionSupported": true,
+                         *           "retentionDurationInDays": {
+                         *             "min": 30,
+                         *             "max": 90
+                         *           },
+                         *           "isCustomRetentionPeriodAllowed": false,
+                         *           "isRetentionIndefinite": false
                          *         },
                          *         "privacy": {
                          *           "privacyEnhancingTechniques": {
-                         *             "dataMinimization": true,
-                         *             "anonymization": false,
-                         *             "pseudonymization": true
+                         *             "arePrivacyEnhancingTechniquesSupported": true,
+                         *             "privacyEnhancingTechniquesSupported": [
+                         *               "anonymization"
+                         *             ]
                          *           },
                          *           "gdpr": {
-                         *             "gdprCompliant": true,
-                         *             "dataProcessingBasis": "CONSENT",
-                         *             "userRights": [
-                         *               "ACCESS",
-                         *               "RECTIFICATION",
-                         *               "ERASURE"
-                         *             ]
+                         *             "dataController": {
+                         *               "isAppDataController": "FALSE",
+                         *               "endUserDataTypes": null
+                         *             },
+                         *             "dataProcessor": {
+                         *               "isAppDataProcessor": "TRUE",
+                         *               "endUserDataTypes": [
+                         *                 "USER_PROFILE"
+                         *               ]
+                         *             },
+                         *             "dataTransfer": {
+                         *               "isEndUserDataTransferredOutsideEEA": false,
+                         *               "isTransferComplianceMechanismsAdhered": null,
+                         *               "transferComplianceMechanismsAdheredDetails": null
+                         *             }
                          *           },
                          *           "ccpa": {
-                         *             "ccpaCompliant": true,
-                         *             "dataCategories": [
-                         *               "PERSONAL",
-                         *               "IDENTIFIERS"
-                         *             ]
+                         *             "business": {
+                         *               "isAppBusiness": "FALSE",
+                         *               "endUserDataTypes": null
+                         *             },
+                         *             "serviceProvider": {
+                         *               "isAppServiceProvider": "FALSE",
+                         *               "endUserDataTypes": null
+                         *             }
                          *           },
                          *           "dataProcessingAgreement": {
-                         *             "dpaAvailable": true,
-                         *             "dpaUrl": "https://example.com/dpa"
+                         *             "isDPASupported": "TRUE",
+                         *             "link": "https://example.com/dpa"
                          *           }
                          *         },
                          *         "security": {
@@ -8416,16 +8536,20 @@ export interface paths {
                          *           "compliantCertifications": [
                          *             "SOC2",
                          *             "ISO27001"
-                         *           ]
+                         *           ],
+                         *           "requiresUsersToProvidePATs": false,
+                         *           "permissionsJustification": "Our app requires read access to issues to sync them with external project management tools."
                          *         },
                          *         "properties": {
                          *           "updatedBy": "developer@example.com",
                          *           "updatedAt": 1642233600000,
                          *           "formStatus": "APPROVED",
-                         *           "jiraLinks": [
+                         *           "jiraIssueLinks": [
                          *             "https://jira.atlassian.com/browse/MKPLHELP-12345"
                          *           ]
-                         *         }
+                         *         },
+                         *         "hasRestAPIExtension": false,
+                         *         "llmModels": null
                          *       }
                          *     } */
                         "application/json": components["schemas"]["TrustInfo"];
@@ -8495,70 +8619,90 @@ export interface paths {
                     /** @example {
                      *       "commonCloud": {
                      *         "dataAccessAndStorage": {
-                     *           "dataAccess": {
-                     *             "dataAccessDescription": "This app accesses user data to provide core functionality",
-                     *             "dataAccessTypes": [
-                     *               "USER_PROFILE",
-                     *               "CONTENT"
-                     *             ],
-                     *             "dataAccessScope": "USER_LEVEL"
-                     *           },
-                     *           "dataStorage": {
-                     *             "dataStorageDescription": "User data is stored securely in our cloud infrastructure",
-                     *             "dataRetentionPeriod": "90_DAYS",
-                     *             "dataDeletionPolicy": "AUTOMATIC"
-                     *           }
+                     *           "typesOfDataAccessed": [
+                     *             "USER_PROFILE",
+                     *             "CONTENT"
+                     *           ],
+                     *           "typesOfDataStored": [
+                     *             "USER_PROFILE"
+                     *           ],
+                     *           "isSameDataProcessedAndStored": true,
+                     *           "appProcessEUDOutsideAtlassian": false,
+                     *           "appStoresEUDOutsideAtlassian": false,
+                     *           "appExposesRemoteRestApis": false,
+                     *           "remoteRestApisAdditionalDetails": null
                      *         },
                      *         "thirdPartyInformation": {
-                     *           "thirdPartyServices": [
-                     *             "AWS",
-                     *             "Google Analytics"
-                     *           ],
-                     *           "dataSharing": false,
-                     *           "dataSharingDescription": "No user data is shared with third parties"
+                     *           "isEndUserDataShared": false,
+                     *           "dataSubProcessors": null,
+                     *           "thirdPartyDetails": []
                      *         },
                      *         "logDetails": {
-                     *           "loggingEnabled": true,
-                     *           "logRetention": "30_DAYS",
-                     *           "sensitiveDataLogging": false
+                     *           "logEndUserData": false,
+                     *           "logProcessAndOrStoreEUDOutsideAtlassian": false,
+                     *           "logEUDShareWithThirdParty": false,
+                     *           "logsIntegralForAppFunctionality": false
                      *         },
                      *         "dataResidency": {
-                     *           "dataResidencyRegions": [
+                     *           "isDataResidencySupported": "STORED_IN_ATLASSIAN_AND_DR_SUPPORTED",
+                     *           "countriesWhereEndUserDataStored": [
                      *             "US",
                      *             "EU"
                      *           ],
-                     *           "dataResidencyCompliance": true
+                     *           "realmMigrationSupported": true,
+                     *           "inScopeDataTypes": [
+                     *             "USER_PROFILE"
+                     *           ],
+                     *           "outOfScopeDataTypes": [
+                     *             "CONTENT"
+                     *           ]
                      *         },
                      *         "dataRetention": {
-                     *           "retentionPeriod": "90_DAYS",
-                     *           "deletionProcess": "AUTOMATIC",
-                     *           "backupRetention": "30_DAYS"
+                     *           "isDataRetentionSupported": true,
+                     *           "retentionDurationInDays": {
+                     *             "min": 30,
+                     *             "max": 90
+                     *           },
+                     *           "isCustomRetentionPeriodAllowed": false,
+                     *           "isRetentionDurationIndefinite": false
                      *         },
                      *         "privacy": {
                      *           "privacyEnhancingTechniques": {
-                     *             "dataMinimization": true,
-                     *             "anonymization": false,
-                     *             "pseudonymization": true
+                     *             "arePrivacyEnhancingTechniquesSupported": true,
+                     *             "privacyEnhancingTechniquesSupported": [
+                     *               "anonymization"
+                     *             ]
                      *           },
                      *           "gdpr": {
-                     *             "gdprCompliant": true,
-                     *             "dataProcessingBasis": "CONSENT",
-                     *             "userRights": [
-                     *               "ACCESS",
-                     *               "RECTIFICATION",
-                     *               "ERASURE"
-                     *             ]
+                     *             "dataController": {
+                     *               "isAppDataController": "FALSE",
+                     *               "endUserDataTypes": null
+                     *             },
+                     *             "dataProcessor": {
+                     *               "isAppDataProcessor": "TRUE",
+                     *               "endUserDataTypes": [
+                     *                 "USER_PROFILE"
+                     *               ]
+                     *             },
+                     *             "dataTransfer": {
+                     *               "isEndUserDataTransferredOutsideEEA": false,
+                     *               "isTransferComplianceMechanismsAdhered": null,
+                     *               "transferComplianceMechanismsAdheredDetails": null
+                     *             }
                      *           },
                      *           "ccpa": {
-                     *             "ccpaCompliant": true,
-                     *             "dataCategories": [
-                     *               "PERSONAL",
-                     *               "IDENTIFIERS"
-                     *             ]
+                     *             "business": {
+                     *               "isAppBusiness": "FALSE",
+                     *               "endUserDataTypes": null
+                     *             },
+                     *             "serviceProvider": {
+                     *               "isAppServiceProvider": "FALSE",
+                     *               "endUserDataTypes": null
+                     *             }
                      *           },
                      *           "dataProcessingAgreement": {
-                     *             "dpaAvailable": true,
-                     *             "dpaUrl": "https://example.com/dpa"
+                     *             "isDPASupported": "TRUE",
+                     *             "link": "https://example.com/dpa"
                      *           }
                      *         },
                      *         "security": {
@@ -8573,8 +8717,12 @@ export interface paths {
                      *           "compliantCertifications": [
                      *             "SOC2",
                      *             "ISO27001"
-                     *           ]
-                     *         }
+                     *           ],
+                     *           "requiresUsersToProvidePATs": false,
+                     *           "permissionsJustification": "Our app requires read access to issues to sync them with external project management tools."
+                     *         },
+                     *         "hasRestAPIExtension": false,
+                     *         "llmModels": null
                      *       }
                      *     } */
                     "application/json": components["schemas"]["AppPrivacyAndSecurity"];
@@ -9084,7 +9232,8 @@ export interface components {
          *           "totalVotes": 8,
          *           "helpfulVotes": 6,
          *           "productHosting": "cloud",
-         *           "isFlagged": false
+         *           "isFlagged": false,
+         *           "authorName": "Jane Smith"
          *         },
          *         {
          *           "id": "86551fe0-5f38-43f4-iok92-7ef753efbf16",
@@ -9095,7 +9244,8 @@ export interface components {
          *           "totalVotes": 3,
          *           "helpfulVotes": 2,
          *           "productHosting": "server",
-         *           "isFlagged": false
+         *           "isFlagged": false,
+         *           "authorName": "Bob Johnson"
          *         }
          *       ],
          *       "cursor": "eyJkYXRlIjoiMjAyNS0wMS0xMCIsImlkIjoiMTIzNDUifQ==",
@@ -9129,7 +9279,8 @@ export interface components {
          *       "totalVotes": 12,
          *       "helpfulVotes": 11,
          *       "productHosting": "cloud",
-         *       "isFlagged": false
+         *       "isFlagged": false,
+         *       "authorName": "John Doe"
          *     }
          */
         AppReview: {
@@ -9154,6 +9305,8 @@ export interface components {
             productHosting?: "cloud" | "server" | "datacenter";
             /** @description Whether the review is flagged */
             isFlagged?: boolean;
+            /** @description Name of the review author */
+            authorName?: string;
         };
         /**
          * @description Response object for successfully uploaded artifact
@@ -12640,9 +12793,13 @@ export interface components {
             dataRetention?: components["schemas"]["DataRetention"];
             security?: components["schemas"]["Security"];
             privacy?: components["schemas"]["Privacy"];
+            /** @description Does the app have a REST API extension? */
+            hasRestAPIExtension?: boolean | null;
+            /** @description List of LLM models used by the app */
+            llmModels?: string[] | null;
         };
         TrustInfo: {
-            common?: components["schemas"]["CommonTrustInfo"];
+            commonCloud?: components["schemas"]["CommonTrustInfo"];
         };
         CommonTrustInfo: {
             dataAccessAndStorage?: components["schemas"]["DataAccessAndStorage"];
@@ -12653,6 +12810,10 @@ export interface components {
             privacy?: components["schemas"]["Privacy"];
             security?: components["schemas"]["Security"];
             properties?: components["schemas"]["Properties"];
+            /** @description Does the app have a REST API extension? */
+            hasRestAPIExtension?: boolean | null;
+            /** @description List of LLM models used by the app */
+            llmModels?: string[] | null;
         };
         Properties: {
             /** @description Form updated-by information */
@@ -12668,7 +12829,7 @@ export interface components {
              */
             formStatus?: "SUBMITTED" | "REJECTED" | "APPROVED" | "SAVED";
             /** @description URL of jira tickets. */
-            jiraLinks?: string[];
+            jiraIssueLinks?: string[];
         };
         Security: {
             /** @description Contact for your app security issues */
@@ -12679,12 +12840,16 @@ export interface components {
              */
             publicSecurityPoliciesLink?: string;
             caiq?: components["schemas"]["CAIQ"];
-            /** @description Does your app use full disk encryption at-rest for End-User Data stored outside of Atlassian or the users’s browser? */
+            /** @description Does your app use full disk encryption at-rest for End-User Data stored outside of Atlassian or the users's browser? */
             isDiskEncryptionSupported?: boolean;
             /** @description Does your app have any compliance certifications? */
             hasCompliantCertifications?: boolean;
             /** @description List of compliance certificates for your app */
             compliantCertifications?: string[];
+            /** @description Does the app require end users to provide Atlassian Personal Access Tokens (PATs), User Account Passwords, or another type of Shared Secret? */
+            requiresUsersToProvidePATs?: boolean | null;
+            /** @description Reason/justification for the permissions that are required by the app. */
+            permissionsJustification?: string | null;
         };
         CAIQ: {
             /** @description Have you completed a CAIQ Lite Questionnaire that covers this app? */
@@ -12746,7 +12911,7 @@ export interface components {
             /** @description Does your app have a General Data Protection Regulation (GDPR) approved transfer mechanism in place to govern those transfers? */
             isTransferComplianceMechanismsAdhered?: boolean;
             /** @description Specify the transfer mechanism adhered. */
-            transferComplianceMechanismsAdhered?: string;
+            transferComplianceMechanismsAdheredDetails?: string;
         };
         DataProcessor: {
             /**
@@ -12798,13 +12963,15 @@ export interface components {
              * @description Does your App support data residency?
              * @enum {string}
              */
-            isDataResidencySupported?: "STORED_IN_ATLASSIAN_N_DR_SUPPORTED" | "APP_DOES_NOT_SUPPORT_DR" | "STORED_IN_ATLASSIAN_N_DR_NOT_SUPPORTED" | "STORED_EXTERNAL_TO_ATLASSIAN" | "NOT_APPLICABLE";
+            isDataResidencySupported?: "STORED_IN_ATLASSIAN_AND_DR_SUPPORTED" | "APP_DOES_NOT_SUPPORT_DR" | "STORED_IN_ATLASSIAN_AND_DR_NOT_SUPPORTED" | "STORED_EXTERNAL_TO_ATLASSIAN" | "NOT_APPLICABLE";
             /** @description List of locations where in-scope End-User Data is stored */
             countriesWhereEndUserDataStored?: string[];
             /** @description Does your app support migration of in-scope End User Data between your data residency supported locations? */
             realmMigrationSupported?: boolean;
             /** @description List of in-scope End-User Data type */
             inScopeDataTypes?: string[];
+            /** @description List of out-of-scope End-User Data types */
+            outOfScopeDataTypes?: string[];
         };
         LogDetails: {
             /** @description Does your app log End-User Data? */
@@ -12851,6 +13018,10 @@ export interface components {
             appStoresEUDOutsideAtlassian?: boolean;
             /** @description List of End-User Data types your app stores */
             typesOfDataStored?: string[];
+            /** @description Does your app expose remote REST APIs? */
+            appExposesRemoteRestApis?: boolean | null;
+            /** @description Additional details about the remote REST APIs exposed by the app */
+            remoteRestApisAdditionalDetails?: string | null;
         };
         AddonVersionDeployment: {
             /** @description True if the version is compatible with Server instances */
@@ -17261,8 +17432,9 @@ export interface components {
             developerLinks?: components["schemas"]["ProductExternalLinksV3Request"];
             thirdPartyIntegrations?: components["schemas"]["ThirdPartyIntegrationsV3Request"];
             enrolledPrograms?: components["schemas"]["EnrolledProgramsV3Request"][];
+            legacyListingDetails?: components["schemas"]["LegacyListingDetailsV3Request"];
             /**
-             * @description State of the product listing
+             * @description State of the product listing. Note: Via this API, only transitioning from PRIVATE to PUBLIC is supported. Other state transitions must be done through the Marketplace UI.
              * @example PUBLIC
              * @enum {string}
              */
@@ -17329,6 +17501,26 @@ export interface components {
              * @example 3456789a-bcde-f012-3456-789abcdef012
              */
             bannerFileId?: string;
+        };
+        /** @description Legacy listing details containing additional metadata like wiki, source, and builds links */
+        LegacyListingDetailsV3Request: {
+            /** @description A general description of the app */
+            description?: string;
+            /**
+             * Format: uri
+             * @description Link to a wiki related to the app
+             */
+            wikiLink?: string;
+            /**
+             * Format: uri
+             * @description Link to a source control repository for the app
+             */
+            sourceLink?: string;
+            /**
+             * Format: uri
+             * @description Link to a continuous integration server for the app
+             */
+            buildsLink?: string;
         };
         /** @description Tags associated with the product listing for categorization and discovery */
         TagsV3Request: {
@@ -17512,7 +17704,7 @@ export interface components {
             deploymentInstructions?: components["schemas"]["AppSoftwareVersionListingDeploymentInstructionV3Request"][];
             developerLinks?: components["schemas"]["AppSoftwareVersionListingV3Links"];
             /**
-             * @description State of the app version listing. **Possible values:** - `PRIVATE` - Private/internal use only - `PUBLIC` - Publicly available
+             * @description State of the app version listing. **Possible values:** - `PRIVATE` - Private/internal use only - `PUBLIC` - Publicly available. **State Transition Restrictions:** - Transitioning from `PUBLIC` to `PRIVATE` is not allowed when the version is the only public version of the app
              * @example PUBLIC
              * @enum {string}
              */
@@ -17520,7 +17712,7 @@ export interface components {
             /**
              * @description Approval status of the app version listing. **Possible values:** - `APPROVED` - The app software version has been approved for publication - `REJECTED` - The app software version review was rejected - `PENDING_REVIEW` - The app software version is pending review - `SUBMITTED` - The app software version is submitted for review - `UNINITIATED` - The approvalStatus is not assigned yet.
              *
-             *     **Approval Status Transition Restrictions:** Only allowed transition: `REJECTED` → `PENDING_REVIEW`. All other approval status transitions are not allowed.
+             *     **Approval Status Transition Restrictions:** Approval status transitions are not allowed.
              * @example PENDING_REVIEW
              * @enum {string}
              */
