@@ -124,15 +124,19 @@ export const PricingDetailSubtotal = muiStyled(Typography)(({ theme }) => ({
 })) as typeof Typography;
 
 export const MonthlyApportionmentTable = muiStyled('table')(({ theme }) => ({
-    width: '100%',
+    width: 'auto',
     borderCollapse: 'collapse',
     marginBottom: theme.spacing(2),
     fontSize: theme.typography.body2.fontSize,
     lineHeight: theme.typography.body2.lineHeight,
     '& th, & td': {
-        padding: theme.spacing(0.75, 1),
+        padding: theme.spacing(0.75, 2),
         textAlign: 'left',
-        borderBottom: `1px solid ${theme.palette.divider}`
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        whiteSpace: 'nowrap'
+    },
+    '& th:not(:last-child), & td:not(:last-child)': {
+        paddingRight: theme.spacing(4)
     },
     '& th:last-child, & td:last-child, & th:nth-last-child(2), & td:nth-last-child(2)': {
         textAlign: 'right'

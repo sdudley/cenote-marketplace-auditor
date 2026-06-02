@@ -17,5 +17,6 @@ export const EXPRESS_TYPES = {
     TransactionPricingRoute: Symbol.for('TransactionPricingRoute'),
     AppRoute: Symbol.for('AppRoute'),
     AuthRoute: Symbol.for('AuthRoute'),
-    UserRoute: Symbol.for('UserRoute')
+    UserRoute: Symbol.for('UserRoute'),
+    ApportionmentRoute: Symbol.for('ApportionmentRoute')
 };

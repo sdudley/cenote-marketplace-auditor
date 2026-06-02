@@ -34,5 +34,6 @@ export const TYPES = {
     JobStarter: Symbol.for('JobStarter'),
     SchedulerService: Symbol.for('SchedulerService'),
     SlackService: Symbol.for('SlackService'),
-    UserDao: Symbol.for('UserDao')
+    UserDao: Symbol.for('UserDao'),
+    ApportionmentService: Symbol.for('ApportionmentService')
 };

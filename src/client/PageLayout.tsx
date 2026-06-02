@@ -21,6 +21,7 @@ import {
     PlayArrow,
     Logout as LogoutIcon,
     People as PeopleIcon,
+    PieChart as PieChartIcon,
     Menu as MenuIcon
 } from '@mui/icons-material';
 import { Button, Box } from '@mui/material';
@@ -79,6 +80,10 @@ export const PageLayout: React.FC = () => {
         { text: 'Licenses', icon: <CardMembershipIcon />, path: '/licenses' },
     ];
 
+    const apportionmentMenuItems = [
+        { text: 'Apportionment', icon: <PieChartIcon />, path: '/apportionment' },
+    ];
+
     const systemMenuItems = [
         { text: 'Configuration', icon: <SettingsIcon />, path: '/config' },
         { text: 'Apps', icon: <AppsIcon />, path: '/apps' },
@@ -106,6 +111,37 @@ export const PageLayout: React.FC = () => {
     const drawerContent = (
         <List>
             {dataMenuItems.map((item) => (
+                <StyledListItemButton
+                    key={item.text}
+                    onClick={() => {
+                        navigate(item.path);
+                        if (isMobile) {
+                            setMobileOpen(false);
+                        }
+                    }}
+                    selected={location.pathname.startsWith(item.path)}
+                >
+                    <ListItemIcon sx={{
+                        color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                    }}>
+                        {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={item.text}
+                        sx={{
+                            color: location.pathname.startsWith(item.path) ? 'primary.main' : 'inherit'
+                        }}
+                    />
+                </StyledListItemButton>
+            ))}
+            <Divider
+                sx={{
+                    my: 2,
+                    mx: 2,
+                    borderBottomWidth: 2
+                }}
+            />
+            {apportionmentMenuItems.map((item) => (
                 <StyledListItemButton
                     key={item.text}
                     onClick={() => {

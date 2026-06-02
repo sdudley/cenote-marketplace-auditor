@@ -13,6 +13,7 @@ import { TransactionPricingRoute } from './TransactionPricingRoute';
 import { AppRoute } from './AppRoutes';
 import { AuthRoute } from './AuthRoute';
 import { UserRoute } from './UserRoute';
+import { ApportionmentRoute } from './ApportionmentRoute';
 import { requireAuth } from '../middleware/authMiddleware';
 import { requireAdmin } from '../middleware/adminMiddleware';
 
@@ -32,7 +33,8 @@ export class ApiRouter {
         @inject(EXPRESS_TYPES.TransactionPricingRoute) private transactionPricingRoute: TransactionPricingRoute,
         @inject(EXPRESS_TYPES.AppRoute) private appRoute: AppRoute,
         @inject(EXPRESS_TYPES.AuthRoute) private authRoute: AuthRoute,
-        @inject(EXPRESS_TYPES.UserRoute) private userRoute: UserRoute
+        @inject(EXPRESS_TYPES.UserRoute) private userRoute: UserRoute,
+        @inject(EXPRESS_TYPES.ApportionmentRoute) private apportionmentRoute: ApportionmentRoute
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -83,6 +85,9 @@ export class ApiRouter {
 
         // App routes
         this.router.use('/apps', this.appRoute.router);
+
+        // Apportionment routes
+        this.router.use('/apportionment', this.apportionmentRoute.router);
 
         // User routes (admin only)
         this.router.use('/users', requireAdmin(), this.userRoute.getRouter());

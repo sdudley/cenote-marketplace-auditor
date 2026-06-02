@@ -4,7 +4,7 @@ import { TransactionDao } from "#server/database/dao/TransactionDao";
 import { TYPES } from "#server/config/types";
 import { TransactionValidationService } from "#server/services/transactionValidation/TransactionValidationService";
 import { PricingService } from "#server/services/PricingService";
-import { PriceCalculatorService } from "#server/services/PriceCalculatorService";
+import { ApportionmentService } from "#server/services/ApportionmentService";
 import { TransactionPricingResponse, PriceTestSnippetResponse, TransactionMonthlyApportionmentResponse } from "#common/types/transactionPricing";
 import { TransactionData } from "#common/types/marketplace";
 
@@ -16,7 +16,7 @@ export class TransactionPricingRoute {
         @inject(TYPES.TransactionDao) private transactionDao: TransactionDao,
         @inject(TYPES.TransactionValidationService) private transactionValidationService: TransactionValidationService,
         @inject(TYPES.PricingService) private pricingService: PricingService,
-        @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService
+        @inject(TYPES.ApportionmentService) private apportionmentService: ApportionmentService
     ) {
         this.router = Router();
         this.initializeRoutes();
@@ -68,25 +68,12 @@ export class TransactionPricingRoute {
             return;
         }
 
-        const pricing = await this.pricingService.getPricingForTransaction(transaction);
+        const months = await this.apportionmentService.calculateApportionmentForTransaction(transaction);
 
-        if (!pricing) {
-            res.status(400).json({ error: 'Pricing not found' });
-            return;
-        }
-
-        const validationResult = await this.transactionValidationService.validateTransaction({ transaction, pricing });
-
-        if (!validationResult) {
+        if (!months) {
             res.status(400).json({ error: 'Invalid transaction' });
             return;
         }
-
-        const months = this.priceCalculatorService.calculateMonthlyPriceApportionment({
-            pricingOpts: validationResult.pricingOpts,
-            expectedVendorAmount: validationResult.expectedVendorAmount,
-            actualVendorAmount: transaction.data.purchaseDetails.vendorAmount
-        });
 
         res.json({ months } as TransactionMonthlyApportionmentResponse);
     }

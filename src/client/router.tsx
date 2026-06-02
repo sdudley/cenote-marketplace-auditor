@@ -7,6 +7,7 @@ import { ConfigPage } from './pages/config';
 import { JobsPage } from './pages/jobs';
 import { UsersPage } from './pages/users';
 import { AppsPage } from './pages/apps';
+import { ApportionmentPage } from './pages/apportionment';
 import { LoginPage, SetupPage } from './pages/auth';
 import { AuthGuard } from './components/AuthGuard';
 
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
             {
                 path: 'licenses',
                 element: <LicensesPage />,
+            },
+            {
+                path: 'apportionment',
+                element: <ApportionmentPage />,
             },
             {
                 path: 'config',

@@ -69,6 +69,16 @@ class TransactionDao {
         return rows.map((r: { transaction_id: string }) => r.transaction_id);
     }
 
+    public async getTransactionsBySaleMonth(startDate: string, endDate: string): Promise<Transaction[]> {
+        return await this.transactionRepo
+            .createQueryBuilder('transaction')
+            .where('transaction.data->\'purchaseDetails\'->>\'saleDate\' >= :startDate', { startDate })
+            .andWhere('transaction.data->\'purchaseDetails\'->>\'saleDate\' < :endDate', { endDate })
+            .orderBy("transaction.data->'purchaseDetails'->>'saleDate'", 'ASC')
+            .addOrderBy('transaction.created_at', 'ASC')
+            .getMany();
+    }
+
     // Load transactions by IDs, returned in the same order as the input array.
     public async getTransactionsByIds(ids: string[]): Promise<Transaction[]> {
         if (ids.length === 0) return [];
