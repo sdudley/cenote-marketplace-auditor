@@ -23,7 +23,7 @@ export class AddonJob {
         // name changes
 
         for (const addon of existingAddons) {
-            const { parentProduct, name } = addon;
+            const { parentProduct } = addon;
 
             if (!parentProduct || parentProduct==='unknown') {
                 const parentProduct = await this.marketplaceService.getParentProductForAddon(addon.addonKey);
@@ -43,6 +43,12 @@ export class AddonJob {
                 addon.name = marketplaceAddon.name;
                 await this.addonDao.updateAddon(addon);
             }
+
+            if (marketplaceAddon && marketplaceAddon.productId !== addon.productId) {
+                console.log(`  Updating product ID for addon ${addon.addonKey} to ${marketplaceAddon.productId}`);
+                addon.productId = marketplaceAddon.productId;
+                await this.addonDao.updateAddon(addon);
+            }
         }
 
         const newAddons = marketplaceAddons.filter(mpa => !existingAddons.some(addon => addon.addonKey === mpa.key));
@@ -53,7 +59,7 @@ export class AddonJob {
             for (const addon of newAddons) {
                 console.log(`  Adding addon: ${addon.key}`);
                 const parentProduct = await this.marketplaceService.getParentProductForAddon(addon.key);
-                await this.addonDao.addAddon({ addonKey: addon.key, name: addon.name, parentProduct: parentProduct || 'unknown' });
+                await this.addonDao.addAddon({ addonKey: addon.key, name: addon.name, productId: addon.productId, parentProduct: parentProduct || 'unknown' });
             }
 
             console.log('Successfully added new addons to database');

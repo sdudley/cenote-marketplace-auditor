@@ -14,13 +14,14 @@ export class AddonDao {
         this.addonRepository = this.dataSource.getRepository(Addon);
     }
 
-    async addAddon(opts: { addonKey: string; parentProduct: string; name: string }): Promise<void> {
-        const { addonKey, parentProduct, name } = opts;
+    async addAddon(opts: { addonKey: string; parentProduct: string; name: string; productId?: string }): Promise<void> {
+        const { addonKey, parentProduct, name, productId } = opts;
 
         const addon = new Addon();
         addon.addonKey = addonKey;
         addon.parentProduct = parentProduct;
         addon.name = name;
+        addon.productId = productId;
         await this.addonRepository.save(addon);
 
         // Invalidate cache for this addon key

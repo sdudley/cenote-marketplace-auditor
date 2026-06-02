@@ -9,6 +9,9 @@ export class Addon {
     parentProduct!: string;
 
     @Column({ nullable: true })
+    productId?: string;
+
+    @Column({ nullable: true })
     name?: string;
 
     @Column({ type: 'date', nullable: true })

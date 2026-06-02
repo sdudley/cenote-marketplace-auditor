@@ -9,14 +9,13 @@ import {
     StatusAsyncTransactionCollection,
     TransactionData
 } from '#common/types/marketplace';
-import { components } from '#common/types/marketplace-api';
-import { components as v3Components } from '#common/types/marketplace-v3-api';
+import { components as v3Components, paths as v3Paths } from '#common/types/marketplace-v3-api';
 import { TYPES } from '../config/types';
 import { ConfigDao } from '../database/dao/ConfigDao';
 import { ConfigKey } from '#common/types/configItem';
-import { CloudOrServer, LicenseQueryParams, LiveOrPending, TransactionQueryParams } from '#server/services/types';
+import { CloudOrServer, LiveOrPending } from '#server/services/types';
 
-const licenseKey = (license : LicenseData) : string => license.appEntitlementNumber || license.licenseId;
+type ListingResponse = v3Paths["/rest/3/product-listing/developer-space/{developerId}"]["get"]["responses"]["200"]["content"]["application/json"];
 
 @injectable()
 export class MarketplaceService {
@@ -253,38 +252,76 @@ export class MarketplaceService {
         return response.data;
     }
 
-    async getVendorSpecificAddons(): Promise<{ key: string; name: string; }[]> {
+    async getVendorSpecificAddons(): Promise<{ key: string; name: string; productId: string; }[]> {
         await this.initializeConfig();
         const url = this.buildUrlWithParams(
-            `${this.baseUrl}/rest/2/addons`,
-            {
-                cost: 'marketplace',
-                forThisUser: true
-            }
+            `${this.baseUrlV3}/product-listing/developer-space/${this.developerId}`,
+            { limit: 50 }
         );
         console.log(`Calling Marketplace API: ${url}`);
 
-        const response = await axios.get<components['schemas']['AddonCollection']>(url, {
+        const response = await axios.get<ListingResponse>(url, {
             headers: {
                 'Authorization': await this.getAuthHeader(),
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
             }
         });
 
-        return response.data._embedded.addons.map(addon => ({ key: addon.key, name: addon.name }));
+        if (response.data.links.next) {
+            throw new Error('Pagination not supported yet: maximum number of registered apps exceeded');
+        }
+
+        return response.data.items.map(item => ({ key: item.appKey, name: item.appName, productId: item.productId }));
     }
 
-    async getParentProductForAddon(addonKey: string): Promise<string|undefined> {
+    async getParentProductForAddon(appKey: string): Promise<string|undefined> {
         await this.initializeConfig();
-        const url = `${this.baseUrl}/rest/2/addons/${addonKey}/versions/latest`;
-        console.log(`Calling Marketplace API: ${url}`);
 
-        const response = await axios.get<components["schemas"]["AddonVersion"]>(url, {
+        // Convert the appKey to the softwareId (which is somehow different from the productId)
+        const softwareIdUrl = `${this.baseUrlV3}/app-software/app-key/${appKey}`;
+        console.log(`Calling Marketplace API: ${softwareIdUrl}`);
+
+        const softwareIdResponse = await axios.get<v3Components["schemas"]["AppSoftwareByAppKeyResponse"][]>(softwareIdUrl, {
             headers: {
                 'Authorization': await this.getAuthHeader()
             }
         });
 
-        return response.data.compatibilities ? response.data.compatibilities[0].application : undefined;
+        const softwareId = softwareIdResponse.data[0].appSoftwareId;
+
+        // Get the versions for this app, which we use to extract the parentSoftwareId
+
+        const versionsUrl = `${this.baseUrlV3}/app-software/${softwareId}/versions`;
+        console.log(`Calling Marketplace API: ${versionsUrl}`);
+
+        const response = await axios.get<v3Components["schemas"]["AppSoftwareVersionsGetResponse"]>(versionsUrl, {
+            headers: {
+                'Authorization': await this.getAuthHeader()
+            }
+        });
+
+        if (!response.data.versions || response.data.versions.length === 0) {
+            return undefined;
+        }
+
+        const parentSoftwareId = response.data.versions[0].compatibilities ? response.data.versions[0].compatibilities[0].parentSoftwareId : undefined;
+
+        return parentSoftwareId;
+
+        // The parentSoftwareId is currently a string like "confluence" or "jira", so we can return it directly, rather than going through
+        // the next step to fetch the name (which serves just to capitalize the first letter)
+
+        /*
+        // Now fetch the parent software to get the name
+
+        const parentSoftwareUrl = `${this.baseUrlV3}/parent-software/${parentSoftwareId}`;
+        console.log(`Calling Marketplace API: ${parentSoftwareUrl}`);
+
+        const parentSoftwareResponse = await axios.get<v3Components["schemas"]["ParentSoftwareGetResponse"]>(parentSoftwareUrl, {
+            headers: { 'Authorization': await this.getAuthHeader() }
+        });
+
+        return parentSoftwareResponse.data.name;
+        */
     }
 }
