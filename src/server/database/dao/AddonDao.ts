@@ -45,11 +45,6 @@ export class AddonDao {
         });
     }
 
-    public async getAddonKeys(): Promise<string[]> {
-        const addons = await this.addonRepository.find();
-        return addons.map(addon => addon.addonKey);
-    }
-
     public async getParentProductForApp(addonKey: string): Promise<string> {
         // Check cache first
         if (this.parentProductCache.has(addonKey)) {

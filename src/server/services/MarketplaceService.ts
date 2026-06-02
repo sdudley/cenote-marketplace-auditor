@@ -4,12 +4,11 @@ import { Readable } from 'stream';
 import {
     InitiateAsyncLicense,
     InitiateAsyncLicenseCollection,
-    LicenseData,
     PricingData,
     StatusAsyncTransactionCollection,
-    TransactionData
 } from '#common/types/marketplace';
 import { components as v3Components, paths as v3Paths } from '#common/types/marketplace-v3-api';
+import { components as commerceComponents } from '#common/types/commerce-api';
 import { TYPES } from '../config/types';
 import { ConfigDao } from '../database/dao/ConfigDao';
 import { ConfigKey } from '#common/types/configItem';
@@ -17,10 +16,35 @@ import { CloudOrServer, LiveOrPending } from '#server/services/types';
 
 type ListingResponse = v3Paths["/rest/3/product-listing/developer-space/{developerId}"]["get"]["responses"]["200"]["content"]["application/json"];
 
+export interface OurPricingItem {
+    /**
+     * Format: int32
+     * @description The time period that this pricing is for: 1 for monthly, 12 for annual
+     */
+    monthsValid: number;
+    /**
+     * Format: float
+     * @description The amount (in USD) that a customer pays for a license at this tier
+     */
+    amount: number;
+    /**
+     * Format: int32
+     * @description The user count (or other unit if appropriate, such as remote agents in Bamboo) defining this pricing tier; -1 for unlimited
+     */
+    unitCount: number;
+};
+
+export interface OurPricingData {
+    items: OurPricingItem[];
+    perUnitItems?: OurPricingItem[];
+    expertDiscountOptOut: boolean;
+}
+
 @injectable()
 export class MarketplaceService {
     private readonly baseUrl = 'https://marketplace.atlassian.com';
     private readonly baseUrlV3 = 'https://api.atlassian.com/marketplace/rest/3';
+    private readonly commerceBaseUrl = 'https://api.atlassian.com/commerce/api/v2';
     private username: string = '';
     private password: string = '';
     private vendorId: string = '';
@@ -234,12 +258,114 @@ export class MarketplaceService {
         return streams;
     }
 
+    private mapCloudOrServerToHostingType(cloudOrServer: CloudOrServer): string|undefined {
+        return cloudOrServer === 'cloud' ? 'CLOUD'
+            : cloudOrServer === 'server' ? 'SERVER'
+            : cloudOrServer === 'datacenter' ? 'DATACENTER'
+            : undefined;
+    }
+
     async getPricing(
         addonKey: string,
+        productId: string|undefined,
         cloudOrServer: CloudOrServer,
         liveOrPending: LiveOrPending
-    ): Promise<PricingData> {
+    ): Promise<OurPricingData|undefined> {
+        if (!productId) {
+            throw new Error('Product ID is required');
+        }
+
         await this.initializeConfig();
+
+        const offeringsUrl = this.buildUrlWithParams(`${this.commerceBaseUrl}/products/${productId}/offerings`, {
+            status: liveOrPending === 'live' ? 'ACTIVE' : 'DRAFT',
+            'hosting-type': this.mapCloudOrServerToHostingType(cloudOrServer)
+        });
+        console.log(`Calling Marketplace API: ${offeringsUrl}`);
+
+        const offeringsResponse = await axios.get<commerceComponents["schemas"]["Offerings_PaginatedResponsePublicOfferingResponse"]>(offeringsUrl, {
+            headers: {
+                'Authorization': await this.getAuthHeader()
+            }
+        });
+
+        let newResult : OurPricingData|undefined = undefined;
+        let tenUserItem : OurPricingItem|undefined = undefined;
+
+        for (const offering of offeringsResponse.data.values) {
+            const { id } = offering;
+
+            if (offering.name !== 'Standard' && offering.name !== 'Data Center') {
+                // console.log(`Skipping offering because it is not Standard or Data Center: ${offering.name}`);
+                continue;
+            }
+
+            // console.log('--------------------------------');
+            // console.log(`OFFERING FOUND: ${offering.name}:`);
+            // console.dir(offering);
+
+            const pricingPlansUrl = this.buildUrlWithParams(`${this.commerceBaseUrl}/offerings/${id}/pricing-plans`,
+                { 'page-size': 50 }
+            );
+
+            console.log(`Calling Marketplace API: ${pricingPlansUrl}`);
+            const pricingPlansResponse = await axios.get<commerceComponents["schemas"]["Offerings_PaginatedResponsePublicPricingPlanResponse"]>(pricingPlansUrl, {
+                headers: {
+                    'Authorization': await this.getAuthHeader()
+                }
+            });
+
+            // console.log(`Pricing plans found for offering ${id} (${offering.name}): `, pricingPlansResponse.data.values.map(pp => pp.description));
+            // console.dir('***Raw pricing plan response:')
+            // console.dir(pricingPlansResponse.data);
+
+            const commercialPricingPlans = pricingPlansResponse.data.values.filter(pp => pp.currency === 'USD' && pp.type==='COMMERCIAL');
+
+            for (const commercialPricingPlan of commercialPricingPlans) {
+                // console.log('Commercial pricing plan found:');
+                // console.dir(commercialPricingPlan);
+
+                const tiers = commercialPricingPlan.items[0].tiers;
+                // console.log('Tiers found:');
+                // console.dir(tiers);
+
+                const cycleType = commercialPricingPlan.items[0].cycle.name;
+                if (cycleType==='ANNUAL') {
+                    newResult = {
+                        expertDiscountOptOut: false,
+                        items: tiers
+                            .map(tier => ({
+                                monthsValid: 12,
+                                amount: tier.flatAmount ? Math.floor(tier.flatAmount / 100) : 0,
+                                unitCount: tier.ceiling ?? -1
+                            }))
+                            // sort -1 as highest, but otherwise ascending
+                            .sort((a, b) => (a.unitCount === -1 ? 1 : b.unitCount === -1 ? -1 : a.unitCount - b.unitCount)),
+                        perUnitItems: undefined
+                    }
+                } else if (cycleType==='MONTHLY') {
+                    const tenUserTier = tiers.find(tier => tier.ceiling === 10)
+
+                    if (tenUserTier) {
+                        tenUserItem = {
+                            monthsValid: 1,
+                            amount: tenUserTier.flatAmount ? Math.floor(tenUserTier.flatAmount / 100) : 0,
+                            unitCount: 10
+                        };
+                    }
+                }
+            }
+        }
+
+        if (newResult && tenUserItem) {
+            newResult.items = [tenUserItem, ...newResult.items];
+        }
+
+        return newResult;
+
+        /*
+        // Legacy V.2 API request
+
         const url = `${this.baseUrl}/rest/2/addons/${addonKey}/pricing/${cloudOrServer}/${liveOrPending}`;
         console.log(`Calling Marketplace API: ${url}`);
 
@@ -249,7 +375,26 @@ export class MarketplaceService {
             }
         });
 
-        return response.data;
+        const lr = response.data;
+
+        const result = {
+            expertDiscountOptOut: lr.expertDiscountOptOut,
+            items: lr.items.map(item => ({
+                monthsValid: item.monthsValid,
+                amount: item.amount,
+                unitCount: item.unitCount
+            })),
+            perUnitItems: lr.perUnitItems?.map(item => ({
+                monthsValid: item.monthsValid,
+                amount: item.amount,
+                unitCount: item.unitCount
+            }))
+        };
+
+        console.log('Legacy pricing data:')
+        console.dir(result);
+        return result;
+        */
     }
 
     async getVendorSpecificAddons(): Promise<{ key: string; name: string; productId: string; }[]> {

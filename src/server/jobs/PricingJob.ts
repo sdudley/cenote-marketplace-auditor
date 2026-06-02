@@ -18,10 +18,11 @@ export class PricingJob {
     public async fetchPricing(): Promise<void> {
         console.log(`\n=== Fetching pricing for apps ===`);
 
-        const addons = await this.addonDao.getAddonKeys();
+        const addons = await this.addonDao.getAddons();
         console.log(`Found ${addons.length} addons to check pricing`);
 
-        for (const addonKey of addons) {
+        for (const addon of addons) {
+            const { addonKey, productId } = addon;
             console.log(`\n=== Pricing for ${addonKey} ===`);
 
             // Try to fetch pricing for each deployment type
@@ -31,9 +32,15 @@ export class PricingJob {
                     console.log(`\nFetching ${deploymentType.toUpperCase()} pricing:`);
                     const pricingData = await this.marketplaceService.getPricing(
                         addonKey,
+                        productId,
                         deploymentType,
                         'live'
                     );
+
+                    if (!pricingData) {
+                        console.warn(`No pricing data found for app ${addonKey} with deployment type ${deploymentType}`);
+                        continue;
+                    }
 
                     const startDate = undefined;
                     const endDate = undefined;
@@ -97,7 +104,7 @@ export class PricingJob {
                         await this.pricingService.savePricingInfo(item, pricing);
                     }
                 } catch (e) {
-                    console.warn(`App ${addonKey} has no pricing available for deploymentType=${deploymentType}`, e);
+                    console.warn(`Error collecting pricing data for app ${addonKey} for deploymentType=${deploymentType}`, e);
                 }
             }
         }
