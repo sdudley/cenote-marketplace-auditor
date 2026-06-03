@@ -27,6 +27,7 @@ import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import { formatTransactionData } from './transactionUtils';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { handleExportTransaction } from './util';
+import { getDisplayId } from '#client/util/displayIdUtils';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;
@@ -94,8 +95,8 @@ export const TransactionDetailsDialog: React.FC<TransactionDetailsProps> = ({ tr
                                     <TableCell>{isoStringWithDateAndTime(transaction.transaction.updatedAt.toString())}</TableCell>
                                 </TableRow>
                                 <TableRow>
-                                    <InfoTableHeader>Entitlement ID</InfoTableHeader>
-                                    <TableCell>{transaction.transaction.entitlementId}</TableCell>
+                                    <InfoTableHeader>Entitlement</InfoTableHeader>
+                                    <TableCell>{getDisplayId(transaction.transaction.data.purchaseDetails.hosting, transaction.transaction.data.licenseId, transaction.transaction.data.appEntitlementNumber)}</TableCell>
                                     <InfoTableHeader>Transaction Version</InfoTableHeader>
                                     <TableCell>
                                         <Link

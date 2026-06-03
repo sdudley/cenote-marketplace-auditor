@@ -26,6 +26,7 @@ import { CloseButton } from '../../components/CloseButton';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils';
 import { LicenseVersionListDialog } from './LicenseVersionListDialog';
 import { handleExportLicense } from './util';
+import { getDisplayId } from '#client/util/displayIdUtils';
 
 interface LicenseDetailsProps {
     license: LicenseResult | null;
@@ -101,8 +102,8 @@ export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, o
                                     <TableCell>{isoStringWithDateAndTime(license.license.updatedAt.toString())}</TableCell>
                                 </TableRow>
                                 <TableRow>
-                                    <InfoTableHeader>Entitlement ID</InfoTableHeader>
-                                    <TableCell>{license.license.entitlementId}</TableCell>
+                                    <InfoTableHeader>Entitlement</InfoTableHeader>
+                                    <TableCell>{getDisplayId(license.license.data.hosting, license.license.data.licenseId, license.license.data.appEntitlementNumber)}</TableCell>
                                     <InfoTableHeader>License Version</InfoTableHeader>
                                     <TableCell>
                                         <Link

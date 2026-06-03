@@ -29,7 +29,7 @@ const isMaintenanceActive = (maintenanceEndDate?: string | null): boolean => {
 export const defaultLicenseColumns: ColumnConfig<LicenseResult, LicenseCellContext, LicenseQuerySortType>[] = [
     {
         id: 'entitlementId',
-        label: 'Entitlement ID',
+        label: 'Entitlement',
         visible: true,
         nowrap: true,
         renderSimpleCell: (lr) => {
