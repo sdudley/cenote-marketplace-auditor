@@ -120,7 +120,7 @@ const createRenderFunctions = (
                                 : delta.changeType==='added' ? (
                                     highlightNew ?
                                         <TreeValueNew component="span">{renderValue(delta.newValue)}</TreeValueNew>
-                                        : <span>{renderValue(delta.newValue)}</span>
+                                        : <JsonValue component="span">{renderValue(delta.newValue)}</JsonValue>
                                 )
                                 : delta.changeType==='removed' ? <TreeValueOld component="span">{renderValue(delta.oldValue)}</TreeValueOld>
                                 : renderValue(delta.newValue)

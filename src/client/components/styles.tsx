@@ -21,27 +21,36 @@ export const drawerWidth = 240;
 export const KeyColumn = styled(Box)({
     width: '250px',
     textAlign: 'left',
-    paddingRight: '16px'
+    paddingRight: '16px',
+    cursor: 'inherit',
+    userSelect: 'none'
 });
 
 export const ValueColumn = styled(Box)({
-    flexGrow: 1
+    flexGrow: 1,
+    cursor: 'inherit',
+    userSelect: 'none'
 });
 
 export const LabelContainer = styled(Box)({
     display: 'flex',
     alignItems: 'center',
-    width: '100%'
+    width: '100%',
+    cursor: 'inherit',
+    userSelect: 'none'
 });
 
 export const JsonValue = styled(Typography)({
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    cursor: 'inherit',
+    userSelect: 'none'
 }) as typeof Typography;
 
 export const JsonKey = styled(Typography)({
     fontWeight: 'bold',
     color: '#881391',
     marginRight: '8px',
+    cursor: 'inherit',
     userSelect: 'none'
 }) as typeof Typography;
 
@@ -49,6 +58,7 @@ export const JsonKeyNew = styled(Typography)({
     fontWeight: 'bold',
     color: '#1AA61A',
     marginRight: '8px',
+    cursor: 'inherit',
     userSelect: 'none'
 }) as typeof Typography;
 
@@ -57,6 +67,7 @@ export const JsonKeyRemoved = styled(Typography)({
     color: '#A61A1A',
     textDecoration: 'line-through',
     marginRight: '8px',
+    cursor: 'inherit',
     userSelect: 'none'
 }) as typeof Typography;
 
@@ -388,16 +399,32 @@ export const VersionDataBox = styled(Box)({
     marginTop: 16
 });
 
+/** Cursor rules for MUI TreeItem rows used by JsonTreeView / JsonDiffObjectTreeView. */
+const jsonTreeViewItemCursorStyles = {
+    '& .MuiTreeItem-label, & .MuiTreeItem-label *': {
+        cursor: 'inherit',
+        userSelect: 'none',
+    },
+    '& .MuiTreeItem-content': {
+        cursor: 'default',
+    },
+    '& .MuiTreeItem-root:has(.MuiTreeItem-groupTransition) > .MuiTreeItem-content': {
+        cursor: 'pointer',
+    },
+};
+
 export const TreeContainer = styled(Box)({
     padding: '8px',
     fontFamily: 'monospace',
     fontSize: '14px',
     lineHeight: '1.5',
     color: '#333',
+    ...jsonTreeViewItemCursorStyles,
 });
 
 export const TreeValue = styled(Typography)({
     color: '#1A1AA6',
+    cursor: 'inherit',
     userSelect: 'none',
 }) as typeof Typography;
 
@@ -440,7 +467,8 @@ export const TreeViewScrollContent = styled(Box)({
     minWidth: '100%',
     '& > *': {
         width: 'max-content'
-    }
+    },
+    ...jsonTreeViewItemCursorStyles,
 });
 
 export const StyledListPaper = styled(Paper)({
