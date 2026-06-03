@@ -3998,12 +3998,12 @@ export interface components {
         PeriodResponse: {
             /**
              * Format: int64
-             * @description  The end timestamp of the period
+             * @description The end timestamp of the period
              */
             endsAt?: number;
             /**
              * Format: int64
-             * @description  The start timestamp of the period
+             * @description The start timestamp of the period
              */
             startsAt?: number;
         };
@@ -4078,8 +4078,10 @@ export interface components {
         LineItemResponse: {
             /** @description Id for the quote line item */
             lineItemId: string;
-            /** @description - For quotes with net new entitlements, entitlementId is null. It is set post-acceptance.
-             *     - For quotes amending existing entitlements, entitlementId is always present. */
+            /**
+             * @description - For quotes with net new entitlements, entitlementId is null. It is set post-acceptance.
+             *     - For quotes amending existing entitlements, entitlementId is always present.
+             */
             entitlementId?: string;
             /** @description Version of the entitlement id for which the amendment quote is created */
             entitlementVersion?: string;
@@ -4528,12 +4530,12 @@ export interface components {
             cancelledReason?: components["schemas"]["CanceledReasonResponse"];
             /**
              * Format: int64
-             * @description  Timestamp at which upcoming bills were requested
+             * @description Timestamp at which upcoming bills were requested
              */
             upcomingBillsRequestedAt: number;
             /**
              * Format: int64
-             * @description  Timestamp at which upcoming bills were computed
+             * @description Timestamp at which upcoming bills were computed
              */
             upcomingBillsComputedAt?: number;
             upcomingBills?: components["schemas"]["UpcomingBillsResponseV2"];
@@ -5103,7 +5105,7 @@ export interface components {
              */
             type: "REACTIVATION_ORDER";
         };
-        RelatesFromEntitlementDto: Omit<WithRequired<components["schemas"]["RelatesFromDto"], "referenceType" | "relationshipType">, "referenceType"> & {
+        RelatesFromEntitlementDto: Omit<components["schemas"]["RelatesFromDto"], "referenceType"> & {
             entitlementId: string | null;
         } & {
             /**
@@ -5117,7 +5119,7 @@ export interface components {
             /** @enum {string} */
             referenceType: "ORDER_ITEM" | "ENTITLEMENT";
         } | null;
-        RelatesFromOrderItemDto: Omit<WithRequired<components["schemas"]["RelatesFromDto"], "referenceType" | "relationshipType">, "referenceType"> & {
+        RelatesFromOrderItemDto: Omit<components["schemas"]["RelatesFromDto"], "referenceType"> & {
             itemId: string | null;
         } & {
             /**
@@ -9684,12 +9686,12 @@ export interface components {
             cancelledReason?: components["schemas"]["Quotes_CanceledReasonResponse"];
             /**
              * Format: int64
-             * @description  Timestamp at which upcoming bills were requested
+             * @description Timestamp at which upcoming bills were requested
              */
             upcomingBillsRequestedAt: number;
             /**
              * Format: int64
-             * @description  Timestamp at which upcoming bills were computed
+             * @description Timestamp at which upcoming bills were computed
              */
             upcomingBillsComputedAt?: number;
             upcomingBills?: components["schemas"]["Quotes_UpcomingBillsResponseV2"];
@@ -9844,12 +9846,12 @@ export interface components {
         Quotes_PeriodResponse: {
             /**
              * Format: int64
-             * @description  The end timestamp of the period
+             * @description The end timestamp of the period
              */
             endsAt?: number;
             /**
              * Format: int64
-             * @description  The start timestamp of the period
+             * @description The start timestamp of the period
              */
             startsAt?: number;
         };
@@ -10697,7 +10699,7 @@ export interface components {
              */
             type: "REACTIVATION_ORDER";
         };
-        Oms_RelatesFromOrderItemDto: Omit<WithRequired<components["schemas"]["Oms_RelatesFromDto"], "referenceType" | "relationshipType">, "referenceType"> & {
+        Oms_RelatesFromOrderItemDto: Omit<components["schemas"]["Oms_RelatesFromDto"], "referenceType"> & {
             itemId: string | null;
         } & {
             /**
@@ -10711,7 +10713,7 @@ export interface components {
             /** @enum {string} */
             referenceType: "ORDER_ITEM" | "ENTITLEMENT";
         } | null;
-        Oms_RelatesFromEntitlementDto: Omit<WithRequired<components["schemas"]["Oms_RelatesFromDto"], "referenceType" | "relationshipType">, "referenceType"> & {
+        Oms_RelatesFromEntitlementDto: Omit<components["schemas"]["Oms_RelatesFromDto"], "referenceType"> & {
             entitlementId: string | null;
         } & {
             /**
