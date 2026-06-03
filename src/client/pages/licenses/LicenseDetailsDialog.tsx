@@ -34,7 +34,7 @@ interface LicenseDetailsProps {
 }
 
 export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, open, onClose }) => {
-    const [showVersions, setShowVersions] = useState(false);
+    const [versionSource, setVersionSource] = useState<'database' | 'atlassian' | null>(null);
 
     if (!license) return null;
 
@@ -74,10 +74,18 @@ export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, o
                         <Button
                             variant="outlined"
                             size="small"
-                            onClick={() => setShowVersions(true)}
+                            onClick={() => setVersionSource('database')}
                             sx={{ textTransform: 'none' }}
                         >
-                            Show all versions
+                            Show all versions (dB)
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => setVersionSource('atlassian')}
+                            sx={{ textTransform: 'none' }}
+                        >
+                            Show all versions (fetch from Atlassian)
                         </Button>
                     </Box>
                     <CloseButton onClose={onClose} />
@@ -100,7 +108,7 @@ export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, o
                                         <Link
                                             component="button"
                                             variant="body2"
-                                            onClick={() => setShowVersions(true)}
+                                            onClick={() => setVersionSource('database')}
                                             sx={{ textDecoration: 'none' }}
                                         >
                                             {license.license.currentVersion}
@@ -125,9 +133,10 @@ export const LicenseDetailsDialog: React.FC<LicenseDetailsProps> = ({ license, o
             </Dialog>
 
             <LicenseVersionListDialog
-                open={showVersions}
-                onClose={() => setShowVersions(false)}
+                open={versionSource !== null}
+                onClose={() => setVersionSource(null)}
                 licenseResult={license}
+                source={versionSource ?? 'database'}
             />
         </>
     );

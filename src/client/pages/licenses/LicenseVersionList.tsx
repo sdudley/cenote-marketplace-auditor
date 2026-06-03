@@ -6,6 +6,7 @@ import {
     CircularProgress
 } from '@mui/material';
 import { LicenseVersion } from '#common/entities/LicenseVersion';
+import { LicenseVersionDto } from '#common/util/licenseVersionUtils';
 import {
     VersionListContainer,
     VersionListTable,
@@ -17,22 +18,34 @@ import {
 } from '../../components/styles';
 import { LicenseVersionDialog } from './LicenseVersionDialog';
 import { StyledTableCell } from '../../components/styles';
+import { formatLicenseVersionDiffLabel } from './util';
+
+export type LicenseVersionSource = 'database' | 'atlassian';
+
+type DisplayableLicenseVersion = LicenseVersion | LicenseVersionDto;
 
 interface LicenseVersionListProps {
     licenseId: string;
+    source?: LicenseVersionSource;
 }
 
-export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({ licenseId }) => {
-    const [versions, setVersions] = useState<LicenseVersion[]>([]);
+export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({
+    licenseId,
+    source = 'database'
+}) => {
+    const [versions, setVersions] = useState<DisplayableLicenseVersion[]>([]);
     const [loading, setLoading] = useState(false);
-    const [selectedVersion, setSelectedVersion] = useState<LicenseVersion | null>(null);
-    const [priorVersion, setPriorVersion] = useState<LicenseVersion | null>(null);
+    const [selectedVersion, setSelectedVersion] = useState<DisplayableLicenseVersion | null>(null);
+    const [priorVersion, setPriorVersion] = useState<DisplayableLicenseVersion | null>(null);
 
     useEffect(() => {
         const fetchVersions = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`/api/licenses/${licenseId}/versions`);
+                const endpoint = source === 'atlassian'
+                    ? `/api/licenses/${licenseId}/versions/atlassian`
+                    : `/api/licenses/${licenseId}/versions`;
+                const response = await fetch(endpoint);
                 const data = await response.json();
                 setVersions(data);
             } catch (error) {
@@ -43,12 +56,11 @@ export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({ licenseI
         };
 
         fetchVersions();
-    }, [licenseId]);
+    }, [licenseId, source]);
 
-    const handleRowClick = (version: LicenseVersion) => {
+    const handleRowClick = (version: DisplayableLicenseVersion) => {
         setSelectedVersion(version);
 
-        // Find the prior version from our existing versions array
         const prior = versions.find(v => v.version === version.version - 1);
         setPriorVersion(prior || null);
     };
@@ -73,7 +85,7 @@ export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({ licenseI
                             </StyledTableCell>
                         </TableRow>
                     )}
-                    {versions.map((version) => (
+                    {!loading && versions.map((version) => (
                         <TableRow
                             key={version.id}
                             onClick={() => handleRowClick(version)}
@@ -85,7 +97,9 @@ export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({ licenseI
                                 {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
                             </VersionDateCell>
 
-                            <VersionDiffCell>{version.diff ?? 'Initial version'}</VersionDiffCell>
+                            <VersionDiffCell>
+                                {formatLicenseVersionDiffLabel(version.version, version.diff)}
+                            </VersionDiffCell>
                         </TableRow>
                     ))}
                 </TableBody>

@@ -5,6 +5,13 @@ interface ExportLicenseParams {
     suffix?: string;
 }
 
+export const formatLicenseVersionDiffLabel = (version: number, diff?: string): string => {
+    if (diff) {
+        return diff;
+    }
+    return version === 1 ? 'Initial version' : 'No changes';
+};
+
 export const handleExportLicense = ({ licenseData, suffix }: ExportLicenseParams): void => {
     const baseFileName = licenseData.appEntitlementNumber || licenseData.licenseId || licenseData.addonLicenseId || 'license';
     const fileName = suffix ? `${baseFileName}-${suffix}.json` : `${baseFileName}.json`;

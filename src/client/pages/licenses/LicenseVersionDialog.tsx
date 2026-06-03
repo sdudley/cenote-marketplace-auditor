@@ -13,6 +13,7 @@ import {
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { LicenseVersion } from '#common/entities/LicenseVersion';
+import { LicenseVersionDto } from '#common/util/licenseVersionUtils';
 import {
     VersionDataBox,
     InfoTableBox,
@@ -25,11 +26,11 @@ import { getObjectDiff } from '#common/util/objectDiff';
 import { CloseButton } from '../../components/CloseButton';
 import { collectIdsForDiffObject } from '#client/util/collectIds';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils';
-import { handleExportLicense } from './util';
+import { handleExportLicense, formatLicenseVersionDiffLabel } from './util';
 
 interface LicenseVersionDialogProps {
-    version: LicenseVersion | null;
-    priorVersion: LicenseVersion | null;
+    version: LicenseVersion | LicenseVersionDto | null;
+    priorVersion: LicenseVersion | LicenseVersionDto | null;
     open: boolean;
     onClose: () => void;
 }
@@ -77,7 +78,9 @@ export const LicenseVersionDialog: React.FC<LicenseVersionDialogProps> = ({ vers
                                 <InfoTableHeader>Entitlement ID</InfoTableHeader>
                                 <TableCell>{version.entitlementId}</TableCell>
                                 <InfoTableHeader>Changes</InfoTableHeader>
-                                <TableCell>{version.diff || 'N/A'}</TableCell>
+                                <TableCell>
+                                    {formatLicenseVersionDiffLabel(version.version, version.diff)}
+                                </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>

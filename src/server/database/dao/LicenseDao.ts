@@ -44,6 +44,10 @@ export class LicenseDao {
         return await this.licenseRepo.findOne({ where: { entitlementId } });
     }
 
+    public async getLicenseById(licenseId: string): Promise<License | null> {
+        return await this.licenseRepo.findOne({ where: { id: licenseId } });
+    }
+
     public async loadLicenseForTransaction(transaction: Transaction): Promise<License | null> {
         return await this.licenseRepo
             .findOne({

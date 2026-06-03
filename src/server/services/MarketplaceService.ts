@@ -7,6 +7,7 @@ import {
     PricingData,
     StatusAsyncTransactionCollection,
 } from '#common/types/marketplace';
+import { LicenseHistorySnapshot } from '#common/util/licenseVersionUtils';
 import { components as v3Components, paths as v3Paths } from '#common/types/marketplace-v3-api';
 import { components as commerceComponents } from '#common/types/commerce-api';
 import { TYPES } from '../config/types';
@@ -15,6 +16,7 @@ import { ConfigKey } from '#common/types/configItem';
 import { CloudOrServer, LiveOrPending } from '#server/services/types';
 
 type ListingResponse = v3Paths["/rest/3/product-listing/developer-space/{developerId}"]["get"]["responses"]["200"]["content"]["application/json"];
+type GetLicensesResponse = v3Components['schemas']['Reports_GetLicenses'];
 
 export interface OurPricingItem {
     /**
@@ -397,6 +399,47 @@ export class MarketplaceService {
         console.dir(result);
         return result;
         */
+    }
+
+    /**
+     * Fetch all historical license snapshots for a SEN or entitlement ID from Atlassian.
+     */
+    async getLicenseHistory(searchText: string): Promise<LicenseHistorySnapshot[]> {
+        await this.initializeConfig();
+
+        const allLicenses: LicenseHistorySnapshot[] = [];
+        let nextUrl: string | undefined = this.buildUrlWithParams(
+            `${this.baseUrlV3}/reporting/developer-space/${this.developerId}/licenses`,
+            {
+                text: searchText,
+                withDataInsights: true,
+                includeAtlassianLicenses: true,
+                showLicensesHistory: true,
+                limit: 50
+            }
+        );
+
+        while (nextUrl) {
+            console.log(`Calling Marketplace API: ${nextUrl}`);
+
+            const page: GetLicensesResponse = (await axios.get<GetLicensesResponse>(nextUrl, {
+                headers: {
+                    'Authorization': await this.getAuthHeader()
+                }
+            })).data;
+
+            const licenses = page.licenses;
+            if (Array.isArray(licenses)) {
+                allLicenses.push(...licenses as LicenseHistorySnapshot[]);
+            } else if (licenses) {
+                allLicenses.push(licenses as LicenseHistorySnapshot);
+            }
+
+            const nextHref: string | undefined = page._links?.next?.href;
+            nextUrl = nextHref ? `https://api.atlassian.com/marketplace${nextHref}` : undefined;
+        }
+
+        return allLicenses;
     }
 
     async getVendorSpecificAddons(): Promise<{ key: string; name: string; productId: string; }[]> {

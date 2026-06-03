@@ -8,25 +8,28 @@ import {
 } from '@mui/material';
 import { LicenseResult } from '#common/types/apiTypes';
 import { StyledDialog } from '../../components/styles';
-import { LicenseVersionList } from './LicenseVersionList';
+import { LicenseVersionList, LicenseVersionSource } from './LicenseVersionList';
 import { CloseButton } from '../../components/CloseButton';
 
 interface LicenseVersionListDialogProps {
     licenseResult: LicenseResult | null;
     open: boolean;
     onClose: () => void;
+    source?: LicenseVersionSource;
 }
 
 export const LicenseVersionListDialog: React.FC<LicenseVersionListDialogProps> = ({
     licenseResult,
     open,
-    onClose
+    onClose,
+    source = 'database'
 }) => {
     if (!licenseResult) return null;
 
     const { data } = licenseResult.license;
     const { addonName, licenseType, hosting, tier, maintenanceStartDate, maintenanceEndDate, contactDetails } = data;
     const { company } = contactDetails;
+    const sourceLabel = source === 'atlassian' ? 'Atlassian' : 'dB';
 
     return (
         <Dialog
@@ -37,7 +40,7 @@ export const LicenseVersionListDialog: React.FC<LicenseVersionListDialogProps> =
         >
             <DialogTitle>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="h6">License Versions</Typography>
+                    <Typography variant="h6">License Versions ({sourceLabel})</Typography>
                     <Typography variant="subtitle1" color="text.secondary">
                         {addonName} • {licenseType} • {hosting} • {tier} • {maintenanceStartDate}-{maintenanceEndDate} • {company}
                     </Typography>
@@ -46,7 +49,7 @@ export const LicenseVersionListDialog: React.FC<LicenseVersionListDialogProps> =
             </DialogTitle>
             <DialogContent>
                 <StyledDialog>
-                    <LicenseVersionList licenseId={licenseResult.license.id} />
+                    <LicenseVersionList licenseId={licenseResult.license.id} source={source} />
                 </StyledDialog>
             </DialogContent>
         </Dialog>
