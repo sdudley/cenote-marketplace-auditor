@@ -85,3 +85,33 @@ export interface AppUpdateRequest {
     forgeReleaseDate?: string | null;
     alwaysForge?: boolean;
 }
+
+export interface AppPricingInfoDto {
+    id: string;
+    userTier: number;
+    cost: number;
+}
+
+export interface AppPricingPeriodSummary {
+    id: string;
+    startDate: string | null;
+    endDate: string | null;
+    expertDiscountOptOut: boolean;
+}
+
+export interface AppPricingPeriodDetail extends AppPricingPeriodSummary {
+    addonKey: string;
+    deploymentType: string;
+    items: AppPricingInfoDto[];
+}
+
+export interface AppPricingSaveRequest {
+    deploymentType: string;
+    startDate?: string | null;
+    endDate?: string | null;
+    expertDiscountOptOut?: boolean;
+    items: Array<{
+        userTier: number;
+        cost: number;
+    }>;
+}

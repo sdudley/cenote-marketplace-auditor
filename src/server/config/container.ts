@@ -16,6 +16,7 @@ import { TransactionAdjustmentDao } from '../database/dao/TransactionAdjustmentD
 import { ResellerDao } from '../database/dao/ResellerDao';
 import { PreviousTransactionService } from '../services/PreviousTransactionService';
 import { AddonDao } from '../database/dao/AddonDao';
+import { PricingDao } from '../database/dao/PricingDao';
 import { PricingService } from '../services/PricingService';
 import { TransactionVersionDao } from '#server/database/dao/TransactionVersionDao';
 import { TransactionValidationService } from '#server/services/transactionValidation/TransactionValidationService';
@@ -47,6 +48,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<MarketplaceService>(TYPES.MarketplaceService).to(MarketplaceService).inSingletonScope();
     container.bind<AddonJob>(TYPES.AddonJob).to(AddonJob).inSingletonScope();
     container.bind<AddonDao>(TYPES.AddonDao).to(AddonDao).inSingletonScope();
+    container.bind<PricingDao>(TYPES.PricingDao).to(PricingDao).inSingletonScope();
     container.bind<TransactionJob>(TYPES.TransactionJob).to(TransactionJob).inSingletonScope();
     container.bind<LicenseJob>(TYPES.LicenseJob).to(LicenseJob).inSingletonScope();
     container.bind<PricingJob>(TYPES.PricingJob).to(PricingJob).inSingletonScope();

@@ -25,6 +25,7 @@ import {
     LoadingContainer,
     SmallActionButton
 } from './styles';
+import { AppPricingDialog } from './AppPricingDialog';
 
 export const AppList: React.FC = () => {
     interface AppEditDraft {
@@ -44,6 +45,7 @@ export const AppList: React.FC = () => {
         message: '',
         severity: 'success'
     });
+    const [pricingApp, setPricingApp] = useState<AppInfo | null>(null);
 
     const fetchApps = async () => {
         setLoading(true);
@@ -230,13 +232,22 @@ export const AppList: React.FC = () => {
                                                     </SmallActionButton>
                                                 </>
                                             ) : (
-                                                <SmallActionButton
-                                                    size="small"
-                                                    variant="contained"
-                                                    onClick={() => beginEdit(app)}
-                                                >
-                                                    Edit
-                                                </SmallActionButton>
+                                                <>
+                                                    <SmallActionButton
+                                                        size="small"
+                                                        variant="contained"
+                                                        onClick={() => beginEdit(app)}
+                                                    >
+                                                        Edit App Data
+                                                    </SmallActionButton>
+                                                    <SmallActionButton
+                                                        size="small"
+                                                        variant="outlined"
+                                                        onClick={() => setPricingApp(app)}
+                                                    >
+                                                        Pricing
+                                                    </SmallActionButton>
+                                                </>
                                             )}
                                         </ActionButtons>
                                     </ActionsCell>
@@ -246,6 +257,11 @@ export const AppList: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <AppPricingDialog
+                open={pricingApp !== null}
+                app={pricingApp}
+                onClose={() => setPricingApp(null)}
+            />
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={5000}

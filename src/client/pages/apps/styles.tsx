@@ -69,3 +69,44 @@ export const ActionButtons = styled(Box)(({ theme }) => ({
 export const SmallActionButton = styled(Button)({
     minWidth: 72
 });
+
+export const PricingDialogContent = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+    minHeight: 280
+}));
+
+export const PricingDeploymentSelect = styled(Box)(({ theme }) => ({
+    maxWidth: 280,
+    marginBottom: theme.spacing(1)
+}));
+
+export const PricingPeriodActions = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    gap: theme.spacing(1),
+    justifyContent: 'flex-end'
+}));
+
+export const PricingDialogActions = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'flex-end',
+    marginTop: theme.spacing(2)
+}));
+
+export const PricingPeriodForm = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2)
+}));
+
+export const PricingDateFields = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(2)
+}));
+
+export const PricingTierTablePaper = styled(Paper)({
+    width: '100%',
+    overflow: 'hidden'
+});

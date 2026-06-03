@@ -171,6 +171,10 @@ export class PricingService {
         await this.pricingInfoRepository.save(pricingInfo);
     }
 
+    public clearPricingTierCache(): void {
+        this.pricingTierCache.clear();
+    }
+
     public async findPricing(opts: { addonKey: string, deploymentType: DeploymentType, startDate: string|undefined, endDate: string|undefined }) : Promise<Pricing|null> {
         const { addonKey, deploymentType, startDate, endDate } = opts;
 

@@ -295,6 +295,8 @@ export class MarketplaceService {
         for (const offering of offeringsResponse.data.values) {
             const { id } = offering;
 
+            // Supported offering names: See https://developer.atlassian.com/platform/marketplace/marketplace-app-pricing-api/
+
             if (offering.name !== 'Standard' && offering.name !== 'Data Center') {
                 // console.log(`Skipping offering because it is not Standard or Data Center: ${offering.name}`);
                 continue;
@@ -332,7 +334,7 @@ export class MarketplaceService {
                 const cycleType = commercialPricingPlan.items[0].cycle.name;
                 if (cycleType==='ANNUAL') {
                     newResult = {
-                        expertDiscountOptOut: false,
+                        expertDiscountOptOut: true, // TODO FIXME FIGURE OUT HOW TO SET THIS PROPERLY WITH V.3 API
                         items: tiers
                             .map(tier => ({
                                 monthsValid: 12,

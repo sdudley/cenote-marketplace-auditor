@@ -9,6 +9,7 @@ export const TYPES = {
     MarketplaceService: Symbol.for('MarketplaceService'),
     AddonJob: Symbol.for('AddonJob'),
     AddonDao: Symbol.for('AddonDao'),
+    PricingDao: Symbol.for('PricingDao'),
     TransactionJob: Symbol.for('TransactionJob'),
     LicenseJob: Symbol.for('LicenseJob'),
     PricingJob: Symbol.for('PricingJob'),

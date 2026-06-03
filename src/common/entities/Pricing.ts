@@ -18,10 +18,10 @@ export class Pricing {
     expertDiscountOptOut!: boolean;
 
     @Column({ type: 'date', nullable: true })
-    startDate?: string;
+    startDate?: string | null;
 
     @Column({ type: 'date', nullable: true })
-    endDate?: string;
+    endDate?: string | null;
 
     @OneToMany(() => PricingInfo, (info: PricingInfo) => info.pricing)
     items!: PricingInfo[];
