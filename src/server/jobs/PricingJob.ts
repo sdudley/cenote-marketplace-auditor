@@ -80,15 +80,8 @@ export class PricingJob {
                     let items : { amount: number; unitCount: number; }[] = [];
 
                     if (deploymentType==='cloud') {
-                        if (!pricingData.perUnitItems) {
-                            throw new Error(`No perUnitItems found for ${addonKey} with deployment type ${deploymentType}`);
-                        }
-
-                        // Get the 10-user price
-                        items = items.concat(pricingData.items.filter(i => i.monthsValid===1).map(i => ({ unitCount: i.unitCount, amount: i.amount })));
-
                         // Get all of the other per-tier prices
-                        items = items.concat(pricingData.perUnitItems?.filter(i => i.monthsValid===1).map(i => ({ unitCount: i.unitCount, amount: i.amount })));
+                        items = items.concat(pricingData.items?.filter(i => i.monthsValid===1).map(i => ({ unitCount: i.unitCount, amount: i.amount })));
                     } else {
                         // DC and server pricing is only 12-month pricing
 

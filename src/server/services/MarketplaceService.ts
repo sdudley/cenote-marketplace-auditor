@@ -4,7 +4,6 @@ import { Readable } from 'stream';
 import {
     InitiateAsyncLicense,
     InitiateAsyncLicenseCollection,
-    PricingData,
     StatusAsyncTransactionCollection,
 } from '#common/types/marketplace.js';
 import { LicenseHistorySnapshot } from '#common/util/licenseVersionUtils.js';
@@ -50,7 +49,6 @@ export class MarketplaceService {
     private readonly commerceBaseUrl = 'https://api.atlassian.com/commerce/api/v2';
     private username: string = '';
     private password: string = '';
-    private vendorId: string = '';
     private developerId: string = '';
 
     constructor(
@@ -60,7 +58,6 @@ export class MarketplaceService {
     private async initializeConfig(): Promise<void> {
         this.username = await this.configDao.get<string>(ConfigKey.AtlassianAccountUser) || '';
         this.password = await this.configDao.get<string>(ConfigKey.AtlassianAccountApiToken) || '';
-        this.vendorId = await this.configDao.get<string>(ConfigKey.AtlassianVendorId) || '';
         this.developerId = await this.configDao.get<string>(ConfigKey.AtlassianDeveloperId) || '';
     }
 
@@ -308,7 +305,6 @@ export class MarketplaceService {
         });
 
         let newResult : OurPricingData|undefined = undefined;
-        let tenUserItem : OurPricingItem|undefined = undefined;
 
         for (const offering of offeringsResponse.data.values) {
             const { id } = offering;
@@ -346,11 +342,11 @@ export class MarketplaceService {
                 // console.dir(commercialPricingPlan);
 
                 const tiers = commercialPricingPlan.items[0].tiers;
-                // console.log('Tiers found:');
-                // console.dir(tiers);
+                // console.log('Tiers found (top 10):');
+                // console.dir(tiers.slice(0, 10));
 
                 const cycleType = commercialPricingPlan.items[0].cycle.name;
-                if (cycleType==='ANNUAL') {
+                if (cloudOrServer !== 'cloud' &&cycleType==='ANNUAL') {
                     newResult = {
                         expertDiscountOptOut: true, // TODO FIXME FIGURE OUT HOW TO SET THIS PROPERLY WITH V.3 API
                         items: tiers
@@ -363,22 +359,24 @@ export class MarketplaceService {
                             .sort((a, b) => (a.unitCount === -1 ? 1 : b.unitCount === -1 ? -1 : a.unitCount - b.unitCount)),
                         perUnitItems: undefined
                     }
-                } else if (cycleType==='MONTHLY') {
-                    const tenUserTier = tiers.find(tier => tier.ceiling === 10)
-
-                    if (tenUserTier) {
-                        tenUserItem = {
-                            monthsValid: 1,
-                            amount: tenUserTier.flatAmount ? Math.floor(tenUserTier.flatAmount / 100) : 0,
-                            unitCount: 10
-                        };
+                } else if (cloudOrServer === 'cloud' &&cycleType==='MONTHLY') {
+                    newResult = {
+                        expertDiscountOptOut: true, // TODO FIXME FIGURE OUT HOW TO SET THIS PROPERLY WITH V.3 API
+                        items: tiers
+                            .filter(tier => tier.ceiling !== tier.floor) // strip out the weird floor=11, ceiling=11
+                            .map(tier => ({
+                                monthsValid: 1,
+                                amount: tier.flatAmount ? tier.flatAmount / 100
+                                        : tier.unitAmount ? tier.unitAmount / 100
+                                        : 0,
+                                unitCount: tier.ceiling ?? -1
+                            }))
+                            // sort -1 as highest, but otherwise ascending
+                            .sort((a, b) => (a.unitCount === -1 ? 1 : b.unitCount === -1 ? -1 : a.unitCount - b.unitCount)),
+                        perUnitItems: undefined
                     }
                 }
             }
-        }
-
-        if (newResult && tenUserItem) {
-            newResult.items = [tenUserItem, ...newResult.items];
         }
 
         return newResult;
