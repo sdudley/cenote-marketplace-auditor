@@ -3,7 +3,8 @@ import {
     TableBody,
     TableHead,
     TableRow,
-    CircularProgress
+    CircularProgress,
+    Alert
 } from '@mui/material';
 import { LicenseVersion } from '#common/entities/LicenseVersion.js';
 import { LicenseVersionDto } from '#common/util/licenseVersionUtils.js';
@@ -35,21 +36,36 @@ export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({
 }) => {
     const [versions, setVersions] = useState<DisplayableLicenseVersion[]>([]);
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedVersion, setSelectedVersion] = useState<DisplayableLicenseVersion | null>(null);
     const [priorVersion, setPriorVersion] = useState<DisplayableLicenseVersion | null>(null);
 
     useEffect(() => {
         const fetchVersions = async () => {
             setLoading(true);
+            setErrorMessage(null);
+            setVersions([]);
             try {
                 const endpoint = source === 'atlassian'
                     ? `/api/licenses/${licenseId}/versions/atlassian`
                     : `/api/licenses/${licenseId}/versions`;
                 const response = await fetch(endpoint);
                 const data = await response.json();
+                if (!response.ok) {
+                    const message = typeof data?.error === 'string'
+                        ? data.error
+                        : `Failed to load license versions (HTTP ${response.status})`;
+                    setErrorMessage(message);
+                    return;
+                }
+                if (!Array.isArray(data)) {
+                    setErrorMessage('Unexpected response from server');
+                    return;
+                }
                 setVersions(data);
             } catch (error) {
                 console.error('Error fetching license versions:', error);
+                setErrorMessage('Failed to load license versions');
             } finally {
                 setLoading(false);
             }
@@ -67,6 +83,11 @@ export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({
 
     return (
         <VersionListContainer>
+            {errorMessage && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {errorMessage}
+                </Alert>
+            )}
             <VersionListTable>
                 <TableHead>
                     <TableRow>

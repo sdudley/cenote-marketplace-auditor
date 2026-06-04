@@ -14,6 +14,7 @@ import { TYPES } from '../config/types.js';
 import { ConfigDao } from '../database/dao/ConfigDao.js';
 import { ConfigKey } from '#common/types/configItem.js';
 import { CloudOrServer, LiveOrPending } from '#server/services/types.js';
+import { throwMarketplaceApiError } from './MarketplaceApiError.js';
 
 type ListingResponse = v3Paths["/rest/3/product-listing/developer-space/{developerId}"]["get"]["responses"]["200"]["content"]["application/json"];
 type GetLicensesResponse = v3Components['schemas']['Reports_GetLicenses'];
@@ -124,6 +125,21 @@ export class MarketplaceService {
             }
         });
         return `${baseUrl}?${queryString.toString()}`;
+    }
+
+    /** Resolve `_links.next.href` from the Marketplace reporting API (may omit `/rest/3`). */
+    private resolveMarketplacePaginationUrl(href: string): string {
+        if (href.startsWith('http://') || href.startsWith('https://')) {
+            return href;
+        }
+        const origin = 'https://api.atlassian.com/marketplace';
+        if (href.startsWith('/rest/')) {
+            return `${origin}${href}`;
+        }
+        if (href.startsWith('/')) {
+            return `${origin}/rest/3${href}`;
+        }
+        return `${origin}/rest/3/${href}`;
     }
 
     private async pollForCompletion<T>(
@@ -422,11 +438,19 @@ export class MarketplaceService {
         while (nextUrl) {
             console.log(`Calling Marketplace API: ${nextUrl}`);
 
-            const page: GetLicensesResponse = (await axios.get<GetLicensesResponse>(nextUrl, {
-                headers: {
-                    'Authorization': await this.getAuthHeader()
-                }
-            })).data;
+            let page: GetLicensesResponse;
+            try {
+                page = (await axios.get<GetLicensesResponse>(nextUrl, {
+                    headers: {
+                        'Authorization': await this.getAuthHeader()
+                    }
+                })).data;
+            } catch (error) {
+                throwMarketplaceApiError(
+                    error,
+                    `Failed to fetch license history from Atlassian (${searchText})`
+                );
+            }
 
             const licenses = page.licenses;
             if (Array.isArray(licenses)) {
@@ -436,7 +460,7 @@ export class MarketplaceService {
             }
 
             const nextHref: string | undefined = page._links?.next?.href;
-            nextUrl = nextHref ? `https://api.atlassian.com/marketplace${nextHref}` : undefined;
+            nextUrl = nextHref ? this.resolveMarketplacePaginationUrl(nextHref) : undefined;
         }
 
         return allLicenses;

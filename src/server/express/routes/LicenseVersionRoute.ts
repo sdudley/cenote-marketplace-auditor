@@ -9,6 +9,7 @@ import { pseudonymizeLicenseData } from '#common/pseudonymize/pseudonymizeLicens
 import { ConfigKey } from '#common/types/configItem.js';
 import { buildLicenseVersionsFromHistory } from '#common/util/licenseVersionUtils.js';
 import { isUUID } from '#common/util/validator.js';
+import { MarketplaceApiError } from '../../services/MarketplaceApiError.js';
 
 @injectable()
 export class LicenseVersionRoute {
@@ -85,8 +86,33 @@ export class LicenseVersionRoute {
 
             res.json(versions);
         } catch (error) {
+            if (error instanceof MarketplaceApiError) {
+                const status = mapMarketplaceErrorToHttpStatus(error.statusCode);
+                console.error('Atlassian Marketplace API error:', error.message);
+                res.status(status).json({
+                    error: error.message,
+                    upstreamStatus: error.statusCode
+                });
+                return;
+            }
             console.error('Error fetching Atlassian license versions:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
     }
+}
+
+function mapMarketplaceErrorToHttpStatus(upstreamStatus: number): number {
+    if (upstreamStatus === 404) {
+        return 404;
+    }
+    if (upstreamStatus === 401 || upstreamStatus === 403) {
+        return 503;
+    }
+    if (upstreamStatus >= 400 && upstreamStatus < 500) {
+        return 502;
+    }
+    if (upstreamStatus >= 500) {
+        return 502;
+    }
+    return 500;
 }
