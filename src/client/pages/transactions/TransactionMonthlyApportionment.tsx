@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { TransactionMonthlyApportionmentResponse } from '#common/types/transactionPricing';
-import { formatCurrency } from '#common/util/formatCurrency';
+import { TransactionMonthlyApportionmentResponse } from '#common/types/transactionPricing.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
 import { NotesHeadingBox } from '#client/components/styles.js';
 import { MonthlyApportionmentTable } from '../styles';
 

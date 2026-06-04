@@ -1,9 +1,9 @@
 import * as cron from 'node-cron';
 import { injectable, inject } from 'inversify';
-import { ConfigDao } from '#server/database/dao/ConfigDao';
-import { ConfigKey } from '#common/types/configItem';
-import { JobRunner } from '../jobs/JobRunner';
-import { TYPES } from '../config/types';
+import { ConfigDao } from '#server/database/dao/ConfigDao.js';
+import { ConfigKey } from '#common/types/configItem.js';
+import { JobRunner } from '../jobs/JobRunner.js';
+import { TYPES } from '../config/types.js';
 
 @injectable()
 export class SchedulerService {

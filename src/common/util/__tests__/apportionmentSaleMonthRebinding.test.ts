@@ -1,5 +1,5 @@
-import { rebindApportionmentBeforeSaleMonth } from '../apportionmentSaleMonthRebinding';
-import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing';
+import { rebindApportionmentBeforeSaleMonth } from '../apportionmentSaleMonthRebinding.js';
+import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing.js';
 
 describe('rebindApportionmentBeforeSaleMonth', () => {
     const entries: TransactionMonthlyApportionmentEntry[] = [

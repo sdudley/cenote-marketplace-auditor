@@ -2,7 +2,7 @@ import {
     getMonthsInDateRange,
     getDaysInDateRangeForMonth,
     getLicenseDurationInDays
-} from '../licenseDurationCalculator';
+} from '../licenseDurationCalculator.js';
 
 describe('getDaysInDateRangeForMonth', () => {
     it('counts days within a single month', () => {

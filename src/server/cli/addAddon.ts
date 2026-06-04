@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { initializeDatabase } from '../config/database';
-import { configureContainer } from '../config/container';
-import { TYPES } from '../config/types';
-import { AddonDao } from '../database/dao/AddonDao';
+import { initializeDatabase } from '../config/database.js';
+import { configureContainer } from '../config/container.js';
+import { TYPES } from '../config/types.js';
+import { AddonDao } from '../database/dao/AddonDao.js';
 
 async function main() {
     const addonKey = process.argv[2];

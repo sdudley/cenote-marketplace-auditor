@@ -1,13 +1,13 @@
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../config/types';
-import { AddonJob } from './AddonJob';
-import { TransactionJob } from './TransactionJob';
-import { LicenseJob } from './LicenseJob';
-import { PricingJob } from './PricingJob';
-import { ValidationJob } from './ValidationJob';
-import { MarketplaceService } from '../services/MarketplaceService';
-import { JobType } from '#common/entities/JobStatus';
-import { JobDao } from '#server/database/dao/JobDao';
+import { TYPES } from '../config/types.js';
+import { AddonJob } from './AddonJob.js';
+import { TransactionJob } from './TransactionJob.js';
+import { LicenseJob } from './LicenseJob.js';
+import { PricingJob } from './PricingJob.js';
+import { ValidationJob } from './ValidationJob.js';
+import { MarketplaceService } from '../services/MarketplaceService.js';
+import { JobType } from '#common/entities/JobStatus.js';
+import { JobDao } from '#server/database/dao/JobDao.js';
 
 @injectable()
 export class JobRunner {

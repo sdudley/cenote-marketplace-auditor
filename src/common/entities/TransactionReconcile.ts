@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
-import { Transaction } from './Transaction';
-import { TransactionReconcileNote } from './TransactionReconcileNote';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany, type Relation } from 'typeorm';
+import type { Transaction } from './Transaction.js';
+import type { TransactionReconcileNote } from './TransactionReconcileNote.js';
 
 @Entity()
 export class TransactionReconcile {

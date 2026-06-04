@@ -1,8 +1,8 @@
 import { DataSource, Repository } from 'typeorm';
-import { Transaction } from '#common/entities/Transaction';
-import { TransactionAdjustment } from '#common/entities/TransactionAdjustment';
+import { Transaction } from '#common/entities/Transaction.js';
+import { TransactionAdjustment } from '#common/entities/TransactionAdjustment.js';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../../config/types';
+import { TYPES } from '../../config/types.js';
 
 @injectable()
 export class TransactionAdjustmentDao {

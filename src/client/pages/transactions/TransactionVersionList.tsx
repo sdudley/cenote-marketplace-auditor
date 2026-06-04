@@ -5,7 +5,7 @@ import {
     TableRow,
     CircularProgress
 } from '@mui/material';
-import { TransactionVersion } from '#common/entities/TransactionVersion';
+import { TransactionVersion } from '#common/entities/TransactionVersion.js';
 import {
     VersionListContainer,
     VersionListTable,

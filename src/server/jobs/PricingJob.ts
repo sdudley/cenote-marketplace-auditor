@@ -1,9 +1,9 @@
-import { MarketplaceService } from '../services/MarketplaceService';
+import { MarketplaceService } from '../services/MarketplaceService.js';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../config/types';
-import { DeploymentType } from '#common/types/marketplace';
-import { PricingService } from '../services/PricingService';
-import { AddonDao } from '../database/dao/AddonDao';
+import { TYPES } from '../config/types.js';
+import { DeploymentType } from '#common/types/marketplace.js';
+import { PricingService } from '../services/PricingService.js';
+import { AddonDao } from '../database/dao/AddonDao.js';
 
 @injectable()
 export class PricingJob {

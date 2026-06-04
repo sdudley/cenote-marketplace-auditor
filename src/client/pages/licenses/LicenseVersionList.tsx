@@ -5,8 +5,8 @@ import {
     TableRow,
     CircularProgress
 } from '@mui/material';
-import { LicenseVersion } from '#common/entities/LicenseVersion';
-import { LicenseVersionDto } from '#common/util/licenseVersionUtils';
+import { LicenseVersion } from '#common/entities/LicenseVersion.js';
+import { LicenseVersionDto } from '#common/util/licenseVersionUtils.js';
 import {
     VersionListContainer,
     VersionListTable,

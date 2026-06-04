@@ -9,11 +9,11 @@ import {
     Box,
     Typography
 } from '@mui/material';
-import { TransactionResult } from '#common/types/apiTypes';
-import { TransactionReconcileNote } from '#common/entities/TransactionReconcileNote';
-import { TransactionPricingResponse, TransactionMonthlyApportionmentResponse } from '#common/types/transactionPricing';
-import { formatCurrency } from '#common/util/formatCurrency';
-import { isoStringWithDateAndTime } from '#common/util/dateUtils';
+import { TransactionResult } from '#common/types/apiTypes.js';
+import { TransactionReconcileNote } from '#common/entities/TransactionReconcileNote.js';
+import { TransactionPricingResponse, TransactionMonthlyApportionmentResponse } from '#common/types/transactionPricing.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
+import { isoStringWithDateAndTime } from '#common/util/dateUtils.js';
 import {
     StyledDialog,
     InfoTableBox,

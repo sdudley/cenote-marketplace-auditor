@@ -1,4 +1,4 @@
-import { getObjectDiff, JsonDelta } from '../objectDiff';
+import { getObjectDiff, JsonDelta } from '../objectDiff.js';
 
 describe('objectDiff', () => {
     it('should detect unchanged primitive values', () => {

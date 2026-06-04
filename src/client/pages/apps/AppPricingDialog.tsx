@@ -20,7 +20,7 @@ import {
     TableHead,
     TableRow
 } from '@mui/material';
-import { AppInfo, AppPricingPeriodSummary } from '#common/types/apiTypes';
+import { AppInfo, AppPricingPeriodSummary } from '#common/types/apiTypes.js';
 import { CloseButton } from '../../components/CloseButton';
 import {
     AppsTableHeadCell,

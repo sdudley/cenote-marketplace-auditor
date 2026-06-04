@@ -1,12 +1,12 @@
 import 'dotenv/config';
-import { AppDataSource, initializeDatabase } from '../config/database';
-import { Pricing } from '#common/entities/Pricing';
-import { PricingInfo } from '#common/entities/PricingInfo';
+import { AppDataSource, initializeDatabase } from '../config/database.js';
+import { Pricing } from '#common/entities/Pricing.js';
+import { PricingInfo } from '#common/entities/PricingInfo.js';
 import * as fs from 'fs';
-import { parse } from 'csv-parse/sync';
+import { parse } from 'csv-parse/sync.js';
 import { LessThan, MoreThan, IsNull, Or, Repository } from 'typeorm';
-import { isoDateMath } from '#common/util/dateUtils';
-import { formatCurrency } from '#common/util/formatCurrency';
+import { isoDateMath } from '#common/util/dateUtils.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
 
 interface DateRange {
     startDate?: string;

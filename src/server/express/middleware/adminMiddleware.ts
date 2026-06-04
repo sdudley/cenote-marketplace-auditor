@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { isAdmin } from '#common/util/userUtils';
-import { User } from '#common/entities/User';
+import { isAdmin } from '#common/util/userUtils.js';
+import { User } from '#common/entities/User.js';
 
 /**
  * Middleware factory that returns a middleware function to require admin access.

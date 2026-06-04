@@ -1,21 +1,21 @@
 import { Container } from 'inversify';
 import { DataSource } from 'typeorm';
-import { configureContainer as configureCommonContainer } from '../../config/container';
-import { ApiRouter } from '../routes';
-import { TransactionRoute } from '../routes/TransactionRoute';
-import { TransactionVersionRoute } from '../routes/TransactionVersionRoute';
-import { EXPRESS_TYPES } from './expressTypes';
-import { TransactionReconcileRoute } from '../routes/TransactionReconcileRoute';
-import { ConfigRoute } from '../routes/ConfigRoute';
-import { JobRoute } from '../routes/JobRoute';
-import { LicenseRoute } from '../routes/LicenseRoute';
-import { LicenseVersionRoute } from '../routes/LicenseVersionRoute';
-import { SchedulerRoute } from '../routes/SchedulerRoute';
-import { TransactionPricingRoute } from '../routes/TransactionPricingRoute';
-import { AppRoute } from '../routes/AppRoutes';
-import { AuthRoute } from '../routes/AuthRoute';
-import { UserRoute } from '../routes/UserRoute';
-import { ApportionmentRoute } from '../routes/ApportionmentRoute';
+import { configureContainer as configureCommonContainer } from '../../config/container.js';
+import { ApiRouter } from '../routes/index.js';
+import { TransactionRoute } from '../routes/TransactionRoute.js';
+import { TransactionVersionRoute } from '../routes/TransactionVersionRoute.js';
+import { EXPRESS_TYPES } from './expressTypes.js';
+import { TransactionReconcileRoute } from '../routes/TransactionReconcileRoute.js';
+import { ConfigRoute } from '../routes/ConfigRoute.js';
+import { JobRoute } from '../routes/JobRoute.js';
+import { LicenseRoute } from '../routes/LicenseRoute.js';
+import { LicenseVersionRoute } from '../routes/LicenseVersionRoute.js';
+import { SchedulerRoute } from '../routes/SchedulerRoute.js';
+import { TransactionPricingRoute } from '../routes/TransactionPricingRoute.js';
+import { AppRoute } from '../routes/AppRoutes.js';
+import { AuthRoute } from '../routes/AuthRoute.js';
+import { UserRoute } from '../routes/UserRoute.js';
+import { ApportionmentRoute } from '../routes/ApportionmentRoute.js';
 
 export function configureContainer(dataSource: DataSource): Container {
     const container = configureCommonContainer(dataSource);

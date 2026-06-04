@@ -1,12 +1,11 @@
 import { DataSource, In, Repository } from "typeorm";
-import { License } from "#common/entities/License";
-import { Transaction } from "#common/entities/Transaction";
+import { License } from "#common/entities/License.js";
+import { Transaction } from "#common/entities/Transaction.js";
 import { inject, injectable } from "inversify";
-import { TYPES } from "../../config/types";
-import { LicenseData } from "#common/types/marketplace";
-import { LicenseQueryParams, LicenseQueryResult, LicenseQuerySortType } from "#common/types/apiTypes";
-import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
-import { LicenseResult } from "#common/types/apiTypes";
+import { TYPES } from "../../config/types.js";
+import { LicenseData } from "#common/types/marketplace.js";
+import { LicenseQueryParams, LicenseQueryResult, LicenseQuerySortType } from "#common/types/apiTypes.js";
+import { LicenseResult } from "#common/types/apiTypes.js";
 
 
 @injectable()

@@ -1,4 +1,4 @@
-import { LicenseData } from '#common/types/marketplace';
+import { LicenseData } from '#common/types/marketplace.js';
 
 interface ExportLicenseParams {
     licenseData: LicenseData;

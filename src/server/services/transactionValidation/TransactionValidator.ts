@@ -1,22 +1,22 @@
 import { inject, injectable } from "inversify";
-import { ValidationOptions } from "./types";
-import { TransactionValidationResult } from "./types";
-import { deploymentTypeFromHosting } from "#common/util/validationUtils";
-import { Transaction } from "#common/entities/Transaction";
-import { PricingTierResult } from "#common/types/pricingTierResult";
-import { PricingService } from "#server/services/PricingService";
-import { PriceCalculatorService } from "#server/services/PriceCalculatorService";
-import { PriceWithPricingOpts } from "./types";
-import { MAX_JPY_DRIFT } from "./constants";
-import { TYPES } from "#server/config/types";
-import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator";
-import { isSignificantlyDifferent } from "#common/util/significantDifferenceTester";
-import { PriceCalcOpts, PriceResult } from '#server/services/types';
-import { AddonDao } from "../../database/dao/AddonDao";
-import { sumDiscountArrayForTransaction } from "#common/util/transactionDiscounts";
-import { isCommunityLicense } from "#server/util/communityLicense";
-import { isMQBTransaction } from "#common/util/mqbUtils";
-import { EnhancedLicenseType, HostingType } from '#common/types/marketplace';
+import { ValidationOptions } from "./types.js";
+import { TransactionValidationResult } from "./types.js";
+import { deploymentTypeFromHosting } from "#common/util/validationUtils.js";
+import { Transaction } from "#common/entities/Transaction.js";
+import { PricingTierResult } from "#common/types/pricingTierResult.js";
+import { PricingService } from "#server/services/PricingService.js";
+import { PriceCalculatorService } from "#server/services/PriceCalculatorService.js";
+import { PriceWithPricingOpts } from "./types.js";
+import { MAX_JPY_DRIFT } from "./constants.js";
+import { TYPES } from "#server/config/types.js";
+import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator.js";
+import { isSignificantlyDifferent } from "#common/util/significantDifferenceTester.js";
+import { PriceCalcOpts, PriceResult } from '#server/services/types.js';
+import { AddonDao } from "../../database/dao/AddonDao.js";
+import { sumDiscountArrayForTransaction } from "#common/util/transactionDiscounts.js";
+import { isCommunityLicense } from "#server/util/communityLicense.js";
+import { isMQBTransaction } from "#common/util/mqbUtils.js";
+import { EnhancedLicenseType, HostingType } from '#common/types/marketplace.js';
 
 @injectable()
 export class TransactionValidator {

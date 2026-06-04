@@ -1,9 +1,9 @@
 import { inject, injectable } from 'inversify';
 import { Router, Request, Response } from 'express';
-import { TYPES } from '#server/config/types';
-import { ApportionmentService } from '#server/services/ApportionmentService';
-import { CalculateApportionmentRequest, MonthlyAggregateApportionmentResponse } from '#common/types/apportionment';
-import { isValidPurchaseMonth } from '#common/util/purchaseMonthUtils';
+import { TYPES } from '#server/config/types.js';
+import { ApportionmentService } from '#server/services/ApportionmentService.js';
+import { CalculateApportionmentRequest, MonthlyAggregateApportionmentResponse } from '#common/types/apportionment.js';
+import { isValidPurchaseMonth } from '#common/util/purchaseMonthUtils.js';
 
 @injectable()
 export class ApportionmentRoute {

@@ -1,10 +1,10 @@
 import { ColumnConfig } from '../../components/ColumnConfig';
-import { LicenseQuerySortType, LicenseResult } from '#common/types/apiTypes';
+import { LicenseQuerySortType, LicenseResult } from '#common/types/apiTypes.js';
 import { WrappedLabel, EntitlementIdLink } from '#client/components/styles.js';
-import { isoStringWithOnlyDate } from '#common/util/dateUtils';
-import { dateDiff } from '#common/util/dateUtils';
+import { isoStringWithOnlyDate } from '#common/util/dateUtils.js';
+import { dateDiff } from '#common/util/dateUtils.js';
 import { EmphasizedAnnotation } from '../../components/styles';
-import { getLicenseDisplayId } from '#client/util/displayIdUtils';
+import { getLicenseDisplayId } from '#client/util/displayIdUtils.js';
 
 // Define the context type for license cell rendering (currently no context needed)
 export interface LicenseCellContext {

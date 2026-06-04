@@ -1,9 +1,9 @@
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../config/types';
-import { Transaction } from '#common/entities/Transaction';
-import { TransactionDao } from '../database/dao/TransactionDao';
-import { PreviousTransactionResult } from '#server/services/types';
-import { findParentForMQBTransaction, isMQBTransaction } from '#common/util/mqbUtils';
+import { TYPES } from '../config/types.js';
+import { Transaction } from '#common/entities/Transaction.js';
+import { TransactionDao } from '../database/dao/TransactionDao.js';
+import { PreviousTransactionResult } from '#server/services/types.js';
+import { findParentForMQBTransaction, isMQBTransaction } from '#common/util/mqbUtils.js';
 
 @injectable()
 export class PreviousTransactionService {

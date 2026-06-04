@@ -1,5 +1,5 @@
-import { PriceTestSnippetResponse } from '#common/types/transactionPricing';
-import { PricingTierResult } from '#common/types/pricingTierResult';
+import { PriceTestSnippetResponse } from '#common/types/transactionPricing.js';
+import { PricingTierResult } from '#common/types/pricingTierResult.js';
 
 /** Stable JSON stringify (sorted keys) for hashing. */
 function stableStringify(obj: unknown): string {

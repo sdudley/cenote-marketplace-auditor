@@ -1,6 +1,6 @@
-import { TransactionValidationService } from '../TransactionValidationService';
-import { DiscountResult, TransactionValidationResult } from '../types';
-import { PreviousTransactionResult } from '#server/services/types';
+import { TransactionValidationService } from '../TransactionValidationService.js';
+import { DiscountResult, TransactionValidationResult } from '../types.js';
+import { PreviousTransactionResult } from '#server/services/types.js';
 
 const makeDiscountResult = (): DiscountResult => ({
     discountToUse: 0,

@@ -1,8 +1,8 @@
-import { PreviousTransactionService } from '../PreviousTransactionService';
-import { Transaction } from '../../../common/entities/Transaction';
-import { TransactionDao } from '../../database/dao/TransactionDao';
-import { SaleType } from '../../../common/types/marketplace';
-import { isMQBTransaction } from '../../../common/util/mqbUtils';
+import { PreviousTransactionService } from '../PreviousTransactionService.js';
+import { Transaction } from '../../../common/entities/Transaction.js';
+import { TransactionDao } from '../../database/dao/TransactionDao.js';
+import { SaleType } from '../../../common/types/marketplace.js';
+import { isMQBTransaction } from '../../../common/util/mqbUtils.js';
 
 let uniqueTransactionId = 0;
 

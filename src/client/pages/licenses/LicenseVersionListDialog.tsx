@@ -6,7 +6,7 @@ import {
     Typography,
     Box
 } from '@mui/material';
-import { LicenseResult } from '#common/types/apiTypes';
+import { LicenseResult } from '#common/types/apiTypes.js';
 import { StyledDialog } from '../../components/styles';
 import { LicenseVersionList, LicenseVersionSource } from './LicenseVersionList';
 import { CloseButton } from '../../components/CloseButton';

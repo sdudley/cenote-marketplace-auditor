@@ -1,4 +1,4 @@
-import { UserTierPricing } from './userTiers';
+import { UserTierPricing } from './userTiers.js';
 
 export interface PricingTierResult {
     tiers: UserTierPricing[];                   // Pricing tiers corresponding to the saleDate of the transaction

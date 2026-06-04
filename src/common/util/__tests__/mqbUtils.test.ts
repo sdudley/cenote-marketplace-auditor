@@ -1,5 +1,5 @@
-import { Transaction } from '#common/entities/Transaction';
-import { hasProratedDetails, isMQBTransaction, findParentForMQBTransaction } from '../mqbUtils';
+import { Transaction } from '#common/entities/Transaction.js';
+import { hasProratedDetails, isMQBTransaction, findParentForMQBTransaction } from '../mqbUtils.js';
 
 describe('mqbUtils', () => {
     describe('hasProratedDetails', () => {

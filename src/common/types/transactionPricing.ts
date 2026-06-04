@@ -1,5 +1,5 @@
-import { PriceCalcDescriptor, PriceCalcOpts } from "#server/services/types";
-import { PricingTierResult } from "#common/types/pricingTierResult";
+import { PriceCalcDescriptor, PriceCalcOpts } from "#server/services/types.js";
+import { PricingTierResult } from "#common/types/pricingTierResult.js";
 
 export interface TransactionPricingResponse {
     descriptors: PriceCalcDescriptor[];

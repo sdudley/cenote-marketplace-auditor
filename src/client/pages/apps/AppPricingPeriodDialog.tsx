@@ -16,7 +16,7 @@ import {
     TableRow,
     TextField
 } from '@mui/material';
-import { AppInfo, AppPricingPeriodDetail, AppPricingSaveRequest } from '#common/types/apiTypes';
+import { AppInfo, AppPricingPeriodDetail, AppPricingSaveRequest } from '#common/types/apiTypes.js';
 import { CloseButton } from '../../components/CloseButton';
 import {
     DateField,

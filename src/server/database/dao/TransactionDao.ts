@@ -1,11 +1,10 @@
 import { inject, injectable } from "inversify";
-import { Transaction } from "#common/entities/Transaction";
-import { TYPES } from "../../config/types";
+import { Transaction } from "#common/entities/Transaction.js";
+import { TYPES } from "../../config/types.js";
 import { Repository } from "typeorm";
 import { DataSource } from "typeorm";
-import { TransactionData } from "#common/types/marketplace";
-import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortType } from "#common/types/apiTypes";
-import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
+import { TransactionData } from "#common/types/marketplace.js";
+import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortType } from "#common/types/apiTypes.js";
 import { In } from "typeorm";
 import { SelectQueryBuilder } from "typeorm";
 

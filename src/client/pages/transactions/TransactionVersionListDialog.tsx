@@ -6,8 +6,8 @@ import {
     Typography,
     Box
 } from '@mui/material';
-import { TransactionResult } from '#common/types/apiTypes';
-import { formatCurrency } from '#common/util/formatCurrency';
+import { TransactionResult } from '#common/types/apiTypes.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
 import { StyledDialog } from '../../components/styles';
 import { TransactionVersionList } from './TransactionVersionList';
 import { CloseButton } from '../../components/CloseButton';

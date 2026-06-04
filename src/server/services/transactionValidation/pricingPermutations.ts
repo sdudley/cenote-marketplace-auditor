@@ -1,7 +1,7 @@
 // List of various permutations of legacy pricing (or not) for both the main transaction and the
 // license we are upgrading from (if any).
 
-import { LegacyPricePermutation } from "./types";
+import { LegacyPricePermutation } from "./types.js";
 
 export const LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE : LegacyPricePermutation[] = [
     { useLegacyPricingTierForCurrent: false, useLegacyPricingTierForPrevious: false },  // start with no legacy pricing

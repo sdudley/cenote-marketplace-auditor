@@ -7,5 +7,5 @@ export {
     validatePassword,
     getPasswordHelperText,
     type PasswordValidationResult,
-} from '#common/util/passwordValidation';
+} from '#common/util/passwordValidation.js';
 

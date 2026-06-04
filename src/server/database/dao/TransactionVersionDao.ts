@@ -1,9 +1,9 @@
-import { TransactionVersion } from "#common/entities/TransactionVersion";
-import { Transaction } from "#common/entities/Transaction";
-import { TYPES } from "#server/config/types";
+import { TransactionVersion } from "#common/entities/TransactionVersion.js";
+import { Transaction } from "#common/entities/Transaction.js";
+import { TYPES } from "#server/config/types.js";
 import { inject, injectable } from "inversify";
 import { DataSource, Repository } from "typeorm";
-import { isUUID } from "validator";
+import { isUUID } from '#common/util/validator.js';
 
 @injectable()
 export class TransactionVersionDao {

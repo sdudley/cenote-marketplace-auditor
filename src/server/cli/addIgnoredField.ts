@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { AppDataSource, initializeDatabase } from '../config/database';
-import { IgnoredFieldService } from '../services/IgnoredFieldService';
-import { RecordType } from '#common/entities/IgnoredField';
+import { AppDataSource, initializeDatabase } from '../config/database.js';
+import { IgnoredFieldService } from '../services/IgnoredFieldService.js';
+import { RecordType } from '#common/entities/IgnoredField.js';
 
 async function main() {
     const recordType = process.argv[2] as RecordType;

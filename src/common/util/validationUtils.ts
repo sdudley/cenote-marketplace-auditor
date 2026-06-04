@@ -1,7 +1,7 @@
-import { DeploymentType } from "../types/marketplace";
-import { Transaction } from "../entities/Transaction";
+import { DeploymentType } from "../types/marketplace.js";
+import { Transaction } from "../entities/Transaction.js";
 import { Repository } from "typeorm";
-import { License } from "../entities/License";
+import { License } from "../entities/License.js";
 
 const userCountFromTier = (tier: string): number => {
     if (tier === 'Unlimited Users') {

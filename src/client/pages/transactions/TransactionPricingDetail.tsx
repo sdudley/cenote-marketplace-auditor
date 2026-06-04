@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { TransactionPricingResponse } from '#common/types/transactionPricing';
-import { formatCurrency } from '#common/util/formatCurrency';
+import { TransactionPricingResponse } from '#common/types/transactionPricing.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
 import {
     PricingDetailList,
     PricingDetailItem,

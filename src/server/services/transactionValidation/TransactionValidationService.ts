@@ -1,20 +1,20 @@
-import { Transaction } from '#common/entities/Transaction';
+import { Transaction } from '#common/entities/Transaction.js';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../../config/types';
-import { formatCurrency } from '#common/util/formatCurrency';
-import { dateDiff } from '#common/util/dateUtils';
-import { Pricing } from '#common/entities/Pricing';
-import { TransactionValidationResult, DiscountResult } from './types';
-import { EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS, EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS, LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE, LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE, PARTNER_DISCOUNT_PERMUTATIONS } from './pricingPermutations';
-import { TransactionSandboxService } from './TransactionSandboxService';
-import { TransactionAdjustmentValidationService } from './TransactionAdjustmentValidationService';
-import { TransactionValidator } from './TransactionValidator';
-import { ALERT_DAYS_AFTER_PRICING_CHANGE } from './constants';
-import { PreviousTransactionService } from '../PreviousTransactionService';
-import { PreviousTransactionResult } from '#server/services/types';
-import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts';
-import { hasProratedDetails } from '#common/util/mqbUtils';
-import { userCountFromTier } from '#common/util/validationUtils';
+import { TYPES } from '../../config/types.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
+import { dateDiff } from '#common/util/dateUtils.js';
+import { Pricing } from '#common/entities/Pricing.js';
+import { TransactionValidationResult, DiscountResult } from './types.js';
+import { EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ACTUAL_ADJUSTMENTS, EXPECTED_DISCOUNT_PERMUTATIONS_WITH_ESTIMATED_ADJUSTMENTS, LEGACY_PRICING_PERMUTATIONS_NO_UPGRADE, LEGACY_PRICING_PERMUTATIONS_WITH_UPGRADE, PARTNER_DISCOUNT_PERMUTATIONS } from './pricingPermutations.js';
+import { TransactionSandboxService } from './TransactionSandboxService.js';
+import { TransactionAdjustmentValidationService } from './TransactionAdjustmentValidationService.js';
+import { TransactionValidator } from './TransactionValidator.js';
+import { ALERT_DAYS_AFTER_PRICING_CHANGE } from './constants.js';
+import { PreviousTransactionService } from '../PreviousTransactionService.js';
+import { PreviousTransactionResult } from '#server/services/types.js';
+import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts.js';
+import { hasProratedDetails } from '#common/util/mqbUtils.js';
+import { userCountFromTier } from '#common/util/validationUtils.js';
 
 @injectable()
 export class TransactionValidationService {

@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index, Unique } from 'typeorm';
-import { License } from './License';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index, Unique, type Relation } from 'typeorm';
+import type { License } from './License.js';
 
 @Entity()
 @Unique(['license', 'version'])

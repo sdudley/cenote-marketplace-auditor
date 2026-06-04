@@ -1,7 +1,7 @@
-import { License } from '#common/entities/License';
+import { License } from '#common/entities/License.js';
 import { faker } from '@faker-js/faker';
-import type { LicenseData } from '#common/types/marketplace';
-import { randomizeNumericString, generateFormattedId, transformIdWithPrefix } from './pseudonymizeUtils';
+import type { LicenseData } from '#common/types/marketplace.js';
+import { randomizeNumericString, generateFormattedId, transformIdWithPrefix } from './pseudonymizeUtils.js';
 
 export function pseudonymizeLicense(license: License): License {
     // Create a deep copy of the license

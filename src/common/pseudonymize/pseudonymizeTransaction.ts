@@ -1,7 +1,7 @@
-import { Transaction } from '#common/entities/Transaction';
-import type { TransactionData } from '#common/types/marketplace';
+import { Transaction } from '#common/entities/Transaction.js';
+import type { TransactionData } from '#common/types/marketplace.js';
 import { faker } from '@faker-js/faker';
-import { randomizeNumericString, generateFormattedId, scaleAmount, transformCurrencyInText, transformIdWithPrefix } from './pseudonymizeUtils';
+import { randomizeNumericString, generateFormattedId, scaleAmount, transformCurrencyInText, transformIdWithPrefix } from './pseudonymizeUtils.js';
 
 export function pseudonymizeTransaction(transaction: Transaction): Transaction {
     // Create a deep copy of the transaction

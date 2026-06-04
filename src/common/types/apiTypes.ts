@@ -1,5 +1,5 @@
-import { Transaction } from "#common/entities/Transaction";
-import { License } from "#common/entities/License";
+import { Transaction } from "#common/entities/Transaction.js";
+import { License } from "#common/entities/License.js";
 
 export interface TransactionResult {
     transaction: Transaction;

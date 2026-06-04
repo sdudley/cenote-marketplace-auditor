@@ -1,5 +1,5 @@
-import { Transaction } from '#common/entities/Transaction';
-import { ProratedDetails } from '#common/types/marketplace';
+import { Transaction } from '#common/entities/Transaction.js';
+import { ProratedDetails } from '#common/types/marketplace.js';
 
 /**
  * Returns true when proratedDetails is a non-empty array (MQB / prorated transaction).

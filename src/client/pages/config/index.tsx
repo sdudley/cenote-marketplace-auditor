@@ -13,10 +13,10 @@ import {
     Box
 } from '@mui/material';
 import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer, ConfigColumn, SchedulerContainer } from '../styles';
-import { ConfigKey } from '#common/types/configItem';
+import { ConfigKey } from '#common/types/configItem.js';
 import { StyledLink } from '../styles';
 import { DemoModeContainer, SlackContainer } from './styles';
-import { APP_VERSION } from '#common/config/versions';
+import { APP_VERSION } from '#common/config/versions.js';
 
 export const ConfigPage: React.FC = () => {
     const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number | boolean>>({

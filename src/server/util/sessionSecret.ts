@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ConfigDao } from '../database/dao/ConfigDao';
+import { ConfigDao } from '../database/dao/ConfigDao.js';
 
 const SESSION_SECRET_CONFIG_KEY = 'SessionSecret';
 

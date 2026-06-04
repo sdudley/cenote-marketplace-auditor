@@ -1,6 +1,6 @@
-import { JsonObject } from "#client/util/collectIds";
-import { formatCurrency } from "#common/util/formatCurrency";
-import { TransactionData } from '#common/types/marketplace';
+import { JsonObject } from "#client/util/collectIds.js";
+import { formatCurrency } from "#common/util/formatCurrency.js";
+import { TransactionData } from '#common/types/marketplace.js';
 
 export const formatTransactionData = (data: TransactionData): JsonObject => {
     // Deep clone the data to avoid mutating the original

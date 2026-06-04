@@ -1,12 +1,12 @@
 import { inject, injectable } from "inversify";
 
-import { Transaction } from "#common/entities/Transaction";
-import { TransactionAdjustment } from "#common/entities/TransactionAdjustment";
-import { formatCurrency } from "#common/util/formatCurrency";
-import { DiscountResult } from "./types";
-import { TYPES } from "#server/config/types";
-import { ResellerDao } from "#server/database/dao/ResellerDao";
-import { TransactionAdjustmentDao } from "#server/database/dao/TransactionAdjustmentDao";
+import { Transaction } from "#common/entities/Transaction.js";
+import { TransactionAdjustment } from "#common/entities/TransactionAdjustment.js";
+import { formatCurrency } from "#common/util/formatCurrency.js";
+import { DiscountResult } from "./types.js";
+import { TYPES } from "#server/config/types.js";
+import { ResellerDao } from "#server/database/dao/ResellerDao.js";
+import { TransactionAdjustmentDao } from "#server/database/dao/TransactionAdjustmentDao.js";
 
 @injectable()
 export class TransactionAdjustmentValidationService {

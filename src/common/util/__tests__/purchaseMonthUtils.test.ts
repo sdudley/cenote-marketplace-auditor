@@ -1,4 +1,4 @@
-import { parsePurchaseMonth, isValidPurchaseMonth, getPriorPurchaseMonth } from '../purchaseMonthUtils';
+import { parsePurchaseMonth, isValidPurchaseMonth, getPriorPurchaseMonth } from '../purchaseMonthUtils.js';
 
 describe('parsePurchaseMonth', () => {
     it('parses a valid month into date range', () => {

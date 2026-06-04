@@ -1,4 +1,4 @@
-import { EnhancedLicenseType } from "#common/types/marketplace";
+import { EnhancedLicenseType } from "#common/types/marketplace.js";
 
 export const isCommunityLicense = (licenseType: EnhancedLicenseType): boolean => {
     return licenseType==='COMMUNITY' ||

@@ -1,4 +1,4 @@
-import { PriceCalculatorService } from '../PriceCalculatorService';
+import { PriceCalculatorService } from '../PriceCalculatorService.js';
 import {
     cloudAnnualPricingTiers,
     cloudPerUserPricingTiers,
@@ -10,8 +10,8 @@ import {
     pricingTierResult_93f67ba5,
     pricingTierResult_118424d0,
     mqbPricingTierResult
-} from './pricingTable';
-import { PriceResult } from '../../../server/services/types';
+} from './pricingTable.js';
+import { PriceResult } from '../../../server/services/types.js';
 
 const stripDailyPrice = (data: PriceResult) => (
     {

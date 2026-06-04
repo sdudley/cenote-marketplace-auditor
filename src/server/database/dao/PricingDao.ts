@@ -1,9 +1,9 @@
 import { injectable, inject } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
-import { Pricing } from '#common/entities/Pricing';
-import { PricingInfo } from '#common/entities/PricingInfo';
-import { TYPES } from '../../config/types';
-import { DeploymentType } from '#common/types/marketplace';
+import { Pricing } from '#common/entities/Pricing.js';
+import { PricingInfo } from '#common/entities/PricingInfo.js';
+import { TYPES } from '../../config/types.js';
+import { DeploymentType } from '#common/types/marketplace.js';
 
 export interface PricingInfoInput {
     id?: string;

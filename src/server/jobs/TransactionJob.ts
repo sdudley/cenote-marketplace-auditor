@@ -1,17 +1,17 @@
 import { Readable } from 'stream';
-import StreamArray from 'stream-json/streamers/StreamArray';
-import { Transaction } from '#common/entities/Transaction';
-import { TransactionVersion } from '#common/entities/TransactionVersion';
-import { deepEqual, normalizeObject, computeJsonPaths } from '#common/util/objectUtils';
-import { printJsonDiff } from '#common/util/jsonDiff';
-import { TransactionData } from '#common/types/marketplace';
-import { IgnoredFieldService } from '../services/IgnoredFieldService';
-import { TYPES } from '../config/types';
+import StreamArray from 'stream-json/streamers/StreamArray.js';
+import { Transaction } from '#common/entities/Transaction.js';
+import { TransactionVersion } from '#common/entities/TransactionVersion.js';
+import { deepEqual, normalizeObject, computeJsonPaths } from '#common/util/objectUtils.js';
+import { printJsonDiff } from '#common/util/jsonDiff.js';
+import { TransactionData } from '#common/types/marketplace.js';
+import { IgnoredFieldService } from '../services/IgnoredFieldService.js';
+import { TYPES } from '../config/types.js';
 import { inject, injectable } from 'inversify';
-import { TransactionDao } from '../database/dao/TransactionDao';
-import { isProperSubsetOfFields } from '#common/util/fieldUtils';
-import { TransactionVersionDao } from '#server/database/dao/TransactionVersionDao';
-import { SlackService, SlackTransactionData } from '#server/services/SlackService';
+import { TransactionDao } from '../database/dao/TransactionDao.js';
+import { isProperSubsetOfFields } from '#common/util/fieldUtils.js';
+import { TransactionVersionDao } from '#server/database/dao/TransactionVersionDao.js';
+import { SlackService, SlackTransactionData } from '#server/services/SlackService.js';
 
 export interface ProcessOneTransactionResult {
     processed: number;

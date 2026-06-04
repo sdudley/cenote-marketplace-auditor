@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import { Transaction } from '#common/entities/Transaction';
-import { TransactionVersion } from '#common/entities/TransactionVersion';
-import { License } from '#common/entities/License';
-import { LicenseVersion } from '#common/entities/LicenseVersion';
-import { initializeDatabase } from '../config/database';
-import { computeJsonPaths } from '#common/util/objectUtils';
+import { Transaction } from '#common/entities/Transaction.js';
+import { TransactionVersion } from '#common/entities/TransactionVersion.js';
+import { License } from '#common/entities/License.js';
+import { LicenseVersion } from '#common/entities/LicenseVersion.js';
+import { initializeDatabase } from '../config/database.js';
+import { computeJsonPaths } from '#common/util/objectUtils.js';
 
 /**
  * WARNING: this script will mutate the updated_at field for all licenses and transactions.

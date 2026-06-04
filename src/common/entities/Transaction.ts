@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
-import { TransactionVersion } from './TransactionVersion';
-import type { TransactionData } from '../types/marketplace';
-import { License } from './License';
-import { TransactionReconcile } from './TransactionReconcile';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, ManyToOne, OneToOne, type Relation } from 'typeorm';
+import type { TransactionVersion } from './TransactionVersion.js';
+import type { TransactionData } from '../types/marketplace.js';
+import type { License } from './License.js';
+import type { TransactionReconcile } from './TransactionReconcile.js';
 
 @Entity()
 export class Transaction {

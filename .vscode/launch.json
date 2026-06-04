@@ -1,157 +1,142 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Run Express Server",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/node_modules/.bin/ts-node",
-            "args": [
-                "${workspaceFolder}/src/server/index.ts"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "sourceMaps": true,
-            "smartStep": true,
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ],
-            "env": {
-                "NODE_ENV": "development",
-                "DB_HOST": "127.0.0.1",
-                "DB_PORT": "5431",
-                "DB_USERNAME": "postgres",
-                "DB_PASSWORD": "postgres",
-                "DB_DATABASE": "marketplace_auditor",
-                //"RANDOMIZE_TRANSACTIONS": "true"
-                //"DB_LOGGING": "true",
-                //"NODE_OPTIONS": "--enable-source-maps"
-            }
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Run JS Server",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "runtimeExecutable": "node",
-            "args": [
-                "-r",
-                "${workspaceFolder}/dist/express/src/server/util/ModuleResolver.js",
-                "${workspaceFolder}/dist/express/src/server/index.js"
-            ],
-            "sourceMaps": true,
-            "smartStep": true,
-            "env": {
-                "NODE_ENV": "development",
-                "DB_HOST": "127.0.0.1",
-                "DB_PORT": "5431",
-                "DB_USERNAME": "postgres",
-                "DB_PASSWORD": "postgres",
-                "DB_DATABASE": "marketplace_auditor",
-            }
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Run Jobs",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/node_modules/.bin/ts-node",
-            "args": [
-                "${workspaceFolder}/src/server/cli/runJobs.ts"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "sourceMaps": true,
-            "smartStep": true,
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ],
-            "env": {
-                "NODE_ENV": "development",
-                "DB_HOST": "127.0.0.1",
-                "DB_PORT": "5431",
-                "DB_USERNAME": "postgres",
-                "DB_PASSWORD": "postgres",
-                "DB_DATABASE": "marketplace_auditor",
-                // "DB_LOGGING": "true",
-                //"NODE_OPTIONS": "--enable-source-maps"
-            }
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Validate Transactions",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/node_modules/.bin/ts-node",
-            "args": [
-                "${workspaceFolder}/src/server/cli/runJobs.ts",
-                "--validate-transactions"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ],
-            "sourceMaps": true,
-            "smartStep": true,
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ],
-            "env": {
-                "NODE_ENV": "development",
-                "NODE_OPTIONS": "--enable-source-maps",
-                "DB_HOST": "127.0.0.1",
-                "DB_PORT": "5431",
-                "DB_USERNAME": "postgres",
-                "DB_PASSWORD": "postgres",
-                "DB_DATABASE": "marketplace_auditor",
-                // "DB_LOGGING": "true"
-            }
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Debug Jest Tests",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/node_modules/.bin/jest",
-            "args": [
-                "--runInBand",
-                "--config",
-                "${workspaceFolder}/jest.config.js"
-            ],
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
-            "disableOptimisticBPs": true,
-            "smartStep": true,
-            "windows": {
-                "program": "${workspaceFolder}/node_modules/jest/bin/jest"
-            },
-            "sourceMaps": true,
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ],
-            "env": {
-                "NODE_ENV": "test",
-                "NODE_OPTIONS": "--enable-source-maps"
-            }
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Express Server",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
+      "runtimeArgs": ["--tsconfig", "src/server/tsconfig.json"],
+      "program": "${workspaceFolder}/src/server/index.ts",
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "sourceMaps": true,
+      "smartStep": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "5431",
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_DATABASE": "marketplace_auditor"
+        // "RANDOMIZE_TRANSACTIONS": "true"
+        // "DB_LOGGING": "true"
+        // "NODE_OPTIONS": "--enable-source-maps"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run JS Server",
+      "program": "${workspaceFolder}/dist/server/src/server/index.js",
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "sourceMaps": true,
+      "smartStep": true,
+      "console": "integratedTerminal",
+      "preLaunchTask": "build:server",
+      "env": {
+        "NODE_ENV": "development",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "5431",
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_DATABASE": "marketplace_auditor"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Jobs",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
+      "runtimeArgs": ["--tsconfig", "src/server/tsconfig.json"],
+      "program": "${workspaceFolder}/src/server/cli/runJobs.ts",
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "sourceMaps": true,
+      "smartStep": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "5431",
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_DATABASE": "marketplace_auditor"
+        // "DB_LOGGING": "true"
+        // "NODE_OPTIONS": "--enable-source-maps"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Validate Transactions",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
+      "runtimeArgs": ["--tsconfig", "src/server/tsconfig.json"],
+      "program": "${workspaceFolder}/src/server/cli/runJobs.ts",
+      "args": ["--validate-transactions"],
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "sourceMaps": true,
+      "smartStep": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development",
+        "NODE_OPTIONS": "--enable-source-maps",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "5431",
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "postgres",
+        "DB_DATABASE": "marketplace_auditor"
+        // "DB_LOGGING": "true"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Jest Tests",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--runInBand",
+        "--config",
+        "${workspaceFolder}/jest.config.cjs"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "smartStep": true,
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "env": {
+        "NODE_ENV": "test",
+        "NODE_OPTIONS": "--enable-source-maps"
+      }
+    }
+  ]
 }

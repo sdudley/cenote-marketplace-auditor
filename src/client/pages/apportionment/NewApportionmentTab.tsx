@@ -6,7 +6,7 @@ import {
     Typography
 } from '@mui/material';
 import { Dayjs } from 'dayjs';
-import { MonthlyAggregateApportionmentResponse } from '#common/types/apportionment';
+import { MonthlyAggregateApportionmentResponse } from '#common/types/apportionment.js';
 import { ApportionmentForm } from './styles';
 import { getDefaultPurchaseMonth, PurchaseMonthPicker, purchaseMonthFromDayjs } from './PurchaseMonthPicker';
 import { ApportionmentResultsDisplay } from './ApportionmentResultsDisplay';

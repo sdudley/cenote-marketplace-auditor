@@ -1,4 +1,4 @@
-import { TransactionData, TransactionDiscount } from '#common/types/marketplace';
+import { TransactionData, TransactionDiscount } from '#common/types/marketplace.js';
 
 export const handleExportTransaction = (opts: { transactionData: TransactionData; suffix?: string }): void => {
     const { transactionData, suffix } = opts;

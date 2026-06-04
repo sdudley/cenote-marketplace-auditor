@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../config/types';
-import { UserDao } from '../../database/dao/UserDao';
-import { UserType } from '#common/types/userType';
-import { validatePassword } from '#common/util/passwordValidation';
+import { TYPES } from '../../config/types.js';
+import { UserDao } from '../../database/dao/UserDao.js';
+import { UserType } from '#common/types/userType.js';
+import { validatePassword } from '#common/util/passwordValidation.js';
 import passport from 'passport';
 
 @injectable()

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, CircularProgress, Alert, Box } from '@mui/material';
 import { PlayArrow, CheckCircle, Error as ErrorIcon, Schedule } from '@mui/icons-material';
-import { JobType } from '#common/entities/JobStatus';
+import { JobType } from '#common/entities/JobStatus.js';
 import { PageContainer, PageTitle } from '../styles';
 import { JobList, JobCard, JobInfo, JobStatus, StartAllButton, StartJobButton } from './styles';
 

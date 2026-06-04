@@ -1,5 +1,5 @@
-import { buildYearlyApportionmentFromMonths } from '../apportionmentAggregation';
-import { MonthlyAggregateApportionmentEntry } from '#common/types/apportionment';
+import { buildYearlyApportionmentFromMonths } from '../apportionmentAggregation.js';
+import { MonthlyAggregateApportionmentEntry } from '#common/types/apportionment.js';
 
 describe('buildYearlyApportionmentFromMonths', () => {
     const months: MonthlyAggregateApportionmentEntry[] = [

@@ -13,7 +13,7 @@ import {
     Button,
 } from '@mui/material';
 import { Search as SearchIcon, Settings as SettingsIcon } from '@mui/icons-material';
-import { TransactionQuerySortType, TransactionResult, AppInfo } from '#common/types/apiTypes';
+import { TransactionQuerySortType, TransactionResult, AppInfo } from '#common/types/apiTypes.js';
 import { StyledTableContainer, TableScrollWrapper, TableWrapper, LoadingOverlay, TableContainer, StyledTable, StyledTableHead, StyledTableBody, PaginationWrapper } from '../../components/styles';
 import { TableWithMeasuredFooter } from '../../components/TableWithMeasuredFooter';
 import { TransactionDetailsDialog } from './TransactionDetailsDialog';

@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, JoinColumn } from 'typeorm';
-import { LicenseVersion } from './LicenseVersion';
-import type { LicenseData } from '../types/marketplace';
-import { Transaction } from './Transaction';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, Index, type Relation } from 'typeorm';
+import type { LicenseVersion } from './LicenseVersion.js';
+import type { LicenseData } from '../types/marketplace.js';
+import type { Transaction } from './Transaction.js';
 
 @Entity()
 export class License {

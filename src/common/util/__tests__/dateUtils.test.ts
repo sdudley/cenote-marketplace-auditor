@@ -1,4 +1,4 @@
-import { isoDateMath } from '../dateUtils';
+import { isoDateMath } from '../dateUtils.js';
 
 describe('isoDateMath', () => {
     it('should add days to a date', () => {

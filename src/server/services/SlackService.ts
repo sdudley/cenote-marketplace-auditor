@@ -1,16 +1,16 @@
 import { inject, injectable } from 'inversify';
 import { WebClient, KnownBlock, Block } from '@slack/web-api';
-import { ConfigDao } from '#server/database/dao/ConfigDao';
-import { ConfigKey } from '#common/types/configItem';
-import { SlackChannelType } from '#common/types/slackChannel';
-import { TYPES } from '#server/config/types';
-import { encodeSlackText } from '#server/util/SlackUtils';
-import { formatCurrency } from '#common/util/formatCurrency';
-import { dateDiff } from '#common/util/dateUtils';
-import { Transaction } from '#common/entities/Transaction';
-import { License } from '#common/entities/License';
-import { LicenseData } from '#common/types/marketplace';
-import { TransactionValidationResult } from './transactionValidation/types';
+import { ConfigDao } from '#server/database/dao/ConfigDao.js';
+import { ConfigKey } from '#common/types/configItem.js';
+import { SlackChannelType } from '#common/types/slackChannel.js';
+import { TYPES } from '#server/config/types.js';
+import { encodeSlackText } from '#server/util/SlackUtils.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
+import { dateDiff } from '#common/util/dateUtils.js';
+import { Transaction } from '#common/entities/Transaction.js';
+import { License } from '#common/entities/License.js';
+import { LicenseData } from '#common/types/marketplace.js';
+import { TransactionValidationResult } from './transactionValidation/types.js';
 
 export type SlackBlock = (KnownBlock | Block);
 

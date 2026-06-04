@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../config/types';
-import { SchedulerService } from '../../services/SchedulerService';
-import { ConfigDao } from '../../database/dao/ConfigDao';
-import { ConfigKey } from '#common/types/configItem';
+import { TYPES } from '../../config/types.js';
+import { SchedulerService } from '../../services/SchedulerService.js';
+import { ConfigDao } from '../../database/dao/ConfigDao.js';
+import { ConfigKey } from '#common/types/configItem.js';
 
 @injectable()
 export class SchedulerRoute {

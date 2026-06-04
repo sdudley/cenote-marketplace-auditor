@@ -1,5 +1,5 @@
-import { LicenseData } from '#common/types/marketplace';
-import { computeJsonPaths, normalizeObject } from './objectUtils';
+import { LicenseData } from '#common/types/marketplace.js';
+import { computeJsonPaths, normalizeObject } from './objectUtils.js';
 
 export type LicenseHistorySnapshot = LicenseData & { recordCreatedDate?: string };
 

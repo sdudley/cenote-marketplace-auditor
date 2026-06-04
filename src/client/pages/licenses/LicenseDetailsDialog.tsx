@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
-import { LicenseResult } from '#common/types/apiTypes';
+import { LicenseResult } from '#common/types/apiTypes.js';
 import { JsonTreeView } from '../../components/JsonTreeView';
 import {
     InfoTableBox,
@@ -21,12 +21,12 @@ import {
     TreeViewScrollContainer,
     TreeViewScrollContent
 } from '../../components/styles';
-import { collectIds } from '#client/util/collectIds';
+import { collectIds } from '#client/util/collectIds.js';
 import { CloseButton } from '../../components/CloseButton';
-import { isoStringWithDateAndTime } from '#common/util/dateUtils';
+import { isoStringWithDateAndTime } from '#common/util/dateUtils.js';
 import { LicenseVersionListDialog } from './LicenseVersionListDialog';
 import { handleExportLicense } from './util';
-import { getDisplayId } from '#client/util/displayIdUtils';
+import { getDisplayId } from '#client/util/displayIdUtils.js';
 
 interface LicenseDetailsProps {
     license: LicenseResult | null;

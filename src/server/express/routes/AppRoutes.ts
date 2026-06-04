@@ -1,21 +1,21 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../config/types';
-import { AddonDao } from '../../database/dao/AddonDao';
-import { PricingDao } from '../../database/dao/PricingDao';
+import { TYPES } from '../../config/types.js';
+import { AddonDao } from '../../database/dao/AddonDao.js';
+import { PricingDao } from '../../database/dao/PricingDao.js';
 import {
     AppInfo,
     AppPricingPeriodDetail,
     AppPricingPeriodSummary,
     AppPricingSaveRequest,
     AppUpdateRequest
-} from '#common/types/apiTypes';
-import { requireAdmin } from '../middleware/adminMiddleware';
-import { DeploymentType } from '#common/types/marketplace';
-import { Pricing } from '#common/entities/Pricing';
-import { PricingService } from '#server/services/PricingService';
-import { isDateOnlyString, validatePricingPeriods } from '#common/util/pricingPeriodValidation';
-import { userTierSorter } from '#common/util/userTierSorter';
+} from '#common/types/apiTypes.js';
+import { requireAdmin } from '../middleware/adminMiddleware.js';
+import { DeploymentType } from '#common/types/marketplace.js';
+import { Pricing } from '#common/entities/Pricing.js';
+import { PricingService } from '#server/services/PricingService.js';
+import { isDateOnlyString, validatePricingPeriods } from '#common/util/pricingPeriodValidation.js';
+import { userTierSorter } from '#common/util/userTierSorter.js';
 
 const DEPLOYMENT_TYPES: DeploymentType[] = ['cloud', 'server', 'datacenter'];
 

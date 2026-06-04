@@ -1,4 +1,4 @@
-import { TransactionData, TransactionDiscountType } from "#common/types/marketplace";
+import { TransactionData, TransactionDiscountType } from "#common/types/marketplace.js";
 
 export const sumDiscountArrayForTransaction = (opts: { data: TransactionData; type?: TransactionDiscountType; }) => {
     const { data, type } = opts;

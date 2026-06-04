@@ -1,5 +1,5 @@
 import React from 'react';
-import { JsonDiffObject, JsonDelta } from '#common/util/objectDiff';
+import { JsonDiffObject, JsonDelta } from '#common/util/objectDiff.js';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import {
     TreeContainer,

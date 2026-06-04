@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
-import { TransactionResult } from '#common/types/apiTypes';
+import { TransactionResult } from '#common/types/apiTypes.js';
 import { JsonTreeView } from '../../components/JsonTreeView';
 import {
     InfoTableBox,
@@ -21,13 +21,13 @@ import {
     TreeViewScrollContainer,
     TreeViewScrollContent
 } from '../../components/styles';
-import { collectIds } from '#client/util/collectIds';
+import { collectIds } from '#client/util/collectIds.js';
 import { CloseButton } from '../../components/CloseButton';
-import { isoStringWithDateAndTime } from '#common/util/dateUtils';
+import { isoStringWithDateAndTime } from '#common/util/dateUtils.js';
 import { formatTransactionData } from './transactionUtils';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { handleExportTransaction } from './util';
-import { getDisplayId } from '#client/util/displayIdUtils';
+import { getDisplayId } from '#client/util/displayIdUtils.js';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;

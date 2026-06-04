@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { DataSource, Repository, Not, IsNull } from 'typeorm';
-import { TYPES } from '../../config/types';
-import { JobStatus, JobType } from '#common/entities/JobStatus';
+import { TYPES } from '../../config/types.js';
+import { JobStatus, JobType } from '#common/entities/JobStatus.js';
 
 @injectable()
 export class JobDao {

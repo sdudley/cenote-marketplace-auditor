@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../config/types';
-import { TransactionDao } from '../../database/dao/TransactionDao';
-import { TransactionReconcileDao } from '../../database/dao/TransactionReconcileDao';
-import { isUUID } from 'validator';
-import { CURRENT_RECONCILER_VERSION } from "#common/config/versions";
+import { TYPES } from '../../config/types.js';
+import { TransactionDao } from '../../database/dao/TransactionDao.js';
+import { TransactionReconcileDao } from '../../database/dao/TransactionReconcileDao.js';
+import { isUUID } from '#common/util/validator.js';
+import { CURRENT_RECONCILER_VERSION } from "#common/config/versions.js";
 
 interface ReconcileRequestBody {
     reconciled: boolean;

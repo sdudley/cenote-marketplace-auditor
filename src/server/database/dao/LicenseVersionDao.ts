@@ -1,9 +1,9 @@
-import { LicenseVersion } from "#common/entities/LicenseVersion";
-import { License } from "#common/entities/License";
-import { TYPES } from "#server/config/types";
+import { LicenseVersion } from "#common/entities/LicenseVersion.js";
+import { License } from "#common/entities/License.js";
+import { TYPES } from "#server/config/types.js";
 import { inject, injectable } from "inversify";
 import { DataSource, Repository, In } from "typeorm";
-import { isUUID } from "validator";
+import { isUUID } from '#common/util/validator.js';
 
 @injectable()
 export class LicenseVersionDao {

@@ -1,5 +1,5 @@
-import { userTierSorter } from '#common/util/userTierSorter';
-import { AppPricingInfoDto } from '#common/types/apiTypes';
+import { userTierSorter } from '#common/util/userTierSorter.js';
+import { AppPricingInfoDto } from '#common/types/apiTypes.js';
 
 export const DEPLOYMENT_TYPE_OPTIONS = [
     { value: 'cloud', label: 'Cloud' },

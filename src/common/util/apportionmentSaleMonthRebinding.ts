@@ -1,4 +1,4 @@
-import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing';
+import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing.js';
 
 function roundCurrency(value: number): number {
     return Math.round(value * 100) / 100;

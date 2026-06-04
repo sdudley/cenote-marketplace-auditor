@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tooltip } from '@mui/material';
 import { InfoOutlined } from '@mui/icons-material';
-import { TransactionResult } from '#common/types/apiTypes';
+import { TransactionResult } from '#common/types/apiTypes.js';
 import { StatusDot, StatusControlsBox, StatusIconButton } from '../../components/styles';
 
 interface ReconciliationControlsProps {

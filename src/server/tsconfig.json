@@ -1,11 +1,15 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "outDir": "../../dist/server",
     "rootDir": "../..",
     "baseUrl": "../..",
     "paths": {
-      "#*": ["src/*"]
+      "#common/*": ["./src/common/*"],
+      "#server/*": ["./src/server/*"],
+      "#client/*": ["./src/client/*"]
     }
   },
   "include": [
@@ -13,5 +17,12 @@
     "../common/**/*",
     "./types/**/*"
   ],
-  "exclude": ["node_modules", "cli", "**/*.test.ts", "dist"]
+  "exclude": [
+    "node_modules",
+    "cli",
+    "**/*.test.ts",
+    "**/__tests__/**",
+    "../common/**/__tests__/**",
+    "dist"
+  ]
 }

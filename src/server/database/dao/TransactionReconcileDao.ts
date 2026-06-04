@@ -1,9 +1,9 @@
 import { DataSource, Repository } from "typeorm";
-import { TransactionReconcile } from "#common/entities/TransactionReconcile";
-import { Transaction } from "#common/entities/Transaction";
+import { TransactionReconcile } from "#common/entities/TransactionReconcile.js";
+import { Transaction } from "#common/entities/Transaction.js";
 import { inject, injectable } from "inversify";
-import { TYPES } from "../../config/types";
-import { TransactionReconcileNote } from "#common/entities/TransactionReconcileNote";
+import { TYPES } from "../../config/types.js";
+import { TransactionReconcileNote } from "#common/entities/TransactionReconcileNote.js";
 
 export interface RecordReconcileOpts {
     transaction: Transaction;

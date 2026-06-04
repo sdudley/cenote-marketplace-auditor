@@ -1,7 +1,7 @@
-import { Transaction } from "#common/entities/Transaction";
-import { TYPES } from "#server/config/types";
+import { Transaction } from "#common/entities/Transaction.js";
+import { TYPES } from "#server/config/types.js";
 import { inject, injectable } from "inversify";
-import { LicenseDao } from "#server/database/dao/LicenseDao";
+import { LicenseDao } from "#server/database/dao/LicenseDao.js";
 
 @injectable()
 export class TransactionSandboxService {

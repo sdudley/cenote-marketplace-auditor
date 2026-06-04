@@ -1,7 +1,7 @@
-import { PricingTierResult } from '#common/types/pricingTierResult';
-import { BillingPeriod, HostingType, SaleType, EnhancedLicenseType } from '#common/types/marketplace';
-import { Transaction } from '#common/entities/Transaction';
-import { TransactionDiscount, ProratedDetails } from '#common/types/marketplace';
+import { PricingTierResult } from '#common/types/pricingTierResult.js';
+import { BillingPeriod, HostingType, SaleType, EnhancedLicenseType } from '#common/types/marketplace.js';
+import { Transaction } from '#common/entities/Transaction.js';
+import { TransactionDiscount, ProratedDetails } from '#common/types/marketplace.js';
 
 /** Prorated (MQB) segment: users added on a given date, charged until maintenance end */
 export type ProratedDetail = ProratedDetails;

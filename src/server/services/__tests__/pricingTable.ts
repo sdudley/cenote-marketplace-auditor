@@ -1,5 +1,5 @@
-import { PricingTierResult } from "../../../common/types/pricingTierResult";
-import { UserTierPricing } from '../../../common/types/userTiers';
+import { PricingTierResult } from "../../../common/types/pricingTierResult.js";
+import { UserTierPricing } from '../../../common/types/userTiers.js';
 
 export const cloudPerUserPricingTiers : UserTierPricing[] = [
     { userTier: 10, cost: 10 },

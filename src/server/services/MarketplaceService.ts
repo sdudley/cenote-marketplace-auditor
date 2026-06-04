@@ -6,14 +6,14 @@ import {
     InitiateAsyncLicenseCollection,
     PricingData,
     StatusAsyncTransactionCollection,
-} from '#common/types/marketplace';
-import { LicenseHistorySnapshot } from '#common/util/licenseVersionUtils';
-import { components as v3Components, paths as v3Paths } from '#common/types/marketplace-v3-api';
-import { components as commerceComponents } from '#common/types/commerce-api';
-import { TYPES } from '../config/types';
-import { ConfigDao } from '../database/dao/ConfigDao';
-import { ConfigKey } from '#common/types/configItem';
-import { CloudOrServer, LiveOrPending } from '#server/services/types';
+} from '#common/types/marketplace.js';
+import { LicenseHistorySnapshot } from '#common/util/licenseVersionUtils.js';
+import { components as v3Components, paths as v3Paths } from '#common/types/marketplace-v3-api.js';
+import { components as commerceComponents } from '#common/types/commerce-api.js';
+import { TYPES } from '../config/types.js';
+import { ConfigDao } from '../database/dao/ConfigDao.js';
+import { ConfigKey } from '#common/types/configItem.js';
+import { CloudOrServer, LiveOrPending } from '#server/services/types.js';
 
 type ListingResponse = v3Paths["/rest/3/product-listing/developer-space/{developerId}"]["get"]["responses"]["200"]["content"]["application/json"];
 type GetLicensesResponse = v3Components['schemas']['Reports_GetLicenses'];

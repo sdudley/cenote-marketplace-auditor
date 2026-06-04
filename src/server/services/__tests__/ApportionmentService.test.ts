@@ -1,6 +1,6 @@
-import { ApportionmentService } from '../ApportionmentService';
-import { Transaction } from '#common/entities/Transaction';
-import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing';
+import { ApportionmentService } from '../ApportionmentService.js';
+import { Transaction } from '#common/entities/Transaction.js';
+import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing.js';
 
 describe('ApportionmentService', () => {
     const createTransaction = (

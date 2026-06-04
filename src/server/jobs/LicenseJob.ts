@@ -1,17 +1,17 @@
 import { Readable } from 'stream';
-import StreamArray from 'stream-json/streamers/StreamArray';
-import { License } from '#common/entities/License';
-import { LicenseVersion } from '#common/entities/LicenseVersion';
-import { deepEqual, normalizeObject, computeJsonPaths } from '#common/util/objectUtils';
-import { printJsonDiff } from '#common/util/jsonDiff';
-import { LicenseData } from '#common/types/marketplace';
-import { IgnoredFieldService } from '../services/IgnoredFieldService';
-import { TYPES } from '../config/types';
+import StreamArray from 'stream-json/streamers/StreamArray.js';
+import { License } from '#common/entities/License.js';
+import { LicenseVersion } from '#common/entities/LicenseVersion.js';
+import { deepEqual, normalizeObject, computeJsonPaths } from '#common/util/objectUtils.js';
+import { printJsonDiff } from '#common/util/jsonDiff.js';
+import { LicenseData } from '#common/types/marketplace.js';
+import { IgnoredFieldService } from '../services/IgnoredFieldService.js';
+import { TYPES } from '../config/types.js';
 import { inject, injectable } from 'inversify';
-import { LicenseDao } from '../database/dao/LicenseDao';
-import { isProperSubsetOfFields } from '#common/util/fieldUtils';
-import { LicenseVersionDao } from '#server/database/dao/LicenseVersionDao';
-import { SlackLicenseData, SlackService } from '#server/services/SlackService';
+import { LicenseDao } from '../database/dao/LicenseDao.js';
+import { isProperSubsetOfFields } from '#common/util/fieldUtils.js';
+import { LicenseVersionDao } from '#server/database/dao/LicenseVersionDao.js';
+import { SlackLicenseData, SlackService } from '#server/services/SlackService.js';
 
 export interface ProcessOneLicenseResult {
     processed: number;

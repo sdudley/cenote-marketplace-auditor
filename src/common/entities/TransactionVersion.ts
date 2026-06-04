@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index, Unique } from 'typeorm';
-import { Transaction } from './Transaction';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Index, Unique, type Relation } from 'typeorm';
+import type { Transaction } from './Transaction.js';
 
 @Entity()
 @Unique(['transaction', 'version'])

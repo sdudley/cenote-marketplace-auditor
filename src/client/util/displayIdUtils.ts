@@ -2,7 +2,7 @@
  * Utility functions for determining display IDs in licenses and transactions
  */
 
-import { LicenseData, TransactionData } from "#common/types/marketplace";
+import { LicenseData, TransactionData } from "#common/types/marketplace.js";
 
 /**
  * Determines the appropriate ID to display based on hosting type and availability

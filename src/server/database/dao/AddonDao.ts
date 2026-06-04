@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { DataSource } from 'typeorm';
-import { Addon } from '#common/entities/Addon';
-import { TYPES } from '../../config/types';
+import { Addon } from '#common/entities/Addon.js';
+import { TYPES } from '../../config/types.js';
 
 @injectable()
 export class AddonDao {

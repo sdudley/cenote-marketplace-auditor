@@ -10,7 +10,7 @@ import {
     TableHead,
     TableRow
 } from '@mui/material';
-import { AppInfo, AppUpdateRequest } from '#common/types/apiTypes';
+import { AppInfo, AppUpdateRequest } from '#common/types/apiTypes.js';
 import {
     ActionButtons,
     ActionsCell,

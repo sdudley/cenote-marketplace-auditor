@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { LicenseList } from '#client/pages/licenses/LicenseList';
+import { LicenseList } from '#client/pages/licenses/LicenseList.js';
 import { PageContainer, PageTitle } from '../styles';
 
 export const LicensesPage: React.FC = () => {

@@ -1,21 +1,21 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { injectable, inject } from 'inversify';
-import { EXPRESS_TYPES } from '../config/expressTypes';
-import { TransactionRoute } from './TransactionRoute';
-import { TransactionVersionRoute } from './TransactionVersionRoute';
-import { TransactionReconcileRoute } from './TransactionReconcileRoute';
-import { ConfigRoute } from './ConfigRoute';
-import { JobRoute } from './JobRoute';
-import { LicenseRoute } from './LicenseRoute';
-import { LicenseVersionRoute } from './LicenseVersionRoute';
-import { SchedulerRoute } from './SchedulerRoute';
-import { TransactionPricingRoute } from './TransactionPricingRoute';
-import { AppRoute } from './AppRoutes';
-import { AuthRoute } from './AuthRoute';
-import { UserRoute } from './UserRoute';
-import { ApportionmentRoute } from './ApportionmentRoute';
-import { requireAuth } from '../middleware/authMiddleware';
-import { requireAdmin } from '../middleware/adminMiddleware';
+import { EXPRESS_TYPES } from '../config/expressTypes.js';
+import { TransactionRoute } from './TransactionRoute.js';
+import { TransactionVersionRoute } from './TransactionVersionRoute.js';
+import { TransactionReconcileRoute } from './TransactionReconcileRoute.js';
+import { ConfigRoute } from './ConfigRoute.js';
+import { JobRoute } from './JobRoute.js';
+import { LicenseRoute } from './LicenseRoute.js';
+import { LicenseVersionRoute } from './LicenseVersionRoute.js';
+import { SchedulerRoute } from './SchedulerRoute.js';
+import { TransactionPricingRoute } from './TransactionPricingRoute.js';
+import { AppRoute } from './AppRoutes.js';
+import { AuthRoute } from './AuthRoute.js';
+import { UserRoute } from './UserRoute.js';
+import { ApportionmentRoute } from './ApportionmentRoute.js';
+import { requireAuth } from '../middleware/authMiddleware.js';
+import { requireAdmin } from '../middleware/adminMiddleware.js';
 
 @injectable()
 export class ApiRouter {

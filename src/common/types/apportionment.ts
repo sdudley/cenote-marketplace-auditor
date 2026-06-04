@@ -1,4 +1,4 @@
-import { HostingType } from '#common/types/marketplace';
+import { HostingType } from '#common/types/marketplace.js';
 
 export interface ApportionmentTransactionRef {
     transactionId: string;

@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
-import { TYPES } from '../../config/types';
-import { Config } from '#common/entities/Config';
+import { TYPES } from '../../config/types.js';
+import { Config } from '#common/entities/Config.js';
 
 type ConfigValue = string | number | boolean;
 

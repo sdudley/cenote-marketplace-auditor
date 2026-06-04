@@ -1,8 +1,8 @@
 import { injectable, inject } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
-import { TYPES } from '../../config/types';
-import { User } from '#common/entities/User';
-import { UserType } from '#common/types/userType';
+import { TYPES } from '../../config/types.js';
+import { User } from '#common/entities/User.js';
+import { UserType } from '#common/types/userType.js';
 import bcrypt from 'bcrypt';
 
 @injectable()

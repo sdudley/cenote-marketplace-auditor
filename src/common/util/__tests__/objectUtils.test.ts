@@ -1,4 +1,4 @@
-import { computeJsonPaths } from '../objectUtils';
+import { computeJsonPaths } from '../objectUtils.js';
 
 describe('computeJsonPaths', () => {
     test('should return empty array for identical objects', () => {

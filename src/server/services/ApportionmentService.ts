@@ -1,19 +1,19 @@
 import { inject, injectable } from 'inversify';
-import { TYPES } from '#server/config/types';
-import { TransactionDao } from '#server/database/dao/TransactionDao';
-import { AddonDao } from '#server/database/dao/AddonDao';
-import { PricingService } from '#server/services/PricingService';
-import { PriceCalculatorService } from '#server/services/PriceCalculatorService';
-import { TransactionValidationService } from '#server/services/transactionValidation/TransactionValidationService';
-import { Transaction } from '#common/entities/Transaction';
-import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing';
+import { TYPES } from '#server/config/types.js';
+import { TransactionDao } from '#server/database/dao/TransactionDao.js';
+import { AddonDao } from '#server/database/dao/AddonDao.js';
+import { PricingService } from '#server/services/PricingService.js';
+import { PriceCalculatorService } from '#server/services/PriceCalculatorService.js';
+import { TransactionValidationService } from '#server/services/transactionValidation/TransactionValidationService.js';
+import { Transaction } from '#common/entities/Transaction.js';
+import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing.js';
 import {
     MonthlyAggregateApportionmentEntry,
     MonthlyAggregateApportionmentResponse
-} from '#common/types/apportionment';
-import { parsePurchaseMonth } from '#common/util/purchaseMonthUtils';
-import { buildYearlyApportionmentFromMonths } from '#common/util/apportionmentAggregation';
-import { rebindApportionmentBeforeSaleMonth } from '#common/util/apportionmentSaleMonthRebinding';
+} from '#common/types/apportionment.js';
+import { parsePurchaseMonth } from '#common/util/purchaseMonthUtils.js';
+import { buildYearlyApportionmentFromMonths } from '#common/util/apportionmentAggregation.js';
+import { rebindApportionmentBeforeSaleMonth } from '#common/util/apportionmentSaleMonthRebinding.js';
 
 @injectable()
 export class ApportionmentService {

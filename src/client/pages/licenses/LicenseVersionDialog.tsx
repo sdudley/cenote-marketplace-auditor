@@ -12,8 +12,8 @@ import {
 } from '@mui/material';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
-import { LicenseVersion } from '#common/entities/LicenseVersion';
-import { LicenseVersionDto } from '#common/util/licenseVersionUtils';
+import { LicenseVersion } from '#common/entities/LicenseVersion.js';
+import { LicenseVersionDto } from '#common/util/licenseVersionUtils.js';
 import {
     VersionDataBox,
     InfoTableBox,
@@ -22,10 +22,10 @@ import {
     TreeViewScrollContent
 } from '../../components/styles';
 import { JsonDiffObjectTreeView } from '../../components/JsonDiffObjectTreeView';
-import { getObjectDiff } from '#common/util/objectDiff';
+import { getObjectDiff } from '#common/util/objectDiff.js';
 import { CloseButton } from '../../components/CloseButton';
-import { collectIdsForDiffObject } from '#client/util/collectIds';
-import { isoStringWithDateAndTime } from '#common/util/dateUtils';
+import { collectIdsForDiffObject } from '#client/util/collectIds.js';
+import { isoStringWithDateAndTime } from '#common/util/dateUtils.js';
 import { handleExportLicense, formatLicenseVersionDiffLabel } from './util';
 
 interface LicenseVersionDialogProps {

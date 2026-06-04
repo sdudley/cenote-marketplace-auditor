@@ -1,6 +1,6 @@
-import { getLicenseDurationInDays, getSubscriptionOverlapDays, getMonthsInDateRange, getDaysInDateRangeForMonth } from "#common/util/licenseDurationCalculator";
-import { UserTierPricing } from '#common/types/userTiers';
-import { deploymentTypeFromHosting, userCountFromTier } from "#common/util/validationUtils";
+import { getLicenseDurationInDays, getSubscriptionOverlapDays, getMonthsInDateRange, getDaysInDateRangeForMonth } from "#common/util/licenseDurationCalculator.js";
+import { UserTierPricing } from '#common/types/userTiers.js';
+import { deploymentTypeFromHosting, userCountFromTier } from "#common/util/validationUtils.js";
 import {
     ACADEMIC_CLOUD_PRICE_RATIO,
     ACADEMIC_DC_PRICE_RATIO_CURRENT_CONF_10K,
@@ -11,15 +11,15 @@ import {
     COMMUNITY_CLOUD_PRICE_RATIO,
     DC_DISCOUNT_RATIO,
     SOCIAL_IMPACT_GLOBAL_ACCESS_CLOUD_PRICE_RATIO
-} from "#server/util/validationConstants";
+} from "#server/util/validationConstants.js";
 import { injectable } from "inversify";
-import { DeploymentType, EnhancedLicenseType, HostingType } from "#common/types/marketplace";
-import { PriceCalcDescriptor, PriceCalcOpts, PriceResult } from '#server/services/types';
-import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing';
-import { formatCurrency } from "#common/util/formatCurrency";
-import { isDiscountedLicenseType, isCommunityLicense } from "#server/util/communityLicense";
-import { isoStringWithOnlyDate } from "#common/util/dateUtils";
-import { hasProratedDetails } from "#common/util/mqbUtils";
+import { DeploymentType, EnhancedLicenseType, HostingType } from "#common/types/marketplace.js";
+import { PriceCalcDescriptor, PriceCalcOpts, PriceResult } from '#server/services/types.js';
+import { TransactionMonthlyApportionmentEntry } from '#common/types/transactionPricing.js';
+import { formatCurrency } from "#common/util/formatCurrency.js";
+import { isDiscountedLicenseType, isCommunityLicense } from "#server/util/communityLicense.js";
+import { isoStringWithOnlyDate } from "#common/util/dateUtils.js";
+import { hasProratedDetails } from "#common/util/mqbUtils.js";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
 

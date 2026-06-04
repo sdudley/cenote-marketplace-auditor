@@ -1,18 +1,18 @@
 import { ColumnConfig } from '../../components/ColumnConfig';
-import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes';
-import { WrappedLabel, EntitlementIdLink } from '#client/components/styles';
-import { formatCurrency } from '#common/util/formatCurrency';
-import { isoStringWithOnlyDate } from '#common/util/dateUtils';
-import { dateDiff } from '#common/util/dateUtils';
+import { TransactionQuerySortType, TransactionResult } from '#common/types/apiTypes.js';
+import { WrappedLabel, EntitlementIdLink } from '#client/components/styles.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
+import { isoStringWithOnlyDate } from '#common/util/dateUtils.js';
+import { dateDiff } from '#common/util/dateUtils.js';
 import { HighlightIfSignificantlyDifferent } from '../../components/HighlightIfSignificantlyDifferent';
 import { sumDiscountArrayForTransaction } from '#common/util/transactionDiscounts.js';
-import { TransactionDiscount } from '#common/types/marketplace';
+import { TransactionDiscount } from '#common/types/marketplace.js';
 import { EmphasizedAnnotation } from '../../components/styles';
 import { mapDiscountTypeToDescription } from './util';
 import { StatusCell, ReconciliationHeaderCell, MqbAnnotation } from '../../components/styles';
-import { isMQBTransaction } from '#common/util/mqbUtils';
+import { isMQBTransaction } from '#common/util/mqbUtils.js';
 import { ReconciliationControls } from './ReconciliationControls';
-import { getTransactionDisplayId } from '#client/util/displayIdUtils';
+import { getTransactionDisplayId } from '#client/util/displayIdUtils.js';
 
 // Define the context type for transaction cell rendering
 export interface TransactionCellContext {

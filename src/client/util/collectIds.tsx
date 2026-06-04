@@ -1,4 +1,4 @@
-import { JsonDiffObject } from '#common/util/objectDiff';
+import { JsonDiffObject } from '#common/util/objectDiff.js';
 
 export type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 export interface JsonObject { [key: string]: JsonValue }

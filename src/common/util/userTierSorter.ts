@@ -1,6 +1,6 @@
 // Sort tiers by the user count, treating -1 as infinite.
 
-import { UserTierPricing } from '../types/userTiers';
+import { UserTierPricing } from '../types/userTiers.js';
 
 const userTierSorter = (a: UserTierPricing, b: UserTierPricing) => {
     if (a.userTier===-1) {

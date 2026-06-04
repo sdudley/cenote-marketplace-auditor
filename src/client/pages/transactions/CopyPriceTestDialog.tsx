@@ -10,8 +10,8 @@ import {
     Alert
 } from '@mui/material';
 import { CloseButton } from '../../components/CloseButton';
-import { PriceTestSnippetResponse } from '#common/types/transactionPricing';
-import { TransactionData } from '#common/types/marketplace';
+import { PriceTestSnippetResponse } from '#common/types/transactionPricing.js';
+import { TransactionData } from '#common/types/marketplace.js';
 import { buildPriceTestSnippetStrings } from './priceTestSnippetUtils';
 import { SnippetTextAreaBox, SnippetLabel } from '../../components/styles';
 

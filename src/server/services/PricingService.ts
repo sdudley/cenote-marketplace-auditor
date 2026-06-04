@@ -1,15 +1,15 @@
 import { DataSource, Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
-import { Pricing } from '#common/entities/Pricing';
-import { PricingInfo } from '#common/entities/PricingInfo';
-import { isoDateMath } from '#common/util/dateUtils';
+import { Pricing } from '#common/entities/Pricing.js';
+import { PricingInfo } from '#common/entities/PricingInfo.js';
+import { isoDateMath } from '#common/util/dateUtils.js';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../config/types';
-import { UserTierPricing } from '#common/types/userTiers';
-import { userTierSorter } from '#common/util/userTierSorter';
-import { DeploymentType } from '#common/types/marketplace';
-import { PricingTierResult } from '#common/types/pricingTierResult';
-import { Transaction } from '#common/entities/Transaction';
-import { deploymentTypeFromHosting } from "#common/util/validationUtils";
+import { TYPES } from '../config/types.js';
+import { UserTierPricing } from '#common/types/userTiers.js';
+import { userTierSorter } from '#common/util/userTierSorter.js';
+import { DeploymentType } from '#common/types/marketplace.js';
+import { PricingTierResult } from '#common/types/pricingTierResult.js';
+import { Transaction } from '#common/entities/Transaction.js';
+import { deploymentTypeFromHosting } from "#common/util/validationUtils.js";
 
 @injectable()
 export class PricingService {

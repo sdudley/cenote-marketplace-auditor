@@ -1,6 +1,6 @@
-import { Transaction } from "#common/entities/Transaction";
-import { TransactionVersion } from "#common/entities/TransactionVersion";
-import { TransactionValidationResult } from "./types";
+import { Transaction } from "#common/entities/Transaction.js";
+import { TransactionVersion } from "#common/entities/TransactionVersion.js";
+import { TransactionValidationResult } from "./types.js";
 import { injectable } from "inversify";
 
 @injectable()

@@ -3,8 +3,8 @@ import { Typography } from '@mui/material';
 import {
     MonthlyAggregateApportionmentResponse,
     YearlyApportionmentByAddon
-} from '#common/types/apportionment';
-import { formatCurrency } from '#common/util/formatCurrency';
+} from '#common/types/apportionment.js';
+import { formatCurrency } from '#common/util/formatCurrency.js';
 import {
     ApportionmentResultsTable,
     ApportionmentSection,

@@ -1,5 +1,5 @@
 // Helper function to get the type of a config key
-import { ConfigKey, ConfigValueType } from '#common/types/configItem';
+import { ConfigKey, ConfigValueType } from '#common/types/configItem.js';
 
 export function getConfigKeyType(key: ConfigKey): ConfigValueType {
     switch (key) {

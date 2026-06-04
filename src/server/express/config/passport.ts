@@ -1,9 +1,9 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Container } from 'inversify';
-import { TYPES } from '../../config/types';
-import { UserDao } from '../../database/dao/UserDao';
-import { User } from '#common/entities/User';
+import { TYPES } from '../../config/types.js';
+import { UserDao } from '../../database/dao/UserDao.js';
+import { User } from '#common/entities/User.js';
 
 export function configurePassport(container: Container): void {
     const userDao = container.get<UserDao>(TYPES.UserDao);

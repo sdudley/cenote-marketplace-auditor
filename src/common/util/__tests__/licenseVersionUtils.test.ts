@@ -1,5 +1,5 @@
-import { buildLicenseVersionsFromHistory } from '../licenseVersionUtils';
-import { LicenseHistorySnapshot } from '../licenseVersionUtils';
+import { buildLicenseVersionsFromHistory } from '../licenseVersionUtils.js';
+import { LicenseHistorySnapshot } from '../licenseVersionUtils.js';
 
 describe('buildLicenseVersionsFromHistory', () => {
     const baseSnapshot = {

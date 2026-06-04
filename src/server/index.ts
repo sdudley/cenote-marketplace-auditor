@@ -2,35 +2,25 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
+import path from 'node:path';
 import session from 'express-session';
 import passport from 'passport';
-const connectPgSimple = require('connect-pg-simple')(session);
-import { configureContainer } from './express/config/container';
-import { ApiRouter } from './express/routes';
-import { initializeDatabase } from './config/database';
-import { createServer, ViteDevServer } from 'vite';
-import fs from 'fs';
-import { resolveModulePath } from './util/ModuleResolver';
-import { EXPRESS_TYPES } from './express/config/expressTypes';
-import { JobDao } from './database/dao/JobDao';
-import { ConfigDao } from './database/dao/ConfigDao';
-import { TYPES } from './config/types';
-import { SchedulerService } from './services/SchedulerService';
-import { MarketplaceService } from './services/MarketplaceService';
-import { configurePassport } from './express/config/passport';
-import { getSessionSecret } from './util/sessionSecret';
+import connectPgSimpleFactory from 'connect-pg-simple';
+import { configureContainer } from './express/config/container.js';
+import { ApiRouter } from './express/routes/index.js';
+import { initializeDatabase } from './config/database.js';
+import { createServer, type ViteDevServer } from 'vite';
+import fs from 'node:fs';
+import { EXPRESS_TYPES } from './express/config/expressTypes.js';
+import { JobDao } from './database/dao/JobDao.js';
+import { ConfigDao } from './database/dao/ConfigDao.js';
+import { TYPES } from './config/types.js';
+import { SchedulerService } from './services/SchedulerService.js';
+import { MarketplaceService } from './services/MarketplaceService.js';
+import { configurePassport } from './express/config/passport.js';
+import { getSessionSecret } from './util/sessionSecret.js';
 
-// Optionally, patch require to use the resolver for #common
-const Module = require('module');
-const originalRequire = Module.prototype.require;
-Module.prototype.require = function (importPath: any) {
-  if (typeof importPath === 'string' && importPath.startsWith('#common')) {
-    const resolved = resolveModulePath(importPath);
-    return originalRequire.call(this, resolved);
-  }
-  return originalRequire.call(this, importPath);
-};
+const connectPgSimple = connectPgSimpleFactory(session);
 
 async function startServer() {
     console.log('Starting server...');

@@ -2,8 +2,8 @@ import {
     MonthlyAggregateApportionmentEntry,
     YearlyApportionmentByAddon,
     YearlyApportionmentEntry
-} from '#common/types/apportionment';
-import { HostingType } from '#common/types/marketplace';
+} from '#common/types/apportionment.js';
+import { HostingType } from '#common/types/marketplace.js';
 
 function yearFromMonth(month: string): string {
     return month.substring(0, 4);

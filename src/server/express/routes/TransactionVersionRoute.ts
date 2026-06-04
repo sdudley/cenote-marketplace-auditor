@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../config/types';
-import { TransactionVersionDao } from '../../database/dao/TransactionVersionDao';
-import { ConfigDao } from '../../database/dao/ConfigDao';
-import { pseudonymizeTransactionData } from '#common/pseudonymize/pseudonymizeTransaction';
-import { ConfigKey } from '#common/types/configItem';
+import { TYPES } from '../../config/types.js';
+import { TransactionVersionDao } from '../../database/dao/TransactionVersionDao.js';
+import { ConfigDao } from '../../database/dao/ConfigDao.js';
+import { pseudonymizeTransactionData } from '#common/pseudonymize/pseudonymizeTransaction.js';
+import { ConfigKey } from '#common/types/configItem.js';
 
 @injectable()
 export class TransactionVersionRoute {

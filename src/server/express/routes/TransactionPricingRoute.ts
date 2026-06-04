@@ -1,12 +1,12 @@
 import { inject, injectable } from "inversify";
 import { Router, Request, Response } from 'express';
-import { TransactionDao } from "#server/database/dao/TransactionDao";
-import { TYPES } from "#server/config/types";
-import { TransactionValidationService } from "#server/services/transactionValidation/TransactionValidationService";
-import { PricingService } from "#server/services/PricingService";
-import { ApportionmentService } from "#server/services/ApportionmentService";
-import { TransactionPricingResponse, PriceTestSnippetResponse, TransactionMonthlyApportionmentResponse } from "#common/types/transactionPricing";
-import { TransactionData } from "#common/types/marketplace";
+import { TransactionDao } from "#server/database/dao/TransactionDao.js";
+import { TYPES } from "#server/config/types.js";
+import { TransactionValidationService } from "#server/services/transactionValidation/TransactionValidationService.js";
+import { PricingService } from "#server/services/PricingService.js";
+import { ApportionmentService } from "#server/services/ApportionmentService.js";
+import { TransactionPricingResponse, PriceTestSnippetResponse, TransactionMonthlyApportionmentResponse } from "#common/types/transactionPricing.js";
+import { TransactionData } from "#common/types/marketplace.js";
 
 @injectable()
 export class TransactionPricingRoute {

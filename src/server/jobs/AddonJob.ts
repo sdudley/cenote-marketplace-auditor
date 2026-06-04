@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
-import { MarketplaceService } from '../services/MarketplaceService';
-import { TYPES } from '../config/types';
-import { AddonDao } from '../database/dao/AddonDao';
+import { MarketplaceService } from '../services/MarketplaceService.js';
+import { TYPES } from '../config/types.js';
+import { AddonDao } from '../database/dao/AddonDao.js';
 
 @injectable()
 export class AddonJob {

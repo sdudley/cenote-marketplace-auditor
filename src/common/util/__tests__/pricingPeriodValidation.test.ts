@@ -1,4 +1,4 @@
-import { validatePricingPeriods } from '../pricingPeriodValidation';
+import { validatePricingPeriods } from '../pricingPeriodValidation.js';
 
 describe('validatePricingPeriods', () => {
     it('allows non-overlapping adjacent periods', () => {

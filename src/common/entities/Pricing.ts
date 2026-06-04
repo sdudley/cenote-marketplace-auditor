@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Index } from 'typeorm';
-import { PricingInfo } from './PricingInfo';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Index, type Relation } from 'typeorm';
+import type { PricingInfo } from './PricingInfo.js';
 
 @Entity()
 export class Pricing {

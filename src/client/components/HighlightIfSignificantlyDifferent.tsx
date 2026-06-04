@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { formatCurrency } from '#common/util/formatCurrency';
-import { isSignificantlyDifferent } from '#common/util/significantDifferenceTester';
+import { formatCurrency } from '#common/util/formatCurrency.js';
+import { isSignificantlyDifferent } from '#common/util/significantDifferenceTester.js';
 
 export const HighlightIfSignificantlyDifferent = ({value, compareToValue}: {value: number|undefined, compareToValue: number|undefined}) => {
     return <span style={isSignificantlyDifferent(value, compareToValue) ? { color: 'red' } : {}}>

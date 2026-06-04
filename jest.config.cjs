@@ -1,3 +1,4 @@
+/** @type {import('jest').Config} */
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
@@ -5,23 +6,22 @@ module.exports = {
     transform: {
         '^.+\\.tsx?$': ['ts-jest', {
             diagnostics: false,
-            tsconfig: 'tsconfig.json',
+            tsconfig: 'tsconfig.jest.json',
             sourceMap: true,
             inlineSourceMap: false
         }],
     },
     testRegex: '(/__tests__/.*\\.test\\.(ts|js)x?)$',
-    // Enable source maps
     moduleNameMapper: {
-        '^#(.*)$': '<rootDir>/src/$1'
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+        '^#common/(.*)\\.js$': '<rootDir>/src/common/$1',
+        '^#server/(.*)\\.js$': '<rootDir>/src/server/$1',
+        '^#client/(.*)\\.js$': '<rootDir>/src/client/$1'
     },
-    // Ensure source maps are properly loaded
-    setupFiles: ['<rootDir>/jest.setup.js'],
-    // Add these settings to ensure proper source map handling
+    setupFiles: ['<rootDir>/jest.setup.cjs'],
     testEnvironmentOptions: {
         NODE_OPTIONS: '--enable-source-maps'
     },
-    // Exclude test files in the dist/ directory
     testPathIgnorePatterns: [
         '/node_modules/',
         '/dist/',

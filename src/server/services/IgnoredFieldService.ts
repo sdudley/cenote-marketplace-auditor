@@ -1,7 +1,7 @@
 import { DataSource, Repository } from "typeorm";
-import { IgnoredField, RecordType } from "#common/entities/IgnoredField";
+import { IgnoredField, RecordType } from "#common/entities/IgnoredField.js";
 import { injectable, inject } from "inversify";
-import { TYPES } from "../config/types";
+import { TYPES } from "../config/types.js";
 
 @injectable()
 export class IgnoredFieldService {

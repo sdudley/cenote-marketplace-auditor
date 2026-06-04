@@ -1,5 +1,5 @@
-import { components } from './marketplace-api';
-import { components as v3Components } from './marketplace-v3-api';
+import { components } from './marketplace-api.js';
+import { components as v3Components } from './marketplace-v3-api.js';
 
 // Simplified type names to represent individual components imported from the
 // Atlassian Marketplace OpenAPI spec

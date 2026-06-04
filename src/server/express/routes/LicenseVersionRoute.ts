@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../config/types';
-import { LicenseVersionDao } from '../../database/dao/LicenseVersionDao';
-import { LicenseDao } from '../../database/dao/LicenseDao';
-import { ConfigDao } from '../../database/dao/ConfigDao';
-import { MarketplaceService } from '../../services/MarketplaceService';
-import { pseudonymizeLicenseData } from '#common/pseudonymize/pseudonymizeLicense';
-import { ConfigKey } from '#common/types/configItem';
-import { buildLicenseVersionsFromHistory } from '#common/util/licenseVersionUtils';
-import { isUUID } from 'validator';
+import { TYPES } from '../../config/types.js';
+import { LicenseVersionDao } from '../../database/dao/LicenseVersionDao.js';
+import { LicenseDao } from '../../database/dao/LicenseDao.js';
+import { ConfigDao } from '../../database/dao/ConfigDao.js';
+import { MarketplaceService } from '../../services/MarketplaceService.js';
+import { pseudonymizeLicenseData } from '#common/pseudonymize/pseudonymizeLicense.js';
+import { ConfigKey } from '#common/types/configItem.js';
+import { buildLicenseVersionsFromHistory } from '#common/util/licenseVersionUtils.js';
+import { isUUID } from '#common/util/validator.js';
 
 @injectable()
 export class LicenseVersionRoute {

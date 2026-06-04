@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { injectable, inject } from 'inversify';
-import { TYPES } from '../../config/types';
-import { JobDao } from '../../database/dao/JobDao';
-import { JobStatus, JobType } from '#common/entities/JobStatus';
-import { JobRunner } from '../../jobs/JobRunner';
+import { TYPES } from '../../config/types.js';
+import { JobDao } from '../../database/dao/JobDao.js';
+import { JobStatus, JobType } from '#common/entities/JobStatus.js';
+import { JobRunner } from '../../jobs/JobRunner.js';
 
 interface JobStatusResponse {
     jobType: JobType;

@@ -1,5 +1,5 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
-import { IgnoredField } from "../../../common/entities/IgnoredField";
+import { IgnoredField } from "../../../common/entities/IgnoredField.js";
 
 // When updating the default list of ignored fields, we must also update the README.md file
 
