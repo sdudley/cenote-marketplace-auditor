@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0] - 2026-06-04
+
+### ✨ Major New Features
+
+- Migrate to **Marketplace REST API v3** to replace the deprecated calls to V.2.
+Configuration now uses **Developer ID** (with automatic resolution from a legacy
+Vendor ID on startup when only the latter is set). Note that this upgrade will
+cause a new version to be created for every existing transaction and license in
+your database, since the V.3 API includes a new "productId" field with every record.
+- **App pricing** can be viewed and edited in the UI (loaded from the V3 pricing APIs).
+- New **Apportionment** page summarizing monthly revenue by app, hosting, and year/month.
+- **Monthly price apportionment** for an individual transaciton is visible in the transaction reconciliation dialog.
+- **Atlassian's view of license history**: new button added to license details dialog to display historical license versions, fetched in real time from the Marketplace API, which may show more or less detail than
+the local database history.
+
+
 ## [0.5.0] - 2026-04-24
 
 ### ✨ Major New Features
