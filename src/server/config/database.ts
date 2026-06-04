@@ -42,7 +42,8 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
-    synchronize: true,
+    synchronize: false,
+    migrationsRun: false,
     logging: databaseLogging,
     namingStrategy: new SnakeNamingStrategy(),
     entities: [
@@ -71,10 +72,24 @@ export const AppDataSource = new DataSource({
     ],
 });
 
+async function isApplicationSchemaPresent(dataSource: DataSource): Promise<boolean> {
+    const result = await dataSource.query<Array<{ exists: boolean }>>(`
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables
+            WHERE table_schema = 'public' AND table_name = 'transaction'
+        ) AS "exists"
+    `);
+    return result[0]?.exists === true;
+}
+
 export async function initializeDatabase() {
     const dataSource = await AppDataSource.initialize();
 
-    // Run migrations
+    if (!await isApplicationSchemaPresent(dataSource)) {
+        console.log('[database] Empty database detected; creating schema from entities.');
+        await dataSource.synchronize();
+    }
+
     await dataSource.runMigrations();
 
     return dataSource;

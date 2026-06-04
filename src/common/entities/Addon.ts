@@ -5,13 +5,13 @@ export class Addon {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column({ default: 'unknown' })
+    @Column({ type: 'varchar', default: 'unknown' })
     parentProduct!: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'varchar', nullable: true })
     productId?: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'varchar', nullable: true })
     name?: string;
 
     @Column({ type: 'date', nullable: true })
@@ -20,10 +20,10 @@ export class Addon {
     @Column({ type: 'date', nullable: true })
     forgeReleaseDate?: string | null;
 
-    @Column({ default: false })
+    @Column({ type: 'boolean', default: false })
     alwaysForge!: boolean;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index({ unique: true })
     addonKey!: string;
 }

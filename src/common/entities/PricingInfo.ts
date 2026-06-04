@@ -6,7 +6,7 @@ export class PricingInfo {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column()
+    @Column({ type: 'int' })
     userTier!: number;
 
     @Column({
@@ -20,7 +20,7 @@ export class PricingInfo {
     })
     cost!: number;
 
-    @ManyToOne(() => Pricing, pricing => pricing.items)
+    @ManyToOne('Pricing', 'items')
     @JoinColumn()
-    pricing!: Pricing;
+    pricing!: Relation<Pricing>;
 }

@@ -10,20 +10,20 @@ export class LicenseVersion {
     @CreateDateColumn()
     createdAt!: Date;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index()
     entitlementId!: string;
 
-    @Column()
+    @Column({ type: 'int' })
     version!: number;
 
     @Column('jsonb')
     @Index('IDX_license_version_data_gin', { synchronize: false })
     data: any;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     diff?: string;
 
-    @ManyToOne(() => License, license => license.versions)
-    license!: License;
+    @ManyToOne('License', 'versions')
+    license!: Relation<License>;
 }

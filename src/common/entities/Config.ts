@@ -11,7 +11,7 @@ export class Config {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index({ unique: true })
     key!: string;
 
@@ -40,6 +40,6 @@ export class Config {
     })
     type!: 'string' | 'number' | 'boolean';
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     description?: string;
 }

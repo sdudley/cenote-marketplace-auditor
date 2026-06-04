@@ -13,9 +13,9 @@ export class TransactionAdjustment {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @ManyToOne(() => Transaction)
+    @ManyToOne('Transaction')
     @JoinColumn()
-    transaction!: Transaction;
+    transaction!: Relation<Transaction>;
 
     @Column('decimal', {
         precision: 14,

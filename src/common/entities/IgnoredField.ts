@@ -7,7 +7,7 @@ export class IgnoredField {
     @PrimaryGeneratedColumn('uuid')
     id!: number;
 
-    @Column()
+    @Column({ type: 'varchar' })
     fieldName!: string;
 
     @Column({

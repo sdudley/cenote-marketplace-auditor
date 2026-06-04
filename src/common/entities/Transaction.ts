@@ -15,28 +15,27 @@ export class Transaction {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index()
     marketplaceTransactionId!: string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index()
     entitlementId!: string;
 
-    @Column()
+    @Column({ type: 'int' })
     currentVersion!: number;
 
-    @ManyToOne(() => License, license => license.transactions)
-    // @JoinColumn({ name: 'entitlement_id', referencedColumnName: 'entitlementId' })
-    license!: License;
+    @ManyToOne('License', 'transactions')
+    license!: Relation<License>;
 
     @Column('jsonb')
     @Index('IDX_transaction_data_gin', { synchronize: false })
     data!: TransactionData;
 
-    @OneToMany(() => TransactionVersion, version => version.transaction)
-    versions!: TransactionVersion[];
+    @OneToMany('TransactionVersion', 'transaction')
+    versions!: Relation<TransactionVersion>[];
 
-    @OneToOne(() => TransactionReconcile, reconcile => reconcile.transaction)
-    reconcile!: TransactionReconcile;
+    @OneToOne('TransactionReconcile', 'transaction')
+    reconcile!: Relation<TransactionReconcile>;
 }

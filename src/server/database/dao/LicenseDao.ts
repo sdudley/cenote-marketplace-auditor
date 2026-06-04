@@ -144,15 +144,7 @@ export class LicenseDao {
 
             queryBuilder.offset(start).limit(limit);
 
-            const rawResults = await queryBuilder.getRawMany();
-
-            const transformer = new RawSqlResultsToEntityTransformer(
-                queryBuilder.expressionMap,
-                this.dataSource.driver,
-                [],
-                []
-            );
-            const licenses = transformer.transform(rawResults, queryBuilder.expressionMap.mainAlias!);
+            const { raw: rawResults, entities: licenses } = await queryBuilder.getRawAndEntities();
 
             const licenseResults = licenses.map((license, index) => {
                 const versionCount = parseInt(rawResults[index].license_versionCount) || 0;

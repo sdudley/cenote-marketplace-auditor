@@ -6,11 +6,11 @@ export class Pricing {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index()
     addonKey!: string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index()
     deploymentType!: string;
 
@@ -23,6 +23,6 @@ export class Pricing {
     @Column({ type: 'date', nullable: true })
     endDate?: string | null;
 
-    @OneToMany(() => PricingInfo, (info: PricingInfo) => info.pricing)
-    items!: PricingInfo[];
+    @OneToMany('PricingInfo', 'pricing')
+    items!: Relation<PricingInfo>[];
 }

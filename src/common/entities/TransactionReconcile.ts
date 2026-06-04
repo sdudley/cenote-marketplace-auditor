@@ -13,17 +13,17 @@ export class TransactionReconcile {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @OneToOne(() => Transaction)
+    @OneToOne('Transaction', 'reconcile')
     @JoinColumn()
-    transaction!: Transaction;
+    transaction!: Relation<Transaction>;
 
-    @Column()
+    @Column({ type: 'int' })
     transactionVersion!: number;
 
-    @Column()
+    @Column({ type: 'boolean' })
     reconciled!: boolean;
 
-    @Column()
+    @Column({ type: 'boolean' })
     automatic!: boolean;
 
     @Column('decimal', {
@@ -46,9 +46,9 @@ export class TransactionReconcile {
         } })
     expectedVendorAmount?: number;
 
-    @Column({ default: 1 })
+    @Column({ type: 'int', default: 1 })
     reconcilerVersion!: number;
 
-    @OneToMany(() => TransactionReconcileNote, (note: TransactionReconcileNote) => note.transactionReconcile)
-    notes!: TransactionReconcileNote[];
+    @OneToMany('TransactionReconcileNote', 'transactionReconcile')
+    notes!: Relation<TransactionReconcileNote>[];
 }

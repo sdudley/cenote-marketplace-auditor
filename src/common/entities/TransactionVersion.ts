@@ -10,20 +10,20 @@ export class TransactionVersion {
     @CreateDateColumn()
     createdAt!: Date;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index()
     entitlementId!: string;
 
-    @Column()
+    @Column({ type: 'int' })
     version!: number;
 
     @Column('jsonb')
     @Index('IDX_transaction_version_data_gin', { synchronize: false })
     data: any;
 
-    @Column({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     diff?: string;
 
-    @ManyToOne(() => Transaction, transaction => transaction.versions)
-    transaction!: Transaction;
+    @ManyToOne('Transaction', 'versions')
+    transaction!: Relation<Transaction>;
 }

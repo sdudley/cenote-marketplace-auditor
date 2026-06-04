@@ -12,10 +12,10 @@ export class TransactionReconcileNote {
     @Column({ type: 'text' })
     note!: string;
 
-    @Column()
+    @Column({ type: 'int' })
     transactionVersion!: number;
 
-    @ManyToOne(() => TransactionReconcile)
+    @ManyToOne('TransactionReconcile', 'notes')
     @JoinColumn()
-    transactionReconcile!: TransactionReconcile;
+    transactionReconcile!: Relation<TransactionReconcile>;
 }

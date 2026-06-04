@@ -123,10 +123,7 @@ class TransactionDao {
         // switching to offset/limit instead of skip/take.
 
         // const rawResults = await queryBuilder.getRawAndEntities();
-        const rawResults = await queryBuilder.getRawMany();
-
-        const transformer = new RawSqlResultsToEntityTransformer(queryBuilder.expressionMap, this.dataSource.driver, [], []);
-        const transactions = transformer.transform(rawResults, queryBuilder.expressionMap.mainAlias!);
+        const { raw: rawResults, entities: transactions } = await queryBuilder.getRawAndEntities();
 
         return { rawResults, transactions };
     }

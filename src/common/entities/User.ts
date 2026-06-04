@@ -12,11 +12,11 @@ export class User {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index({ unique: true })
     email!: string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     passwordHash!: string;
 
     @Column({

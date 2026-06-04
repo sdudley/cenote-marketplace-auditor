@@ -14,21 +14,20 @@ export class License {
     @UpdateDateColumn()
     updatedAt!: Date;
 
-    @Column()
+    @Column({ type: 'varchar' })
     @Index({ unique: true })
     entitlementId!: string;
 
-    @Column()
+    @Column({ type: 'int' })
     currentVersion!: number;
 
     @Column('jsonb')
     @Index('IDX_license_data_gin', { synchronize: false })
     data!: LicenseData;
 
-    @OneToMany(() => LicenseVersion, version => version.license)
-    versions!: LicenseVersion[];
+    @OneToMany('LicenseVersion', 'license')
+    versions!: Relation<LicenseVersion>[];
 
-    @OneToMany(() => Transaction, transaction => transaction.license)
-    // @JoinColumn({ name: 'entitlementId', referencedColumnName: 'entitlementId' })
-    transactions!: Transaction[];
+    @OneToMany('Transaction', 'license')
+    transactions!: Relation<Transaction>[];
 }
