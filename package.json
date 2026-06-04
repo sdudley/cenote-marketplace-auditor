@@ -8,8 +8,14 @@
   "type": "module",
   "main": "dist/server/src/server/index.js",
   "imports": {
-    "#common/*": "./dist/server/src/common/*",
-    "#server/*": "./dist/server/src/server/*",
+    "#common/*": {
+      "development": "./src/common/*",
+      "default": "./dist/server/src/common/*"
+    },
+    "#server/*": {
+      "development": "./src/server/*",
+      "default": "./dist/server/src/server/*"
+    },
     "#client/*": "./src/client/*"
   },
   "scripts": {
@@ -19,7 +25,7 @@
     "build:client:dev": "vite build --mode development",
     "build:client:prod": "vite build --mode production",
     "start": "NODE_ENV=production node dist/server/src/server/index.js",
-    "start:dev": "NODE_ENV=development tsx --tsconfig src/server/tsconfig.json src/server/index.ts",
+    "start:dev": "NODE_ENV=development NODE_OPTIONS='--conditions=development' tsx --tsconfig src/server/tsconfig.json src/server/index.ts",
     "test": "jest",
     "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.608 --output src/common/types/marketplace-api.ts",
     "generate-v3-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.marketplace.v3.json?_v=1.2006.666 --output src/common/types/marketplace-v3-api.ts",

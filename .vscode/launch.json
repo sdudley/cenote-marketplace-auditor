@@ -9,20 +9,29 @@
       "request": "launch",
       "name": "Run Express Server",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
-      "runtimeArgs": ["--tsconfig", "src/server/tsconfig.json"],
+      "runtimeArgs": [
+        "--conditions=development",
+        "--tsconfig",
+        "src/server/tsconfig.json"
+      ],
       "program": "${workspaceFolder}/src/server/index.ts",
       "cwd": "${workspaceFolder}",
-      "skipFiles": ["<node_internals>/**", "node_modules/**"],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "node_modules/**",
+        "${workspaceFolder}/dist/**"
+      ],
       "sourceMaps": true,
       "smartStep": true,
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
+        "${workspaceFolder}/src/**",
+        "!**/node_modules/**",
+        "!**/dist/**"
       ],
       "console": "integratedTerminal",
       "env": {
         "NODE_ENV": "development",
+        "NODE_OPTIONS": "--conditions=development",
         "DB_HOST": "127.0.0.1",
         "DB_PORT": "5431",
         "DB_USERNAME": "postgres",
@@ -30,7 +39,7 @@
         "DB_DATABASE": "marketplace_auditor"
         // "RANDOMIZE_TRANSACTIONS": "true"
         // "DB_LOGGING": "true"
-        // "NODE_OPTIONS": "--enable-source-maps"
+        // "NODE_OPTIONS": "--conditions=development --enable-source-maps"
       }
     },
     {
@@ -58,27 +67,36 @@
       "request": "launch",
       "name": "Run Jobs",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
-      "runtimeArgs": ["--tsconfig", "src/server/tsconfig.json"],
+      "runtimeArgs": [
+        "--conditions=development",
+        "--tsconfig",
+        "src/server/tsconfig.json"
+      ],
       "program": "${workspaceFolder}/src/server/cli/runJobs.ts",
       "cwd": "${workspaceFolder}",
-      "skipFiles": ["<node_internals>/**", "node_modules/**"],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "node_modules/**",
+        "${workspaceFolder}/dist/**"
+      ],
       "sourceMaps": true,
       "smartStep": true,
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
+        "${workspaceFolder}/src/**",
+        "!**/node_modules/**",
+        "!**/dist/**"
       ],
       "console": "integratedTerminal",
       "env": {
         "NODE_ENV": "development",
+        "NODE_OPTIONS": "--conditions=development",
         "DB_HOST": "127.0.0.1",
         "DB_PORT": "5431",
         "DB_USERNAME": "postgres",
         "DB_PASSWORD": "postgres",
         "DB_DATABASE": "marketplace_auditor"
         // "DB_LOGGING": "true"
-        // "NODE_OPTIONS": "--enable-source-maps"
+        // "NODE_OPTIONS": "--conditions=development --enable-source-maps"
       }
     },
     {
@@ -86,22 +104,30 @@
       "request": "launch",
       "name": "Validate Transactions",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
-      "runtimeArgs": ["--tsconfig", "src/server/tsconfig.json"],
+      "runtimeArgs": [
+        "--conditions=development",
+        "--tsconfig",
+        "src/server/tsconfig.json"
+      ],
       "program": "${workspaceFolder}/src/server/cli/runJobs.ts",
       "args": ["--validate-transactions"],
       "cwd": "${workspaceFolder}",
-      "skipFiles": ["<node_internals>/**", "node_modules/**"],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "node_modules/**",
+        "${workspaceFolder}/dist/**"
+      ],
       "sourceMaps": true,
       "smartStep": true,
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
+        "${workspaceFolder}/src/**",
+        "!**/node_modules/**",
+        "!**/dist/**"
       ],
       "console": "integratedTerminal",
       "env": {
         "NODE_ENV": "development",
-        "NODE_OPTIONS": "--enable-source-maps",
+        "NODE_OPTIONS": "--conditions=development --enable-source-maps",
         "DB_HOST": "127.0.0.1",
         "DB_PORT": "5431",
         "DB_USERNAME": "postgres",
