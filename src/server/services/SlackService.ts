@@ -11,6 +11,7 @@ import { Transaction } from '#common/entities/Transaction.js';
 import { License } from '#common/entities/License.js';
 import { LicenseData } from '#common/types/marketplace.js';
 import { TransactionValidationResult } from './transactionValidation/types.js';
+import { getLicenseDisplayId, getTransactionDisplayId } from '#client/util/displayIdUtils.js';
 
 export type SlackBlock = (KnownBlock | Block);
 
@@ -167,7 +168,7 @@ export class SlackService {
             maintenanceStartDate,
             maintenanceEndDate: maintenanceEndDate ?? 'Unknown',
             oldMaintenanceEndDate: oldLicenseData?.maintenanceEndDate,
-            entitlementId: license.entitlementId,
+            entitlementId: getLicenseDisplayId(license.data),
             extended,
             evaluationOpportunitySize
         };
@@ -190,7 +191,7 @@ export class SlackService {
             company: company ?? 'Unknown',
             maintenanceStartDate: maintenanceStartDate,
             maintenanceEndDate: maintenanceEndDate,
-            entitlementId: transaction.entitlementId
+            entitlementId: getTransactionDisplayId(transaction.data)
         };
     }
 
@@ -432,7 +433,7 @@ export class SlackService {
         const sanitizedCompany = company ?? 'Unknown';
         const baseUrl = await this.getBaseUrl();
         const entitlementUrl = `${baseUrl}/transactions?search=${encodeURIComponent(transaction.entitlementId)}`;
-        const entitlementIdText = encodeSlackText(transaction.entitlementId);
+        const entitlementIdText = encodeSlackText(getTransactionDisplayId(transaction.data));
 
         const message = encodeSlackText(`⚠️ Transaction Exception - ${addonName}  - ${sanitizedCompany} (${formatCurrency(vendorDifference)})`);
 
