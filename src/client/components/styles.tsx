@@ -29,7 +29,6 @@ export const KeyColumn = styled(Box)({
 export const ValueColumn = styled(Box)({
     flexGrow: 1,
     cursor: 'inherit',
-    userSelect: 'none'
 });
 
 export const LabelContainer = styled(Box)({
@@ -37,13 +36,11 @@ export const LabelContainer = styled(Box)({
     alignItems: 'center',
     width: '100%',
     cursor: 'inherit',
-    userSelect: 'none'
 });
 
 export const JsonValue = styled(Typography)({
     whiteSpace: 'nowrap',
     cursor: 'inherit',
-    userSelect: 'none'
 }) as typeof Typography;
 
 export const JsonKey = styled(Typography)({
@@ -403,7 +400,6 @@ export const VersionDataBox = styled(Box)({
 const jsonTreeViewItemCursorStyles = {
     '& .MuiTreeItem-label, & .MuiTreeItem-label *': {
         cursor: 'inherit',
-        userSelect: 'none',
     },
     '& .MuiTreeItem-content': {
         cursor: 'default',
@@ -425,7 +421,6 @@ export const TreeContainer = styled(Box)({
 export const TreeValue = styled(Typography)({
     color: '#1A1AA6',
     cursor: 'inherit',
-    userSelect: 'none',
 }) as typeof Typography;
 
 export const TreeValueOld = styled(TreeValue)({
