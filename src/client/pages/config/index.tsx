@@ -269,7 +269,7 @@ export const ConfigPage: React.FC = () => {
                             value={configValues[ConfigKey.AtlassianDeveloperId]}
                             onChange={handleChange(ConfigKey.AtlassianDeveloperId)}
                             fullWidth
-                            helperText="Developer ID (UUID) for Marketplace V3 APIs. If left empty but a vendor ID is configured, it will be resolved automatically on startup. This is also visible in the URL for the Developer console for the develoepr space, such as: https://developer.atlassian.com/console/developer-space/######"
+                            helperText="Developer ID (UUID) for Marketplace V3 APIs. If left empty but a vendor ID is configured, it will be resolved automatically on startup. This is also visible in the URL for the Developer console for the developer space, such as: https://developer.atlassian.com/console/developer-space/######"
                         />
                         <TextField
                             label="Base URL"
