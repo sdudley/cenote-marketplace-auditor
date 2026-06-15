@@ -16,7 +16,38 @@ export class QuoteRoute {
     }
 
     private initializeRoutes() {
+        this.router.get('/details', this.getQuoteDetails.bind(this));
         this.router.get('/', this.getQuotes.bind(this));
+    }
+
+    private async getQuoteDetails(req: Request, res: Response) {
+        try {
+            const quoteNumber = req.query.quoteNumber as string | undefined;
+            const entitlementNumber = req.query.entitlementNumber as string | undefined;
+
+            if (!quoteNumber?.trim()) {
+                res.status(400).json({ error: 'quoteNumber is required' });
+                return;
+            }
+
+            const details = await this.marketplaceService.getQuoteDetails({
+                quoteNumber: quoteNumber.trim(),
+                entitlementNumber: entitlementNumber?.trim() || undefined,
+            });
+            res.json(details);
+        } catch (error) {
+            if (error instanceof MarketplaceApiError) {
+                const status = mapMarketplaceErrorToHttpStatus(error.statusCode);
+                console.error('Atlassian Marketplace API error:', error.message);
+                res.status(status).json({
+                    error: error.message,
+                    upstreamStatus: error.statusCode
+                });
+                return;
+            }
+            console.error('Error fetching quote details from Atlassian:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 
     private async getQuotes(_req: Request, res: Response) {

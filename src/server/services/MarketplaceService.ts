@@ -292,6 +292,36 @@ export class MarketplaceService {
         return quotes;
     }
 
+    async getQuoteDetails(params: {
+        quoteNumber: string;
+        entitlementNumber?: string;
+    }): Promise<v3Components['schemas']['Reports_GetQuoteDetails']> {
+        await this.initializeConfig();
+
+        const url = this.buildUrlWithParams(
+            `${this.baseUrlV3}/reporting/developer-space/${this.developerId}/quotes/details`,
+            {
+                quoteNumber: params.quoteNumber,
+                entitlementNumber: params.entitlementNumber,
+            }
+        );
+        console.log(`Calling Marketplace API: ${url}`);
+
+        try {
+            const response = await axios.get<v3Components['schemas']['Reports_GetQuoteDetails']>(url, {
+                headers: {
+                    'Authorization': await this.getAuthHeader()
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throwMarketplaceApiError(
+                error,
+                `Failed to fetch quote details from Atlassian (${params.quoteNumber})`
+            );
+        }
+    }
+
     /**
      * Start both license exports and return streams of the JSON arrays (one per date range). Caller must consume and destroy the streams.
      */

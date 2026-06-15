@@ -358,6 +358,14 @@ export const TableLoadingCell = styled(StyledTableCell)({
     textAlign: 'center',
 });
 
+export const DialogLoadingBox = styled(Box)({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 240,
+    padding: '32px 16px',
+});
+
 export const TableContainer = styled(Box)(({ theme }) => ({
     width: '100%',
     padding: '16px 16px 0 16px',
