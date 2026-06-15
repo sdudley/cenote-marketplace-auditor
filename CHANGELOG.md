@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0] - 2026-06-15
+
+### ✨ Major New Features
+
+- Support for fetching quotes from the Marketplace API. The new "Quotes" sidebar
+nav item performs a live fetch of accepted quotes from the Marketplace, then displays
+a paginated list of quotes and details.
+
 ## [0.6.0] - 2026-06-04
 
 ### ✨ Major New Features
