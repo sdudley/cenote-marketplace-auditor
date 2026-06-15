@@ -5,6 +5,13 @@ import { isoStringWithOnlyDate } from '#common/util/dateUtils.js';
 
 export interface QuoteCellContext {}
 
+export enum QuoteQuerySortType {
+    CreatedDate = 'quoteCreatedDate',
+    ExpiryDate = 'quoteExpiryDate',
+    StartDate = 'startDate',
+    EndDate = 'endDate',
+}
+
 function formatQuoteDate(date?: string): string {
     if (!date) {
         return '';
@@ -26,11 +33,12 @@ function formatListPrice(listPrice?: number): string {
     return `$${listPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export const defaultQuoteColumns: ColumnConfig<Quote, QuoteCellContext, string>[] = [
+export const defaultQuoteColumns: ColumnConfig<Quote, QuoteCellContext, QuoteQuerySortType>[] = [
     {
         id: 'quoteCreatedDate',
         label: 'Created Date',
         visible: true,
+        sortField: QuoteQuerySortType.CreatedDate,
         renderSimpleCell: (quote) => formatQuoteDate(quote.quoteCreatedDate),
     },
     {
@@ -56,6 +64,7 @@ export const defaultQuoteColumns: ColumnConfig<Quote, QuoteCellContext, string>[
         id: 'quoteExpiryDate',
         label: 'Expiry Date',
         visible: true,
+        sortField: QuoteQuerySortType.ExpiryDate,
         renderSimpleCell: (quote) => formatQuoteDate(quote.quoteExpiryDate),
     },
     {
@@ -85,12 +94,14 @@ export const defaultQuoteColumns: ColumnConfig<Quote, QuoteCellContext, string>[
         id: 'startDate',
         label: 'Start Date',
         visible: true,
+        sortField: QuoteQuerySortType.StartDate,
         renderSimpleCell: (quote) => formatQuoteDate(quote.startDate),
     },
     {
         id: 'endDate',
         label: 'End Date',
         visible: true,
+        sortField: QuoteQuerySortType.EndDate,
         renderSimpleCell: (quote) => formatQuoteDate(quote.endDate),
     },
     {

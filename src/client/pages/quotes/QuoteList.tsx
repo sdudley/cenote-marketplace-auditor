@@ -29,12 +29,13 @@ import { TableWithMeasuredFooter } from '../../components/TableWithMeasuredFoote
 import { QuoteDetailsDialog } from './QuoteDetailsDialog';
 import { ColumnConfigDialog } from '../../components/ColumnConfig';
 import { useColumnConfig } from '../../components/useColumnConfig';
-import { defaultQuoteColumns, QuoteCellContext } from './quoteColumns';
+import { defaultQuoteColumns, QuoteCellContext, QuoteQuerySortType } from './quoteColumns';
 import { renderHeader, renderCell } from '../../components/columnRenderHelpers';
 import { ResponsiveSearchContainer } from '../../components/ResponsiveSearchContainer';
 import { SortOrder } from '../../components/SortableHeader';
 import { useSearchParamState } from '../../hooks/useSearchParamState';
 import { quoteMatchesSearch } from './quoteSearchUtils';
+import { sortQuotes } from './quoteSortUtils';
 
 function getQuoteRowKey(globalIndex: number): string {
     return `quote-row-${globalIndex}`;
@@ -50,6 +51,8 @@ export const QuoteList: React.FC = () => {
     const [showColumnConfig, setShowColumnConfig] = useState(false);
     const [search, setSearch] = useSearchParamState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [sortBy, setSortBy] = useState<QuoteQuerySortType>(QuoteQuerySortType.CreatedDate);
+    const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
 
     const { columns, visibleColumns, updateColumns, isLoaded } = useColumnConfig(
         defaultQuoteColumns,
@@ -122,17 +125,25 @@ export const QuoteList: React.FC = () => {
         }
     };
 
-    const filteredQuotes = quotes.filter((quote) => quoteMatchesSearch(quote, debouncedSearch));
+    const handleSort = (field: QuoteQuerySortType) => {
+        if (field === sortBy) {
+            setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+        } else {
+            setSortBy(field);
+            setSortOrder('DESC');
+        }
+        setPage(0);
+    };
 
-    const paginatedQuotes = filteredQuotes.slice(
+    const filteredQuotes = quotes.filter((quote) => quoteMatchesSearch(quote, debouncedSearch));
+    const sortedQuotes = sortQuotes(filteredQuotes, sortBy, sortOrder);
+
+    const paginatedQuotes = sortedQuotes.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
     );
 
     const cellContext: QuoteCellContext = {};
-    const sortBy = '';
-    const sortOrder: SortOrder = 'DESC';
-    const handleSort = () => {};
 
     return (
         <TableContainer>
@@ -230,7 +241,7 @@ export const QuoteList: React.FC = () => {
                     <PaginationWrapper>
                         <TablePagination
                             component="div"
-                            count={filteredQuotes.length}
+                            count={sortedQuotes.length}
                             page={page}
                             onPageChange={handleChangePage}
                             rowsPerPage={rowsPerPage}
