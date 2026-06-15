@@ -348,6 +348,16 @@ export const LoadingOverlay = styled(Box)({
     zIndex: 1
 });
 
+/** Loading overlay that leaves the sticky table header row visible. */
+export const TableLoadingOverlay = styled(LoadingOverlay)({
+    top: 49,
+});
+
+export const TableLoadingCell = styled(StyledTableCell)({
+    padding: '64px 8px',
+    textAlign: 'center',
+});
+
 export const TableContainer = styled(Box)(({ theme }) => ({
     width: '100%',
     padding: '16px 16px 0 16px',

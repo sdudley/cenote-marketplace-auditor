@@ -16,6 +16,7 @@ import {
 import {
     Receipt as ReceiptIcon,
     CardMembership as CardMembershipIcon,
+    RequestQuote as RequestQuoteIcon,
     Apps as AppsIcon,
     Settings as SettingsIcon,
     PlayArrow,
@@ -78,6 +79,7 @@ export const PageLayout: React.FC = () => {
     const dataMenuItems = [
         { text: 'Transactions', icon: <ReceiptIcon />, path: '/transactions' },
         { text: 'Licenses', icon: <CardMembershipIcon />, path: '/licenses' },
+        { text: 'Quotes', icon: <RequestQuoteIcon />, path: '/quotes' },
     ];
 
     const apportionmentMenuItems = [

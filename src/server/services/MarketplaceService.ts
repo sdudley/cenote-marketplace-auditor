@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import axios from 'axios';
 import { Readable } from 'stream';
+import StreamArray from 'stream-json/streamers/StreamArray.js';
 import {
     InitiateAsyncLicense,
     InitiateAsyncLicenseCollection,
@@ -50,6 +51,7 @@ export class MarketplaceService {
     private username: string = '';
     private password: string = '';
     private developerId: string = '';
+    private quotesExportPromise: Promise<v3Components['schemas']['Quote'][]> | null = null;
 
     constructor(
         @inject(TYPES.ConfigDao) private readonly configDao: ConfigDao
@@ -182,6 +184,22 @@ export class MarketplaceService {
         return response.data as Readable;
     }
 
+    private async collectStreamArray<T>(stream: Readable): Promise<T[]> {
+        const items: T[] = [];
+        const parserStream = StreamArray.withParser();
+        stream.pipe(parserStream as NodeJS.WritableStream);
+
+        try {
+            for await (const data of parserStream as AsyncIterable<{ value: T }>) {
+                items.push(data.value);
+            }
+        } finally {
+            stream.destroy();
+        }
+
+        return items;
+    }
+
     /**
      * Start transaction export and return a stream of the JSON array. Caller must consume and destroy the stream.
      */
@@ -208,6 +226,70 @@ export class MarketplaceService {
 
         console.log(`Streaming transactions from API`);
         return this.getStreamForResultUrl(resultUrl);
+    }
+
+    private fixQuotesExportUrl(url: string): string {
+        // As of 2026-06, Marketplace API V.3 returns broken V.2 URLs in its response
+        if (!/\/rest\/2\/vendors/.test(url)) {
+            return url;
+        }
+
+        const quotesSuffix = url.match(/\/quotes(\/.*)?$/)?.[0];
+        if (!quotesSuffix) {
+            return url;
+        }
+
+        return `/reporting/developer-space/${this.developerId}${quotesSuffix}`;
+    }
+
+    /**
+     * Start quotes export and return all quotes from the JSON array.
+     * Concurrent callers share a single in-flight export.
+     */
+    async getQuotes(): Promise<v3Components['schemas']['Quote'][]> {
+        if (!this.quotesExportPromise) {
+            this.quotesExportPromise = this.fetchQuotesFromAtlassian().finally(() => {
+                this.quotesExportPromise = null;
+            });
+        }
+        return this.quotesExportPromise;
+    }
+
+    private async fetchQuotesFromAtlassian(): Promise<v3Components['schemas']['Quote'][]> {
+        await this.initializeConfig();
+        const today = new Date().toISOString().split('T')[0];
+        const exportUrl = this.buildUrlWithParams(
+            `${this.baseUrlV3}/reporting/developer-space/${this.developerId}/quotes/async/export`,
+            { createdStartDate: '2010-01-01', createdEndDate: today, accept: 'json' }
+        );
+        console.log(`Calling Marketplace API: ${exportUrl}`);
+
+        let exportResponse;
+        try {
+            exportResponse = await axios.post<v3Components['schemas']['Reports_InitiateAsyncExportQuotes']>(
+                exportUrl,
+                {},
+                { headers: { 'Authorization': await this.getAuthHeader(), 'Content-Type': 'application/json' } }
+            );
+        } catch (error) {
+            throwMarketplaceApiError(error, 'Failed to initiate quotes export from Atlassian');
+        }
+
+        const statusHref = this.fixQuotesExportUrl(exportResponse.data._links.status.href);
+        const downloadHref = this.fixQuotesExportUrl(exportResponse.data._links.download.href);
+
+        const resultUrl = await this.pollForCompletion<v3Components['schemas']['Reports_GetStatusAsyncExportQuotes']>(
+            this.baseUrlV3,
+            statusHref,
+            downloadHref,
+            (data) => data.export.status
+        );
+
+        console.log(`Streaming quotes from API`);
+        const stream = await this.getStreamForResultUrl(resultUrl);
+        const quotes = await this.collectStreamArray<v3Components['schemas']['Quote']>(stream);
+        console.log(`Quotes found: ${quotes.length}`);
+        return quotes;
     }
 
     /**

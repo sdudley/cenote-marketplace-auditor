@@ -18,5 +18,6 @@ export const EXPRESS_TYPES = {
     AppRoute: Symbol.for('AppRoute'),
     AuthRoute: Symbol.for('AuthRoute'),
     UserRoute: Symbol.for('UserRoute'),
-    ApportionmentRoute: Symbol.for('ApportionmentRoute')
+    ApportionmentRoute: Symbol.for('ApportionmentRoute'),
+    QuoteRoute: Symbol.for('QuoteRoute')
 };

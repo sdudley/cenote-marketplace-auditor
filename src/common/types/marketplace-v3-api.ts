@@ -39,7 +39,6 @@ export interface paths {
          *       --header 'Accept: application/json' \
          *       --form 'file=@/path/to/your/app-icon.png'
          *     ```
-         *
          */
         post: {
             parameters: {
@@ -69,13 +68,15 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "id": "img-12345-abcdef-67890-ghijkl",
                          *       "mediaType": "image",
                          *       "mimeType": "image/png",
                          *       "name": "app-icon.png",
                          *       "size": 524288
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["MediaV3Response"];
                     };
                 };
@@ -85,7 +86,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
@@ -102,7 +104,8 @@ export interface paths {
                          *           "detail": "Invalid value for file. File size exceeds maximum limit for this image type"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ProductListingValidationErrorList"];
                     };
                 };
@@ -131,12 +134,12 @@ export interface paths {
         /**
          * Get app software mappings for app
          * @description Get mapping of app software id with the corresponding hosting type for the specified app.
-         *
          */
         get: {
             parameters: {
                 query?: {
-                    /** @description Optional hosting type to filter the results.
+                    /**
+                     * @description Optional hosting type to filter the results.
                      *
                      *     Available values:
                      *     - `cloud` - Cloud hosted applications
@@ -144,9 +147,10 @@ export interface paths {
                      *     - `datacenter` - Data Center hosted applications
                      *
                      *     **Default behavior:** If not specified, returns app software for all hosting types.
-                     *      */
+                     */
                     hosting?: "cloud" | "server" | "datacenter";
-                    /** @description Set of compliance boundaries to filter app software (commercial, fedramp_moderate etc)
+                    /**
+                     * @description Set of compliance boundaries to filter app software (commercial, fedramp_moderate etc)
                      *
                      *     **Important Notes:**
                      *     - Valid only for cloud hosted apps; will be ignored for other hosting types.
@@ -158,7 +162,7 @@ export interface paths {
                      *     - `commercial` - Standard commercial compliance boundary
                      *     - `fedramp_moderate` - FedRAMP moderate compliance boundary
                      *     - `isolated_cloud` - Isolated cloud compliance boundary
-                     *      */
+                     */
                     complianceBoundaries?: ("commercial" | "fedramp_moderate" | "isolated_cloud")[];
                 };
                 header?: never;
@@ -176,7 +180,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example [
+                        /**
+                         * @example [
                          *       {
                          *         "appSoftwareId": "acd011b1-1111-45bc-902a-247046a11111",
                          *         "hosting": "cloud",
@@ -189,7 +194,8 @@ export interface paths {
                          *         "hosting": "server",
                          *         "complianceBoundaries": null
                          *       }
-                         *     ] */
+                         *     ]
+                         */
                         "application/json": components["schemas"]["AppSoftwareByAppKeyResponse"][];
                     };
                 };
@@ -199,7 +205,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "f0bca12d-4513-41ca-ae36-802536909cc5",
@@ -209,7 +216,8 @@ export interface paths {
                          *           "detail": "Invalid hosting type provided. Hosting must be one of: cloud, server, datacenter"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -219,7 +227,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "g1dcb23e-5624-52db-bf47-913647b12cc6",
@@ -229,7 +238,8 @@ export interface paths {
                          *           "detail": "Authentication required for API access"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -239,7 +249,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "h2edc34f-6735-63ec-cg58-a24758c23dd7",
@@ -249,7 +260,8 @@ export interface paths {
                          *           "detail": "No app software found for the specified app key 'app-software-123'"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -259,7 +271,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "i3fed45g-7846-74fd-dh69-b35869d34ee8",
@@ -269,7 +282,8 @@ export interface paths {
                          *           "detail": "An unexpected error occurred while processing the request"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -293,7 +307,6 @@ export interface paths {
         /**
          * Get app software versions
          * @description Get a list of versions of the specified app software.
-         *
          */
         get: {
             parameters: {
@@ -328,7 +341,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "links": {
                          *         "self": "/rest/3/app-software/bde122c2-2222-56cd-a13b-358157b22222/versions",
                          *         "next": "/rest/3/app-software/bde122c2-2222-56cd-a13b-358157b22222/versions?cursor=nextPageToken"
@@ -369,7 +383,8 @@ export interface paths {
                          *         }
                          *       ],
                          *       "totalCount": 1
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["AppSoftwareVersionsGetResponse"];
                     };
                 };
@@ -379,7 +394,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "j4gfe56h-8957-85ge-ei7a-c46a7ae45ff9",
@@ -389,7 +405,8 @@ export interface paths {
                          *           "detail": "limit must be between 1 and 50"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -399,7 +416,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "k5hgf67i-9a68-96hf-fj8b-d57b8bf56gga",
@@ -409,7 +427,8 @@ export interface paths {
                          *           "detail": "Authentication required for API access"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -419,7 +438,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "l6ihg78j-ab79-a7ig-gk9c-e68c9cg67hhb",
@@ -429,7 +449,8 @@ export interface paths {
                          *           "detail": "No app software found with the specified ID 'acd011b1-1111-45bc-902a-247046a11111'"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -439,7 +460,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "m7jih89k-bc8a-b8jh-hl0d-f79d0dh78iic",
@@ -449,7 +471,8 @@ export interface paths {
                          *           "detail": "An unexpected error occurred while processing the request"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -472,7 +495,8 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "buildNumber": 1001,
                      *       "versionNumber": "1.0.1",
                      *       "compatibilities": [
@@ -507,7 +531,8 @@ export interface paths {
                      *         "releaseSummary": "Bug fixes and performance improvements",
                      *         "releaseNotes": "This version includes several bug fixes and performance optimizations"
                      *       }
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["AppSoftwareVersionCreateRequest"];
                 };
             };
@@ -527,7 +552,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "n8kji90l-cd9b-c9ki-im1e-g80e1ei89jjd",
@@ -537,7 +563,8 @@ export interface paths {
                          *           "detail": "Build number already exists"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -603,7 +630,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "buildNumber": 1001,
                          *       "versionNumber": "1.0.1",
                          *       "compatibilities": [
@@ -640,7 +668,8 @@ export interface paths {
                          *         "releaseSummary": "Bug fixes and performance improvements",
                          *         "releaseNotes": "This version includes several bug fixes and performance optimizations"
                          *       }
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["AppSoftwareVersionGetResponse"];
                     };
                 };
@@ -667,7 +696,6 @@ export interface paths {
         /**
          * Update app software version
          * @description Update a specific version of the app’s software.
-         *
          */
         put: {
             parameters: {
@@ -683,7 +711,8 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "buildNumber": 1001,
                      *       "versionNumber": "1.0.2",
                      *       "compatibilities": [
@@ -721,7 +750,8 @@ export interface paths {
                      *         "releaseSummary": "Updated version with additional fixes",
                      *         "releaseNotes": "Added new features and fixed critical bugs"
                      *       }
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["AppSoftwareVersionUpdateRequest"];
                 };
             };
@@ -739,7 +769,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "o9lkj01m-de0c-d0lj-jn2f-h91f2fj90kke",
@@ -749,7 +780,8 @@ export interface paths {
                          *           "detail": "A more recent revision is available"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -781,7 +813,6 @@ export interface paths {
         /**
          * Get list of parent software
          * @description Get a list of parent software.
-         *
          */
         get: {
             parameters: {
@@ -803,7 +834,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "links": {
                          *         "self": "/rest/3/parent-software",
                          *         "next": "/rest/3/parent-software?cursor=nextPageToken"
@@ -862,7 +894,8 @@ export interface paths {
                          *           "revision": 1
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ParentSoftwareGetAllResponse"];
                     };
                 };
@@ -886,7 +919,6 @@ export interface paths {
         /**
          * Get parent software
          * @description Get a specified parent software.
-         *
          */
         get: {
             parameters: {
@@ -906,7 +938,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "id": "jira",
                          *       "developerId": "8152414a-4da9-4f4e-bfb5-8118e9f034e2",
                          *       "name": "Jira",
@@ -933,7 +966,8 @@ export interface paths {
                          *       ],
                          *       "state": "active",
                          *       "revision": 1
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ParentSoftwareGetResponse"];
                     };
                 };
@@ -966,7 +1000,6 @@ export interface paths {
         /**
          * Get parent software versions
          * @description Get a list of versions for the specified parent software.
-         *
          */
         get: {
             parameters: {
@@ -991,7 +1024,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "links": {
                          *         "self": "/rest/3/parent-software/jira/versions",
                          *         "next": "/rest/3/parent-software/jira/versions?cursor=nextPageToken"
@@ -1021,7 +1055,8 @@ export interface paths {
                          *           "createdAt": "2022-12-01T10:30:00Z"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ParentSoftwareVersionsGetResponse"];
                     };
                 };
@@ -1054,7 +1089,6 @@ export interface paths {
         /**
          * Get parent software version by build number
          * @description Get the specified version of the specified parent software, by the version’s build number.
-         *
          */
         get: {
             parameters: {
@@ -1076,7 +1110,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "buildNumber": 90001,
                          *       "versionNumber": "9.0.1",
                          *       "hosting": [
@@ -1087,7 +1122,8 @@ export interface paths {
                          *       "state": "active",
                          *       "revision": 1,
                          *       "createdAt": "2023-01-15T10:30:00Z"
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ParentSoftwareVersionGetResponse"];
                     };
                 };
@@ -1120,7 +1156,6 @@ export interface paths {
         /**
          * Get parent software version by version number
          * @description Get the specified version of the specified parent software, by the version’s version number.
-         *
          */
         get: {
             parameters: {
@@ -1142,7 +1177,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "buildNumber": 90001,
                          *       "versionNumber": "9.0.1",
                          *       "hosting": [
@@ -1153,7 +1189,8 @@ export interface paths {
                          *       "state": "active",
                          *       "revision": 1,
                          *       "createdAt": "2023-01-15T10:30:00Z"
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ParentSoftwareVersionGetResponse"];
                     };
                 };
@@ -1186,7 +1223,6 @@ export interface paths {
         /**
          * Get list of access tokens for app software
          * @description Get list of access tokens associated with a specified app software.
-         *
          */
         get: {
             parameters: {
@@ -1209,7 +1245,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "tokens": [
                          *         {
                          *           "token": "at_abc123xyz789",
@@ -1222,7 +1259,8 @@ export interface paths {
                          *           "instance": null
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["AccessTokenCollectionResponse"];
                     };
                 };
@@ -1241,7 +1279,6 @@ export interface paths {
         /**
          * Create access token for app software
          * @description Creates a new access token for the specified app software.
-         *
          */
         post: {
             parameters: {
@@ -1330,7 +1367,6 @@ export interface paths {
          *       --header 'Accept: application/json' \
          *       --form 'file=@/path/to/your/app.jar'
          *     ```
-         *
          */
         post: {
             parameters: {
@@ -1357,7 +1393,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "fileInfo": {
                          *         "logicalFileName": "my-app.jar",
                          *         "size": 1048576,
@@ -1382,7 +1419,8 @@ export interface paths {
                          *           "href": "/rest/3/artifacts/337c40d8-c903-4e28-8498-7cbc372ba578/download"
                          *         }
                          *       }
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["UploadedSoftwareArtifact"];
                     };
                 };
@@ -1392,7 +1430,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
@@ -1402,7 +1441,8 @@ export interface paths {
                          *           "detail": "The uploaded file is not a valid artifact format"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -1470,7 +1510,6 @@ export interface paths {
          *       --header 'Content-Type: application/json' \
          *       --data '{"uri": "https://example.com/myfile.jar"}'
          *     ```
-         *
          */
         post: {
             parameters: {
@@ -1498,7 +1537,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "fileInfo": {
                          *         "logicalFileName": "my-app-1.0.0.jar",
                          *         "size": 2097152,
@@ -1526,7 +1566,8 @@ export interface paths {
                          *           "href": "https://example.com/releases/my-app-1.0.0.jar"
                          *         }
                          *       }
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["RemoteFetchedSoftwareArtifact"];
                     };
                 };
@@ -1536,7 +1577,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "5e7f8a9b-1c2d-3e4f-5a6b-7c8d9e0f1a2b",
@@ -1546,7 +1588,8 @@ export interface paths {
                          *           "detail": "The provided URL is not accessible or does not contain a valid artifact"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -1617,7 +1660,6 @@ export interface paths {
          *       --user 'email@example.com:<api_token>' \
          *       --header 'Accept: application/json'
          *     ```
-         *
          */
         get: {
             parameters: {
@@ -1637,7 +1679,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "fileInfo": {
                          *         "logicalFileName": "my-app-1.0.0.jar",
                          *         "size": 2097152,
@@ -1651,7 +1694,8 @@ export interface paths {
                          *           "href": "/rest/3/artifacts/337c40d8-c903-4e28-8498-7cbc372ba578/download"
                          *         }
                          *       }
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ArtifactBase"];
                     };
                 };
@@ -1661,7 +1705,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "6f8a9b0c-2d3e-4f5a-6b7c-8d9e0f1a2b3c",
@@ -1671,7 +1716,8 @@ export interface paths {
                          *           "detail": "The provided artifact ID is not a valid UUID format"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -1695,7 +1741,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "7a8b9c0d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
@@ -1705,7 +1752,8 @@ export interface paths {
                          *           "detail": "No artifact found with the specified ID"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -1912,7 +1960,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example [
+                        /**
+                         * @example [
                          *       {
                          *         "developerId": "e33e3aca-c9fc-11ed-afa1-0242ac",
                          *         "type": "DEVELOPER_CORE",
@@ -1951,7 +2000,8 @@ export interface paths {
                          *         },
                          *         "version": 1
                          *       }
-                         *     ] */
+                         *     ]
+                         */
                         "application/json": components["schemas"]["DeveloperListings"];
                     };
                 };
@@ -1994,7 +2044,6 @@ export interface paths {
          *     and additional fields like summary, tagLine, images, and tags.
          *
          *     This endpoint has no query parameters.
-         *
          */
         get: {
             parameters: {
@@ -2014,7 +2063,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "productId": "12345678-1234-1234-1234-123456789abc",
                          *       "appKey": "com.example.app.addon",
                          *       "developerId": "87654321-4321-4321-4321-210987654321",
@@ -2109,7 +2159,8 @@ export interface paths {
                          *       "marketingLabels": [
                          *         "jira-servicedesk"
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": {
                             /**
                              * @description Unique identifier for the Marketplace app
@@ -2127,7 +2178,6 @@ export interface paths {
                             /**
                              * @description Short phrase that summarizes what the app does.
                              *     **Display location:** Shown as a heading on the app details page
-                             *
                              * @example Streamline your workflow with powerful integrations
                              */
                             tagLine?: string;
@@ -2232,7 +2282,6 @@ export interface paths {
                              *     - `ARCHIVED` - Archived and no longer active
                              *     - `DELETED` - Marked for deletion
                              *     - `READY_TO_LAUNCH` - Prepared for public release
-                             *
                              * @example PUBLIC
                              * @enum {string}
                              */
@@ -2245,7 +2294,6 @@ export interface paths {
                              *     - `SUBMITTED` - The Marketplace app has been submitted for review
                              *     - `REJECTED` - The Marketplace app review was rejected
                              *     - `NOT_ASSIGNED` - No approval status has been assigned yet
-                             *
                              * @example APPROVED
                              * @enum {string}
                              */
@@ -2283,7 +2331,6 @@ export interface paths {
                                  * @description Indicates app visibility on Cloud hosting platform.
                                  *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                  *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                 *
                                  * @enum {string}
                                  */
                                 cloud?: "site" | "app";
@@ -2291,7 +2338,6 @@ export interface paths {
                                  * @description Indicates app visibility on Server hosting platform.
                                  *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                  *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                 *
                                  * @enum {string}
                                  */
                                 server?: "site" | "app";
@@ -2299,7 +2345,6 @@ export interface paths {
                                  * @description Indicates app visibility on Data Center hosting platform.
                                  *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                  *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                 *
                                  * @enum {string}
                                  */
                                 dataCenter?: "site" | "app";
@@ -2321,11 +2366,12 @@ export interface paths {
                     };
                     content?: never;
                 };
-                /** @description Marketplace app listing not found. This can occur when:
+                /**
+                 * @description Marketplace app listing not found. This can occur when:
                  *     - The productId doesn't exist
                  *     - The Marketplace app is private and you lack access permissions
                  *     - The Marketplace app has been archived or deleted
-                 *      */
+                 */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -2383,7 +2429,6 @@ export interface paths {
          *       ```
          *       PUT /rest/3/product-listing/12345678-1234-1234-1234-123456789abc
          *       ```
-         *
          */
         put: {
             parameters: {
@@ -2397,7 +2442,8 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "appKey": "com.example.updated.addon",
                      *       "developerId": "87654321-4321-4321-4321-210987654321",
                      *       "appName": "Updated Example App",
@@ -2465,7 +2511,8 @@ export interface paths {
                      *         "jira-servicedesk"
                      *       ],
                      *       "revision": 16
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["UpdateProductListingV3Request"];
                 };
             };
@@ -2476,7 +2523,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "productId": "12345678-1234-1234-1234-123456789abc",
                          *       "appKey": "com.example.updated.addon",
                          *       "developerId": "87654321-4321-4321-4321-210987654321",
@@ -2563,7 +2611,8 @@ export interface paths {
                          *       "marketingLabels": [
                          *         "jira-servicedesk"
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": {
                             /**
                              * @description Unique identifier for the Marketplace app
@@ -2581,7 +2630,6 @@ export interface paths {
                             /**
                              * @description Short phrase that summarizes what the app does.
                              *     **Display location:** Shown as a heading on the app details page
-                             *
                              * @example Enhanced workflow automation for modern teams
                              */
                             tagLine?: string;
@@ -2686,7 +2734,6 @@ export interface paths {
                              *     - `ARCHIVED` - Archived and no longer active
                              *     - `DELETED` - Marked for deletion
                              *     - `READY_TO_LAUNCH` - Prepared for public release
-                             *
                              * @example PUBLIC
                              * @enum {string}
                              */
@@ -2699,7 +2746,6 @@ export interface paths {
                              *     - `SUBMITTED` - The Marketplace app has been submitted for review
                              *     - `REJECTED` - The Marketplace app review was rejected
                              *     - `NOT_ASSIGNED` - No approval status has been assigned yet
-                             *
                              * @example SUBMITTED
                              * @enum {string}
                              */
@@ -2737,7 +2783,6 @@ export interface paths {
                                  * @description Indicates app visibility on Cloud hosting platform.
                                  *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                  *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                 *
                                  * @enum {string}
                                  */
                                 cloud?: "site" | "app";
@@ -2745,7 +2790,6 @@ export interface paths {
                                  * @description Indicates app visibility on Server hosting platform.
                                  *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                  *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                 *
                                  * @enum {string}
                                  */
                                 server?: "site" | "app";
@@ -2753,7 +2797,6 @@ export interface paths {
                                  * @description Indicates app visibility on Data Center hosting platform.
                                  *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                  *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                 *
                                  * @enum {string}
                                  */
                                 dataCenter?: "site" | "app";
@@ -2774,7 +2817,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "f7e8d9c0-b1a2-3456-789a-bcdef0123456",
@@ -2791,7 +2835,8 @@ export interface paths {
                          *           "detail": "Invalid value for images.bannerFileId. Must be a valid uuid"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ProductListingValidationErrorList"];
                     };
                 };
@@ -2802,11 +2847,12 @@ export interface paths {
                     };
                     content?: never;
                 };
-                /** @description Marketplace app listing not found. This can occur when:
+                /**
+                 * @description Marketplace app listing not found. This can occur when:
                  *     - The productId doesn't exist
                  *     - The Marketplace app is private and you lack access permissions
                  *     - The Marketplace app has been archived or deleted
-                 *      */
+                 */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -2865,7 +2911,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "links": {
                          *         "self": "/rest/3/product-listing/developer-space/87654321-4321-4321-4321-210987654321?limit=10",
                          *         "next": "/rest/3/product-listing/developer-space/87654321-4321-4321-4321-210987654321?limit=10&cursor=eyJwcm9kdWN0SWQiOiI5ODc2NTQzMi04NzY1LTQzMjEtODc2NS00MzIxMDk4NzY1NDMifQ=="
@@ -3037,7 +3084,8 @@ export interface paths {
                          *           ]
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": {
                             /** @description Pagination links */
                             links: {
@@ -3078,7 +3126,6 @@ export interface paths {
                                 /**
                                  * @description Short phrase that summarizes what the app does.
                                  *     **Display location:** Shown as a heading on the app details page
-                                 *
                                  * @example Streamline your workflow with powerful integrations
                                  */
                                 tagLine?: string;
@@ -3183,7 +3230,6 @@ export interface paths {
                                  *     - `ARCHIVED` - Archived and no longer active
                                  *     - `DELETED` - Marked for deletion
                                  *     - `READY_TO_LAUNCH` - Prepared for public release
-                                 *
                                  * @example PUBLIC
                                  * @enum {string}
                                  */
@@ -3196,7 +3242,6 @@ export interface paths {
                                  *     - `SUBMITTED` - The Marketplace app has been submitted for review
                                  *     - `REJECTED` - The Marketplace app review was rejected
                                  *     - `NOT_ASSIGNED` - No approval status has been assigned yet
-                                 *
                                  * @example APPROVED
                                  * @enum {string}
                                  */
@@ -3234,7 +3279,6 @@ export interface paths {
                                      * @description Indicates app visibility on Cloud hosting platform.
                                      *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                      *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                     *
                                      * @enum {string}
                                      */
                                     cloud?: "site" | "app";
@@ -3242,7 +3286,6 @@ export interface paths {
                                      * @description Indicates app visibility on Server hosting platform.
                                      *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                      *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                     *
                                      * @enum {string}
                                      */
                                     server?: "site" | "app";
@@ -3250,7 +3293,6 @@ export interface paths {
                                      * @description Indicates app visibility on Data Center hosting platform.
                                      *     - `site` - Listing should appear in UPM normally but not appear on the MPAC site
                                      *     - `app` - Listing should not appear in MPAC site or in UPM Find New view, but should appear in UPM Manage view
-                                     *
                                      * @enum {string}
                                      */
                                     dataCenter?: "site" | "app";
@@ -3335,7 +3377,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "screenshots": [
                          *         {
                          *           "caption": "Task management interface with board view",
@@ -3424,7 +3467,8 @@ export interface paths {
                          *       "buildNumber": 12345,
                          *       "appSoftwareId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
                          *       "revision": 5
-                         *     } */
+                         *     }
+                         */
                         "application/json": {
                             /** @description Screenshots of the app software version */
                             screenshots?: {
@@ -3556,7 +3600,6 @@ export interface paths {
                              *     **Possible values:**
                              *     - `PRIVATE` - Private/internal use only
                              *     - `PUBLIC` - Publicly available
-                             *
                              * @example PUBLIC
                              * @enum {string}
                              */
@@ -3569,7 +3612,6 @@ export interface paths {
                              *     - `SUBMITTED` - The app software version has been submitted for review
                              *     - `REJECTED` - The app software version review was rejected
                              *     - `UNINITIATED` - No approval process has been started yet
-                             *
                              * @example APPROVED
                              * @enum {string}
                              */
@@ -3674,7 +3716,6 @@ export interface paths {
          *       ```
          *       PUT /rest/3/app-software/a1b2c3d4-e5f6-7890-abcd-ef1234567890/versions/42/listing
          *       ```
-         *
          */
         put: {
             parameters: {
@@ -3690,7 +3731,8 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "screenshots": [
                      *         {
                      *           "caption": "Updated dashboard interface",
@@ -3763,7 +3805,8 @@ export interface paths {
                      *       "state": "PUBLIC",
                      *       "approvalStatus": "SUBMITTED",
                      *       "revision": 6
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["UpdateAppSoftwareVersionListingV3Request"];
                 };
             };
@@ -3774,7 +3817,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "screenshots": [
                          *         {
                          *           "caption": "Updated dashboard interface",
@@ -3853,7 +3897,8 @@ export interface paths {
                          *       "buildNumber": 42,
                          *       "appSoftwareId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
                          *       "revision": 6
-                         *     } */
+                         *     }
+                         */
                         "application/json": {
                             /** @description Screenshots of the app software version */
                             screenshots?: {
@@ -3983,7 +4028,6 @@ export interface paths {
                              *     **Possible values:**
                              *     - `PRIVATE` - Private/internal use only
                              *     - `PUBLIC` - Publicly available
-                             *
                              * @example PUBLIC
                              * @enum {string}
                              */
@@ -3996,7 +4040,6 @@ export interface paths {
                              *     - `SUBMITTED` - The app software version has been submitted for review
                              *     - `REJECTED` - The app software version review was rejected
                              *     - `UNINITIATED` - No approval process has been started yet
-                             *
                              * @example PENDING_REVIEW
                              * @enum {string}
                              */
@@ -4052,7 +4095,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
@@ -4069,7 +4113,8 @@ export interface paths {
                          *           "detail": "Invalid value for highlights.screenshot.imageId. Must be a valid UUID"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["AppSoftwareVersionListingValidationErrorList"];
                     };
                 };
@@ -4114,7 +4159,6 @@ export interface paths {
          *       ```
          *       POST /rest/3/app-software/a1b2c3d4-e5f6-7890-abcd-ef1234567890/versions/42/listing
          *       ```
-         *
          */
         post: {
             parameters: {
@@ -4130,7 +4174,8 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "screenshots": [
                      *         {
                      *           "caption": "Main dashboard interface",
@@ -4201,7 +4246,8 @@ export interface paths {
                      *         "partnerSpecificTerms": "Custom partner terms and conditions apply"
                      *       },
                      *       "state": "PUBLIC"
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["CreateAppSoftwareVersionListingV3Request"];
                 };
             };
@@ -4221,7 +4267,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "3456789a-bcde-f012-3456-789abcdef012",
@@ -4238,7 +4285,8 @@ export interface paths {
                          *           "detail": "Invalid value for state. Required field is missing"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["AppSoftwareVersionListingValidationErrorList"];
                     };
                 };
@@ -4309,7 +4357,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "links": {
                          *         "self": "/rest/3/app-software/a1b2c3d4-e5f6-7890-abcd-ef1234567890/listings/all?limit=10",
                          *         "next": "/rest/3/app-software/a1b2c3d4-e5f6-7890-abcd-ef1234567890/listings/all?limit=10&cursor=eyJ2ZXJzaW9uSWQiOiJhYmNkZWZnaC0xMjM0LTU2NzgtOTBhYi1jZGVmZ2hpams="
@@ -4480,7 +4529,8 @@ export interface paths {
                          *           "revision": 1
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": {
                             /** @description Pagination links */
                             links: {
@@ -4629,7 +4679,6 @@ export interface paths {
                                  *     **Possible values:**
                                  *     - `PRIVATE` - Private/internal use only
                                  *     - `PUBLIC` - Publicly available
-                                 *
                                  * @example PUBLIC
                                  * @enum {string}
                                  */
@@ -4642,7 +4691,6 @@ export interface paths {
                                  *     - `SUBMITTED` - The app software version has been submitted for review
                                  *     - `REJECTED` - The app software version review was rejected
                                  *     - `UNINITIATED` - No approval process has been started yet
-                                 *
                                  * @example APPROVED
                                  * @enum {string}
                                  */
@@ -6967,11 +7015,15 @@ export interface paths {
                 query?: {
                     /** @description If specified, restricts the query to values for apps with the specified keys */
                     productId?: string[];
-                    /** @description Starting date for the query and should be in the format **YYYY-MM-DD** and startDate will always be the start of the month irrespective of the data you provide.
-                     *      For example: If startDate entered is 2022-01-22, it will reflect as 2022-01-01 */
+                    /**
+                     * @description Starting date for the query and should be in the format **YYYY-MM-DD** and startDate will always be the start of the month irrespective of the data you provide.
+                     *      For example: If startDate entered is 2022-01-22, it will reflect as 2022-01-01
+                     */
                     startDate?: string;
-                    /** @description Ending date for the query and should be in the format **YYYY-MM-DD** and endDate will always be the start of the month irrespective of the data you provide.
-                     *      For example: If endDate entered is 2022-01-22, it will reflect as 2022-01-01 */
+                    /**
+                     * @description Ending date for the query and should be in the format **YYYY-MM-DD** and endDate will always be the start of the month irrespective of the data you provide.
+                     *      For example: If endDate entered is 2022-01-22, it will reflect as 2022-01-01
+                     */
                     endDate?: string;
                 };
                 header?: never;
@@ -7024,11 +7076,15 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Starting date for the query and should be in the format **YYYY-MM-DD** and startDate will always be the start of the month irrespective of the data you provide.
-                     *      For example: If startDate entered is 2022-01-22, it will reflect as 2022-01-01 */
+                    /**
+                     * @description Starting date for the query and should be in the format **YYYY-MM-DD** and startDate will always be the start of the month irrespective of the data you provide.
+                     *      For example: If startDate entered is 2022-01-22, it will reflect as 2022-01-01
+                     */
                     startDate?: string;
-                    /** @description Ending date for the query and should be in the format **YYYY-MM-DD** and endDate will always be the start of the month irrespective of the data you provide.
-                     *      For example: If endDate entered is 2022-01-22, it will reflect as 2022-01-01 */
+                    /**
+                     * @description Ending date for the query and should be in the format **YYYY-MM-DD** and endDate will always be the start of the month irrespective of the data you provide.
+                     *      For example: If endDate entered is 2022-01-22, it will reflect as 2022-01-01
+                     */
                     endDate?: string;
                 };
                 header?: never;
@@ -7136,7 +7192,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Starting date for the query. Should be in the format **YYYY-MM-DD**. startDate will always be the start of the month irrespective of the data you provide. For example: if startDate entered is 2022-01-22, it will reflect as 2022-01-01.  */
+                    /** @description Starting date for the query. Should be in the format **YYYY-MM-DD**. startDate will always be the start of the month irrespective of the data you provide. For example: if startDate entered is 2022-01-22, it will reflect as 2022-01-01. */
                     startDate?: string;
                     /** @description Ending date for the query. Should be of the format **YYYY-MM-DD**. endDate will always be the start of the month irrespective of the data you provide. For example: if endDate entered is 2022-01-22, it will reflect as 2022-01-01 */
                     endDate?: string;
@@ -7191,7 +7247,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Starting date for the query. Should be in the format **YYYY-MM-DD**. startDate will always be the start of the month irrespective of the data you provide. For example: if startDate entered is 2022-01-22, it will reflect as 2022-01-01.  */
+                    /** @description Starting date for the query. Should be in the format **YYYY-MM-DD**. startDate will always be the start of the month irrespective of the data you provide. For example: if startDate entered is 2022-01-22, it will reflect as 2022-01-01. */
                     startDate?: string;
                     /** @description Ending date for the query. Should be of the format **YYYY-MM-DD**. endDate will always be the start of the month irrespective of the data you provide. For example: if endDate entered is 2022-01-22, it will reflect as 2022-01-01. */
                     endDate?: string;
@@ -7707,11 +7763,15 @@ export interface paths {
                 query?: {
                     /** @description If specified, restricts the query to values for apps with the specified keys */
                     productId?: string[];
-                    /** @description Starting date for the query and should be in the format **YYYY-MM-DD** and startDate will always be the start of the month irrespective of the data you provide.
-                     *      For example: If startDate entered is 2022-01-22, it will reflect as 2022-01-01 */
+                    /**
+                     * @description Starting date for the query and should be in the format **YYYY-MM-DD** and startDate will always be the start of the month irrespective of the data you provide.
+                     *      For example: If startDate entered is 2022-01-22, it will reflect as 2022-01-01
+                     */
                     startDate?: string;
-                    /** @description Ending date for the query and should be in the format **YYYY-MM-DD** and endDate will always be the start of the month irrespective of the data you provide.
-                     *      For example: If endDate entered is 2022-01-22, it will reflect as 2022-01-01 */
+                    /**
+                     * @description Ending date for the query and should be in the format **YYYY-MM-DD** and endDate will always be the start of the month irrespective of the data you provide.
+                     *      For example: If endDate entered is 2022-01-22, it will reflect as 2022-01-01
+                     */
                     endDate?: string;
                 };
                 header?: never;
@@ -7804,11 +7864,13 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "date": "2025-11-06",
                          *       "presignedUrl": "https://s3.amazonaws.com/s3-bucket/wide_public_apps_overview-2025-11-06-10:30:00.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=EXAMPLE...",
                          *       "expiresInSeconds": 300
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["Reports_GetProductCatalogSnapshot"];
                     };
                 };
@@ -7828,6 +7890,325 @@ export interface paths {
                 };
                 /** @description Service temporarily unavailable */
                 503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rest/3/reporting/developer-space/{developerId}/quotes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get accepted quotes
+         * @description Returns a paginated list of **accepted** quotes for the specified developer space's apps. This resource requires authentication.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Optional filter by product ID. */
+                    productId?: string[];
+                    /** @description Quote created on or after this date */
+                    startDate?: string;
+                    /** @description Quote created on or before this date */
+                    endDate?: string;
+                    /** @description Quote accepted on or after this date */
+                    acceptedStartDate?: string;
+                    /** @description Quote accepted on or before this date */
+                    acceptedEndDate?: string;
+                    /** @description Entitlement period overlapping start */
+                    entitlementStartDate?: string;
+                    /** @description Entitlement period overlapping end */
+                    entitlementEndDate?: string;
+                    /** @description Maximum number of items to return */
+                    limit?: number;
+                    /** @description Number of items to skip for pagination */
+                    offset?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description The unique identifier for this developer space. */
+                    developerId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Reports_GetQuotes"];
+                    };
+                };
+                /** @description Temporarily unable to retrieve quotes information */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rest/3/reporting/developer-space/{developerId}/quotes/details": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get quote details
+         * @description Returns details for a single accepted quote line set for the developer space. Provide **quoteId** and/or **quoteNumber** (and optional **entitlementNumber**) as query parameters. This resource requires authentication.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Quote identifier */
+                    quoteId?: string;
+                    /** @description Quote number */
+                    quoteNumber?: string;
+                    /** @description Optional entitlement number when scoping the quote line */
+                    entitlementNumber?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The unique identifier for this developer space. */
+                    developerId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Reports_GetQuoteDetails"];
+                    };
+                };
+                /** @description Bad request (for example neither quoteId nor quoteNumber provided) */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Quote not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Temporarily unable to retrieve quote details */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rest/3/reporting/developer-space/{developerId}/quotes/async/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Initiate async export quotes
+         * @description Initiate export of accepted quotes matching the supplied date filters. At least one complete date pair is required among created, accepted, or entitlement ranges. This resource requires authentication.
+         */
+        post: {
+            parameters: {
+                query?: {
+                    /** @description Quote created on or after */
+                    createdStartDate?: string;
+                    /** @description Quote created on or before */
+                    createdEndDate?: string;
+                    /** @description Quote accepted on or after */
+                    acceptedStartDate?: string;
+                    /** @description Quote accepted on or before */
+                    acceptedEndDate?: string;
+                    /** @description Entitlement period start */
+                    entitlementStartDate?: string;
+                    /** @description Entitlement period end */
+                    entitlementEndDate?: string;
+                    /** @description Response format for export file (csv or json) */
+                    accept?: "csv" | "json";
+                };
+                header?: never;
+                path: {
+                    /** @description The unique identifier for this developer space. */
+                    developerId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Reports_InitiateAsyncExportQuotes"];
+                    };
+                };
+                /** @description Invalid or incomplete date filters */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Temporarily unable to request quotes export */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rest/3/reporting/developer-space/{developerId}/quotes/async/export/{exportId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get status async export quotes
+         * @description Returns status for a quotes async export job. This resource requires authentication.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The unique identifier for this developer space. */
+                    developerId: string;
+                    /** @description Unique export id returned from the async export initiation */
+                    exportId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Reports_GetStatusAsyncExportQuotes"];
+                    };
+                };
+                /** @description No export found for the requested export id */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Temporarily unable to retrieve export status */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rest/3/reporting/developer-space/{developerId}/quotes/async/export/{exportId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download async export quotes
+         * @description Downloads the completed quotes export file. This resource requires authentication.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The unique identifier for this developer space. */
+                    developerId: string;
+                    /** @description Unique export id for the quotes export */
+                    exportId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Export file (CSV or JSON per request) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No export found or export not ready */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Temporarily unable to retrieve export file */
+                502: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8408,16 +8789,16 @@ export interface paths {
          *       ```
          *       GET /rest/3/privacy-and-security/products/12345678-1234-1234-1234-123456789abc?state=draft
          *       ```
-         *
          */
         get: {
             parameters: {
                 query?: {
-                    /** @description Specifies the version of Privacy and security information to
+                    /**
+                     * @description Specifies the version of Privacy and security information to
                      *     be fetched. Possible values are "live" or "draft". For partners with manage
                      *     app permissions, if a draft version exists then the default value will be
                      *     "draft", or else the default value will be "live".
-                     *      */
+                     */
                     state?: "live" | "draft";
                 };
                 header?: never;
@@ -8435,7 +8816,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "commonCloud": {
                          *         "dataAccessAndStorage": {
                          *           "typesOfDataAccessed": [
@@ -8551,7 +8933,8 @@ export interface paths {
                          *         "hasRestAPIExtension": false,
                          *         "llmModels": null
                          *       }
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["TrustInfo"];
                     };
                 };
@@ -8561,7 +8944,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "3dcdc22c-638c-4230-a474-ba541d3fe27b",
@@ -8571,7 +8955,8 @@ export interface paths {
                          *           "detail": "Invalid value for state. Must be LIVE or DRAFT"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -8602,7 +8987,6 @@ export interface paths {
          *       ```
          *       PUT /rest/3/privacy-and-security/products/12345678-1234-1234-1234-123456789abc
          *       ```
-         *
          */
         put: {
             parameters: {
@@ -8616,7 +9000,8 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "commonCloud": {
                      *         "dataAccessAndStorage": {
                      *           "typesOfDataAccessed": [
@@ -8724,7 +9109,8 @@ export interface paths {
                      *         "hasRestAPIExtension": false,
                      *         "llmModels": null
                      *       }
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["AppPrivacyAndSecurity"];
                 };
             };
@@ -8749,7 +9135,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "errors": [
                          *         {
                          *           "id": "3dcdc22c-638c-4230-a474-ba541d3fe27b",
@@ -8759,7 +9146,8 @@ export interface paths {
                          *           "detail": "Please provide a list of types of data stored outside Atlassian products and services."
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
@@ -8790,7 +9178,6 @@ export interface paths {
          *       ```
          *       DELETE /rest/3/privacy-and-security/products/12345678-1234-1234-1234-123456789abc
          *       ```
-         *
          */
         delete: {
             parameters: {
@@ -8852,7 +9239,6 @@ export interface paths {
          *       ```
          *       POST /rest/3/privacy-and-security/products/12345678-1234-1234-1234-123456789abc/publish
          *       ```
-         *
          */
         post: {
             parameters: {
@@ -8906,7 +9292,6 @@ export interface paths {
          * Get migration info by product ID
          * @description Get migration info about the Server/DC version for this product. All
          *     fields except addonName, addonKey, productId and developerId are optional and may not exist.
-         *
          */
         get: {
             parameters: {
@@ -8926,7 +9311,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "developerId": "87654321-4321-4321-4321-210987654321",
                          *       "productId": "acd011b1-1111-45bc-902a-247046a11111",
                          *       "addonKey": "com.riadalabs.jira.plugins.insight",
@@ -8946,7 +9332,8 @@ export interface paths {
                          *           "end": "8.6.5"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ProductMigrationInformation"];
                     };
                 };
@@ -8963,7 +9350,6 @@ export interface paths {
          * Create migration info by product ID
          * @description Create product migration information for consumption. All fields are
          *     optional except developerId and addonName.
-         *
          */
         put: {
             parameters: {
@@ -8977,7 +9363,8 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    /** @example {
+                    /**
+                     * @example {
                      *       "developerId": "87654321-4321-4321-4321-210987654321",
                      *       "addonName": "Calendar for Jira",
                      *       "cloudAddonKey": "com.doitb.calendar.jira.cloud",
@@ -8995,7 +9382,8 @@ export interface paths {
                      *           "end": "4.5.0"
                      *         }
                      *       ]
-                     *     } */
+                     *     }
+                     */
                     "application/json": components["schemas"]["ProductMigrationPut"];
                 };
             };
@@ -9006,7 +9394,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "developerId": "87654321-4321-4321-4321-210987654321",
                          *       "productId": "acd011b1-1111-45bc-902a-247046a11111",
                          *       "addonKey": "com.doitb.calendar.jira",
@@ -9026,7 +9415,8 @@ export interface paths {
                          *           "end": "4.5.0"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ProductMigrationInformation"];
                     };
                 };
@@ -9099,7 +9489,6 @@ export interface paths {
          *       }
          *     ]
          *     ```
-         *
          */
         patch: {
             parameters: {
@@ -9113,7 +9502,8 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    /** @example [
+                    /**
+                     * @example [
                      *       {
                      *         "op": "replace",
                      *         "path": "/migrationPath",
@@ -9144,7 +9534,8 @@ export interface paths {
                      *         "path": "/isDualLicenseOptedIn",
                      *         "value": true
                      *       }
-                     *     ] */
+                     *     ]
+                     */
                     "application/json-patch+json": components["schemas"]["AppMigrationPatch"];
                 };
             };
@@ -9155,7 +9546,8 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        /** @example {
+                        /**
+                         * @example {
                          *       "developerId": "87654321-4321-4321-4321-210987654321",
                          *       "productId": "acd011b1-1111-45bc-902a-247046a11111",
                          *       "addonKey": "com.riadalabs.jira.plugins.insight",
@@ -9175,7 +9567,8 @@ export interface paths {
                          *           "end": "8.6.5"
                          *         }
                          *       ]
-                         *     } */
+                         *     }
+                         */
                         "application/json": components["schemas"]["ProductMigrationInformation"];
                     };
                 };
@@ -9201,6 +9594,260 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        QuoteCollectionLinks: {
+            self: components["schemas"]["Link"];
+            query: components["schemas"]["LinkTemplate"];
+            /** @description Links for exporting quotes with the currently specified filter parameters */
+            export: components["schemas"]["Link"][];
+            next?: components["schemas"]["Link"];
+            prev?: components["schemas"]["Link"];
+        };
+        QuoteDiscount: {
+            promotionId?: string;
+            /** Format: double */
+            amount?: number;
+            /** Format: double */
+            percent?: number;
+            reasonCode?: string;
+            type?: string;
+            promoCode?: string;
+        };
+        QuoteSchedule: {
+            startDate?: string;
+            endDate?: string;
+            /** Format: int64 */
+            userTier?: number;
+            /** Format: double */
+            listPrice?: number;
+            discounts?: components["schemas"]["QuoteDiscount"][];
+        };
+        QuoteLine: {
+            entitlementEid?: string;
+            entitlementNumber?: string;
+            commerceProductId?: string;
+            productId?: string;
+            productName?: string;
+            appEdition?: string;
+            technicalContactCompany?: string;
+            technicalEmail?: string;
+            productPlatform?: string;
+            commerceSystem?: string;
+            schedules?: components["schemas"]["QuoteSchedule"][];
+        };
+        /** @description One accepted quote row returned by the quotes list API */
+        Quote: {
+            quoteId?: string;
+            quoteNumber?: string;
+            quoteStatus?: string;
+            quoteCreatedDate?: string;
+            acceptedDate?: string;
+            quoteExpiryDate?: string;
+            entitlementEid?: string;
+            entitlementNumber?: string;
+            commerceProductId?: string;
+            productId?: string;
+            productName?: string;
+            appEdition?: string;
+            technicalContactCompany?: string;
+            technicalEmail?: string;
+            startDate?: string;
+            endDate?: string;
+            /** Format: int64 */
+            userTier?: number;
+            /** Format: double */
+            listPrice?: number;
+            discounts?: components["schemas"]["QuoteDiscount"][];
+            createdBy?: string;
+            vendorId?: string;
+            productPlatform?: string;
+            commerceSystem?: string;
+        };
+        /**
+         * @description Collection of accepted quotes for the developer space's apps
+         * @example {
+         *       "_links": {
+         *         "self": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes?startDate=2025-01-01&endDate=2025-01-31"
+         *         },
+         *         "query": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes{?productId*,startDate,endDate,acceptedStartDate,acceptedEndDate,entitlementStartDate,entitlementEndDate,limit,offset}",
+         *           "templated": true
+         *         },
+         *         "next": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes?startDate=2025-01-01&endDate=2025-01-31&offset=10&limit=10"
+         *         }
+         *       },
+         *       "quotes": [
+         *         {
+         *           "quoteId": "Q-12345",
+         *           "quoteNumber": "QT-000123",
+         *           "quoteStatus": "ACCEPTED",
+         *           "quoteCreatedDate": "2025-01-05",
+         *           "acceptedDate": "2025-01-10",
+         *           "quoteExpiryDate": "2025-02-05",
+         *           "entitlementEid": "1a1a11aa-aa11-1a11-aa1a-aa111a1111a1",
+         *           "entitlementNumber": "E-111-AAA-AAA-11A",
+         *           "commerceProductId": "acd011b1-1111-45bc-902a-247046a11111",
+         *           "productId": "acd011b1-1111-45bc-902a-247046a11111",
+         *           "productName": "Test App",
+         *           "appEdition": "Advanced",
+         *           "technicalContactCompany": "Test Company",
+         *           "technicalEmail": "test@example.com",
+         *           "startDate": "2025-02-01",
+         *           "endDate": "2026-02-01",
+         *           "userTier": 100,
+         *           "listPrice": 1200,
+         *           "discounts": [
+         *             {
+         *               "promotionId": "PROMO-1",
+         *               "amount": 120,
+         *               "percent": 10,
+         *               "reasonCode": "LOYALTY",
+         *               "type": "EXPERT",
+         *               "promoCode": "SAVE10"
+         *             }
+         *           ],
+         *           "createdBy": "partner@example.com",
+         *           "vendorId": "1213041",
+         *           "productPlatform": "cloud",
+         *           "commerceSystem": "CART"
+         *         }
+         *       ]
+         *     }
+         */
+        Reports_GetQuotes: {
+            _links: components["schemas"]["QuoteCollectionLinks"];
+            /** @description List of accepted quotes for the developer space's apps */
+            readonly quotes: components["schemas"]["Quote"][];
+        };
+        /**
+         * @description Detailed quote response including line-level schedules
+         * @example {
+         *       "quoteId": "Q-12345",
+         *       "quoteNumber": "QT-000123",
+         *       "quoteStatus": "ACCEPTED",
+         *       "quoteCreatedDate": "2025-01-05",
+         *       "quoteExpiryDate": "2025-02-05",
+         *       "createdBy": "partner@example.com",
+         *       "vendorId": "1213041",
+         *       "quotesLines": [
+         *         {
+         *           "entitlementEid": "1a1a11aa-aa11-1a11-aa1a-aa111a1111a1",
+         *           "entitlementNumber": "E-111-AAA-AAA-11A",
+         *           "commerceProductId": "acd011b1-1111-45bc-902a-247046a11111",
+         *           "productId": "acd011b1-1111-45bc-902a-247046a11111",
+         *           "productName": "Test App",
+         *           "appEdition": "Advanced",
+         *           "technicalContactCompany": "Test Company",
+         *           "technicalEmail": "test@example.com",
+         *           "productPlatform": "cloud",
+         *           "commerceSystem": "CART",
+         *           "schedules": [
+         *             {
+         *               "startDate": "2025-02-01",
+         *               "endDate": "2026-02-01",
+         *               "userTier": 100,
+         *               "listPrice": 1200,
+         *               "discounts": [
+         *                 {
+         *                   "promotionId": "PROMO-1",
+         *                   "amount": 120,
+         *                   "percent": 10,
+         *                   "reasonCode": "LOYALTY",
+         *                   "type": "EXPERT",
+         *                   "promoCode": "SAVE10"
+         *                 }
+         *               ]
+         *             }
+         *           ]
+         *         }
+         *       ]
+         *     }
+         */
+        Reports_GetQuoteDetails: {
+            quoteId?: string;
+            quoteNumber?: string;
+            quoteStatus?: string;
+            quoteCreatedDate?: string;
+            quoteExpiryDate?: string;
+            createdBy?: string;
+            vendorId?: string;
+            quotesLines?: components["schemas"]["QuoteLine"][];
+        };
+        InitiateAsyncQuoteCollectionLinks: {
+            self: components["schemas"]["Link"];
+            query: components["schemas"]["Link"];
+            status: components["schemas"]["Link"];
+            download: components["schemas"]["Link"];
+        };
+        InitiateAsyncQuote: {
+            /** @description Unique export id for quotes export, for example "12345678-ab12-12ab-1234-123a4b5678ab" */
+            id: string;
+        };
+        /**
+         * @description Initiate quotes export request for the developer space's apps
+         * @example {
+         *       "_links": {
+         *         "self": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes/async/export"
+         *         },
+         *         "query": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes/async/export?createdStartDate=2025-01-01&createdEndDate=2025-01-31&accept=csv"
+         *         },
+         *         "status": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes/async/export/638035ff-ef0f-412b-addd-8bf144bcdfa1/status"
+         *         },
+         *         "download": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes/async/export/638035ff-ef0f-412b-addd-8bf144bcdfa1"
+         *         }
+         *       },
+         *       "export": {
+         *         "id": "638035ff-ef0f-412b-addd-8bf144bcdfa1"
+         *       }
+         *     }
+         */
+        Reports_InitiateAsyncExportQuotes: {
+            _links: components["schemas"]["InitiateAsyncQuoteCollectionLinks"];
+            export: components["schemas"]["InitiateAsyncQuote"];
+        };
+        StatusAsyncQuoteCollectionLinks: {
+            self: components["schemas"]["Link"];
+            query: components["schemas"]["Link"];
+            download: components["schemas"]["Link"];
+        };
+        StatusAsyncQuote: {
+            /** @description Unique export id for quotes export, for example "12345678-ab12-12ab-1234-123a4b5678ab" */
+            id: string;
+            /**
+             * @description Indicates the status of the quotes export request
+             * @enum {string}
+             */
+            status: "QUEUED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+        };
+        /**
+         * @description Get status for quotes export request for the developer space's apps
+         * @example {
+         *       "_links": {
+         *         "self": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes/async/export/000aaaa0-a000-0a00-a000-a0aa0a0000a0/status"
+         *         },
+         *         "query": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes/async/export/000aaaa0-a000-0a00-a000-a0aa0a0000a0/status"
+         *         },
+         *         "download": {
+         *           "href": "/rest/3/reporting/developer-space/{developerId}/quotes/async/export/000aaaa0-a000-0a00-a000-a0aa0a0000a0"
+         *         }
+         *       },
+         *       "export": {
+         *         "id": "000aaaa0-a000-0a00-a000-a0aa0a0000a0",
+         *         "status": "COMPLETED"
+         *       }
+         *     }
+         */
+        Reports_GetStatusAsyncExportQuotes: {
+            _links: components["schemas"]["StatusAsyncQuoteCollectionLinks"];
+            export: components["schemas"]["StatusAsyncQuote"];
+        };
         /** @description eveloper listing refers to details provided by the Developer for its customers that might be displayed through an interface provided by Atlassian ecosystem. */
         DeveloperListing: {
             /** @description Unique Identifier of the Developer. */
@@ -9632,7 +10279,7 @@ export interface components {
              * @example 38133e3a-c9fcd-afa1-024
              */
             programId: string;
-            /** @description Name of the program developer space is enrolled in.  */
+            /** @description Name of the program developer space is enrolled in. */
             programName?: string;
             /**
              * @description Unique Identifier of the Developer space.
@@ -9709,7 +10356,8 @@ export interface components {
             /** @description Unique Identity of the resource on which the role needs to be assigned (Developer ID for DEVELOPER_SPACE) */
             resourceId: string;
         };
-        /** @example {
+        /**
+         * @example {
          *       "granularity": "WEEK",
          *       "metrics": {
          *         "metricFields": [
@@ -9734,7 +10382,8 @@ export interface components {
          *           ]
          *         }
          *       }
-         *     } */
+         *     }
+         */
         ReportingMetricTimeSeriesRequestBody: {
             attributes?: components["schemas"]["ReportingMetricTimeSeriesRequestAttributes"];
             metrics?: components["schemas"]["ReportingMetricTimeSeriesRequestMetrics"];
@@ -9776,7 +10425,8 @@ export interface components {
              */
             expiresInSeconds: number;
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/"
@@ -9950,11 +10600,13 @@ export interface components {
          *           "name": "transactionsByType"
          *         }
          *       }
-         *     } */
+         *     }
+         */
         Reports_GetReportingLlinks: {
             _links: components["schemas"]["VendorReportingLinks"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/feedback/metrics/reason"
@@ -10210,13 +10862,15 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_GetAggregatedFeedback: {
             _links: components["schemas"]["AggregatedVendorReportingLink"];
             total: components["schemas"]["AggregatedFeedbackSeries"];
             addons: unknown;
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/feedback/details"
@@ -10251,13 +10905,15 @@ export interface components {
          *           "cloudId": "111bb111-111b-1bb1-1b1b-1111b1b1b111"
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_GetFeedback: {
             _links?: components["schemas"]["VendorFeedbackCollection"];
             feedback?: components["schemas"]["VendorFeedback"][];
             totalCount?: number;
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/evaluations/hosting"
@@ -10522,13 +11178,15 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_GetAggregatedEvaluations: {
             _links: components["schemas"]["AggregatedVendorReportingLink"];
             total: components["schemas"]["AggregatedSeries"];
             addons: unknown;
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/licenses?hosting=cloud&withDataInsights=true&withAttribution=true"
@@ -10613,13 +11271,15 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_GetLicenses: {
             _links: components["schemas"]["LicenseCollectionLinks"];
             licenses: components["schemas"]["License"];
             totalCount?: number;
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/licenses/async/export"
@@ -10637,12 +11297,14 @@ export interface components {
          *       "export": {
          *         "id": "638035ff-ef0f-412b-addd-8bf144bcdfa1"
          *       }
-         *     } */
+         *     }
+         */
         Reports_InitiateAsyncExportLicenses: {
             _links: components["schemas"]["InitiateAsyncLicenseCollectionLinks"];
             export: components["schemas"]["InitiateAsyncLicense"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/licenses/async/export/000aaaa0-a000-0a00-a000-a0aa0a0000a0/status"
@@ -10658,12 +11320,14 @@ export interface components {
          *         "id": "000aaaa0-a000-0a00-a000-a0aa0a0000a0",
          *         "status": "COMPLETED"
          *       }
-         *     } */
+         *     }
+         */
         Reports_GetStatusAsyncExportLicenses: {
             _links: components["schemas"]["StatusAsyncLicenseCollectionLinks"];
             export: components["schemas"]["StatusAsyncLicense"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/marketing-attribution/async/export"
@@ -10681,12 +11345,14 @@ export interface components {
          *       "export": {
          *         "id": "000aaaa0-a000-0a00-a000-a0aa0a0000a0"
          *       }
-         *     } */
+         *     }
+         */
         Reports_InitiateAsyncExportMarketingAttribution: {
             _links: components["schemas"]["InitiateAsyncMarketingAttributionCollectionLinks"];
             export: components["schemas"]["InitiateAsyncMarketingAttribution"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/marketing-attribution/async/export/000aaaa0-a000-0a00-a000-a0aa0a0000a0/status"
@@ -10702,12 +11368,14 @@ export interface components {
          *         "id": "000aaaa0-a000-0a00-a000-a0aa0a0000a0",
          *         "status": "COMPLETED"
          *       }
-         *     } */
+         *     }
+         */
         Reports_GetStatusAsyncExportMarketingAttribution: {
             _links: components["schemas"]["StatusAsyncMarketingAttributionCollectionLinks"];
             export: components["schemas"]["StatusAsyncMarketingAttribution"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/sales/metrics/churn"
@@ -10895,7 +11563,8 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_GetCloudChurn: {
             _links: components["schemas"]["AggregatedVendorReportingLink"];
             total: components["schemas"]["CalculatedChurnSeries"];
@@ -11042,7 +11711,8 @@ export interface components {
             /** @description Collection of calculated conversion values per period per app */
             readonly addons: components["schemas"]["CalculatedAddonConversionsSeries"][];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/sales/metrics/renewal"
@@ -11222,7 +11892,8 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_GetCloudRenewals: {
             _links: components["schemas"]["AggregatedVendorReportingLink"];
             total: components["schemas"]["CalculatedRenewalsSeries"];
@@ -11487,7 +12158,8 @@ export interface components {
             _links: components["schemas"]["InitiateAsyncTransactionCollectionLinks"];
             export: components["schemas"]["InitiateAsyncTransaction"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/sales/transactions/hosting"
@@ -11583,13 +12255,15 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_AggregatedSales: {
             _links: components["schemas"]["AggregatedVendorReportingLink"];
             total: components["schemas"]["AggregatedSeries"];
             addons: components["schemas"]["AggregatedAddonSeries"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/sales/metrics/churn/benchmark"
@@ -11618,7 +12292,8 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_CloudChurnBenchmark: {
             _links: components["schemas"]["ChurnBenchmarkReportingLink"];
             churnBenchmarkPerApp: components["schemas"]["CloudChurnBenchmarkPerApp"];
@@ -11742,7 +12417,8 @@ export interface components {
             /** @description List of cloud evaluation benchmark per app */
             readonly CloudEvaluationBenchmarkPerApp: components["schemas"]["CloudEvaluationBenchmarkPerApp"][];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/benchmark/sales"
@@ -11792,7 +12468,8 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_CloudSalesBenchmark: {
             _links: components["schemas"]["BenchmarkReportingLink"];
             total: components["schemas"]["CloudSalesBenchmarkAllApps"];
@@ -11946,7 +12623,8 @@ export interface components {
             /** @description List of active paid/non-paid users benchmark for all apps */
             readonly activePaidUsersInsights: components["schemas"]["UsersDistributionByMonth"][];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/customer-insights/editions"
@@ -12027,12 +12705,14 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_UsersEditionInsightsCollection: {
             _links: components["schemas"]["InsightsReportingLink"];
             usersEditionDistribution: components["schemas"]["UsersDistributionByMonth"];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/zero-search-results-keywords/source/marketplace"
@@ -12070,7 +12750,8 @@ export interface components {
          *           "count": 1
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_ZeroSearchResultsKeywords: {
             _links: components["schemas"]["ZeroSearchResultsKeywordsLink"];
             details: components["schemas"]["ZeroSearchResultsKeywordsDetails"];
@@ -12161,7 +12842,8 @@ export interface components {
             /** @description List of aggregated searched keywords detail per app. */
             readonly addons: components["schemas"]["SearchKeywordsByPartnerAggregatedAddonsDetails"][];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/customer-insights/tiers"
@@ -12338,7 +13020,8 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_TierWiseUserBenchmark: {
             _links: components["schemas"]["TierInsightsReportingLink"];
             usersDistributionPerProduct: components["schemas"]["UsersDistributionByMonth"];
@@ -12394,7 +13077,8 @@ export interface components {
             /** @description Details of each searched keyword */
             readonly details: components["schemas"]["SearchKeywordsBySourceDetails"][];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/products/{productId}/search-keywords"
@@ -12443,14 +13127,16 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_SearchKeywordsByApp: {
             _links: components["schemas"]["SearchKeywordsByAppLink"];
             summary: components["schemas"]["SearchKeywordsByAppSummary"];
             /** @description Details of searched keywords for that specific app */
             details: components["schemas"]["SearchKeywordsByAppDetails"][];
         };
-        /** @example {
+        /**
+         * @example {
          *       "_links": {
          *         "self": {
          *           "href": "/rest/3/reporting/developer-space/{developerId}/app-requests-and-approvals"
@@ -12498,7 +13184,8 @@ export interface components {
          *           ]
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Reports_GetAppRequestsandApprovals: {
             _links: components["schemas"]["AppRequestsAndApprovalsReportingLink"];
             total: components["schemas"]["AppRequestsAndApprovalsAllApps"];
@@ -12536,7 +13223,8 @@ export interface components {
             /** @description List of activities */
             readonly marketingAttribution: components["schemas"]["MarketingAttributionActivity"][];
         };
-        /** @example {
+        /**
+         * @example {
          *       "records": [
          *         {
          *           "date": "2024-10-21",
@@ -12580,7 +13268,8 @@ export interface components {
          *           "installCounts": 1426
          *         }
          *       ]
-         *     } */
+         *     }
+         */
         Report_FetchMetricTimeSeries: {
             /** @description Time series data points. */
             records?: ({
@@ -12644,7 +13333,6 @@ export interface components {
              *       * `FUNNEL_INSIGHTS`
              *     * `PROSPECT_TYPE` - Type of the prospect. Possible values are `new`, `existing`, `lost`. Applicable MetricSets are:
              *       * `FUNNEL_INSIGHTS`
-             *
              * @enum {string}
              */
             name?: "APP_KEY" | "APP_NAME" | "GRACE_PERIOD_IN_DAYS" | "SUBSCRIPTION" | "APP_VERSION" | "APP_VERSION_TYPE" | "PARENT_SOFTWARE" | "PARENT_SOFTWARE_VERSION" | "PARENT_SOFTWARE_MAJOR_VERSION" | "PARENT_SOFTWARE_MINOR_VERSION" | "HOSTING" | "PARENT_PRODUCT" | "PRODUCT_TYPE" | "PARENT_PRODUCT_TENURE_LEVEL" | "PARENT_PRODUCT_EDITION" | "PARENT_PRODUCT_UNIT_COUNT" | "LICENSE_STATUS" | "LICENSE_TYPE" | "PRODUCT_STATE" | "PROSPECT_TYPE";
@@ -12661,7 +13349,6 @@ export interface components {
                  *     * `FUNNEL_INSIGHTS` - The metric providing funnel insights data.
                  *     * `DOWNLOADS` - The metric providing downloads data.
                  *     * `GMV` - The metric providing GMV (Gross Merchandise Value) data for apps.
-                 *
                  * @enum {string}
                  */
                 name?: "RECURRING_REVENUE" | "DISTRIBUTIONS" | "FUNNEL_INSIGHTS" | "DOWNLOADS" | "GMV";
@@ -12700,7 +13387,6 @@ export interface components {
                  *       * `NON_HARMONISED_FORGE_VERSIONS_LIFETIME_GMV` - Lifetime GMV for non-harmonised Forge app versions. This breakout ignores the `attributesFilter` and is computed via predefined SQL.
                  *       * `STANDARD_FORGE_VERSIONS_LIFETIME_GMV` - Lifetime GMV for Forge app versions that do not use connect modules (`has_connect_modules = false`). This breakout ignores the `attributesFilter` and is computed via predefined SQL.
                  *       * GMV field names are case-insensitive. Requests that only specify `metricSets: [{ "name": "GMV" }]` receive all three fields for backward compatibility.
-                 *
                  * @enum {string}
                  */
                 name?: "OPENING_MRR" | "NEW_MRR" | "EXPANSION_MRR" | "CONTRACTION_MRR" | "REACTIVATED_MRR" | "EXPIRED_MRR" | "CLOSING_MRR" | "ARR" | "INSTALL_COUNT" | "USER_COUNT" | "PROSPECT" | "D1_D6_AI" | "AVERAGE_CHURN_DAY" | "DOWNLOAD_COUNT" | "LIFETIME_GMV" | "NON_HARMONISED_FORGE_VERSIONS_LIFETIME_GMV" | "STANDARD_FORGE_VERSIONS_LIFETIME_GMV";
@@ -12717,18 +13403,18 @@ export interface components {
              *     * FUNNEL_INSIGHTS: End date should be less than or equal to last day of previous month
              *     * DOWNLOADS: End date should be less than current date
              *     * GMV: End date should be less than current date
-             *
              */
             endDate?: string;
         };
         /** @description list of sorting criteria to define the order in which the response data should be sorted. The sorting follows a hierarchical approach, meaning that the data is first sorted by the primary criterion, then by the secondary, and so on. */
         ReportingMetricTimeSeriesRequestSortByList: {
-            /** @description Field name on which response needs to be sorted. Valid value for the metrics are listed below:
+            /**
+             * @description Field name on which response needs to be sorted. Valid value for the metrics are listed below:
              *     * `RECURRING_REVENUE`: `DATE`, `APP_KEY`, `APP_NAME`, `GRACE_PERIOD_IN_DAYS`, `SUBSCRIPTION`, `ARR`, `OPENING_MRR`, `NEW_MRR`, `EXPANSION_MRR`, `CONTRACTION_MRR`, `REACTIVATED_MRR`, `EXPIRED_MRR`, `CLOSING_MRR`
              *     * `DISTRIBUTIONS`: `DATE`, `APP_KEY`, `APP_VERSION`, `HOSTING`, `PARENT_SOFTWARE`, `PARENT_SOFTWARE_VERSION`, `PARENT_SOFTWARE_MAJOR_VERSION`, `PARENT_SOFTWARE_MINOR_VERSION`, `INSTALL_COUNT`, `USER_COUNT`
              *     * `FUNNEL_INSIGHTS`: `DATE`, `APP_KEY`, `APP_NAME`, `PARENT_PRODUCT`, `PRODUCT_TYPE`, `PARENT_PRODUCT_TENURE_LEVEL`, `PARENT_PRODUCT_EDITION`, `PARENT_PRODUCT_UNIT_COUNT`, `LICENSE_STATUS`, `LICENSE_TYPE`, `PRODUCT_STATE`, `PROSPECT_TYPE`, `PROSPECT`, `D1_D6_AI`, `AVERAGE_CHURN_DAY`
              *     * `DOWNLOADS`: `DATE`, `APP_KEY`, `APP_VERSION`
-             *      */
+             */
             name?: string;
             /** @description Order in which data needs to be sorted in response. Valid values for order are `asc` and `desc` */
             order?: string;
@@ -12764,7 +13450,6 @@ export interface components {
          * @description The match type of a string filter
          *
          *     * `EXACT` - Exact match of the string value.
-         *
          * @default EXACT
          * @enum {string}
          */
@@ -13476,7 +14161,6 @@ export interface components {
         AppRequestsAndApprovalsPerApp: {
             /**
              * @description The unique identifier for this app
-             *
              * @example appKey
              */
             addonKey: string;
@@ -14862,7 +15546,7 @@ export interface components {
             evalautionCount?: number;
             /**
              * Format: double
-             * @description  Number of evaluations for the app in the previous month.
+             * @description Number of evaluations for the app in the previous month.
              * @example 15
              */
             previousMonthEvaluationCounts?: number;
@@ -14963,7 +15647,7 @@ export interface components {
             evalautionCount?: number;
             /**
              * Format: double
-             * @description  Number of evaluations for the vendor in the previous month.
+             * @description Number of evaluations for the vendor in the previous month.
              * @example 15
              */
             previousMonthEvaluationCounts?: number;
@@ -17055,7 +17739,6 @@ export interface components {
              *     **Requirement depends on frameworkId:**
              *     - **Required for:** `workflow`, `external`, `plugin`
              *     - **Auto-generated:** `forge`, `connect`
-             *
              * @example 1001
              */
             buildNumber?: number | null;
@@ -17066,7 +17749,6 @@ export interface components {
              *     - **Required for:** `forge`, `plugin`
              *     - **Optional for:** `external`, `workflow`
              *     - **Auto-generated:** `connect`
-             *
              * @example 1.0.1
              */
             versionNumber?: string | null;

@@ -8,6 +8,8 @@ export type InitiateAsyncLicenseCollection = components["schemas"]["InitiateAsyn
 export type InitiateAsyncLicense = components["schemas"]["InitiateAsyncLicense"];
 export type InitiateAsyncTransactionCollection = components["schemas"]["InitiateAsyncTransactionCollection"];
 export type StatusAsyncTransactionCollection = components["schemas"]["StatusAsyncTransactionCollection"];
+export type StatusAsyncQuoteCollection = v3Components["schemas"]["Reports_GetStatusAsyncExportQuotes"];
+export type Quote = v3Components["schemas"]["Quote"];
 
 // BEGIN: Hack to work around problem of missing saleType='Downgrade' in the OpenAPI spec
 

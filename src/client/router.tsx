@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { PageLayout } from './PageLayout';
 import { TransactionsPage } from './pages/transactions';
 import { LicensesPage } from './pages/licenses';
+import { QuotesPage } from './pages/quotes';
 import { ConfigPage } from './pages/config';
 import { JobsPage } from './pages/jobs';
 import { UsersPage } from './pages/users';
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
             {
                 path: 'licenses',
                 element: <LicensesPage />,
+            },
+            {
+                path: 'quotes',
+                element: <QuotesPage />,
             },
             {
                 path: 'apportionment',

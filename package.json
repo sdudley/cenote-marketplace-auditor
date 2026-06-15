@@ -28,7 +28,7 @@
     "start:dev": "NODE_ENV=development NODE_OPTIONS='--conditions=development' tsx --tsconfig src/server/tsconfig.json src/server/index.ts",
     "test": "jest",
     "generate-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.v3.json?_v=1.2006.608 --output src/common/types/marketplace-api.ts",
-    "generate-v3-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.marketplace.v3.json?_v=1.2006.666 --output src/common/types/marketplace-v3-api.ts",
+    "generate-v3-types": "openapi-typescript https://dac-static.atlassian.com/platform/marketplace/swagger.marketplace.v3.json?_v=1.2006.673 --output src/common/types/marketplace-v3-api.ts",
     "generate-commerce-types": "openapi-typescript https://dac-static.atlassian.com/platform/commerce/swagger.v3.json?_v=1.0.54 --output src/common/types/commerce-api.ts",
     "jobs": "NODE_ENV=development tsx --tsconfig src/server/tsconfig.json src/server/cli/runJobs.ts",
     "add-addon": "tsx --tsconfig src/server/tsconfig.json src/server/cli/addAddon.ts",
