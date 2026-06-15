@@ -27,7 +27,7 @@ import { isoStringWithDateAndTime } from '#common/util/dateUtils.js';
 import { formatTransactionData } from './transactionUtils';
 import { TransactionVersionListDialog } from './TransactionVersionListDialog';
 import { handleExportTransaction } from './util';
-import { getDisplayId } from '#client/util/displayIdUtils.js';
+import { getDisplayId } from '#common/util/displayIdUtils.js';
 
 interface TransactionDetailsProps {
     transaction: TransactionResult | null;

@@ -26,7 +26,7 @@ import { CloseButton } from '../../components/CloseButton';
 import { isoStringWithDateAndTime } from '#common/util/dateUtils.js';
 import { LicenseVersionListDialog } from './LicenseVersionListDialog';
 import { handleExportLicense } from './util';
-import { getDisplayId } from '#client/util/displayIdUtils.js';
+import { getDisplayId } from '#common/util/displayIdUtils.js';
 
 interface LicenseDetailsProps {
     license: LicenseResult | null;

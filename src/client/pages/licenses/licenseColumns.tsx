@@ -4,7 +4,7 @@ import { WrappedLabel, EntitlementIdLink } from '#client/components/styles.js';
 import { isoStringWithOnlyDate } from '#common/util/dateUtils.js';
 import { dateDiff } from '#common/util/dateUtils.js';
 import { EmphasizedAnnotation } from '../../components/styles';
-import { getLicenseDisplayId } from '#client/util/displayIdUtils.js';
+import { getLicenseDisplayId } from '#common/util/displayIdUtils.js';
 
 // Define the context type for license cell rendering (currently no context needed)
 export interface LicenseCellContext {

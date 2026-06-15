@@ -12,7 +12,7 @@ import { mapDiscountTypeToDescription } from './util';
 import { StatusCell, ReconciliationHeaderCell, MqbAnnotation } from '../../components/styles';
 import { isMQBTransaction } from '#common/util/mqbUtils.js';
 import { ReconciliationControls } from './ReconciliationControls';
-import { getTransactionDisplayId } from '#client/util/displayIdUtils.js';
+import { getTransactionDisplayId } from '#common/util/displayIdUtils.js';
 
 // Define the context type for transaction cell rendering
 export interface TransactionCellContext {

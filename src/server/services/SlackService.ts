@@ -11,7 +11,7 @@ import { Transaction } from '#common/entities/Transaction.js';
 import { License } from '#common/entities/License.js';
 import { LicenseData } from '#common/types/marketplace.js';
 import { TransactionValidationResult } from './transactionValidation/types.js';
-import { getLicenseDisplayId, getTransactionDisplayId } from '#client/util/displayIdUtils.js';
+import { getLicenseDisplayId, getTransactionDisplayId } from '#common/util/displayIdUtils.js';
 
 export type SlackBlock = (KnownBlock | Block);
 
