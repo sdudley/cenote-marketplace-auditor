@@ -52,17 +52,6 @@ discrepancies, it remains your responsibility to validate the app's calculations
 to correctly calculate the price for your sales.
 - Pricing is known to work correctly for Confluence apps. Your mileage may vary for other host application types.
 
-# Database schema and upgrades
-
-On startup the app:
-
-1. **Empty database** (no `transaction` table): runs `synchronize()` once to create all tables from the current entities, then runs migrations.
-2. **Existing database**: runs **migrations only** — never auto-syncs schema.
-
-Never enable ongoing `synchronize` on databases that already contain data. TypeORM can drop and recreate columns when entity metadata changes, which can erase values (for example `transaction_version.diff`) while leaving row counts intact.
-
-When you change entities for an upgrade to an **existing** installation, add a migration under `src/server/database/migrations/` with explicit SQL (`ADD COLUMN IF NOT EXISTS`, `ALTER COLUMN … TYPE … USING …`) so PostgreSQL preserves existing data.
-
 # Prerequisites
 
 To use this app, you need:
