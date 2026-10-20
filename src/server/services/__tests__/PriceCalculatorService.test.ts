@@ -1001,5 +1001,41 @@ describe('PriceCalculatorService', () => {
             expect(total2027).toBeCloseTo(-3095.73, 2);
             expect(total2026 + total2027).toBeCloseTo(-4049.97, 2);
         });
+
+        it('apportions the actual amount by days when the expected price is $0', () => {
+            // Tier was made free, but the customer paid a quote issued before the pricing change
+            const freeTierOpts = {
+                ...baseAnnualOpts,
+                pricingTierResult: {
+                    ...cloudPricingTierResult,
+                    tiers: cloudPricingTierResult.tiers.map(tier => ({ ...tier, cost: 0 }))
+                }
+            };
+
+            expect(service.calculateExpectedPrice(freeTierOpts).vendorPrice).toBe(0);
+
+            const months = service.calculateMonthlyPriceApportionment({
+                pricingOpts: freeTierOpts,
+                expectedVendorAmount: 0,
+                actualVendorAmount: 365
+            });
+
+            expect(months).toHaveLength(12);
+            expect(months.every(entry => entry.estimatedValue === 0)).toBe(true);
+            expect(months.reduce((sum, entry) => sum + entry.actualValue, 0)).toBeCloseTo(365, 2);
+            expect(months.find(entry => entry.month === '2026-06')!.actualValue).toBeCloseTo(30, 2);
+            expect(months.find(entry => entry.month === '2026-07')!.actualValue).toBeCloseTo(31, 2);
+        });
+
+        it('still apportions zero when both expected and actual amounts are $0', () => {
+            const months = service.calculateMonthlyPriceApportionment({
+                pricingOpts: { ...baseAnnualOpts, isSandbox: true },
+                expectedVendorAmount: 0,
+                actualVendorAmount: 0
+            });
+
+            expect(months).toHaveLength(12);
+            expect(months.every(entry => entry.estimatedValue === 0 && entry.actualValue === 0)).toBe(true);
+        });
     });
 });

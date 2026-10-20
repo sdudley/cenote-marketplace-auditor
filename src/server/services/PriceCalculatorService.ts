@@ -193,19 +193,25 @@ export class PriceCalculatorService {
         }
 
         const { isFreeLicense } = this.isFreeLicense(pricingOpts);
-        if (isFreeLicense) {
-            return months.map(month => ({ month, estimatedValue: 0, actualValue: 0 }));
-        }
-
         const deploymentType = deploymentTypeFromHosting(pricingOpts.hosting);
         const isMQB =
             deploymentType === 'cloud' &&
             pricingOpts.billingPeriod === 'Monthly' &&
             hasProratedDetails(pricingOpts.proratedDetails);
 
-        const monthlyWeights = isMQB
-            ? this.computeMQBMonthlyWeights(pricingOpts)
-            : this.computeRegularMonthlyWeights(pricingOpts);
+        let monthlyWeights = isFreeLicense
+            ? new Map<string, number>()
+            : isMQB
+                ? this.computeMQBMonthlyWeights(pricingOpts)
+                : this.computeRegularMonthlyWeights(pricingOpts);
+
+        // Price-based weights sum to zero when the expected price is $0 (e.g. a free tier, or the
+        // customer paid a quote issued before the tier was made free), yet a non-zero vendor amount
+        // can still have been paid. Spread by license days so that amount is not lost.
+        const totalWeight = [...monthlyWeights.values()].reduce((sum, weight) => sum + weight, 0);
+        if (totalWeight === 0) {
+            monthlyWeights = this.computeDayMonthlyWeights(maintenanceStartDate, maintenanceEndDate);
+        }
 
         return this.scaleMonthlyWeightsToAmounts({
             monthlyWeights,
@@ -319,6 +325,14 @@ export class PriceCalculatorService {
             }
         }
 
+        return weights;
+    }
+
+    private computeDayMonthlyWeights(maintenanceStartDate: string, maintenanceEndDate: string): Map<string, number> {
+        const weights = new Map<string, number>();
+        for (const month of getMonthsInDateRange(maintenanceStartDate, maintenanceEndDate)) {
+            weights.set(month, getDaysInDateRangeForMonth(maintenanceStartDate, maintenanceEndDate, month));
+        }
         return weights;
     }
 
