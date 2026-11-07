@@ -17,6 +17,7 @@ import { TYPES } from './types.js';
 import { TransactionAdjustmentDao } from '../database/dao/TransactionAdjustmentDao.js';
 import { ResellerDao } from '../database/dao/ResellerDao.js';
 import { PreviousTransactionService } from '../services/PreviousTransactionService.js';
+import { AccumulatedRevenueService } from '../services/AccumulatedRevenueService.js';
 import { AddonDao } from '../database/dao/AddonDao.js';
 import { PricingDao } from '../database/dao/PricingDao.js';
 import { PricingService } from '../services/PricingService.js';
@@ -68,6 +69,7 @@ export function configureContainer(dataSource: DataSource): Container {
     container.bind<TransactionAdjustmentDao>(TYPES.TransactionAdjustmentDao).to(TransactionAdjustmentDao).inSingletonScope();
     container.bind<ResellerDao>(TYPES.ResellerDao).to(ResellerDao).inSingletonScope();
     container.bind<PreviousTransactionService>(TYPES.PreviousTransactionService).to(PreviousTransactionService).inSingletonScope();
+    container.bind<AccumulatedRevenueService>(TYPES.AccumulatedRevenueService).to(AccumulatedRevenueService).inSingletonScope();
     container.bind<TransactionVersionDao>(TYPES.TransactionVersionDao).to(TransactionVersionDao).inSingletonScope();
     container.bind<TransactionValidationService>(TYPES.TransactionValidationService).to(TransactionValidationService).inSingletonScope();
     container.bind<TransactionSandboxService>(TYPES.TransactionSandboxService).to(TransactionSandboxService).inSingletonScope();

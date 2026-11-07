@@ -9,6 +9,7 @@ import { TransactionQueryParams, TransactionQueryResult, TransactionQuerySortTyp
 import { In } from "typeorm";
 import { SelectQueryBuilder } from "typeorm";
 import { collectRelatedEntitlementDisplayIds, isMultiInstanceTransaction } from "#common/util/multiInstanceUtils.js";
+import { DailyRevenue } from "#server/util/revenueTimeline.js";
 
 @injectable()
 class TransactionDao {
@@ -56,6 +57,24 @@ class TransactionDao {
 
     public getKeyForTransaction(t: TransactionData) {
         return `${t.transactionLineItemId}:${t.transactionId}`;
+    }
+
+    /**
+     * Total purchase price (gross sales, refunds negative) booked on each sale date, across all apps and
+     * hosting types. Used to derive accumulated revenue. To base the threshold on vendor payouts instead,
+     * change the field summed here.
+     */
+    public async getRevenueBySaleDate(): Promise<DailyRevenue[]> {
+        const rows: { sale_date: string | null; revenue: string | null }[] = await this.transactionRepo
+            .createQueryBuilder('transaction')
+            .select("transaction.data->'purchaseDetails'->>'saleDate'", 'sale_date')
+            .addSelect("SUM((transaction.data->'purchaseDetails'->>'purchasePrice')::numeric)", 'revenue')
+            .groupBy("transaction.data->'purchaseDetails'->>'saleDate'")
+            .getRawMany();
+
+        return rows
+            .filter((r): r is { sale_date: string; revenue: string | null } => r.sale_date != null)
+            .map(r => ({ saleDate: r.sale_date, revenue: Number(r.revenue ?? 0) }));
     }
 
     // Fetch all transaction IDs that have a sale date greater than or equal to the start date (ordered by sale date).

@@ -9,6 +9,10 @@ import {
     ACADEMIC_DC_PRICE_RATIO_LEGACY,
     CLOUD_DISCOUNT_RATIO_LEGACY_END_DATE,
     CLOUD_DISCOUNT_RATIO_LEGACY,
+    CLOUD_DISCOUNT_RATIO_LESS_THAN_1M,
+    CLOUD_DISCOUNT_RATIO_LESS_THAN_1M_NON_ROA_START_DATE,
+    CLOUD_DISCOUNT_RATIO_LESS_THAN_1M_ROA_START_DATE,
+    CLOUD_DISCOUNT_RATIO_LESS_THAN_1M_THRESHOLD,
     COMMUNITY_CLOUD_PRICE_RATIO,
     DC_DISCOUNT_RATIO,
     FORGE_RATE_2026_04,
@@ -27,6 +31,7 @@ import { formatCurrency } from "#common/util/formatCurrency.js";
 import { isDiscountedLicenseType, isCommunityLicense } from "#server/util/communityLicense.js";
 import { isoStringWithOnlyDate } from "#common/util/dateUtils.js";
 import { hasProratedDetails } from "#common/util/mqbUtils.js";
+import { getPricingConfig } from "#server/config/pricing.js";
 
 const ANNUAL_DISCOUNT_MULTIPLIER = 10; // 12 months for the price of 10 months
 
@@ -48,13 +53,25 @@ export class PriceCalculatorService {
         deploymentType: DeploymentType;
         forgeMigrationDate?: string | null;
         alwaysForge?: boolean;
+        /** Accumulated revenue (USD) when the sale was made. When unknown, the "less than $1M" rule is not applied. */
+        accRevenue: number | undefined;
+        isRoA: boolean;
     }): number {
-        const { saleDate, deploymentType, forgeMigrationDate, alwaysForge } = opts;
+        const { saleDate, deploymentType, forgeMigrationDate, alwaysForge, accRevenue, isRoA } = opts;
 
         // DC always has the same rate
 
         if (deploymentType !== 'cloud') {
             return DC_DISCOUNT_RATIO;
+        }
+
+        // Sellers with less than $1M in accumulated revenue keep the full amount
+
+        if (accRevenue !== undefined && accRevenue < CLOUD_DISCOUNT_RATIO_LESS_THAN_1M_THRESHOLD) {
+            const startDate = isRoA ? CLOUD_DISCOUNT_RATIO_LESS_THAN_1M_ROA_START_DATE : CLOUD_DISCOUNT_RATIO_LESS_THAN_1M_NON_ROA_START_DATE;
+            if (saleDate >= startDate) {
+                return CLOUD_DISCOUNT_RATIO_LESS_THAN_1M;
+            }
         }
 
         // Sales prior to 2026-04-01 always have the 85% rate, regardless of deployment type
@@ -626,7 +643,8 @@ export class PriceCalculatorService {
         const { saleDate, discountReferenceSaleDate, forgeMigrationDate, alwaysForge } = opts;
         const discountDate = discountReferenceSaleDate || saleDate;
         const deploymentType = deploymentTypeFromHosting(opts.hosting);
-        const discountAmount = this.getDiscountAmount({ saleDate: discountDate, deploymentType, forgeMigrationDate, alwaysForge });
+        const isRoA = opts.isRoA ?? getPricingConfig().isRoA;
+        const discountAmount = this.getDiscountAmount({ saleDate: discountDate, deploymentType, forgeMigrationDate, alwaysForge, accRevenue: opts.accRevenue, isRoA });
         const vendorPrice = basePriceAfterDiscounts * discountAmount;
 
         descriptors = [

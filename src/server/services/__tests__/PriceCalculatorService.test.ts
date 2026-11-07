@@ -13,6 +13,9 @@ import {
 } from './pricingTable.js';
 import { PriceResult } from '../../../server/services/types.js';
 
+// Accumulated revenue at the "less than $1M" threshold, i.e. no longer eligible for the full-amount rule.
+const OVER_1M = 1_000_000;
+
 const stripDailyPrice = (data: PriceResult) => (
     {
         purchasePrice: data.purchasePrice,
@@ -832,6 +835,98 @@ describe('PriceCalculatorService', () => {
         expect(result.purchasePrice).toBeCloseTo(10688, 2);
         expect(result.vendorPrice).toBeCloseTo(8016, 2);
         expect(result.dailyNominalPrice).toBeCloseTo(30.82, 2);
+    });
+
+    describe('"less than $1M" cloud payout rule', () => {
+        // 173-user cloud monthly license: purchase price is 221.21 for a full month.
+        const FULL_MONTH_PURCHASE_PRICE = 221.21;
+
+        const priceFor = (opts: { saleDate: string; endDate: string; accRevenue?: number; isRoA?: boolean; alwaysForge?: boolean; }) =>
+            stripDailyPrice(service.calculateExpectedPrice({
+                pricingTierResult: cloudPricingTierResult,
+                saleDate: opts.saleDate,
+                saleType: 'Renewal',
+                isSandbox: false,
+                hosting: 'Cloud',
+                licenseType: 'COMMERCIAL',
+                tier: 'Per Unit Pricing (173 Users)',
+                maintenanceStartDate: opts.saleDate,
+                maintenanceEndDate: opts.endDate,
+                billingPeriod: 'Monthly',
+                declaredPartnerDiscount: 0,
+                parentProduct: 'confluence',
+                accRevenue: opts.accRevenue,
+                isRoA: opts.isRoA,
+                alwaysForge: opts.alwaysForge
+            }));
+
+        const originalIsRoA = process.env.IS_ROA;
+
+        afterEach(() => {
+            if (originalIsRoA === undefined) {
+                delete process.env.IS_ROA;
+            } else {
+                process.env.IS_ROA = originalIsRoA;
+            }
+        });
+
+        it('RoA: keeps the legacy 85% rate the day before 2025-10-01', () => {
+            const result = priceFor({ saleDate: '2025-09-30', endDate: '2025-10-30', accRevenue: 0, isRoA: true });
+            expect(result.purchasePrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE, 2);
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE * 0.85, 2);
+        });
+
+        it('RoA: pays the full amount from 2025-10-01', () => {
+            const result = priceFor({ saleDate: '2025-10-01', endDate: '2025-11-01', accRevenue: 0, isRoA: true });
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE, 2);
+        });
+
+        it('non-RoA: still uses the legacy 85% rate on 2025-12-31 (RoA start date does not apply)', () => {
+            const result = priceFor({ saleDate: '2025-12-31', endDate: '2026-01-31', accRevenue: 0, isRoA: false });
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE * 0.85, 2);
+        });
+
+        it('non-RoA: pays the full amount from 2026-01-01', () => {
+            const result = priceFor({ saleDate: '2026-01-01', endDate: '2026-02-01', accRevenue: 0, isRoA: false });
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE, 2);
+        });
+
+        it('applies below the threshold but not at exactly $1M', () => {
+            const below = priceFor({ saleDate: '2026-01-01', endDate: '2026-02-01', accRevenue: OVER_1M - 1, isRoA: false });
+            const at = priceFor({ saleDate: '2026-01-01', endDate: '2026-02-01', accRevenue: OVER_1M, isRoA: false });
+            expect(below.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE, 2);
+            expect(at.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE * 0.85, 2);
+        });
+
+        it('at $1M+, falls through to the Connect 20% take rate from 2026-04-01', () => {
+            const result = priceFor({ saleDate: '2026-05-01', endDate: '2026-06-01', accRevenue: OVER_1M, isRoA: true });
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE * 0.80, 2);
+        });
+
+        it('at $1M+, falls through to the Connect 25% take rate from 2026-10-01', () => {
+            const result = priceFor({ saleDate: '2026-10-01', endDate: '2026-11-01', accRevenue: OVER_1M, isRoA: true });
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE * 0.75, 1);
+        });
+
+        it('under $1M, the standard take rates are bypassed after the start date (including Forge)', () => {
+            const result = priceFor({ saleDate: '2026-11-01', endDate: '2026-12-01', accRevenue: 0, isRoA: false, alwaysForge: true });
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE, 2);
+        });
+
+        it('does not apply when accumulated revenue is unknown (falls back to the standard rates)', () => {
+            const result = priceFor({ saleDate: '2026-05-01', endDate: '2026-06-01', isRoA: true });
+            expect(result.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE * 0.80, 2);
+        });
+
+        it('defaults isRoA to the IS_ROA environment variable when not passed explicitly', () => {
+            delete process.env.IS_ROA;
+            const nonRoA = priceFor({ saleDate: '2025-10-01', endDate: '2025-11-01', accRevenue: 0 });
+            expect(nonRoA.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE * 0.85, 2); // non-RoA start date not reached
+
+            process.env.IS_ROA = 'true';
+            const roa = priceFor({ saleDate: '2025-10-01', endDate: '2025-11-01', accRevenue: 0 });
+            expect(roa.vendorPrice).toBeCloseTo(FULL_MONTH_PURCHASE_PRICE, 2);
+        });
     });
 
     describe('calculateMonthlyPriceApportionment', () => {

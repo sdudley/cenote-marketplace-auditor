@@ -31,6 +31,13 @@ export interface PriceCalcOpts {
     discountReferenceSaleDate?: string;
     forgeMigrationDate?: string | null;
     alwaysForge?: boolean;
+    /**
+     * Vendor's accumulated Marketplace revenue in USD across all apps, as of the sale (drives the "less than $1M"
+     * payout rule). When omitted, revenue is unknown and the rule is not applied.
+     */
+    accRevenue?: number;
+    /** True for Rovo/Runs-on-Atlassian apps. Defaults to IS_ROA config. */
+    isRoA?: boolean;
 }
 
 export interface PriceResult {
