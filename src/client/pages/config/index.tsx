@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { PageContainer, PageTitle, ConfigPageTitle, ConfigFormContainer, ConfigFormFields, ConfigSaveButtonContainer, LoadingContainer, ConfigColumn, SchedulerContainer } from '../styles';
 import { ConfigKey } from '#common/types/configItem.js';
+import { getConfigKeyType } from '#common/util/configItemUtil.js';
 import { StyledLink } from '../styles';
 import { DemoModeContainer, SlackContainer } from './styles';
 import { APP_VERSION } from '#common/config/versions.js';
@@ -28,6 +29,7 @@ export const ConfigPage: React.FC = () => {
         [ConfigKey.SchedulerFrequency]: 0,
         [ConfigKey.SlackBotToken]: '',
         [ConfigKey.SlackChannelSales]: '',
+        [ConfigKey.SlackSkipZeroSales]: false,
         [ConfigKey.SlackChannelEvaluations]: '',
         [ConfigKey.SlackChannelExceptions]: '',
         [ConfigKey.SlackChannelQuotes]: '',
@@ -64,7 +66,7 @@ export const ConfigPage: React.FC = () => {
                             const data = await response.json();
                             return [key, data.value];
                         }
-                        return [key, key === ConfigKey.DemoMode ? false : ''];
+                        return [key, getConfigKeyType(key) === 'boolean' ? false : ''];
                     })
             );
 
@@ -176,6 +178,7 @@ export const ConfigPage: React.FC = () => {
                 ...prev,
                 [ConfigKey.SlackBotToken]: '',
                 [ConfigKey.SlackChannelSales]: '',
+                [ConfigKey.SlackSkipZeroSales]: false,
                 [ConfigKey.SlackChannelEvaluations]: '',
                 [ConfigKey.SlackChannelExceptions]: '',
                 [ConfigKey.SlackChannelQuotes]: '',
@@ -338,6 +341,20 @@ export const ConfigPage: React.FC = () => {
                                         }}
                                         helperText="Channel to post sales notifications. Leave blank to disable."
                                     />
+                                    <Box sx={{ ml: 3, pl: 2, borderLeft: 2, borderColor: 'divider' }}>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={Boolean(configValues[ConfigKey.SlackSkipZeroSales])}
+                                                    onChange={(event) => setConfigValues((prev) => ({
+                                                        ...prev,
+                                                        [ConfigKey.SlackSkipZeroSales]: event.target.checked,
+                                                    }))}
+                                                />
+                                            }
+                                            label="Skip $0 sales"
+                                        />
+                                    </Box>
                                     <TextField
                                         label="Channel for New Evaluations"
                                         value={configValues[ConfigKey.SlackChannelEvaluations]}

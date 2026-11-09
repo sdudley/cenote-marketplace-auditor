@@ -232,7 +232,17 @@ export class SlackService {
         };
     }
 
-    public async postNewTransactionsToSlack(transactions: SlackTransactionData[]): Promise<void> {
+    public async postNewTransactionsToSlack(allTransactions: SlackTransactionData[]): Promise<void> {
+        // Optionally skip $0 sales (e.g. free renewals from test/bug bounty accounts).
+        // Only exact zero is skipped; negative amounts (refunds/downgrades) are still posted.
+        const skipZeroSales = await this.configDao.get<boolean>(ConfigKey.SlackSkipZeroSales);
+        const transactions = skipZeroSales
+            ? allTransactions.filter(t => t.vendorAmount !== 0)
+            : allTransactions;
+        if (transactions.length === 0) {
+            return;
+        }
+
         const totalVendorAmount = transactions.reduce((acc, t) => acc + t.vendorAmount, 0);
         const baseUrl = await this.getBaseUrl();
 

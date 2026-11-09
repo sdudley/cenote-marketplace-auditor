@@ -11,6 +11,7 @@ export interface ConfigKeyType {
     [ConfigKey.SchedulerFrequency]: number;
     [ConfigKey.SlackBotToken]: string;
     [ConfigKey.SlackChannelSales]: string;
+    [ConfigKey.SlackSkipZeroSales]: boolean;
     [ConfigKey.SlackChannelEvaluations]: string;
     [ConfigKey.SlackChannelExceptions]: string;
     [ConfigKey.SlackChannelQuotes]: string;
@@ -27,6 +28,7 @@ export enum ConfigKey {
     SchedulerFrequency = 'SchedulerFrequency',
     SlackBotToken = 'SlackBotToken',
     SlackChannelSales = 'SlackChannelSales',
+    SlackSkipZeroSales = 'SlackSkipZeroSales',
     SlackChannelEvaluations = 'SlackChannelEvaluations',
     SlackChannelExceptions = 'SlackChannelExceptions',
     SlackChannelQuotes = 'SlackChannelQuotes',
