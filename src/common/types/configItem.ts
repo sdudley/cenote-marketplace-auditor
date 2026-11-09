@@ -12,6 +12,7 @@ export interface ConfigKeyType {
     [ConfigKey.SlackBotToken]: string;
     [ConfigKey.SlackChannelSales]: string;
     [ConfigKey.SlackChannelEvaluations]: string;
+    [ConfigKey.SlackEvaluationsSiteFilter]: string;
     [ConfigKey.SlackChannelExceptions]: string;
     [ConfigKey.SlackChannelQuotes]: string;
     [ConfigKey.DemoMode]: boolean;
@@ -28,6 +29,7 @@ export enum ConfigKey {
     SlackBotToken = 'SlackBotToken',
     SlackChannelSales = 'SlackChannelSales',
     SlackChannelEvaluations = 'SlackChannelEvaluations',
+    SlackEvaluationsSiteFilter = 'SlackEvaluationsSiteFilter',
     SlackChannelExceptions = 'SlackChannelExceptions',
     SlackChannelQuotes = 'SlackChannelQuotes',
     DemoMode = 'DemoMode'
