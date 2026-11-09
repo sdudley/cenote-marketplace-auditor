@@ -177,6 +177,7 @@ incoming-webhook
 - Paste the OAuth Token into the "Slack Bot Token" field
 - Enter the channel names where you would like to post notifications of new sales, new evaluations, or exceptions.
 - Leaving a channel name blank means that those types of events will not be posted to Slack.
+- Optionally, tick "Skip $0 sales" to leave sales with a vendor amount of exactly $0.00 (for example free renewals from test accounts) out of the sales channel.
 - The exceptions channel is not currently implemented.
 
 ## Command Line Tools
