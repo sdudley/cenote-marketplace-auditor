@@ -6,9 +6,11 @@ import { Transaction } from "#common/entities/Transaction.js";
 import { PricingTierResult } from "#common/types/pricingTierResult.js";
 import { PricingService } from "#server/services/PricingService.js";
 import { PriceCalculatorService } from "#server/services/PriceCalculatorService.js";
+import { AccumulatedRevenueService } from "#server/services/AccumulatedRevenueService.js";
 import { PriceWithPricingOpts } from "./types.js";
 import { MAX_JPY_DRIFT } from "./constants.js";
 import { TYPES } from "#server/config/types.js";
+import { getPricingConfig } from "#server/config/pricing.js";
 import { getLicenseDurationInDays } from "#common/util/licenseDurationCalculator.js";
 import { isSignificantlyDifferent } from "#common/util/significantDifferenceTester.js";
 import { PriceCalcOpts, PriceResult } from '#server/services/types.js';
@@ -23,7 +25,8 @@ export class TransactionValidator {
     constructor(
         @inject(TYPES.PricingService) private pricingService: PricingService,
         @inject(TYPES.PriceCalculatorService) private priceCalculatorService: PriceCalculatorService,
-        @inject(TYPES.AddonDao) private addonDao: AddonDao
+        @inject(TYPES.AddonDao) private addonDao: AddonDao,
+        @inject(TYPES.AccumulatedRevenueService) private accumulatedRevenueService: AccumulatedRevenueService
     ) {}
 
     /**
@@ -87,6 +90,16 @@ export class TransactionValidator {
         // is the license that was active when the refunded purchase was made (see TransactionValidationService).
 
         const needsPreviousPricing = saleType==='Upgrade' || saleType==='Downgrade' || (saleType==='Refund' && !!previousPurchaseFindResult);
+
+        // The "less than $1M" payout rule depends on how much revenue had accumulated when each sale was made, so the
+        // current and previous purchases each get their own figure. The current one is keyed to the date that also
+        // selects its payout rate (the refunded sale's date for standalone refunds).
+
+        const accRevenue = await this.accumulatedRevenueService.getAccumulatedRevenueBefore(discountReferenceSaleDate ?? saleDate);
+        const previousAccRevenue = needsPreviousPricing && previousPurchase
+            ? await this.accumulatedRevenueService.getAccumulatedRevenueBefore(previousPurchase.data.purchaseDetails.saleDate)
+            : undefined;
+
         const previousPurchasePricing =
                     needsPreviousPricing && previousPurchase && previousPurchasePricingTierResult && typeof expectedDiscountForPreviousPurchase !== 'undefined'
                         ? this.calculatePriceForTransaction({
@@ -97,6 +110,7 @@ export class TransactionValidator {
                             expectedDiscount: expectedDiscountForPreviousPurchase.discountToUse,
                             previousPurchaseEffectiveMaintenanceEndDate: undefined,
                             parentProduct,
+                            accRevenue: previousAccRevenue,
                             forgeMigrationDate: addon.forgeMigrationDate ?? null,
                             alwaysForge: addon.alwaysForge ?? false
                         })
@@ -116,6 +130,7 @@ export class TransactionValidator {
             parentProduct,
             mqbLicenseUserCount,
             discountReferenceSaleDate,
+            accRevenue,
             forgeMigrationDate: addon.forgeMigrationDate ?? null,
             alwaysForge: addon.alwaysForge ?? false
         });
@@ -200,6 +215,7 @@ export class TransactionValidator {
         parentProduct: string;
         mqbLicenseUserCount?: number;
         discountReferenceSaleDate?: string;
+        accRevenue?: number;
         forgeMigrationDate?: string | null;
         alwaysForge?: boolean;
     }) : PriceWithPricingOpts {
@@ -214,6 +230,7 @@ export class TransactionValidator {
             parentProduct,
             mqbLicenseUserCount,
             discountReferenceSaleDate,
+            accRevenue,
             forgeMigrationDate,
             alwaysForge
         } = opts;
@@ -222,6 +239,7 @@ export class TransactionValidator {
         // Sum the partner discount from the discounts array
         const declaredPartnerDiscount = sumDiscountArrayForTransaction( { data: transaction.data, type: 'EXPERT' });
 
+        const pricingConfig = getPricingConfig();
         const pricingOpts: PriceCalcOpts = {
             pricingTierResult: pricingTierResult,
             saleType: purchaseDetails.saleType,
@@ -243,7 +261,11 @@ export class TransactionValidator {
             mqbLicenseUserCount,
             discountReferenceSaleDate,
             forgeMigrationDate,
-            alwaysForge
+            alwaysForge,
+            // Resolve these here (rather than inside the calculator) so that the returned pricingOpts, and the
+            // test snippets generated from them, are fully reproducible.
+            accRevenue,
+            isRoA: pricingConfig.isRoA
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator

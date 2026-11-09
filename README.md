@@ -93,6 +93,21 @@ tabs to visualize transaction and license data.
 
 8. To configure the Slack integration, see below.
 
+## Payout rate configuration (optional)
+
+Cloud sellers with less than $1M in accumulated Marketplace revenue keep the full amount of each Cloud sale (from
+2025-10-01 for Runs-on-Atlassian apps, 2026-01-01 for other apps). Accumulated revenue is calculated automatically from
+the transactions you have imported: the gross purchase price (refunds negative) of every sale across all of your apps,
+up to but not including the sale date. Make sure your full transaction history has been fetched, otherwise
+accumulated revenue is understated.
+
+If your apps are Runs-on-Atlassian (RoA) apps, set this environment variable (in your shell or `.env`) before
+`docker-compose up`:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `IS_ROA` | `false` | Set to `true` if the audited apps are Runs-on-Atlassian (RoA) apps. |
+
 # Usage
 
 ## Transaction View

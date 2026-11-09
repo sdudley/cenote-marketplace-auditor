@@ -3,6 +3,7 @@ import { TransactionValidator } from '../TransactionValidator.js';
 import { PricingService } from '#server/services/PricingService.js';
 import { PriceCalculatorService } from '#server/services/PriceCalculatorService.js';
 import { AddonDao } from '#server/database/dao/AddonDao.js';
+import { AccumulatedRevenueService } from '#server/services/AccumulatedRevenueService.js';
 import { mqbPricingTierResult } from '../../__tests__/pricingTable.js';
 import { DiscountResult } from '../types.js';
 import { PreviousTransactionResult } from '#server/services/types.js';
@@ -92,6 +93,7 @@ function findOverlapDescriptor(descriptors: { description: string }[]): string |
 
 describe('TransactionValidator upgrade refund overlap', () => {
     let validator: TransactionValidator;
+    let accumulatedRevenueService: { getAccumulatedRevenueBefore: jest.Mock };
 
     beforeEach(() => {
         const pricingService = {
@@ -106,11 +108,75 @@ describe('TransactionValidator upgrade refund overlap', () => {
             })
         } as unknown as AddonDao;
 
+        // Well above the "less than $1M" threshold, so Atlassian's standard take rates apply.
+        accumulatedRevenueService = { getAccumulatedRevenueBefore: jest.fn().mockResolvedValue(5_000_000) };
+
         validator = new TransactionValidator(
             pricingService,
             new PriceCalculatorService(),
-            addonDao
+            addonDao,
+            accumulatedRevenueService as unknown as AccumulatedRevenueService
         );
+    });
+
+    it('resolves accumulated revenue separately for the current and the previous purchase', async () => {
+        accumulatedRevenueService.getAccumulatedRevenueBefore.mockImplementation(async (date: string) =>
+            date === sale2.data.purchaseDetails.saleDate ? 900_000 : 100_000
+        );
+
+        const result = await validator.validateOneTransaction({
+            transaction: sale2,
+            useLegacyPricingTierForCurrent: false,
+            useLegacyPricingTierForPrevious: false,
+            expectedDiscount: 0,
+            hasActualAdjustments: false,
+            isSandbox: false,
+            previousPurchaseFindResult: previousPurchaseFromSale1,
+            expectedDiscountForPreviousPurchase: noDiscount
+        });
+
+        expect(accumulatedRevenueService.getAccumulatedRevenueBefore).toHaveBeenCalledWith('2026-05-28'); // current
+        expect(accumulatedRevenueService.getAccumulatedRevenueBefore).toHaveBeenCalledWith('2026-04-28'); // previous
+        expect(result.pricingOpts.accRevenue).toBe(900_000);
+    });
+
+    it('uses the refunded sale date for accumulated revenue on standalone refunds', async () => {
+        await validator.validateOneTransaction({
+            transaction: sale3,
+            useLegacyPricingTierForCurrent: false,
+            useLegacyPricingTierForPrevious: false,
+            expectedDiscount: 0,
+            hasActualAdjustments: false,
+            isSandbox: false,
+            previousPurchaseFindResult: undefined,
+            expectedDiscountForPreviousPurchase: undefined,
+            discountReferenceSaleDate: '2026-05-28'
+        });
+
+        expect(accumulatedRevenueService.getAccumulatedRevenueBefore).toHaveBeenCalledWith('2026-05-28');
+        expect(accumulatedRevenueService.getAccumulatedRevenueBefore).not.toHaveBeenCalledWith('2026-06-01');
+    });
+
+    it('applies the full-amount payout when accumulated revenue is under $1M', async () => {
+        const opts = {
+            transaction: sale2,
+            useLegacyPricingTierForCurrent: false,
+            useLegacyPricingTierForPrevious: false,
+            expectedDiscount: 0,
+            hasActualAdjustments: false,
+            isSandbox: false,
+            previousPurchaseFindResult: previousPurchaseFromSale1,
+            expectedDiscountForPreviousPurchase: noDiscount
+        };
+
+        accumulatedRevenueService.getAccumulatedRevenueBefore.mockResolvedValue(5_000_000);
+        const standard = await validator.validateOneTransaction(opts);
+
+        accumulatedRevenueService.getAccumulatedRevenueBefore.mockResolvedValue(10_000);
+        const underThreshold = await validator.validateOneTransaction(opts);
+
+        expect(underThreshold.price.vendorPrice).toBeCloseTo(underThreshold.price.purchasePrice, 2);
+        expect(standard.price.vendorPrice).toBeLessThan(standard.price.purchasePrice);
     });
 
     it('applies the same overlap adjustment to upgrade and its refund across sale-1/2/3', async () => {
