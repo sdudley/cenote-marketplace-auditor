@@ -177,6 +177,11 @@ incoming-webhook
 - Paste the OAuth Token into the "Slack Bot Token" field
 - Enter the channel names where you would like to post notifications of new sales, new evaluations, or exceptions.
 - Leaving a channel name blank means that those types of events will not be posted to Slack.
+- Optionally, set the "Evaluation Site URL Filter (regex)" to restrict which new evaluations are posted. Only evaluations whose
+  cloud site hostname (for example `acme.atlassian.net`, without `https://`) matches the (case-insensitive) regular expression
+  are posted; leave blank to post all. For example, `^(?!.*(bugbounty|bugcrowd))` skips bug bounty and Bugcrowd sites.
+  Evaluations with no site hostname (such as Server or Data Center) are matched as empty text, so a positive pattern such as
+  `^acme` will not post them. If the regex is invalid, all evaluations are posted.
 - The exceptions channel is not currently implemented.
 
 ## Command Line Tools
