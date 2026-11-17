@@ -19,7 +19,7 @@
     "#client/*": "./src/client/*"
   },
   "scripts": {
-    "build": "env -u npm_config_allow_scripts npm audit --audit-level high && npm run build:server && npm run build:client",
+    "build": "env -u npm_config_allow_scripts npm audit --omit=dev --audit-level high && npm run build:server && npm run build:client",
     "build:server": "tsc -p src/server/tsconfig.json",
     "build:client": "vite build",
     "build:client:dev": "vite build --mode development",
@@ -111,7 +111,8 @@
     "bcrypt@6.0.0": true,
     "esbuild@0.28.1": true,
     "fsevents@2.3.3": true,
-    "@parcel/watcher@2.6.0": true
+    "@parcel/watcher@2.6.0": true,
+    "unrs-resolver@1.12.2": true
   },
   "overrides": {
     "uuid": "14.0.0",
