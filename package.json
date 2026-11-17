@@ -76,7 +76,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "7.18.3",
     "reflect-metadata": "^0.2.2",
-    "stream-json": "3.6.0",
+    "stream-json": "3.9.0",
     "typeorm": "^0.3.20",
     "typeorm-naming-strategies": "^4.1.0",
     "validator": "^13.15.15"
@@ -110,7 +110,8 @@
   "allowScripts": {
     "bcrypt@6.0.0": true,
     "esbuild@0.28.1": true,
-    "fsevents@2.3.3": true
+    "fsevents@2.3.3": true,
+    "@parcel/watcher@2.6.0": true
   },
   "overrides": {
     "uuid": "14.0.0",
