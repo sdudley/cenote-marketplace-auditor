@@ -19,6 +19,16 @@ import { StyledLink } from '../styles';
 import { DemoModeContainer, SlackContainer } from './styles';
 import { APP_VERSION } from '#common/config/versions.js';
 
+const isValidRegex = (pattern: string): boolean => {
+    try {
+        // Trim to match the server, which ignores leading/trailing whitespace in the pattern
+        new RegExp(pattern.trim(), 'i');
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 export const ConfigPage: React.FC = () => {
     const [configValues, setConfigValues] = useState<Record<ConfigKey, string | number | boolean>>({
         [ConfigKey.AtlassianAccountUser]: '',
@@ -31,6 +41,7 @@ export const ConfigPage: React.FC = () => {
         [ConfigKey.SlackChannelSales]: '',
         [ConfigKey.SlackSkipZeroSales]: false,
         [ConfigKey.SlackChannelEvaluations]: '',
+        [ConfigKey.SlackEvaluationsSiteFilter]: '',
         [ConfigKey.SlackChannelExceptions]: '',
         [ConfigKey.SlackChannelQuotes]: '',
         [ConfigKey.DemoMode]: false,
@@ -180,6 +191,7 @@ export const ConfigPage: React.FC = () => {
                 [ConfigKey.SlackChannelSales]: '',
                 [ConfigKey.SlackSkipZeroSales]: false,
                 [ConfigKey.SlackChannelEvaluations]: '',
+                [ConfigKey.SlackEvaluationsSiteFilter]: '',
                 [ConfigKey.SlackChannelExceptions]: '',
                 [ConfigKey.SlackChannelQuotes]: '',
             }));
@@ -202,6 +214,8 @@ export const ConfigPage: React.FC = () => {
             [ConfigKey.DemoMode]: event.target.checked,
         }));
     };
+
+    const siteFilterValid = isValidRegex(String(configValues[ConfigKey.SlackEvaluationsSiteFilter] ?? ''));
 
     if (loading) {
         return (
@@ -366,6 +380,23 @@ export const ConfigPage: React.FC = () => {
                                         }}
                                         helperText="Channel to post new evaluation notifications. Leave blank to disable."
                                     />
+                                    <Box sx={{ ml: 3, pl: 2, borderLeft: 2, borderColor: 'divider' }}>
+                                        <TextField
+                                            label="Evaluation Site URL Filter (regex)"
+                                            placeholder="^(?!.*(bugbounty|bugcrowd))"
+                                            slotProps={{ inputLabel: { shrink: true } }}
+                                            value={configValues[ConfigKey.SlackEvaluationsSiteFilter]}
+                                            onChange={handleChange(ConfigKey.SlackEvaluationsSiteFilter)}
+                                            fullWidth
+                                            sx={{ mt: 2 }}
+                                            error={!siteFilterValid}
+                                            helperText={
+                                                siteFilterValid
+                                                    ? 'Only evaluations whose site hostname (e.g. acme.atlassian.net, without https://) matches this case-insensitive regex are posted. Leave blank to post all. Evaluations with no hostname are matched as empty text. Example to skip bug bounty/bugcrowd sites: ^(?!.*(bugbounty|bugcrowd))'
+                                                    : 'Invalid regular expression. Until fixed, all evaluations will be posted.'
+                                            }
+                                        />
+                                    </Box>
                                     <TextField
                                         label="Channel for Exceptions"
                                         value={configValues[ConfigKey.SlackChannelExceptions]}

@@ -11,6 +11,7 @@ export function getConfigKeyType(key: ConfigKey): ConfigValueType {
         case ConfigKey.SlackBotToken:
         case ConfigKey.SlackChannelSales:
         case ConfigKey.SlackChannelEvaluations:
+        case ConfigKey.SlackEvaluationsSiteFilter:
         case ConfigKey.SlackChannelExceptions:
         case ConfigKey.SlackChannelQuotes:
             return 'string';

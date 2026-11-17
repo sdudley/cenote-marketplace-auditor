@@ -4,7 +4,7 @@ import { ConfigDao } from '#server/database/dao/ConfigDao.js';
 import { ConfigKey } from '#common/types/configItem.js';
 import { SlackChannelType } from '#common/types/slackChannel.js';
 import { TYPES } from '#server/config/types.js';
-import { encodeSlackText } from '#server/util/SlackUtils.js';
+import { buildSiteFilter, encodeSlackText } from '#server/util/SlackUtils.js';
 import { formatCurrency } from '#common/util/formatCurrency.js';
 import { dateDiff } from '#common/util/dateUtils.js';
 import { Transaction } from '#common/entities/Transaction.js';
@@ -45,6 +45,7 @@ export interface SlackLicenseData {
     addonName: string;
     hosting: string;
     company: string;
+    cloudSiteHostname: string|undefined;
     maintenanceStartDate: string;
     maintenanceEndDate: string|undefined;
     oldMaintenanceEndDate: string|undefined;
@@ -174,7 +175,7 @@ export class SlackService {
         const { hosting } = license.data;
         const { company } = license.data.contactDetails;
         const { maintenanceStartDate, maintenanceEndDate } = license.data;
-        const { evaluationOpportunitySize } = license.data;
+        const { evaluationOpportunitySize, cloudSiteHostname } = license.data;
 
         if (licenseType !== 'EVALUATION') {
             return undefined;
@@ -185,6 +186,7 @@ export class SlackService {
             addonName,
             hosting,
             company: company ?? 'Unknown',
+            cloudSiteHostname,
             maintenanceStartDate,
             maintenanceEndDate: maintenanceEndDate ?? 'Unknown',
             oldMaintenanceEndDate: oldLicenseData?.maintenanceEndDate,
@@ -357,7 +359,22 @@ export class SlackService {
         }
     }
 
-    public async postNewLicensesToSlack(licenses: SlackLicenseData[]): Promise<void> {
+    public async postNewLicensesToSlack(allLicenses: SlackLicenseData[]): Promise<void> {
+        // Nothing to do (and no filter to compile or log about) if the evaluations channel is disabled
+        if (!(await this.configDao.get<string>(ConfigKey.SlackChannelEvaluations))) {
+            return;
+        }
+
+        // Only post evaluations whose site URL matches the configured regex (if any)
+        const siteFilterPattern = await this.configDao.get<string>(ConfigKey.SlackEvaluationsSiteFilter);
+        const matchesSiteFilter = buildSiteFilter(siteFilterPattern, (error) =>
+            console.error(`Invalid Slack evaluations site filter regex "${siteFilterPattern}"; posting all evaluations:`, error)
+        );
+        const licenses = allLicenses.filter(l => matchesSiteFilter(l.cloudSiteHostname));
+        if (licenses.length === 0) {
+            return;
+        }
+
         const baseUrl = await this.getBaseUrl();
 
         // Slack has a limit of 50 blocks per message
