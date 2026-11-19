@@ -106,6 +106,19 @@ export const PricingDateFields = styled(Box)(({ theme }) => ({
     gap: theme.spacing(2)
 }));
 
+export const AppEditForm = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(3)
+}));
+
+export const AppEditSection = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: theme.spacing(1.5)
+}));
+
 export const PricingTierTablePaper = styled(Paper)({
     width: '100%',
     overflow: 'hidden'

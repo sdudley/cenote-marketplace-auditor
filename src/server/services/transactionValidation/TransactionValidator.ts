@@ -98,7 +98,9 @@ export class TransactionValidator {
                             previousPurchaseEffectiveMaintenanceEndDate: undefined,
                             parentProduct,
                             forgeMigrationDate: addon.forgeMigrationDate ?? null,
-                            alwaysForge: addon.alwaysForge ?? false
+                            alwaysForge: addon.alwaysForge ?? false,
+                            forgePromoStartDate: addon.forgePromoStartDate ?? null,
+                            forgePromoEndDate: addon.forgePromoEndDate ?? null
                         })
                         : undefined;
 
@@ -117,7 +119,9 @@ export class TransactionValidator {
             mqbLicenseUserCount,
             discountReferenceSaleDate,
             forgeMigrationDate: addon.forgeMigrationDate ?? null,
-            alwaysForge: addon.alwaysForge ?? false
+            alwaysForge: addon.alwaysForge ?? false,
+            forgePromoStartDate: addon.forgePromoStartDate ?? null,
+            forgePromoEndDate: addon.forgePromoEndDate ?? null
         });
 
         let expectedVendorAmount = price.vendorPrice;
@@ -202,6 +206,8 @@ export class TransactionValidator {
         discountReferenceSaleDate?: string;
         forgeMigrationDate?: string | null;
         alwaysForge?: boolean;
+        forgePromoStartDate?: string | null;
+        forgePromoEndDate?: string | null;
     }) : PriceWithPricingOpts {
         const {
             transaction,
@@ -215,7 +221,9 @@ export class TransactionValidator {
             mqbLicenseUserCount,
             discountReferenceSaleDate,
             forgeMigrationDate,
-            alwaysForge
+            alwaysForge,
+            forgePromoStartDate,
+            forgePromoEndDate
         } = opts;
         const { purchaseDetails } = transaction.data;
 
@@ -243,7 +251,9 @@ export class TransactionValidator {
             mqbLicenseUserCount,
             discountReferenceSaleDate,
             forgeMigrationDate,
-            alwaysForge
+            alwaysForge,
+            forgePromoStartDate,
+            forgePromoEndDate
         };
 
         // If asked to use the legacy pricing tier for this transaction, switch out the data sent to the calculator

@@ -86,6 +86,119 @@ describe('PriceCalculatorService', () => {
         expect(result).toEqual({ purchasePrice: -221.21, vendorPrice: -188.03 });
     });
 
+    describe('Forge 0% promo', () => {
+        const promo = { forgePromoStartDate: '2026-11-01', forgePromoEndDate: '2026-12-31' };
+
+        const cloudOpts = (saleDate: string) => ({
+            pricingTierResult: cloudPricingTierResult,
+            saleDate,
+            saleType: 'Renewal' as const,
+            isSandbox: false,
+            hosting: 'Cloud' as const,
+            licenseType: 'COMMERCIAL' as const,
+            tier: 'Per Unit Pricing (173 Users)',
+            maintenanceStartDate: '2025-05-01',
+            maintenanceEndDate: '2025-06-01',
+            billingPeriod: 'Monthly' as const,
+            declaredPartnerDiscount: 0,
+            parentProduct: 'confluence',
+            alwaysForge: true
+        });
+
+        it('applies a 0% take rate to Cloud sales inside the promo window', () => {
+            const price = service.calculateExpectedPrice({ ...cloudOpts('2026-11-15'), ...promo });
+            expect(stripDailyPrice(price)).toEqual({ purchasePrice: 221.21, vendorPrice: 221.21 });
+            expect(price.descriptors.at(-1)?.description).toContain('Forge 0% promo');
+        });
+
+        it('treats the promo start and end dates as inclusive', () => {
+            for (const saleDate of ['2026-11-01', '2026-12-31']) {
+                const result = stripDailyPrice(service.calculateExpectedPrice({ ...cloudOpts(saleDate), ...promo }));
+                expect(result).toEqual({ purchasePrice: 221.21, vendorPrice: 221.21 });
+            }
+        });
+
+        it('uses the normal Forge rate for Cloud sales outside the promo window', () => {
+            const before = service.calculateExpectedPrice({ ...cloudOpts('2026-10-31'), ...promo });
+            const after = service.calculateExpectedPrice({ ...cloudOpts('2027-01-01'), ...promo });
+            expect(stripDailyPrice(before)).toEqual({ purchasePrice: 221.21, vendorPrice: 183.60 });
+            expect(stripDailyPrice(after)).toEqual({ purchasePrice: 221.21, vendorPrice: 183.60 });
+            expect(after.descriptors.at(-1)?.description).not.toContain('Forge 0% promo');
+        });
+
+        it('treats an empty end date as an open-ended promo', () => {
+            const openEnded = { forgePromoStartDate: '2026-11-01', forgePromoEndDate: null };
+            const beforeStart = stripDailyPrice(service.calculateExpectedPrice({ ...cloudOpts('2026-10-31'), ...openEnded }));
+            const longAfter = service.calculateExpectedPrice({ ...cloudOpts('2028-06-01'), ...openEnded });
+            expect(beforeStart).toEqual({ purchasePrice: 221.21, vendorPrice: 183.60 });
+            expect(stripDailyPrice(longAfter)).toEqual({ purchasePrice: 221.21, vendorPrice: 221.21 });
+            expect(longAfter.descriptors.at(-1)?.description).toContain('2026-11-01 to present');
+        });
+
+        it('ignores the promo when only the end date is set', () => {
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                ...cloudOpts('2026-11-15'),
+                forgePromoStartDate: null,
+                forgePromoEndDate: '2026-12-31'
+            }));
+            expect(result).toEqual({ purchasePrice: 221.21, vendorPrice: 183.60 });
+        });
+
+        it('does not apply the promo to Connect (non-Forge) Cloud sales', () => {
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                ...cloudOpts('2026-11-15'),
+                alwaysForge: false,
+                forgeMigrationDate: null,
+                ...promo
+            }));
+            // Connect rate from 2026-10-01 is 25%
+            expect(result).toEqual({ purchasePrice: 221.21, vendorPrice: 165.91 });
+        });
+
+        it('applies the promo only to sales after the Forge migration date', () => {
+            const migratedMidPromo = { alwaysForge: false, forgeMigrationDate: '2026-11-20', ...promo };
+            const beforeMigration = stripDailyPrice(service.calculateExpectedPrice({
+                ...cloudOpts('2026-11-15'),
+                ...migratedMidPromo
+            }));
+            const afterMigration = stripDailyPrice(service.calculateExpectedPrice({
+                ...cloudOpts('2026-11-25'),
+                ...migratedMidPromo
+            }));
+            expect(beforeMigration).toEqual({ purchasePrice: 221.21, vendorPrice: 165.91 });
+            expect(afterMigration).toEqual({ purchasePrice: 221.21, vendorPrice: 221.21 });
+        });
+
+        it('uses discountReferenceSaleDate to decide promo eligibility (refund of a promo sale)', () => {
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                ...cloudOpts('2027-02-10'),
+                saleType: 'Refund',
+                discountReferenceSaleDate: '2026-12-15',
+                ...promo
+            }));
+            expect(result).toEqual({ purchasePrice: -221.21, vendorPrice: -221.21 });
+        });
+
+        it('does not apply the promo to Data Center sales', () => {
+            const result = stripDailyPrice(service.calculateExpectedPrice({
+                pricingTierResult: dataCenterPricingTierResult,
+                saleDate: '2026-11-15',
+                saleType: 'Renewal',
+                isSandbox: false,
+                hosting: 'Data Center',
+                licenseType: 'COMMERCIAL',
+                tier: '500 Users',
+                maintenanceStartDate: '2026-11-15',
+                maintenanceEndDate: '2027-11-15',
+                billingPeriod: 'Annual',
+                declaredPartnerDiscount: 0,
+                parentProduct: 'confluence',
+                ...promo
+            }));
+            expect(result).toEqual({ purchasePrice: 3400, vendorPrice: 2550 });
+        });
+    });
+
     it('should return $0 for sandbox licenses regardless of user count', () => {
         const result = stripDailyPrice(service.calculateExpectedPrice({
             pricingTierResult: cloudPricingTierResult,

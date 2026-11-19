@@ -8,6 +8,9 @@ export const FORGE_RATE_2026_04 = 0.84; // 16%
 export const FORGE_RATE_2026_10_START_DATE = '2026-10-01';
 export const FORGE_RATE_2026_10 = 0.83; // 17%
 
+// Forge 0% take rate promo (applies to Cloud sales within the app's configured promo date range)
+export const FORGE_PROMO_RATE = 1.0; // 0%
+
 export const CONNECT_RATE_2026_04 = 0.80; // 20%
 export const CONNECT_RATE_2026_10_START_DATE = '2026-10-01';
 export const CONNECT_RATE_2026_10 = 0.75; // 25%

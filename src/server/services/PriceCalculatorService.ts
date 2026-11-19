@@ -14,6 +14,7 @@ import {
     FORGE_RATE_2026_04,
     FORGE_RATE_2026_10,
     FORGE_RATE_2026_10_START_DATE,
+    FORGE_PROMO_RATE,
     SOCIAL_IMPACT_GLOBAL_ACCESS_CLOUD_PRICE_RATIO,
     CONNECT_RATE_2026_04,
     CONNECT_RATE_2026_10,
@@ -48,6 +49,8 @@ export class PriceCalculatorService {
         deploymentType: DeploymentType;
         forgeMigrationDate?: string | null;
         alwaysForge?: boolean;
+        forgePromoStartDate?: string | null;
+        forgePromoEndDate?: string | null;
     }): number {
         const { saleDate, deploymentType, forgeMigrationDate, alwaysForge } = opts;
 
@@ -55,6 +58,12 @@ export class PriceCalculatorService {
 
         if (deploymentType !== 'cloud') {
             return DC_DISCOUNT_RATIO;
+        }
+
+        // Forge sales within the app's Forge 0% promo window (inclusive) have no take rate
+
+        if (this.isInForgePromo(opts)) {
+            return FORGE_PROMO_RATE;
         }
 
         // Sales prior to 2026-04-01 always have the 85% rate, regardless of deployment type
@@ -65,7 +74,7 @@ export class PriceCalculatorService {
 
         // Forge sales after 2026-04 have either a 16% or 17% take rate
 
-        if (alwaysForge || forgeMigrationDate && forgeMigrationDate < saleDate) {
+        if (this.isForgeSale({ saleDate, forgeMigrationDate, alwaysForge })) {
             return (saleDate < FORGE_RATE_2026_10_START_DATE)
                 ? FORGE_RATE_2026_04
                 : FORGE_RATE_2026_10;
@@ -74,6 +83,34 @@ export class PriceCalculatorService {
         // Otherwise, it's a Connect sale with either a 20% or 25% take rate
 
         return (saleDate < CONNECT_RATE_2026_10_START_DATE) ? CONNECT_RATE_2026_04 : CONNECT_RATE_2026_10;
+    }
+
+    /** True when the app was on Forge at the time of the sale (always Forge, or migrated before the sale date). */
+    private isForgeSale(opts: {
+        saleDate: string;
+        forgeMigrationDate?: string | null;
+        alwaysForge?: boolean;
+    }): boolean {
+        const { saleDate, forgeMigrationDate, alwaysForge } = opts;
+        return Boolean(alwaysForge || (forgeMigrationDate && forgeMigrationDate < saleDate));
+    }
+
+    /**
+     * True when this is a Forge sale dated within the app's Forge 0% promo window (inclusive).
+     * An empty end date means the promo is still running (open-ended).
+     */
+    private isInForgePromo(opts: {
+        saleDate: string;
+        forgeMigrationDate?: string | null;
+        alwaysForge?: boolean;
+        forgePromoStartDate?: string | null;
+        forgePromoEndDate?: string | null;
+    }): boolean {
+        const { saleDate, forgePromoStartDate, forgePromoEndDate } = opts;
+        if (!forgePromoStartDate || !this.isForgeSale(opts)) {
+            return false;
+        }
+        return saleDate >= forgePromoStartDate && (!forgePromoEndDate || saleDate <= forgePromoEndDate);
     }
 
     public calculateExpectedPrice(opts: PriceCalcOpts): PriceResult {
@@ -623,15 +660,27 @@ export class PriceCalculatorService {
         dailyNominalPrice: number,
         descriptors: PriceCalcDescriptor[]
     ): PriceResult {
-        const { saleDate, discountReferenceSaleDate, forgeMigrationDate, alwaysForge } = opts;
+        const { saleDate, discountReferenceSaleDate, forgeMigrationDate, alwaysForge, forgePromoStartDate, forgePromoEndDate } = opts;
         const discountDate = discountReferenceSaleDate || saleDate;
         const deploymentType = deploymentTypeFromHosting(opts.hosting);
-        const discountAmount = this.getDiscountAmount({ saleDate: discountDate, deploymentType, forgeMigrationDate, alwaysForge });
+        const discountAmount = this.getDiscountAmount({
+            saleDate: discountDate,
+            deploymentType,
+            forgeMigrationDate,
+            alwaysForge,
+            forgePromoStartDate,
+            forgePromoEndDate
+        });
         const vendorPrice = basePriceAfterDiscounts * discountAmount;
+        const isForgePromo = deploymentType === 'cloud'
+            && this.isInForgePromo({ saleDate: discountDate, forgeMigrationDate, alwaysForge, forgePromoStartDate, forgePromoEndDate });
+        const promoNote = isForgePromo
+            ? ` (Forge 0% promo: ${forgePromoStartDate} to ${forgePromoEndDate || 'present'})`
+            : '';
 
         descriptors = [
             ...descriptors,
-            { subtotal: vendorPrice, description: `Apply Atlassian discount rate of ${discountAmount * 100}%` }
+            { subtotal: vendorPrice, description: `Apply Atlassian discount rate of ${discountAmount * 100}%${promoNote}` }
         ];
 
         return {

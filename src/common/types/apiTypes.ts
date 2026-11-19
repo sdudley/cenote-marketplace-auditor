@@ -111,12 +111,16 @@ export interface AppInfo {
     forgeMigrationDate?: string | null;
     forgeReleaseDate?: string | null;
     alwaysForge: boolean;
+    forgePromoStartDate?: string | null;
+    forgePromoEndDate?: string | null;
 }
 
 export interface AppUpdateRequest {
     forgeMigrationDate?: string | null;
     forgeReleaseDate?: string | null;
     alwaysForge?: boolean;
+    forgePromoStartDate?: string | null;
+    forgePromoEndDate?: string | null;
 }
 
 export interface AppPricingInfoDto {

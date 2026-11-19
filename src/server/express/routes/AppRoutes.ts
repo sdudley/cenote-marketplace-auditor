@@ -13,6 +13,7 @@ import {
 import { requireAdmin } from '../middleware/adminMiddleware.js';
 import { DeploymentType } from '#common/types/marketplace.js';
 import { Pricing } from '#common/entities/Pricing.js';
+import { Addon } from '#common/entities/Addon.js';
 import { PricingService } from '#server/services/PricingService.js';
 import { isDateOnlyString, validatePricingPeriods } from '#common/util/pricingPeriodValidation.js';
 import { userTierSorter } from '#common/util/userTierSorter.js';
@@ -121,14 +122,7 @@ export class AppRoute {
                 return nameA.localeCompare(nameB);
             });
 
-            const apps: AppInfo[] = sortedAddons.map(addon => ({
-                addonKey: addon.addonKey,
-                name: addon.name || 'Unknown',
-                parentProduct: addon.parentProduct,
-                forgeMigrationDate: addon.forgeMigrationDate ?? null,
-                forgeReleaseDate: addon.forgeReleaseDate ?? null,
-                alwaysForge: addon.alwaysForge ?? false
-            }));
+            const apps: AppInfo[] = sortedAddons.map(addon => this.toAppInfo(addon));
 
             res.json(apps);
         } catch (error) {
@@ -368,6 +362,19 @@ export class AppRoute {
         }
     }
 
+    private toAppInfo(addon: Addon): AppInfo {
+        return {
+            addonKey: addon.addonKey,
+            name: addon.name || 'Unknown',
+            parentProduct: addon.parentProduct,
+            forgeMigrationDate: addon.forgeMigrationDate ?? null,
+            forgeReleaseDate: addon.forgeReleaseDate ?? null,
+            alwaysForge: addon.alwaysForge ?? false,
+            forgePromoStartDate: addon.forgePromoStartDate ?? null,
+            forgePromoEndDate: addon.forgePromoEndDate ?? null
+        };
+    }
+
     private isDateOnlyString(value: string): boolean {
         return /^\d{4}-\d{2}-\d{2}$/.test(value);
     }
@@ -385,7 +392,9 @@ export class AppRoute {
             const {
                 forgeMigrationDate,
                 forgeReleaseDate,
-                alwaysForge
+                alwaysForge,
+                forgePromoStartDate,
+                forgePromoEndDate
             } = req.body as AppUpdateRequest;
 
             if (typeof alwaysForge !== 'boolean') {
@@ -416,22 +425,43 @@ export class AppRoute {
                 return;
             }
 
+            const normalizedPromoStartDate = forgePromoStartDate || null;
+            const normalizedPromoEndDate = forgePromoEndDate || null;
+
+            if (normalizedPromoStartDate && !this.isDateOnlyString(normalizedPromoStartDate)) {
+                res.status(400).json({ error: 'forgePromoStartDate must be YYYY-MM-DD' });
+                return;
+            }
+
+            if (normalizedPromoEndDate && !this.isDateOnlyString(normalizedPromoEndDate)) {
+                res.status(400).json({ error: 'forgePromoEndDate must be YYYY-MM-DD' });
+                return;
+            }
+
+            if ((normalizedPromoStartDate || normalizedPromoEndDate) && !alwaysForge && !normalizedMigrationDate) {
+                res.status(400).json({ error: 'Forge 0% promo dates can only be set for Forge apps (alwaysForge or forgeMigrationDate)' });
+                return;
+            }
+
+            if (normalizedPromoEndDate && !normalizedPromoStartDate) {
+                res.status(400).json({ error: 'forgePromoEndDate requires forgePromoStartDate' });
+                return;
+            }
+
+            if (normalizedPromoStartDate && normalizedPromoEndDate && normalizedPromoStartDate > normalizedPromoEndDate) {
+                res.status(400).json({ error: 'forgePromoStartDate must be on or before forgePromoEndDate' });
+                return;
+            }
+
             existingAddon.alwaysForge = alwaysForge;
             existingAddon.forgeMigrationDate = alwaysForge ? null : normalizedMigrationDate;
             existingAddon.forgeReleaseDate = alwaysForge ? normalizedReleaseDate : null;
+            existingAddon.forgePromoStartDate = normalizedPromoStartDate;
+            existingAddon.forgePromoEndDate = normalizedPromoEndDate;
 
             await this.addonDao.updateAddon(existingAddon);
 
-            const app: AppInfo = {
-                addonKey: existingAddon.addonKey,
-                name: existingAddon.name || 'Unknown',
-                parentProduct: existingAddon.parentProduct,
-                forgeMigrationDate: existingAddon.forgeMigrationDate ?? null,
-                forgeReleaseDate: existingAddon.forgeReleaseDate ?? null,
-                alwaysForge: existingAddon.alwaysForge
-            };
-
-            res.json(app);
+            res.json(this.toAppInfo(existingAddon));
         } catch (error) {
             console.error('Error updating app:', error);
             res.status(500).json({ error: 'Internal server error' });

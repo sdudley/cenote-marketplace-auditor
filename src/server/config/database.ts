@@ -15,6 +15,7 @@ import { InitializeIgnoredFields1711234567892 } from '../database/migrations/171
 import { AddAddonForgeColumns1711234567893 } from '../database/migrations/1711234567893-AddAddonForgeColumns.js';
 import { AddAddonProductId1711234567894 } from '../database/migrations/1711234567894-AddAddonProductId.js';
 import { AddQuoteTables1711234567898 } from '../database/migrations/1711234567898-AddQuoteTables.js';
+import { AddAddonForgePromoColumns1711234567899 } from '../database/migrations/1711234567899-AddAddonForgePromoColumns.js';
 import { IgnoredField } from '#common/entities/IgnoredField.js';
 import { TransactionReconcile } from '#common/entities/TransactionReconcile.js';
 import { Reseller } from '#common/entities/Reseller.js';
@@ -76,7 +77,8 @@ export const AppDataSource = new DataSource({
         InitializeIgnoredFields1711234567892,
         AddAddonForgeColumns1711234567893,
         AddAddonProductId1711234567894,
-        AddQuoteTables1711234567898
+        AddQuoteTables1711234567898,
+        AddAddonForgePromoColumns1711234567899
     ],
 });
 

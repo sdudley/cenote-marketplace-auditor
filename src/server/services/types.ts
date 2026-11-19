@@ -31,6 +31,10 @@ export interface PriceCalcOpts {
     discountReferenceSaleDate?: string;
     forgeMigrationDate?: string | null;
     alwaysForge?: boolean;
+    /** Inclusive start date of the app's Forge 0% take rate promo window (Cloud only). */
+    forgePromoStartDate?: string | null;
+    /** Inclusive end date of the app's Forge 0% take rate promo window (Cloud only). Empty = still running. */
+    forgePromoEndDate?: string | null;
 }
 
 export interface PriceResult {
