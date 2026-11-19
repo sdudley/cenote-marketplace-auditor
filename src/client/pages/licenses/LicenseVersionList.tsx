@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     TableBody,
     TableHead,
@@ -13,13 +13,12 @@ import {
     VersionListTable,
     VersionNumberCell,
     VersionDateCell,
-    VersionDiffCell,
     LoadingOverlay,
     VersionHeaderCell
 } from '../../components/styles';
 import { LicenseVersionDialog } from './LicenseVersionDialog';
 import { StyledTableCell } from '../../components/styles';
-import { formatLicenseVersionDiffLabel } from './util';
+import { VersionChangesCell } from '../../components/VersionChangesCell';
 
 export type LicenseVersionSource = 'database' | 'atlassian';
 
@@ -74,6 +73,8 @@ export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({
         fetchVersions();
     }, [licenseId, source]);
 
+    const versionsByNumber = useMemo(() => new Map(versions.map(v => [v.version, v])), [versions]);
+
     const handleRowClick = (version: DisplayableLicenseVersion) => {
         setSelectedVersion(version);
 
@@ -118,9 +119,12 @@ export const LicenseVersionList: React.FC<LicenseVersionListProps> = ({
                                 {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
                             </VersionDateCell>
 
-                            <VersionDiffCell>
-                                {formatLicenseVersionDiffLabel(version.version, version.diff)}
-                            </VersionDiffCell>
+                            <VersionChangesCell
+                                version={version.version}
+                                diff={version.diff}
+                                priorData={versionsByNumber.get(version.version - 1)?.data}
+                                currentData={version.data}
+                            />
                         </TableRow>
                     ))}
                 </TableBody>

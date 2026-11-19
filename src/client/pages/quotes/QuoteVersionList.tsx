@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     TableBody,
     TableHead,
@@ -12,13 +12,12 @@ import {
     VersionListTable,
     VersionNumberCell,
     VersionDateCell,
-    VersionDiffCell,
     LoadingOverlay,
     VersionHeaderCell
 } from '../../components/styles';
 import { StyledTableCell } from '../../components/styles';
 import { QuoteVersionDialog } from './QuoteVersionDialog';
-import { formatQuoteVersionDiffLabel } from './quoteUtils';
+import { VersionChangesCell } from '../../components/VersionChangesCell';
 
 interface QuoteVersionListProps {
     quoteId: string;
@@ -61,6 +60,8 @@ export const QuoteVersionList: React.FC<QuoteVersionListProps> = ({ quoteId }) =
 
         fetchVersions();
     }, [quoteId]);
+
+    const versionsByNumber = useMemo(() => new Map(versions.map(v => [v.version, v])), [versions]);
 
     const handleRowClick = (version: QuoteVersion) => {
         setSelectedVersion(version);
@@ -106,13 +107,19 @@ export const QuoteVersionList: React.FC<QuoteVersionListProps> = ({ quoteId }) =
                                 {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
                             </VersionDateCell>
 
-                            <VersionDiffCell>
-                                {formatQuoteVersionDiffLabel(version.version, version.diffQuote)}
-                            </VersionDiffCell>
+                            <VersionChangesCell
+                                version={version.version}
+                                diff={version.diffQuote}
+                                priorData={versionsByNumber.get(version.version - 1)?.data}
+                                currentData={version.data}
+                            />
 
-                            <VersionDiffCell>
-                                {formatQuoteVersionDiffLabel(version.version, version.diffDetails)}
-                            </VersionDiffCell>
+                            <VersionChangesCell
+                                version={version.version}
+                                diff={version.diffDetails}
+                                priorData={versionsByNumber.get(version.version - 1)?.details}
+                                currentData={version.details}
+                            />
                         </TableRow>
                     ))}
                 </TableBody>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     TableBody,
     TableHead,
@@ -11,12 +11,12 @@ import {
     VersionListTable,
     VersionNumberCell,
     VersionDateCell,
-    VersionDiffCell,
     LoadingOverlay,
     VersionHeaderCell
 } from '../../components/styles';
 import { TransactionVersionDialog } from './TransactionVersionDialog';
 import { StyledTableCell } from '../../components/styles';
+import { VersionChangesCell } from '../../components/VersionChangesCell';
 
 interface TransactionVersionListProps {
     transactionId: string;
@@ -44,6 +44,8 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
 
         fetchVersions();
     }, [transactionId]);
+
+    const versionsByNumber = useMemo(() => new Map(versions.map(v => [v.version, v])), [versions]);
 
     const handleRowClick = (version: TransactionVersion) => {
         setSelectedVersion(version);
@@ -85,7 +87,12 @@ export const TransactionVersionList: React.FC<TransactionVersionListProps> = ({ 
                                 {version.createdAt.toString().substring(0, 16).replace('T', ' ')}
                             </VersionDateCell>
 
-                            <VersionDiffCell>{version.diff ?? 'Initial version'}</VersionDiffCell>
+                            <VersionChangesCell
+                                version={version.version}
+                                diff={version.diff}
+                                priorData={versionsByNumber.get(version.version - 1)?.data}
+                                currentData={version.data}
+                            />
                         </TableRow>
                     ))}
                 </TableBody>

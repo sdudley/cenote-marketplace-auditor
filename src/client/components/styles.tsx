@@ -475,17 +475,29 @@ export const VersionListTable = styled(Table)({
 
 export const VersionNumberCell = styled(StyledTableCell)({
     width: '100px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    verticalAlign: 'top'
 });
 
 export const VersionDateCell = styled(StyledTableCell)({
     width: '200px',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    verticalAlign: 'top'
 });
 
 export const VersionDiffCell = styled(StyledTableCell)({
     fontFamily: 'monospace',
-    whiteSpace: 'pre-wrap'
+    whiteSpace: 'pre-wrap',
+    verticalAlign: 'top'
+});
+
+/** One "path: old → new" line in a version's Changes cell. */
+export const VersionChangeLine = styled(Box)({
+    overflowWrap: 'anywhere'
+});
+
+export const VersionChangePath = styled('span')({
+    fontWeight: 600
 });
 
 export const VersionHeaderCell = styled(StyledTableCell)({
