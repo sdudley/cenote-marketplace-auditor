@@ -102,7 +102,8 @@ export async function exportApportionmentExcel(opts: {
 
     (pivotSheet as { orderNo?: number }).orderNo = 1;
     (dataSheet as { orderNo?: number }).orderNo = 2;
-    workbook.views = [{ activeTab: 0, firstSheet: 0 }];
+    // x/y/width/height/visibility are the values exceljs would default to anyway; the type requires them.
+    workbook.views = [{ x: 0, y: 0, width: 12000, height: 24000, visibility: 'visible', firstSheet: 0, activeTab: 0 }];
 
     const buffer = await workbook.xlsx.writeBuffer();
     downloadBlob(

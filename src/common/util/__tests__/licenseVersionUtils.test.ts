@@ -6,7 +6,6 @@ describe('buildLicenseVersionsFromHistory', () => {
         addonLicenseId: '12345',
         licenseId: 'SEN-12345',
         addonKey: 'com.example.app',
-        productId: 'product-id',
         addonName: 'Example App',
         hosting: 'Cloud',
         lastUpdated: '2025-01-01',

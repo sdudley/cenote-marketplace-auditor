@@ -21,9 +21,10 @@
   "scripts": {
     "build": "env -u npm_config_allow_scripts npm audit --omit=dev --audit-level high && npm run build:server && npm run build:client",
     "build:server": "tsc -p src/server/tsconfig.json",
-    "build:client": "vite build",
-    "build:client:dev": "vite build --mode development",
-    "build:client:prod": "vite build --mode production",
+    "build:client": "npm run typecheck:client && vite build",
+    "build:client:dev": "npm run typecheck:client && vite build --mode development",
+    "build:client:prod": "npm run typecheck:client && vite build --mode production",
+    "typecheck:client": "tsc --noEmit -p src/client/tsconfig.json",
     "start": "NODE_ENV=production node dist/server/src/server/index.js",
     "start:dev": "NODE_ENV=development NODE_OPTIONS='--conditions=development' tsx --tsconfig src/server/tsconfig.json src/server/index.ts",
     "test": "jest",
