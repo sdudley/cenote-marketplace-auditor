@@ -28,7 +28,7 @@ async function startServer() {
 
     // Create Express application
     const app = express();
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 4000;
     const clientDistPath = path.join(process.cwd(), 'dist/client');
     const isDev = process.env.NODE_ENV !== 'production';
     let vite: ViteDevServer | undefined;
