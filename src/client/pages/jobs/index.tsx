@@ -3,7 +3,7 @@ import { Typography, CircularProgress, Alert, Box } from '@mui/material';
 import { PlayArrow, CheckCircle, Error as ErrorIcon, Schedule } from '@mui/icons-material';
 import { JobType } from '#common/entities/JobStatus.js';
 import { PageContainer, PageTitle } from '../styles';
-import { JobList, JobCard, JobInfo, JobStatus, StartAllButton, StartJobButton } from './styles';
+import { JobList, JobCard, JobInfo, JobStatus, StatusIconSlot, StartAllButton, StartJobButton } from './styles';
 
 interface JobStatusResponse {
     jobType: JobType;
@@ -169,7 +169,7 @@ export const JobsPage: React.FC = () => {
                         <JobInfo>
                             <Typography variant="h6">{job.name}</Typography>
                             <JobStatus>
-                                {getStatusIcon(job)}
+                                <StatusIconSlot>{getStatusIcon(job)}</StatusIconSlot>
                                 <Typography variant="body2" color="textSecondary">
                                     Last run: {formatRunDate(job)}
                                 </Typography>

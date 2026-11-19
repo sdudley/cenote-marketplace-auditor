@@ -52,6 +52,16 @@ export const JobStatus = styled(Box)(({ theme }) => ({
     gap: theme.spacing(1)
 }));
 
+/** Fixed-size slot so swapping the status icon (24px) for the spinner (20px) doesn't shift the row. */
+export const StatusIconSlot = styled(Box)({
+    width: 24,
+    height: 24,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+});
+
 export const StartAllButton = styled(Button)(({ theme }) => ({
     minWidth: 100,
     textTransform: 'none',
