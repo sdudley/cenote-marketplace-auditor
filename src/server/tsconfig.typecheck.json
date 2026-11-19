@@ -1,0 +1,18 @@
+{
+  // Type-check only (no emit). Extends the server build config but also covers the CLI scripts
+  // (which run via tsx with src/server/tsconfig.json) and all server/common tests, which the
+  // build config excludes and Jest does not type-check (ts-jest diagnostics are disabled).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "./**/*",
+    "../common/**/*",
+    "./types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

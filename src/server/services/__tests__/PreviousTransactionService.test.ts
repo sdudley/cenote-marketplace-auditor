@@ -394,6 +394,8 @@ describe('PreviousTransactionService', () => {
             expect(result?.id).toBe(secondSlice.id);
         });
     });
+
+    describe('isRefundPartOfUpgradePair', () => {
         it('returns true for refund + upgrade on same date and maintenance period with different tiers', async () => {
             const refund = createTransaction('2025-06-01', '2025-12-01', '2025-06-01', 'Refund', '500 Users');
             const upgrade = createTransaction('2025-06-01', '2025-12-01', '2025-06-01', 'Upgrade', '1000 Users');

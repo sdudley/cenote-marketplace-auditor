@@ -14,7 +14,8 @@ export class AddonDao {
         this.addonRepository = this.dataSource.getRepository(Addon);
     }
 
-    async addAddon(opts: { addonKey: string; parentProduct: string; name: string; productId?: string }): Promise<void> {
+    /** name/productId are optional (e.g. the add-addon CLI); AddonJob fills them in from the Marketplace on its next run. */
+    async addAddon(opts: { addonKey: string; parentProduct: string; name?: string; productId?: string }): Promise<void> {
         const { addonKey, parentProduct, name, productId } = opts;
 
         const addon = new Addon();

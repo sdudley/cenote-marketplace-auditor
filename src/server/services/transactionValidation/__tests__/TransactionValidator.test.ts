@@ -28,7 +28,7 @@ function createTransactionFromSale(
         addonKey: ADDON_KEY,
         customerDetails: { country: 'United States' },
         purchaseDetails
-    } as Transaction['data'];
+    } as unknown as Transaction['data'];
     return transaction;
 }
 
